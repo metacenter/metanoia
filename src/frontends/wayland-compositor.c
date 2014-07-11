@@ -14,7 +14,7 @@ static void create_surface(struct wl_client *client,
 {
     struct wl_resource* res;
 
-    LOG_DEBUG("Wayland: create surface");
+    LOG_DEBUG("Wayland: create surface (id: %d)", id);
 
     res = wl_resource_create(client, &wl_surface_interface,
                              wl_resource_get_version(resource), id);

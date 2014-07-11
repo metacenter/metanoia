@@ -61,7 +61,7 @@ static void surface_frame(struct wl_client *client,
                           struct wl_resource *resource,
                           uint32_t callback)
 {
-    LOG_DEBUG("Wayland: surface frame");
+    LOG_DEBUG("Wayland: surface frame (cb: %d)", callback);
 }
 
 //-----------------------------------------------------------------------------
