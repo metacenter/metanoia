@@ -1,3 +1,4 @@
+CC=gcc
 WFLAGS=-Wall
 LFLAGS=-rdynamic -ldl -lrt -lpthread
 
@@ -9,12 +10,13 @@ all: ${build}/aura
 ${build}:
 	mkdir -p ${build}
 
-${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o ${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o ${build}/shared.o ${build}/devfb.o ${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o ${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o
+${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o ${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o ${build}/shared.o ${build}/devfb.o ${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o ${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o ${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o
 	gcc ${LFLAGS} ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o \
 		${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o \
 		${build}/shared.o ${build}/devfb.o \
 		${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o \
 		${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o \
+		${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o \
 		-o ${build}/aura `pkg-config --libs dbus-1` `pkg-config --libs libudev` `pkg-config --libs libdrm` `pkg-config --libs wayland-server`
 
 
@@ -84,6 +86,15 @@ ${build}/xdg-shell-protocol.o: ${build} src/frontends/xdg-shell-protocol.c force
 ${build}/wayland-output.o: ${build} src/frontends/wayland-output.c src/frontends/wayland-output.h force
 	gcc ${WFLAGS} -c src/frontends/wayland-output.c -o ${build}/wayland-output.o -Isrc
 
+
+${build}/surface-aggregator.o: ${build} src/surface-aggregator.c src/surface-aggregator.h force
+	${CC} ${WFLAGS} -c src/surface-aggregator.c -o ${build}/surface-aggregator.o -Isrc
+
+${build}/surface-compositor.o: ${build} src/surface-compositor.c src/surface-compositor.h force
+	${CC} ${WFLAGS} -c src/surface-compositor.c -o ${build}/surface-compositor.o -Isrc
+
+${build}/surface-manager.o: ${build} src/surface-manager.c src/surface-manager.h force
+	${CC} ${WFLAGS} -c src/surface-manager.c -o ${build}/surface-manager.o -Isrc
 
 clear: force
 	rm -r ${build}
