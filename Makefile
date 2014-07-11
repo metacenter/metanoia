@@ -1,5 +1,5 @@
 WFLAGS=-Wall
-LFLAGS=-rdynamic -ldl -lpthread
+LFLAGS=-rdynamic -ldl -lrt -lpthread
 
 build=build
 

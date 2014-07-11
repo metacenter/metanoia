@@ -34,6 +34,13 @@ void sig_handler(int sig, siginfo_t *si, void *arg)
     }
 }
 
+// FIXME: tmp: just a test
+void timer_handler (union sigval data)
+{
+    LOG_DEBUG("TIME'S UP!");
+}
+
+
 int main()
 {
     // Initialize signal hadler
@@ -72,6 +79,8 @@ int main()
     aura_loop_run(loop_devices);
     aura_loop_run(loop_window_manager);
     aura_loop_run(loop_keyboard);
+
+    aura_event_dispatcher_timer_run(dispatcher, timer_handler, 50);
 
     // Receive and dispatch events
     aura_event_dispatcher_start(dispatcher);
