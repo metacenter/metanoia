@@ -8,6 +8,7 @@
 
 typedef enum {
     LEVEL_ERROR,
+    LEVEL_NYIMP,
     LEVEL_WARN1,
     LEVEL_DATA1,
     LEVEL_INFO1,

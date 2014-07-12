@@ -30,7 +30,7 @@ static const char scLogBackTraceEnd[] =
 "----------------+-------+------+--------------------------------+---------\n";
 
 static const char* scLogLevelName[] = {
-        "ERROR",
+        "ERROR", "NYIMP",
         "WARN1", "DATA1", "INFO1",
         "WARN2", "DATA2", "INFO2",
         "DEBUG",

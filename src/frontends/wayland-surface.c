@@ -41,7 +41,7 @@ static void surface_damage(struct wl_client* client,
                            int32_t x, int32_t y,
                            int32_t width, int32_t height)
 {
-    LOG_DEBUG("Wayland: surface damage (x: %d, y: %d, w: %d, h: %d)",
+    LOG_NYIMP("Wayland: surface damage (x: %d, y: %d, w: %d, h: %d)",
               x, y, width, height);
 }
 
@@ -51,7 +51,7 @@ static void surface_frame(struct wl_client* client,
                           struct wl_resource* resource,
                           uint32_t callback)
 {
-    LOG_DEBUG("Wayland: surface frame (cb: %d)", callback);
+    LOG_NYIMP("Wayland: surface frame (cb: %d)", callback);
 }
 
 //-----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ static void surface_set_opaque_region(struct wl_client* client,
                                       struct wl_resource* resource,
                                       struct wl_resource* region_resource)
 {
-    LOG_DEBUG("Wayland: set opaque region");
+    LOG_NYIMP("Wayland: set opaque region");
 }
 
 //-----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ static void surface_set_input_region(struct wl_client* client,
                                      struct wl_resource* resource,
                                      struct wl_resource* region_resource)
 {
-    LOG_DEBUG("Wayland: set input region");
+    LOG_NYIMP("Wayland: set input region");
 }
 
 //-----------------------------------------------------------------------------
@@ -90,7 +90,7 @@ static void surface_set_buffer_transform(struct wl_client* client,
                                          struct wl_resource* resource,
                                          int transform)
 {
-    LOG_DEBUG("Wayland: set buffer transform");
+    LOG_NYIMP("Wayland: set buffer transform");
 }
 
 //-----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ static void surface_set_buffer_scale(struct wl_client* client,
                                      struct wl_resource* resource,
                                      int32_t scale)
 {
-    LOG_DEBUG("Wayland: set buffer scale");
+    LOG_NYIMP("Wayland: set buffer scale");
 }
 
 //-----------------------------------------------------------------------------
