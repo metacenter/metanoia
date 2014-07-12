@@ -4,7 +4,7 @@
 #ifndef __AURA_LOG_H__
 #define __AURA_LOG_H__
 
-#include "../constants.h"
+#include "global-constants.h"
 
 #define LOG(l,s,...) aura_log(l,__LINE__,__FILE__,s,##__VA_ARGS__)
 #define LOG_ERROR(s,...) aura_log(LEVEL_ERROR,__LINE__,__FILE__,s,##__VA_ARGS__)

@@ -4,7 +4,7 @@
 #ifndef __AURA_CONFIGURATION_H__
 #define __AURA_CONFIGURATION_H__
 
-#include "constants.h"
+#include "global-constants.h"
 
 static const LogLevel scConfLogLevel = LEVEL_DATA3;//LEVEL_DEBUG;
 static const char* scConfLogFile = "/home/user/.local/share/aura/logs/log";

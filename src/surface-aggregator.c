@@ -5,7 +5,7 @@
 #include "surface-priv.h"
 
 #include "utils/log.h"
-#include "constants.h"
+#include "global-constants.h"
 
 #include <malloc.h>
 #include <search.h>
