@@ -12,7 +12,7 @@
 
 static void xdg_destroy_shell_surface(struct wl_resource *resource)
 {
-    LOG_DEBUG("Wayland: destroy shell surface");
+    LOG_NYIMP("Wayland: destroy shell surface");
 }
 
 //------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ static void xdg_use_unstable_version(struct wl_client *client,
                                      struct wl_resource *resource,
                                      int32_t version)
 {
-    LOG_DEBUG("Wayland: use unstable version");
+    LOG_NYIMP("Wayland: use unstable version");
 }
 
 //------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ static void xdg_get_xdg_surface(struct wl_client *client,
 {
     struct wl_resource* res;
 
-    LOG_DEBUG("Wayland: get XDG surface (id: %d)", id);
+    LOG_NYIMP("Wayland: get XDG surface (id: %d)", id);
 
     res = wl_resource_create(client, &xdg_surface_interface, 1, id);
     if (!res) {
@@ -43,7 +43,6 @@ static void xdg_get_xdg_surface(struct wl_client *client,
 
     wl_resource_set_implementation(res, &shell_surface_implementation,
                                    NULL, xdg_destroy_shell_surface);
-
 }
 
 //------------------------------------------------------------------------------
@@ -59,7 +58,7 @@ static void xdg_get_xdg_popup(struct wl_client *client,
                               int32_t y,
                               uint32_t flags)
 {
-    LOG_DEBUG("Wayland: XDG popup");
+    LOG_NYIMP("Wayland: XDG popup");
 }
 
 //------------------------------------------------------------------------------
@@ -68,7 +67,7 @@ static void xdg_pong(struct wl_client *client,
                      struct wl_resource *resource,
                      uint32_t serial)
 {
-    LOG_DEBUG("Wayland: XDG pong");
+    LOG_NYIMP("Wayland: XDG pong");
 }
 
 //------------------------------------------------------------------------------

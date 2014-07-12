@@ -12,7 +12,7 @@
 static void surface_destroy(struct wl_client* client,
                             struct wl_resource* resource)
 {
-    LOG_DEBUG("Wayland: surface destroy");
+    LOG_NYIMP("Wayland: surface destroy");
 }
 
 //-----------------------------------------------------------------------------

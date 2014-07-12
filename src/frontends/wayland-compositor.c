@@ -38,7 +38,7 @@ static void create_region(struct wl_client* client,
                           struct wl_resource* resource,
                           uint32_t id)
 {
-    LOG_DEBUG("Wayland: create region");
+    LOG_NYIMP("Wayland: create region");
 }
 
 //------------------------------------------------------------------------------

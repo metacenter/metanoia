@@ -12,7 +12,7 @@ static void get_shell_surface(struct wl_client *client,
                               uint32_t id,
                               struct wl_resource *surface_resource)
 {
-    LOG_DEBUG("Getting Wayland shell surface");
+    LOG_NYIMP("Getting Wayland shell surface");
 }
 
 //------------------------------------------------------------------------------
