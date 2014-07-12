@@ -3,11 +3,9 @@
 
 #include "frontends/wayland-surface.h"
 
+#include "surface.h"
 #include "utils/log.h"
 #include "global-types.h"
-
-// FIXME: tmp
-#include "devices/devfb.h"
 
 //-----------------------------------------------------------------------------
 
@@ -29,22 +27,11 @@ static void surface_attach(struct wl_client* client,
     LOG_DATA3("Wayland: surface attach (sx: %d, sy: %d, id: %d)", sx, sy, id);
 
     struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_resource);
-
-    int width = wl_shm_buffer_get_width(shm_buffer);
-    int height = wl_shm_buffer_get_height(shm_buffer);
-    int stride = wl_shm_buffer_get_stride(shm_buffer);
-    char* data = wl_shm_buffer_get_data(shm_buffer);
-
-
-    int x, y;
-    for (y = 0; y < height; ++y) {
-        for (x = 0; x < width; ++x) {
-            buffer[y*5632 + 4*x + 0] = data[y*stride + 4*x + 0];
-            buffer[y*5632 + 4*x + 1] = data[y*stride + 4*x + 1];
-            buffer[y*5632 + 4*x + 2] = data[y*stride + 4*x + 2];
-            buffer[y*5632 + 4*x + 3] = data[y*stride + 4*x + 3];
-        }
-    }
+    aura_surface_attach(id,
+                        wl_shm_buffer_get_width(shm_buffer),
+                        wl_shm_buffer_get_height(shm_buffer),
+                        wl_shm_buffer_get_stride(shm_buffer),
+                        wl_shm_buffer_get_data(shm_buffer));
 }
 
 //-----------------------------------------------------------------------------
@@ -90,7 +77,11 @@ static void surface_set_input_region(struct wl_client* client,
 static void surface_commit(struct wl_client* client,
                            struct wl_resource* resource)
 {
-    LOG_DEBUG("Wayland: commit");
+    SurfaceId id = (SurfaceId) wl_resource_get_user_data(resource);
+
+    LOG_DATA3("Wayland: commit (id: %d)", id);
+
+    aura_surface_commit(id);
 }
 
 //-----------------------------------------------------------------------------

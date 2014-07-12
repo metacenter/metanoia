@@ -1,7 +1,8 @@
 // file: surface-aggregator.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "surface-aggregator.h"
+#include "surface.h"
+#include "surface-priv.h"
 
 #include "utils/log.h"
 #include "constants.h"
@@ -12,12 +13,6 @@
 #include <string.h>
 
 static void *root = NULL;
-
-//------------------------------------------------------------------------------
-
-typedef struct {
-    SurfaceId id;
-} SurfaceData;
 
 //------------------------------------------------------------------------------
 
@@ -55,6 +50,16 @@ SurfaceId aura_surface_create(void)
     }
 
     return data->id;
+}
+
+//------------------------------------------------------------------------------
+
+SurfaceData* aura_surface_get(SurfaceId id)
+{
+    SurfaceData data;
+    data.id = id;
+
+    return tsearch((void *) &data, &root, compare);
 }
 
 //------------------------------------------------------------------------------
