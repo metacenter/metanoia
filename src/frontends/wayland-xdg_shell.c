@@ -33,7 +33,7 @@ static void xdg_get_xdg_surface(struct wl_client *client,
 {
     struct wl_resource* res;
 
-    LOG_DEBUG("Wayland: get XDG surface");
+    LOG_DEBUG("Wayland: get XDG surface (id: %d)", id);
 
     res = wl_resource_create(client, &xdg_surface_interface, 1, id);
     if (!res) {

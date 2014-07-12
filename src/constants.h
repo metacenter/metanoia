@@ -4,6 +4,8 @@
 #ifndef __AURA_CONSTANTS_H__
 #define __AURA_CONSTANTS_H__
 
+#include "global-types.h"
+
 typedef enum {
     LEVEL_ERROR,
     LEVEL_WARN1,
@@ -20,5 +22,7 @@ typedef enum {
     LEVEL_DATA4,
     LEVEL_INFO4,
 } LogLevel;
+
+static const SurfaceId scInvalidSurfaceId = 0xFFFF;
 
 #endif // __AURA_CONSTANTS_H__

@@ -42,7 +42,7 @@ void aura_wayland_initialize(AuraEventDispatcher* ed)
     // Init Wayland
     display = wl_display_create();
     if (!display) {
-        LOG_ERROR("Could not initialize Wyaland!");
+        LOG_ERROR("Could not initialize Wafyland!");
         return;
     }
 

@@ -4,26 +4,29 @@
 #include "frontends/wayland-surface.h"
 
 #include "utils/log.h"
+#include "global-types.h"
 
 // FIXME: tmp
 #include "devices/devfb.h"
 
 //-----------------------------------------------------------------------------
 
-static void surface_destroy(struct wl_client *client,
-                            struct wl_resource *resource)
+static void surface_destroy(struct wl_client* client,
+                            struct wl_resource* resource)
 {
     LOG_DEBUG("Wayland: surface destroy");
 }
 
 //-----------------------------------------------------------------------------
 
-static void surface_attach(struct wl_client *client,
-                           struct wl_resource *resource,
-                           struct wl_resource *buffer_resource,
+static void surface_attach(struct wl_client* client,
+                           struct wl_resource* resource,
+                           struct wl_resource* buffer_resource,
                            int32_t sx, int32_t sy)
 {
-    LOG_DEBUG("Wayland: surface attach");
+    SurfaceId id = (SurfaceId) wl_resource_get_user_data(resource);
+
+    LOG_DATA3("Wayland: surface attach (sx: %d, sy: %d, id: %d)", sx, sy, id);
 
     struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_resource);
 
@@ -46,8 +49,8 @@ static void surface_attach(struct wl_client *client,
 
 //-----------------------------------------------------------------------------
 
-static void surface_damage(struct wl_client *client,
-                           struct wl_resource *resource,
+static void surface_damage(struct wl_client* client,
+                           struct wl_resource* resource,
                            int32_t x, int32_t y,
                            int32_t width, int32_t height)
 {
@@ -57,8 +60,8 @@ static void surface_damage(struct wl_client *client,
 
 //-----------------------------------------------------------------------------
 
-static void surface_frame(struct wl_client *client,
-                          struct wl_resource *resource,
+static void surface_frame(struct wl_client* client,
+                          struct wl_resource* resource,
                           uint32_t callback)
 {
     LOG_DEBUG("Wayland: surface frame (cb: %d)", callback);
@@ -66,34 +69,34 @@ static void surface_frame(struct wl_client *client,
 
 //-----------------------------------------------------------------------------
 
-static void surface_set_opaque_region(struct wl_client *client,
-                                      struct wl_resource *resource,
-                                      struct wl_resource *region_resource)
+static void surface_set_opaque_region(struct wl_client* client,
+                                      struct wl_resource* resource,
+                                      struct wl_resource* region_resource)
 {
     LOG_DEBUG("Wayland: set opaque region");
 }
 
 //-----------------------------------------------------------------------------
 
-static void surface_set_input_region(struct wl_client *client,
-                                     struct wl_resource *resource,
-                                     struct wl_resource *region_resource)
+static void surface_set_input_region(struct wl_client* client,
+                                     struct wl_resource* resource,
+                                     struct wl_resource* region_resource)
 {
     LOG_DEBUG("Wayland: set input region");
 }
 
 //-----------------------------------------------------------------------------
 
-static void surface_commit(struct wl_client *client,
-                           struct wl_resource *resource)
+static void surface_commit(struct wl_client* client,
+                           struct wl_resource* resource)
 {
     LOG_DEBUG("Wayland: commit");
 }
 
 //-----------------------------------------------------------------------------
 
-static void surface_set_buffer_transform(struct wl_client *client,
-                                         struct wl_resource *resource,
+static void surface_set_buffer_transform(struct wl_client* client,
+                                         struct wl_resource* resource,
                                          int transform)
 {
     LOG_DEBUG("Wayland: set buffer transform");
@@ -101,8 +104,8 @@ static void surface_set_buffer_transform(struct wl_client *client,
 
 //-----------------------------------------------------------------------------
 
-static void surface_set_buffer_scale(struct wl_client *client,
-                                     struct wl_resource *resource,
+static void surface_set_buffer_scale(struct wl_client* client,
+                                     struct wl_resource* resource,
                                      int32_t scale)
 {
     LOG_DEBUG("Wayland: set buffer scale");
