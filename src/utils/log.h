@@ -8,7 +8,7 @@
 
 #define LOG(l,s,...) aura_log(l,__LINE__,__FILE__,s,##__VA_ARGS__)
 #define LOG_ERROR(s,...) aura_log(LEVEL_ERROR,__LINE__,__FILE__,s,##__VA_ARGS__)
-#define LOG_NYIMP(s,...) aura_log(LEVEL_WARN1,__LINE__,__FILE__,s,##__VA_ARGS__)
+#define LOG_NYIMP(s,...) aura_log(LEVEL_NYIMP,__LINE__,__FILE__,s,##__VA_ARGS__)
 #define LOG_WARN1(s,...) aura_log(LEVEL_WARN1,__LINE__,__FILE__,s,##__VA_ARGS__)
 #define LOG_DATA1(s,...) aura_log(LEVEL_DATA1,__LINE__,__FILE__,s,##__VA_ARGS__)
 #define LOG_INFO1(s,...) aura_log(LEVEL_INFO1,__LINE__,__FILE__,s,##__VA_ARGS__)

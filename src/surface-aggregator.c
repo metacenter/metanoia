@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void *root = NULL;
+static void* root = NULL;
 
 //------------------------------------------------------------------------------
 

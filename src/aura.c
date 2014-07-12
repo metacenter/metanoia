@@ -16,6 +16,8 @@
 #include <linux/major.h>
 #include <systemd/sd-login.h>
 
+#include "configuration.h"
+#include "keyboard-bindings.h"
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <linux/vt.h>
@@ -56,6 +58,12 @@ int main()
     // Initialization
     log_initialize();
     aura_dbus_initalize();
+
+    // TODO: move elsewhere
+    int i;
+    for (i=0; i < sizeof(scKeyboardBindings)/sizeof(Binding)-1; ++i) {
+        aura_keyboard_add_binding(&scKeyboardBindings[i]);
+    }
 
     // Prepare loops and events
     AuraEventDispatcher* dispatcher = aura_event_dispatcher_new();

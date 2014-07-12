@@ -10,8 +10,10 @@ all: ${build}/aura
 ${build}:
 	mkdir -p ${build}
 
-${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o ${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o ${build}/shared.o ${build}/devfb.o ${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o ${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o ${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o
+${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o ${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o ${build}/shared.o ${build}/devfb.o ${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o ${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o ${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o ${build}/keyboard-bindings.o ${build}/configuration-functions.o
 	gcc ${LFLAGS} ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o \
+		${build}/keyboard-bindings.o \
+		${build}/configuration-functions.o \
 		${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o \
 		${build}/shared.o ${build}/devfb.o \
 		${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o \
@@ -22,6 +24,9 @@ ${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${
 
 ${build}/aura.o: ${build} src/aura.c force
 	gcc ${WFLAGS} -c src/aura.c -o ${build}/aura.o -Isrc
+
+${build}/configuration-functions.o: ${build} src/configuration-functions.c src/configuration-functions.h force
+	${CC} ${WFLAGS} -c src/configuration-functions.c -o ${build}/configuration-functions.o -Isrc
 
 
 ${build}/chain.o: ${build} src/utils/chain.c src/utils/chain.h force
@@ -44,6 +49,10 @@ ${build}/task.o: ${build} src/utils/task.c src/utils/task.h force
 
 ${build}/task_factory.o: ${build} src/utils/task_factory.c src/utils/task_factory.h force
 	gcc ${WFLAGS} -c src/utils/task_factory.c -o ${build}/task_factory.o -Isrc
+
+
+${build}/keyboard-bindings.o: ${build} src/keyboard-bindings.c src/keyboard-bindings.h force
+	${CC} ${WFLAGS} -c src/keyboard-bindings.c -o ${build}/keyboard-bindings.o -Isrc
 
 
 ${build}/shared.o: ${build} src/devices/shared.c src/devices/shared.h force

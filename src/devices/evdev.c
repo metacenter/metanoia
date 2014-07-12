@@ -5,6 +5,7 @@
 #include "utils/dbus.h"
 #include "utils/log.h"
 #include "devices/shared.h"
+#include "keyboard-bindings.h"
 
 #include <malloc.h>
 #include <libudev.h>
@@ -34,23 +35,14 @@ static const uint32_t scIdInputKeyboardFlag    = 0x0020;
 
 //------------------------------------------------------------------------------
 
-// TODO: move to separate file
-static void key_handler(struct input_event* ev)
+static void handle_key(struct input_event* ev)
 {
-    static bool q_pressed = 0;
-
-    if (ev->type == EV_KEY && ev->code == KEY_Q && ev->value == 1) {
-        q_pressed = 1;
-    }
-
-    if (ev->type == EV_KEY && ev->code == KEY_Q && ev->value == 0
-    &&  q_pressed == 1) {
-        q_pressed = 0;
-        exit(1);
-    }
-
-    if (ev->type == EV_KEY && ev->code == KEY_7 && ev->value == 0) {
-        ioctl(1, VT_ACTIVATE, 7);
+    if (ev->type == EV_KEY) {
+        bool catched = aura_keyboard_catch_key(ev->code,
+                              ev->value ? AURA_KEY_PRESSED : AURA_KEY_RELEASED);
+        if (!catched) {
+            // TODO: pass to client with keyboard focus
+        }
     }
 }
 
@@ -81,7 +73,7 @@ static void handle_event(AuraEventData* data, struct epoll_event* epev)
         LOG_DATA4("Event data: {flag: %o}", flags);
 
         if (flags & scIdInputKeyboardFlag) {
-            key_handler(&ev);
+            handle_key(&ev);
         }
     }
 }
@@ -150,7 +142,7 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
                 flags |= scIdInputTouchscreenFlag;
             else if (strcmp(propname, scIdInputJoystic) == 0)
                 flags |= scIdInputJoysticFlag;
-            //else if (strcmp(propname, scIdInputKey) == 0)
+            //else if (strcmp(propname, scIdInputKey) == 0) // TODO
             //    flags |= scIdInputKeyFlag;
             else if (strcmp(propname, scIdInputKeyboard) == 0)
                 flags |= scIdInputKeyboardFlag;
