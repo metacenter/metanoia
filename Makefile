@@ -1,6 +1,6 @@
 CC=gcc
 WFLAGS=-Wall
-LFLAGS=-rdynamic -ldl -lrt -lpthread
+LFLAGS=-rdynamic -ldl -lrt -lpthread -lm
 
 build=build
 
@@ -10,7 +10,7 @@ all: ${build}/aura
 ${build}:
 	mkdir -p ${build}
 
-${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o ${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o ${build}/shared.o ${build}/devfb.o ${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o ${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o ${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o ${build}/keyboard-bindings.o ${build}/configuration-functions.o
+${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o ${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o ${build}/shared.o ${build}/devfb.o ${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o ${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o ${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o ${build}/keyboard-bindings.o ${build}/configuration-functions.o ${build}/renderer-mmap.o ${build}/renderer-gl.o
 	gcc ${LFLAGS} ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o \
 		${build}/keyboard-bindings.o \
 		${build}/configuration-functions.o \
@@ -18,8 +18,9 @@ ${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${
 		${build}/shared.o ${build}/devfb.o \
 		${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o \
 		${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o \
+		${build}/renderer-mmap.o ${build}/renderer-gl.o \
 		${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o \
-		-o ${build}/aura `pkg-config --libs dbus-1` `pkg-config --libs libudev` `pkg-config --libs libdrm` `pkg-config --libs wayland-server`
+		-o ${build}/aura `pkg-config --libs dbus-1` `pkg-config --libs libudev` `pkg-config --libs libdrm` `pkg-config --libs wayland-server` `pkg-config --libs gbm` `pkg-config --libs egl` `pkg-config --libs gl`
 
 
 ${build}/aura.o: ${build} src/aura.c force
@@ -68,7 +69,7 @@ ${build}/udev.o: ${build} src/devices/udev.c src/devices/udev.h force
 	gcc ${WFLAGS} -c src/devices/udev.c -o ${build}/udev.o -Isrc
 
 ${build}/drm.o: ${build} src/devices/drm.c src/devices/drm.h force
-	gcc ${WFLAGS} -c src/devices/drm.c -o ${build}/drm.o -Isrc `pkg-config --cflags libdrm`
+	gcc ${WFLAGS} -c src/devices/drm.c -o ${build}/drm.o -Isrc `pkg-config --cflags libdrm` `pkg-config --cflags egl`
 
 
 ${build}/wayland.o: ${build} src/frontends/wayland.c src/frontends/wayland.h force
@@ -94,6 +95,13 @@ ${build}/xdg-shell-protocol.o: ${build} src/frontends/xdg-shell-protocol.c force
 
 ${build}/wayland-output.o: ${build} src/frontends/wayland-output.c src/frontends/wayland-output.h force
 	gcc ${WFLAGS} -c src/frontends/wayland-output.c -o ${build}/wayland-output.o -Isrc
+
+
+${build}/renderer-mmap.o: ${build} src/renderer-mmap.c src/renderer-mmap.h force
+	${CC} $${WFLAGS} -c src src/renderer-mmap.c -o ${build}/renderer-mmap.o -Isrc
+
+${build}/renderer-gl.o: ${build} src/renderer-gl.c src/renderer-gl.h force
+	${CC} $${WFLAGS} -c src src/renderer-gl.c -o ${build}/renderer-gl.o -Isrc
 
 
 ${build}/surface-aggregator.o: ${build} src/surface-aggregator.c src/surface-aggregator.h force

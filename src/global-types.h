@@ -18,5 +18,21 @@ typedef struct {
     AuraKeyCallback callback;
 } Binding;
 
+// Renderer strategy interface
+struct Renderer;
+typedef struct {
+    int (*initialize) (void);
+    void (*finalize) (void);
+    void (*free) (struct Renderer*);
+} Renderer;
+
+// Screen output
+typedef struct {
+    short width;
+    short height;
+    short stride;
+    Renderer* renderer;
+} Output;
+
 #endif // __AURA_GLOBAL_TYPES_H__
 

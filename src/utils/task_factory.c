@@ -2,10 +2,9 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "task_factory.h"
-#include "devices/devfb.h"
-#include "devices/drm.h"
 #include "devices/evdev.h"
 #include "devices/udev.h"
+#include "surface.h"
 #include "frontends/wayland.h"
 #include "utils/log.h"
 
@@ -45,15 +44,14 @@ AuraTask* task_factory_get_setup_input_devices_task(AuraEventDispatcher* ed)
 
 //------------------------------------------------------------------------------
 
-AuraTask* task_factory_get_update_screens_task(AuraEventDispatcher* ed)
+AuraTask* task_factory_get_update_outputs_task(AuraEventDispatcher* ed)
 {
     AuraTask* task = malloc(sizeof(AuraTask));
     if (!task) {
         return &sDummyTask;
     }
 
-    //task->process = (AuraTaskProcessor) aura_drm_update_devices;
-    task->process = (AuraTaskProcessor) aura_setup_framebuffer;
+    task->process = (AuraTaskProcessor) aura_update_outputs;
     task->freefunc = (AuraTaskFreeFunc) aura_task_free;
     task->data = ed;
     return task;

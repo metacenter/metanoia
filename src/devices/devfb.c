@@ -13,7 +13,7 @@
 
 static const char* scFrameBufferPath = "/dev/fb0";
 
-void aura_setup_framebuffer(AuraEventDispatcher* ed)
+int aura_setup_framebuffer()
 {
     struct fb_var_screeninfo screen_info;
     struct fb_fix_screeninfo fixed_info;
@@ -24,20 +24,20 @@ void aura_setup_framebuffer(AuraEventDispatcher* ed)
     fd = aura_open(scFrameBufferPath, O_RDWR);
     if (fd < 0) {
         LOG_ERROR("Could not open '%s'!", scFrameBufferPath);
-        return;
+        return -1;
     }
 
     if (ioctl(fd, FBIOGET_VSCREENINFO, &screen_info)
     ||  ioctl(fd, FBIOGET_FSCREENINFO, &fixed_info)) {
         LOG_ERROR("Could not get screen info for '%s'!", scFrameBufferPath);
-        return;
+        return -1;
     }
 
     buflen = screen_info.yres_virtual * fixed_info.line_length;
     buffer = mmap(NULL, buflen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (buffer == MAP_FAILED) {
         LOG_ERROR("mmap failed on '%s'!", scFrameBufferPath);
-        return;
+        return -1;
     }
 
     LOG_INFO2("Framebuffer screen: id='%s', bpp=%d, xres=%d, yres=%d, line_length=%d",
@@ -68,4 +68,6 @@ void aura_setup_framebuffer(AuraEventDispatcher* ed)
             }
         }
     }
+
+    return -1;
 }
