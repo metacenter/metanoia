@@ -76,10 +76,11 @@ int main()
     aura_loop_schedule_task(loop_devices,
               task_factory_get_setup_device_monitor_task(dispatcher));
     aura_loop_schedule_task(loop_devices,
-              task_factory_get_update_outputs_task(dispatcher));
-    aura_loop_schedule_task(loop_devices,
               task_factory_get_setup_input_devices_task(dispatcher));
+    aura_loop_schedule_task(loop_devices,
+              task_factory_get_update_outputs_task());
 
+    // TODO: init surface manager
     aura_loop_schedule_task(loop_window_manager,
               task_factory_get_initialize_wayland_task(dispatcher));
 
@@ -89,9 +90,6 @@ int main()
     aura_loop_run(loop_keyboard);
 
     aura_event_dispatcher_timer_run(dispatcher, timer_handler, 50);
-
-    system("sleep 5s");
-    exit(0);
 
     // Receive and dispatch events
     aura_event_dispatcher_start(dispatcher);

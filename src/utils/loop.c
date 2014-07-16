@@ -70,7 +70,7 @@ static void* loop(void* data)
         while (chain_len(mine->task_chain) > 0) {
             AuraTask* task = chain_pop(mine->task_chain);
             if (task) {
-                if (task->process && task->data) {
+                if (task->process) {
                     task->process(task->data);
                 }
                 if (task->freefunc) {

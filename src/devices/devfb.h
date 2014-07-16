@@ -4,10 +4,12 @@
 #ifndef __AURA_DEVFB_H__
 #define __AURA_DEVFB_H__
 
+#include "global-types.h"
+
 // FIXME: tmp
 char* buffer;
 
-int aura_setup_framebuffer();
+int aura_setup_framebuffer(Output** outputs, int* num);
 
 #endif // __AURA_DEVFB_H__
 

@@ -18,5 +18,9 @@ typedef struct {
 
 SurfaceData* aura_surface_get(SurfaceId id);
 
+void aura_surface_manage(SurfaceId id);
+
+void aura_surface_manager_redraw_all();
+
 #endif // __AURA_SURFACE_PRIV_H__
 

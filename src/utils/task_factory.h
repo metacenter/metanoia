@@ -11,7 +11,7 @@ AuraTask* task_factory_get_setup_input_devices_task(AuraEventDispatcher* ed);
 
 AuraTask* task_factory_get_setup_device_monitor_task(AuraEventDispatcher* ed);
 
-AuraTask* task_factory_get_update_screens_task(AuraEventDispatcher* ed);
+AuraTask* task_factory_get_update_outputs_task();
 
 AuraTask* task_factory_get_initialize_wayland_task(AuraEventDispatcher* ed);
 

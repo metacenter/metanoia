@@ -39,7 +39,10 @@ void aura_surface_commit(SurfaceId id)
         return;
     }
 
-    char* data = surface->pending.data;
+    aura_surface_manager_redraw_all();
+
+    // TODO: remove
+    /*char* data = surface->pending.data;
     int stride = surface->pending.stride;
     int x, y;
     for (y = 0; y < surface->pending.height; ++y) {
@@ -49,7 +52,7 @@ void aura_surface_commit(SurfaceId id)
             buffer[y*5632 + 4*x + 2] = data[y*stride + 4*x + 2];
             buffer[y*5632 + 4*x + 3] = data[y*stride + 4*x + 3];
         }
-    }
+    }*/
 }
 
 //------------------------------------------------------------------------------

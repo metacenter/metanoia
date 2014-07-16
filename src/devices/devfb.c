@@ -3,17 +3,21 @@
 
 #include "devfb.h"
 #include "devices/shared.h"
+#include "renderer-mmap.h"
 #include "utils/log.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <linux/fb.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#include <malloc.h>
+
 static const char* scFrameBufferPath = "/dev/fb0";
 
-int aura_setup_framebuffer()
+int aura_setup_framebuffer(Output** outputs, int* num)
 {
     struct fb_var_screeninfo screen_info;
     struct fb_fix_screeninfo fixed_info;
@@ -40,9 +44,10 @@ int aura_setup_framebuffer()
         return -1;
     }
 
-    LOG_INFO2("Framebuffer screen: id='%s', bpp=%d, xres=%d, yres=%d, line_length=%d",
+    LOG_INFO2("Framebuffer screen: id='%s', bpp=%d, xres=%d, yres=%d, llen=%d",
               fixed_info.id, screen_info.bits_per_pixel,
-              screen_info.xres_virtual, screen_info.yres_virtual, fixed_info.line_length);
+              screen_info.xres_virtual, screen_info.yres_virtual,
+              fixed_info.line_length);
 
     // TODO: something more interesting
     int x, y;
@@ -69,5 +74,15 @@ int aura_setup_framebuffer()
         }
     }
 
-    return -1;
+    // TODO: put malloc elsewhere
+    *outputs = malloc(sizeof(Output));
+    (*outputs)->width = screen_info.xres_virtual;
+    (*outputs)->height = screen_info.yres_virtual;
+    (*outputs)->renderer = aura_renderer_mmap_create(buffer,
+                                                     screen_info.xres_virtual,
+                                                     screen_info.yres_virtual,
+                                                     fixed_info.line_length);
+    *num = 1;
+
+    return 1;
 }

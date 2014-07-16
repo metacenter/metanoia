@@ -4,6 +4,8 @@
 #ifndef __AURA_SURFACE_MANAGER_H__
 #define __AURA_SURFACE_MANAGER_H__
 
+#include "global-types.h"
+
 void aura_update_outputs(void);
 
 #endif // __AURA_SURFACE_MANAGER_H__

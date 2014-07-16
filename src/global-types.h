@@ -4,6 +4,8 @@
 #ifndef __AURA_GLOBAL_TYPES_H__
 #define __AURA_GLOBAL_TYPES_H__
 
+#include "utils/chain.h"
+
 #include <stdint.h>
 
 typedef uint32_t SurfaceId;
@@ -18,11 +20,12 @@ typedef struct {
     AuraKeyCallback callback;
 } Binding;
 
-// Renderer strategy interface
+// Renderer strategy interface // TODO: move to separate file
 struct Renderer;
 typedef struct {
     int (*initialize) (void);
     void (*finalize) (void);
+    void (*draw_surfaces) (struct Renderer*, Chain*);
     void (*free) (struct Renderer*);
 } Renderer;
 
@@ -30,7 +33,6 @@ typedef struct {
 typedef struct {
     short width;
     short height;
-    short stride;
     Renderer* renderer;
 } Output;
 
