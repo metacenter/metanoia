@@ -21,20 +21,22 @@ typedef struct {
 } Binding;
 
 // Renderer strategy interface // TODO: move to separate file
-struct Renderer;
+struct AuraRenderer;
 typedef struct {
     int (*initialize) (void);
     void (*finalize) (void);
-    void (*draw_surfaces) (struct Renderer*, Chain*);
-    void (*free) (struct Renderer*);
-} Renderer;
+    void (*draw_surfaces) (struct AuraRenderer*, Chain*);
+    void (*free) (struct AuraRenderer*);
+} AuraRenderer;
 
-// Screen output
+// Screen output // TODO move to separate file
+struct AuraOutput;
 typedef struct {
-    short width;
-    short height;
-    Renderer* renderer;
-} Output;
+    // TODO: keep list of available modes instead of just width and height
+    int width;
+    int height;
+    AuraRenderer* (*initialize) (struct AuraOutput*, int, int);
+} AuraOutput;
 
 #endif // __AURA_GLOBAL_TYPES_H__
 

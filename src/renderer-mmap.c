@@ -13,12 +13,12 @@
 //------------------------------------------------------------------------------
 
 typedef struct {
-    Renderer base;
+    AuraRenderer base;
     int width;
     int height;
     int stride;
     char* buffer;
-} RendererMMap;
+} AuraRendererMMap;
 
 //------------------------------------------------------------------------------
 
@@ -30,10 +30,10 @@ void aura_renderer_mmap_finalize(void) {}
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_draw_surfaces(struct Renderer* self,
+void aura_renderer_mmap_draw_surfaces(struct AuraRenderer* self,
                                       Chain* surfaces)
 {
-    RendererMMap* mine = (RendererMMap*) self;
+    AuraRendererMMap* mine = (AuraRendererMMap*) self;
 
     Link* link;
 
@@ -59,7 +59,7 @@ void aura_renderer_mmap_draw_surfaces(struct Renderer* self,
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_free(struct Renderer* self)
+void aura_renderer_mmap_free(struct AuraRenderer* self)
 {
     if (self) {
         free(self);
@@ -68,17 +68,17 @@ void aura_renderer_mmap_free(struct Renderer* self)
 
 //------------------------------------------------------------------------------
 
-Renderer* aura_renderer_mmap_create(char* buffer,
+AuraRenderer* aura_renderer_mmap_create(char* buffer,
                                     int width,
                                     int height,
                                     int stride)
 {
-    RendererMMap* mine = malloc(sizeof(RendererMMap));
+    AuraRendererMMap* mine = malloc(sizeof(AuraRendererMMap));
     if (mine == NULL) {
         return NULL;
     }
 
-    memset(mine, 0, sizeof(RendererMMap));
+    memset(mine, 0, sizeof(AuraRendererMMap));
 
     mine->base.initialize    = aura_renderer_mmap_initialize;
     mine->base.finalize      = aura_renderer_mmap_finalize;
@@ -90,7 +90,7 @@ Renderer* aura_renderer_mmap_create(char* buffer,
     mine->height = height;
     mine->stride = stride;
 
-    return (Renderer*) mine;
+    return (AuraRenderer*) mine;
 }
 
 //------------------------------------------------------------------------------

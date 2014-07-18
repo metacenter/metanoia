@@ -6,7 +6,7 @@
 
 #include "global-types.h"
 
-int aura_drm_update_devices(Output** outputs, int* num);
+int aura_drm_update_devices(AuraOutput** outputs, int* num);
 
 #endif // __AURA_DRM_H__
 

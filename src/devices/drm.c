@@ -39,6 +39,13 @@ static const char* scConnectorStateName[] = {
         "NONE", "connected", "disconnected", "Unknown", NULL
     };
 
+//------------------------------------------------------------------------------
+
+typedef struct {
+    AuraOutput base;
+    
+} AuraOutputDRM;
+
 struct gbm_device *gbm_dev;
 struct gbm_surface *gbm_surface;
 
@@ -207,7 +214,7 @@ int create_gbm(int drm_fd,
                drmModeConnector* connector,
                uint32_t crtc_id,
                drmModeModeInfo* mode,
-               Output* output)
+               AuraOutput* output)
 {
     int ret;
     uint32_t fb_id;
@@ -216,12 +223,10 @@ int create_gbm(int drm_fd,
 
 	gbm_dev = gbm_create_device(drm_fd);
 
-    LOG_DEBUG("1 %d", (int) mode);
 	gbm_surface = gbm_surface_create(gbm_dev,
 			mode->hdisplay, mode->vdisplay,
 			GBM_FORMAT_XRGB8888,
 			GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-    LOG_DEBUG("2");
 	if (!gbm_surface) {
 		LOG_DEBUG("failed to create gbm surface\n");
 		return -1;
@@ -236,13 +241,9 @@ int create_gbm(int drm_fd,
 		return ret;
 	}
 
-    LOG_DEBUG(">>> %d %d", (int)gl.display, (int)gl.surface);
-    output->renderer = aura_renderer_gl_create(gl.display,
-                                               gl.surface,
-                                               gl.context);
-
 	eglSwapBuffers(gl.display, gl.surface);
 
+    // TODO change to gbm_bo_create
 	bo = gbm_surface_lock_front_buffer(gbm_surface);
     if (!bo) {
         LOG_ERROR("Could not lock GBM front buffer!");
@@ -300,7 +301,7 @@ int create_gbm(int drm_fd,
 int update_device(int drm_fd,
                   drmModeRes* resources,
                   drmModeConnector* connector,
-                  Output* output)
+                  AuraOutput* output)
 {
     int i, result = 0;
     drmModeEncoder *encoder = NULL;
@@ -343,7 +344,7 @@ int update_device(int drm_fd,
 
 //------------------------------------------------------------------------------
 
-int aura_drm_update_devices(Output** outputs, int* num)
+int aura_drm_update_devices(AuraOutput** outputs, int* num)
 {
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
@@ -397,7 +398,7 @@ if (ret == -1) {
     }
 
     // TODO: put malloc elsewhere
-    *outputs = malloc(sizeof(Output));
+    *outputs = malloc(sizeof(AuraOutput));
     (*outputs)->width = 1366;
     (*outputs)->height = 768;
     *num = 1;
@@ -405,16 +406,18 @@ if (ret == -1) {
     // Find a connected connector
     for (i = 0; i < resources->count_connectors; ++i) {
         connector = drmModeGetConnector(fd, resources->connectors[i]);
-        if (connector) {
-            LOG_INFO2("Connector: %s (%s)",
-                       scConnectorTypeName[connector->connector_type],
-                       scConnectorStateName[connector->connection]);
-            // If connector is connected - update device
-            if (connector->connection == DRM_MODE_CONNECTED) {
-                update_device(fd, resources, connector, *outputs);
-            }
-            drmModeFreeConnector(connector);
+        if (!connector)
+            continue;
+
+        LOG_INFO2("Connector: %s (%s)",
+                   scConnectorTypeName[connector->connector_type],
+                   scConnectorStateName[connector->connection]);
+        // If connector is connected - update device
+        if (connector->connection == DRM_MODE_CONNECTED) {
+            update_device(fd, resources, connector, *outputs);
         }
+        drmModeFreeConnector(connector);
+
         connector = NULL;
     }
 

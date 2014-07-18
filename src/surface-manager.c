@@ -13,20 +13,23 @@
 Chain* visible_surfaces = NULL;
 
 // FIXME: tmp
-Output* output = NULL;
-int num;
+AuraOutput* output = NULL;
+AuraRenderer* renderer = NULL;
+int num = 0;
 
 //------------------------------------------------------------------------------
 
 void aura_update_outputs(void)
 {
     LOG_INFO1("Updating outputs");
+    // TODO: support for many outputs
 
-    int result = aura_drm_update_devices(&output, &num);
-    if (result < 0)
+    int result;// = aura_drm_update_devices(&output, &num);
+    //if (result < 0)
         result = aura_setup_framebuffer(&output, &num);
 
-    //output->renderer->draw_surfaces(output->renderer, visible_surfaces);
+    renderer = output->initialize((struct AuraOutput*) output,
+                                  output->width, output->height);
 }
 
 //------------------------------------------------------------------------------
@@ -46,21 +49,17 @@ void aura_surface_manage(SurfaceId id)
 
 void aura_surface_manager_redraw_all()
 {
-    if (output == NULL) {
-        LOG_ERROR("Wrong output!");
-        return;
-    }
-    if (output->renderer == NULL) {
+    if (renderer == NULL) {
         LOG_ERROR("Wrong renderer!");
         return;
     }
-    if (output->renderer == NULL) {
+    if (renderer->draw_surfaces == NULL) {
         LOG_ERROR("Wrong renderer implementation!");
         return;
     }
 
-    output->renderer->draw_surfaces((struct Renderer*) output->renderer,
-                                    visible_surfaces);
+    renderer->draw_surfaces((struct AuraRenderer*) renderer,
+                            visible_surfaces);
 }
 
 //------------------------------------------------------------------------------

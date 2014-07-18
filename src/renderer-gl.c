@@ -13,11 +13,11 @@
 //------------------------------------------------------------------------------
 
 typedef struct {
-    Renderer base;
+    AuraRenderer base;
     EGLDisplay egl_display;
     EGLSurface egl_surface;
     EGLContext egl_context;
-} RendererGL;
+} AuraRendererGL;
 
 //------------------------------------------------------------------------------
 
@@ -29,13 +29,13 @@ void aura_renderer_gl_finalize(void) {}
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_draw_surfaces(struct Renderer* self,
+void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
                                     Chain* surfaces)
 {
     // TODO: add mutex
     LOG_DEBUG("!!!!!!!!!!!!!!!!!!!!!!!");
 
-    RendererGL* mine = (RendererGL*) self;
+    AuraRendererGL* mine = (AuraRendererGL*) self;
 
     /* connect the context to the surface */
     int r = eglMakeCurrent(mine->egl_display, mine->egl_surface,
@@ -67,7 +67,7 @@ void aura_renderer_gl_draw_surfaces(struct Renderer* self,
 }
 
 //------------------------------------------------------------------------------
-void aura_renderer_gl_free(struct Renderer* self)
+void aura_renderer_gl_free(struct AuraRenderer* self)
 {
     if (self) {
         free(self);
@@ -76,16 +76,16 @@ void aura_renderer_gl_free(struct Renderer* self)
 
 //------------------------------------------------------------------------------
 
-Renderer* aura_renderer_gl_create(EGLDisplay egl_display,
+AuraRenderer* aura_renderer_gl_create(EGLDisplay egl_display,
                                   EGLSurface egl_surface,
                                   EGLContext egl_context)
 {
-    RendererGL* mine = malloc(sizeof(RendererGL));
+    AuraRendererGL* mine = malloc(sizeof(AuraRendererGL));
     if (mine == NULL) {
         return NULL;
     }
 
-    memset(mine, 0, sizeof(RendererGL));
+    memset(mine, 0, sizeof(AuraRendererGL));
 
     mine->base.initialize    = aura_renderer_gl_initialize;
     mine->base.finalize      = aura_renderer_gl_finalize;
@@ -96,7 +96,7 @@ Renderer* aura_renderer_gl_create(EGLDisplay egl_display,
     mine->egl_surface = egl_surface;
     mine->egl_context = egl_context;
 
-    return (Renderer*) mine;
+    return (AuraRenderer*) mine;
 }
 
 //------------------------------------------------------------------------------

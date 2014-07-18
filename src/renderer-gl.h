@@ -10,9 +10,9 @@
 #include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
 
-Renderer* aura_renderer_gl_create(EGLDisplay egl_display,
-                                  EGLSurface egl_surface,
-                                  EGLContext egl_context);
+AuraRenderer* aura_renderer_gl_create(EGLDisplay egl_display,
+                                      EGLSurface egl_surface,
+                                      EGLContext egl_context);
 
 #endif // __AURA_RENDERER_GL_H__
 

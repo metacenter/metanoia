@@ -9,7 +9,7 @@
 // FIXME: tmp
 char* buffer;
 
-int aura_setup_framebuffer(Output** outputs, int* num);
+int aura_setup_framebuffer(AuraOutput** outputs, int* num);
 
 #endif // __AURA_DEVFB_H__
 
