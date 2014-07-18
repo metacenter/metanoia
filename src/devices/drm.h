@@ -4,9 +4,9 @@
 #ifndef __AURA_DRM_H__
 #define __AURA_DRM_H__
 
-#include "utils/event_dispatcher.h"
+#include "global-types.h"
 
-void aura_drm_update_devices(AuraEventDispatcher* ed);
+int aura_drm_update_devices(Output** outputs, int* num);
 
 #endif // __AURA_DRM_H__
 

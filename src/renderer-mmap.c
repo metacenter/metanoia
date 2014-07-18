@@ -37,6 +37,10 @@ void aura_renderer_mmap_draw_surfaces(struct Renderer* self,
 
     Link* link;
 
+    if (surfaces == NULL) {
+        return;
+    }
+
     for (link = surfaces->first; link; link = link->next) {
         SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
         char* data = surface->pending.data;

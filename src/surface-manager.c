@@ -22,10 +22,11 @@ void aura_update_outputs(void)
 {
     LOG_INFO1("Updating outputs");
 
-    //int result = aura_drm_update_devices();
-    //if (result < 0)
-        //result = 
-    aura_setup_framebuffer(&output, &num);
+    int result = aura_drm_update_devices(&output, &num);
+    if (result < 0)
+        result = aura_setup_framebuffer(&output, &num);
+
+    //output->renderer->draw_surfaces(output->renderer, visible_surfaces);
 }
 
 //------------------------------------------------------------------------------
@@ -45,10 +46,19 @@ void aura_surface_manage(SurfaceId id)
 
 void aura_surface_manager_redraw_all()
 {
-    // TODO: do someting with type
-    LOG_DEBUG("O %d", output);
-    LOG_DEBUG("R %d", output->renderer);
-    LOG_DEBUG("D %d", output->renderer->draw_surfaces);
+    if (output == NULL) {
+        LOG_ERROR("Wrong output!");
+        return;
+    }
+    if (output->renderer == NULL) {
+        LOG_ERROR("Wrong renderer!");
+        return;
+    }
+    if (output->renderer == NULL) {
+        LOG_ERROR("Wrong renderer implementation!");
+        return;
+    }
+
     output->renderer->draw_surfaces((struct Renderer*) output->renderer,
                                     visible_surfaces);
 }

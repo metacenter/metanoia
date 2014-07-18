@@ -17,6 +17,8 @@
 
 static const char* scFrameBufferPath = "/dev/fb0";
 
+//------------------------------------------------------------------------------
+
 int aura_setup_framebuffer(Output** outputs, int* num)
 {
     struct fb_var_screeninfo screen_info;
