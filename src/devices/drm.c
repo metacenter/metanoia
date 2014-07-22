@@ -43,22 +43,10 @@ static const char* scConnectorStateName[] = {
 
 typedef struct {
     AuraOutput base;
-    
+    int fd;
+    uint32_t crtc_id;
+    drmModeConnector* connector;
 } AuraOutputDRM;
-
-struct gbm_device *gbm_dev;
-struct gbm_surface *gbm_surface;
-
-static struct {
-	EGLDisplay display;
-	EGLConfig config;
-	EGLContext context;
-	EGLSurface surface;
-	GLuint program;
-	GLint modelviewmatrix, modelviewprojectionmatrix, normalmatrix;
-	GLuint vbo;
-	GLuint positionsoffset, colorsoffset, normalsoffset;
-} gl;
 
 //------------------------------------------------------------------------------
 
@@ -134,166 +122,182 @@ clear_db:
 
 //------------------------------------------------------------------------------
 
-void glerror(char* str)
+AuraRenderer* initialize_egl_with_gbm(AuraOutputDRM* output_drm)
 {
-    GLint error = glGetError();
-    LOG_ERROR("glError (0x%x) after %s", error, str);
+    int r; // TODO EGLint ?
+    uint32_t fb_id;
+    uint32_t width, height, stride, handle;
+    EGLint major, minor, n;
+    EGLDisplay egl_display;
+    EGLConfig  egl_config;
+    EGLContext egl_context;
+    EGLSurface egl_surface;
+    struct gbm_device*  gbm_device;
+    struct gbm_surface* gbm_surface;
+    struct gbm_bo*      gbm_bo;
+    drmModeModeInfo* mode;
+
+    static const EGLint context_attribs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,
+            EGL_NONE
+        };
+
+    static const EGLint config_attribs[] = {
+            EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
+            EGL_RED_SIZE,        1,
+            EGL_GREEN_SIZE,      1,
+            EGL_BLUE_SIZE,       1,
+            EGL_ALPHA_SIZE,      0,
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+            EGL_NONE
+        };
+
+    LOG_INFO1("Creating GBM and initializing EGL...");
+
+    // Find mode // TODO
+    mode = &output_drm->connector->modes[0];
+
+    // Create GBM device and surface
+    gbm_device = gbm_create_device(output_drm->fd);
+
+    gbm_surface = gbm_surface_create(gbm_device,
+                                     mode->hdisplay, mode->vdisplay,
+                                     GBM_FORMAT_XRGB8888,
+                                     GBM_BO_USE_SCANOUT|GBM_BO_USE_RENDERING);
+    if (!gbm_surface) {
+        LOG_ERROR("Failed to create GBM surface!");
+        return NULL;
+    }
+
+
+    // Initialize EGL
+    egl_display = eglGetDisplay((EGLNativeDisplayType) gbm_device);
+
+    if (!eglInitialize(egl_display, &major, &minor)) {
+        LOG_ERROR("Failed to initialize EGL display!");
+        return NULL;
+    }
+
+    LOG_DATA2("EGL Version: '%s'", eglQueryString(egl_display, EGL_VERSION));
+    LOG_DATA2("EGL Vendor:  '%s'", eglQueryString(egl_display, EGL_VENDOR));
+
+    if (!eglBindAPI(EGL_OPENGL_ES_API)) {
+        LOG_ERROR("Failed to bind api EGL_OPENGL_ES_API!");
+        return NULL;
+    }
+
+    r = eglChooseConfig(egl_display, config_attribs, &egl_config, 1, &n);
+    if (!r || n != 1) {
+        LOG_ERROR("Failed to choose EGL config (r: %d, n: %d)", r, n);
+        return NULL;
+    }
+
+    egl_context = eglCreateContext(egl_display, egl_config,
+                                   EGL_NO_CONTEXT, context_attribs);
+    if (egl_context == NULL) {
+        LOG_ERROR("Failed to create RGL context!");
+        return NULL;
+    }
+
+    egl_surface = eglCreateWindowSurface(egl_display, egl_config,
+                                         (EGLNativeWindowType) gbm_surface,
+                                         NULL);
+    if (egl_surface == EGL_NO_SURFACE) {
+        LOG_ERROR("Failed to create EGL surface!");
+        return NULL;
+    }
+
+    // Connect the context to the surface
+    r = eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
+    if (r == EGL_FALSE) {
+        LOG_DEBUG("Failed to make EGL context current!");
+        return NULL;
+    }
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_ERROR("Something went wrong during EGL initialization!");
+        return NULL;
+    }
+
+    // Create GBM BO
+    eglSwapBuffers(egl_display, egl_surface);
+
+    // TODO change to gbm_bo_create
+    gbm_bo = gbm_surface_lock_front_buffer(gbm_surface);
+    if (!gbm_bo) {
+        LOG_ERROR("Could not lock GBM front buffer!");
+        return NULL;
+    }
+
+    width = gbm_bo_get_width(gbm_bo);
+    height = gbm_bo_get_height(gbm_bo);
+    stride = gbm_bo_get_stride(gbm_bo);
+    handle = gbm_bo_get_handle(gbm_bo).u32;
+
+    r = drmModeAddFB(output_drm->fd, width, height,
+                     24, 32, stride, handle, &fb_id);
+    if (r) {
+        LOG_ERROR("Failed to create DRM framebuffer: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    // Set mode
+    r = drmModeSetCrtc(output_drm->fd,
+                       output_drm->crtc_id,
+                       fb_id, 0, 0,
+                       &output_drm->connector->connector_id,
+                       1, mode);
+    if (r) {
+        LOG_ERROR("failed to set mode: %s\n", strerror(errno));
+        goto clear_fb;
+    }
+
+    gbm_surface_release_buffer(gbm_surface, gbm_bo); // TODO: remove?
+
+    glClearColor(0.0, 0.25, 0.5, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    eglSwapBuffers(egl_display, egl_surface);
+
+    // Release context
+    r = eglMakeCurrent(egl_display, EGL_NO_SURFACE,
+                       EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    if (r == EGL_FALSE) {
+        LOG_ERROR("Failed to release EGL context! (%d)", eglGetError());
+    }
+
+    LOG_INFO1("Creating GBM and initializing EGL: SUCCESS");
+
+    return aura_renderer_gl_create(egl_display, egl_surface, egl_context);
+
+clear_fb:
+    drmModeRmFB(output_drm->fd, fb_id);
+    return NULL;
 }
 
 //------------------------------------------------------------------------------
 
-static int init_gl1()
+AuraRenderer* aura_drm_output_initialize(struct AuraOutput* output,
+                                         int widht, int height)
 {
-	EGLint major, minor, n;
+    AuraOutputDRM* output_drm;
+    AuraRenderer* renderer;
 
-	static const EGLint context_attribs[] = {
-		EGL_CONTEXT_CLIENT_VERSION, 2,
-		EGL_NONE
-	};
-
-	static const EGLint config_attribs[] = {
-		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-		EGL_RED_SIZE, 1,
-		EGL_GREEN_SIZE, 1,
-		EGL_BLUE_SIZE, 1,
-		EGL_ALPHA_SIZE, 0,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-		EGL_NONE
-	};
-
-	gl.display = eglGetDisplay((EGLNativeDisplayType) gbm_dev);
-
-	if (!eglInitialize(gl.display, &major, &minor)) {
-		LOG_DEBUG("failed to initialize\n");
-		return -1;
-	}
-
-	LOG_DEBUG("Using display %p with EGL version %d.%d\n",
-			gl.display, major, minor);
-
-	LOG_DEBUG("EGL Version '%s'", eglQueryString(gl.display, EGL_VERSION));
-	LOG_DEBUG("EGL Vendor '%s'", eglQueryString(gl.display, EGL_VENDOR));
-
-	if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-		LOG_DEBUG("failed to bind api EGL_OPENGL_ES_API\n");
-		return -1;
-	}
-
-	if (!eglChooseConfig(gl.display, config_attribs, &gl.config, 1, &n) || n != 1) {
-		LOG_DEBUG("failed to choose config: %d\n", n);
-		return -1;
-	}
-
-	gl.context = eglCreateContext(gl.display, gl.config,
-			EGL_NO_CONTEXT, context_attribs);
-	if (gl.context == NULL) {
-		LOG_DEBUG("failed to create context\n");
-		return -1;
-	}
-
-	gl.surface = eglCreateWindowSurface(gl.display, gl.config,
-                          (EGLNativeWindowType) gbm_surface, NULL);
-	if (gl.surface == EGL_NO_SURFACE) {
-		LOG_DEBUG("failed to create egl surface\n");
-		return -1;
-	}
-
-	/* connect the context to the surface */
-	int r = eglMakeCurrent(gl.display, gl.surface, gl.surface, gl.context);
-    if (r == EGL_FALSE) {
-        LOG_DEBUG("Context failure");
-    } else {
-        LOG_DEBUG("Context success");
+    if (!output) {
+        return NULL;
     }
 
-	return 0;
-}
+    output_drm = (AuraOutputDRM*) output;
 
-
-int create_gbm(int drm_fd,
-               drmModeConnector* connector,
-               uint32_t crtc_id,
-               drmModeModeInfo* mode,
-               AuraOutput* output)
-{
-    int ret;
-    uint32_t fb_id;
-    struct gbm_bo* bo;
-    LOG_DEBUG("Creating GBM");
-
-	gbm_dev = gbm_create_device(drm_fd);
-
-	gbm_surface = gbm_surface_create(gbm_dev,
-			mode->hdisplay, mode->vdisplay,
-			GBM_FORMAT_XRGB8888,
-			GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-	if (!gbm_surface) {
-		LOG_DEBUG("failed to create gbm surface\n");
-		return -1;
-	}
-
-
-    output->width = mode->hdisplay;
-    output->height = mode->vdisplay;
-	ret = init_gl1(mode->hdisplay, mode->vdisplay);
-	if (ret) {
-		LOG_DEBUG("failed to initialize EGL 1\n");
-		return ret;
-	}
-
-	eglSwapBuffers(gl.display, gl.surface);
-
-    // TODO change to gbm_bo_create
-	bo = gbm_surface_lock_front_buffer(gbm_surface);
-    if (!bo) {
-        LOG_ERROR("Could not lock GBM front buffer!");
-        return -1;
+    renderer = initialize_egl_with_gbm(output_drm);
+    if (renderer == NULL) {
+        //result = create_dumb_buffer(drm_fd, &connector->modes[0], &fb_id);
+        //if (result) {
+            LOG_ERROR("DRM failed!");
+            return NULL;
+        //}
     }
 
-	uint32_t width, height, stride, handle;
-	width = gbm_bo_get_width(bo);
-	height = gbm_bo_get_height(bo);
-	stride = gbm_bo_get_stride(bo);
-	handle = gbm_bo_get_handle(bo).u32;
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("something bad happened\n");
-        return -1;
-    }
-
-
-	ret = drmModeAddFB(drm_fd, width, height, 24, 32,
-                           stride, handle, &fb_id);
-	if (ret) {
-		LOG_DEBUG("failed to create fb: %s\n", strerror(errno));
-		return -1;
-	}
-
-    // set mode
-    ret = drmModeSetCrtc(drm_fd, crtc_id, fb_id, 0, 0,
-                    &connector->connector_id, 1, &connector->modes[0]);
-    if (ret) {
-        LOG_ERROR("failed to set mode: %s\n", strerror(errno));
-        return -1;
-    }
-
-    gbm_surface_release_buffer(gbm_surface, bo);
-
-    glClearColor(0.0, 1.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    LOG_DEBUG(">>> %d %d", (int)gl.display, (int)gl.surface);
-    eglSwapBuffers(gl.display, gl.surface);
-
-    // Release context
-    int r = eglMakeCurrent(gl.display, EGL_NO_SURFACE,
-                           EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    if (r == EGL_FALSE) {
-        LOG_DEBUG("Context failure %d", eglGetError());
-    } else {
-        LOG_DEBUG("Context success");
-    }
-
-    return 1;
+    return renderer;
 }
 
 //------------------------------------------------------------------------------
@@ -301,10 +305,10 @@ int create_gbm(int drm_fd,
 int update_device(int drm_fd,
                   drmModeRes* resources,
                   drmModeConnector* connector,
-                  AuraOutput* output)
+                  AuraOutput** output)
 {
-    int i, result = 0;
-    drmModeEncoder *encoder = NULL;
+    int i;
+    drmModeEncoder* encoder = NULL;
 
     LOG_INFO2("Updating connector %u", connector->connector_id);
 
@@ -329,17 +333,21 @@ int update_device(int drm_fd,
         return -EFAULT;
     }
 
-    result = create_gbm(drm_fd, connector, encoder->crtc_id,
-                        &connector->modes[0], output);
-    if (result < 0) {
-        //result = create_dumb_buffer(drm_fd, &connector->modes[0], &fb_id);
-        //if (result) {
-            LOG_ERROR("DRM failed!");
-            return -1;
-        //}
-    }
+    AuraOutputDRM* output_drm = malloc(sizeof(AuraOutputDRM));
+    memset(output_drm, 0, sizeof(AuraOutputDRM));
 
-    return result;
+    output_drm->base.width = connector->modes[0].vdisplay;
+    output_drm->base.height = connector->modes[0].hdisplay;
+    output_drm->base.initialize = aura_drm_output_initialize;
+
+    output_drm->fd = drm_fd;
+    output_drm->connector = connector;
+    output_drm->crtc_id = encoder->crtc_id;
+
+    *output = (AuraOutput*) output_drm;
+
+    drmModeFreeEncoder(encoder);
+    return 1;
 }
 
 //------------------------------------------------------------------------------
@@ -406,18 +414,20 @@ if (ret == -1) {
     // Find a connected connector
     for (i = 0; i < resources->count_connectors; ++i) {
         connector = drmModeGetConnector(fd, resources->connectors[i]);
-        if (!connector)
-            continue;
-
-        LOG_INFO2("Connector: %s (%s)",
-                   scConnectorTypeName[connector->connector_type],
-                   scConnectorStateName[connector->connection]);
-        // If connector is connected - update device
-        if (connector->connection == DRM_MODE_CONNECTED) {
-            update_device(fd, resources, connector, *outputs);
+        if (connector)
+        {
+            LOG_INFO2("Connector: %s (%s)",
+                       scConnectorTypeName[connector->connector_type],
+                       scConnectorStateName[connector->connection]);
+            // If connector is connected - update device
+            if (connector->connection == DRM_MODE_CONNECTED) {
+                update_device(fd, resources, connector, outputs);
+            }
+            else
+            {
+                drmModeFreeConnector(connector);
+            }
         }
-        drmModeFreeConnector(connector);
-
         connector = NULL;
     }
 

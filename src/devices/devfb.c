@@ -28,8 +28,8 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_devfb_initialize(struct AuraOutput* output,
-                                    int width, int height)
+AuraRenderer* aura_devfb_output_initialize(struct AuraOutput* output,
+                                           int width, int height)
 {
     struct fb_fix_screeninfo fixed_info;
     size_t buflen;
@@ -115,7 +115,7 @@ int aura_setup_framebuffer(AuraOutput** outputs, int* num)
 
     output_fb->base.width = screen_info.xres_virtual;
     output_fb->base.height = screen_info.yres_virtual;
-    output_fb->base.initialize = aura_devfb_initialize;
+    output_fb->base.initialize = aura_devfb_output_initialize;
 
     output_fb->fd = fd;
 

@@ -23,8 +23,8 @@ typedef struct {
 // Renderer strategy interface // TODO: move to separate file
 struct AuraRenderer;
 typedef struct {
-    int (*initialize) (void);
-    void (*finalize) (void);
+    int (*initialize) (struct AuraRenderer*);
+    void (*finalize) (struct AuraRenderer*);
     void (*draw_surfaces) (struct AuraRenderer*, Chain*);
     void (*free) (struct AuraRenderer*);
 } AuraRenderer;

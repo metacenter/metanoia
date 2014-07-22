@@ -22,11 +22,17 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-int aura_renderer_mmap_initialize(void) {}
+int aura_renderer_mmap_initialize(struct AuraRenderer* self)
+{
+    return 1;
+}
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_finalize(void) {}
+void aura_renderer_mmap_finalize(struct AuraRenderer* self)
+{
+    return;
+}
 
 //------------------------------------------------------------------------------
 

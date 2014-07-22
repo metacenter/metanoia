@@ -98,10 +98,10 @@ ${build}/wayland-output.o: ${build} src/frontends/wayland-output.c src/frontends
 
 
 ${build}/renderer-mmap.o: ${build} src/renderer-mmap.c src/renderer-mmap.h force
-	${CC} $${WFLAGS} -c src src/renderer-mmap.c -o ${build}/renderer-mmap.o -Isrc
+	${CC} ${WFLAGS} -c src/renderer-mmap.c -o ${build}/renderer-mmap.o -Isrc
 
 ${build}/renderer-gl.o: ${build} src/renderer-gl.c src/renderer-gl.h force
-	${CC} $${WFLAGS} -c src src/renderer-gl.c -o ${build}/renderer-gl.o -Isrc
+	${CC} ${WFLAGS} -c src/renderer-gl.c -o ${build}/renderer-gl.o -Isrc
 
 
 ${build}/surface-aggregator.o: ${build} src/surface-aggregator.c src/surface-aggregator.h force
