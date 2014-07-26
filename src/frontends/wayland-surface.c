@@ -27,6 +27,11 @@ static void surface_attach(struct wl_client* client,
     LOG_DATA3("Wayland: surface attach (sx: %d, sy: %d, id: %d)", sx, sy, id);
 
     struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_resource);
+    if (shm_buffer == NULL) {
+        LOG_WARN1("Wrong shared memory buffer!");
+        return;
+    }
+
     aura_surface_attach(id,
                         wl_shm_buffer_get_width(shm_buffer),
                         wl_shm_buffer_get_height(shm_buffer),

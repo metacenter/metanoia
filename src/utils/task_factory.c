@@ -59,7 +59,7 @@ AuraTask* task_factory_get_update_outputs_task()
 
 //------------------------------------------------------------------------------
 
-AuraTask* task_factory_get_initialize_wayland_task(AuraEventDispatcher* ed)
+AuraTask* task_factory_get_initialize_wayland_task()
 {
     AuraTask* task = malloc(sizeof(AuraTask));
     if (!task) {
@@ -68,7 +68,7 @@ AuraTask* task_factory_get_initialize_wayland_task(AuraEventDispatcher* ed)
 
     task->process = (AuraTaskProcessor) aura_wayland_initialize;
     task->freefunc = (AuraTaskFreeFunc) aura_task_free;
-    task->data = ed;
+    task->data = NULL;
     return task;
 }
 

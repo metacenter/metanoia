@@ -17,6 +17,9 @@
 #include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
 
+// TODO: remove
+#include "bind-egl-wayland.h"
+
 //------------------------------------------------------------------------------
 
 typedef struct {
@@ -227,6 +230,9 @@ int aura_renderer_gl_initialize(struct AuraRenderer* self)
 
     LOG_INFO1("Initializing GL renderer: SUCCESS");
 
+    // TODO: signal
+    aura_bind_egl_wayland(mine->egl_display);
+
 clear_context:
     // Release current context
     r = eglMakeCurrent(mine->egl_display, EGL_NO_SURFACE,
@@ -275,7 +281,7 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
         return;
     }
 
-    glClearColor(0.5, 0.25, 0.0, 1.0);
+    glClearColor(0.75, 0.25, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
     if (surfaces == NULL) {
@@ -290,6 +296,11 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
         int width = surface->pending.width;
         int height = surface->pending.height;
     //}
+
+    if (data == NULL) {
+        LOG_DEBUG("GL renderer: wrong data!");
+        return;
+    }
 
     glUseProgram(program);
 

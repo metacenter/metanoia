@@ -91,7 +91,7 @@ static void shell_surface_set_title(struct wl_client *client,
                                     struct wl_resource *resource,
                                     const char *title)
 {
-    LOG_NYIMP("Wayland: set title: '%s'", title);
+    LOG_NYIMP("Wayland: set title");
 }
 
 //------------------------------------------------------------------------------

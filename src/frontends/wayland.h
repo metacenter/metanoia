@@ -6,6 +6,9 @@
 
 #include "utils/event_dispatcher.h"
 
-void aura_wayland_initialize(AuraEventDispatcher* ed);
+// TODO: tmp
+struct wl_display* get_wayland_display();
+
+void aura_wayland_initialize(void);
 
 #endif // __AURA_WAYLAND_H__

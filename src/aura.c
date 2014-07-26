@@ -82,7 +82,7 @@ int main()
 
     // TODO: init surface manager
     aura_loop_schedule_task(loop_window_manager,
-              task_factory_get_initialize_wayland_task(dispatcher));
+              task_factory_get_initialize_wayland_task());
 
     // Start threads
     aura_loop_run(loop_devices);

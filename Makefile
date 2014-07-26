@@ -10,7 +10,7 @@ all: ${build}/aura
 ${build}:
 	mkdir -p ${build}
 
-${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o ${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o ${build}/shared.o ${build}/devfb.o ${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o ${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o ${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o ${build}/keyboard-bindings.o ${build}/configuration-functions.o ${build}/renderer-mmap.o ${build}/renderer-gl.o
+${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o ${build}/chain.o ${build}/task.o ${build}/task_factory.o ${build}/evdev.o ${build}/udev.o ${build}/drm.o ${build}/shared.o ${build}/devfb.o ${build}/wayland.o ${build}/wayland-compositor.o ${build}/wayland-surface.o ${build}/wayland-output.o ${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o ${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o ${build}/keyboard-bindings.o ${build}/configuration-functions.o ${build}/renderer-mmap.o ${build}/renderer-gl.o ${build}/bind-egl-wayland.o
 	gcc ${LFLAGS} ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${build}/event_dispatcher.o \
 		${build}/keyboard-bindings.o \
 		${build}/configuration-functions.o \
@@ -20,6 +20,7 @@ ${build}/aura: ${build}/aura.o ${build}/log.o ${build}/dbus.o ${build}/loop.o ${
 		${build}/wayland-shell.o ${build}/wayland-xdg_shell.o ${build}/xdg-shell-protocol.o ${build}/wayland-shell-surface.o \
 		${build}/renderer-mmap.o ${build}/renderer-gl.o \
 		${build}/surface-aggregator.o ${build}/surface-compositor.o ${build}/surface-manager.o \
+        ${build}/bind-egl-wayland.o \
 		-o ${build}/aura `pkg-config --libs dbus-1` `pkg-config --libs libudev` `pkg-config --libs libdrm` `pkg-config --libs wayland-server` `pkg-config --libs gbm` `pkg-config --libs egl` `pkg-config --libs gl`
 
 
@@ -102,6 +103,10 @@ ${build}/renderer-mmap.o: ${build} src/renderer-mmap.c src/renderer-mmap.h force
 
 ${build}/renderer-gl.o: ${build} src/renderer-gl.c src/renderer-gl.h force
 	${CC} ${WFLAGS} -c src/renderer-gl.c -o ${build}/renderer-gl.o -Isrc
+
+
+${build}/bind-egl-wayland.o: ${build} src/bind-egl-wayland.c src/bind-egl-wayland.h force
+	${CC} ${WFLAGS} -c src/bind-egl-wayland.c -o ${build}/bind-egl-wayland.o -Isrc
 
 
 ${build}/surface-aggregator.o: ${build} src/surface-aggregator.c src/surface-aggregator.h force
