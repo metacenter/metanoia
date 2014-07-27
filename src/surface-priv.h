@@ -4,16 +4,24 @@
 #ifndef __AURA_SURFACE_PRIV_H__
 #define __AURA_SURFACE_PRIV_H__
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 typedef struct {
     int width;
     int height;
     int stride;
     char* data;
+    GLuint texture;
+    EGLImageKHR image;
 } PendingBuffer;
 
 typedef struct {
     SurfaceId id;
     PendingBuffer pending;
+    void* frame_notify_data; // TODO: here?
 } SurfaceData;
 
 SurfaceData* aura_surface_get(SurfaceId id);

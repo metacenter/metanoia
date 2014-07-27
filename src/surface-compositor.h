@@ -10,7 +10,8 @@ void aura_surface_attach(SurfaceId id,
                          int width,
                          int height,
                          int stride,
-                         char* data);
+                         char* data,
+                         void* resource);
 
 void aura_surface_commit(SurfaceId id);
 

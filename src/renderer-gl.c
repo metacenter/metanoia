@@ -15,19 +15,11 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#include <EGL/egl.h>
 
 // TODO: remove
 #include "bind-egl-wayland.h"
 
 //------------------------------------------------------------------------------
-
-typedef struct {
-    AuraRenderer base;
-    EGLDisplay egl_display;
-    EGLSurface egl_surface;
-    EGLContext egl_context;
-} AuraRendererGL;
 
 // FIXME: tmp
 GLuint program;
@@ -37,6 +29,8 @@ GLint uniform_texture;
 GLuint vbo_vertices;
 GLuint vbo_texcoords;
 GLuint vbo_texture;
+
+void* xxxx_resource = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -137,6 +131,54 @@ GLuint create_shader(const char* filename, GLenum type)
 
 //------------------------------------------------------------------------------
 
+void aura_renderer_gl_attach(struct AuraRenderer* self,
+                             SurfaceId surfaceId,
+                             void* resource)
+{
+    xxxx_resource = resource;
+
+    if (!self) {
+        LOG_ERROR("Wrong renderer!");
+        return;
+    }
+    AuraRendererGL* mine = (AuraRendererGL*) self;
+
+    GLint format;
+    int ret = mine->query_buffer(mine->egl_display, resource,
+                                 EGL_TEXTURE_FORMAT, &format);
+    LOG_DEBUG("FORMAT: %d %d %d", format, ret, EGL_TEXTURE_RGBA);
+
+    EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
+
+    SurfaceData* surface = aura_surface_get(surfaceId);
+
+    //glBindTexture(GL_TEXTURE_2D, surface->pending.texture);
+    //glGenTextures(1, &surface->pending.texture);
+    //glBindTexture(GL_TEXTURE_2D, surface->pending.texture);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    surface->pending.image = mine->create_image(mine->egl_display,
+                                                EGL_NO_CONTEXT,
+                                                EGL_WAYLAND_BUFFER_WL,
+                                                resource,
+                                                attribs);
+
+    if (surface->pending.image == EGL_NO_IMAGE_KHR) {
+        LOG_DEBUG("KHR: %d", eglGetError());
+        LOG_WARN1("Could not create KHR image!");
+        return;
+    }
+
+    /*PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d =
+        (void*) eglGetProcAddress("glEGLImageTargetTexture2DOES");
+
+    image_target_texture_2d(GL_TEXTURE_2D, surface->pending.image);*/
+
+    LOG_DEBUG("ATT: %d", eglGetError());
+}
+
+//------------------------------------------------------------------------------
+
 int aura_renderer_gl_initialize(struct AuraRenderer* self)
 {
     int r, result = 0;
@@ -150,6 +192,25 @@ int aura_renderer_gl_initialize(struct AuraRenderer* self)
         return result;
     }
     mine = (AuraRendererGL*) self;
+
+    // Setup EGL extensions
+    const char* extensions =
+            (const char *) eglQueryString(mine->egl_display, EGL_EXTENSIONS);
+    if (!extensions) {
+        LOG_WARN1("Retrieving EGL extension string failed!");
+    } else if (strstr(extensions, "EGL_WL_bind_wayland_display")) {
+        mine->bind_display =
+                    (void*) eglGetProcAddress("eglBindWaylandDisplayWL");
+        mine->unbind_display =
+                    (void*) eglGetProcAddress("eglUnbindWaylandDisplayWL");
+        mine->create_image =
+                    (void*) eglGetProcAddress("eglCreateImageKHR");
+        mine->destroy_image =
+                    (void*) eglGetProcAddress("eglDestroyImageKHR");
+        mine->query_buffer =
+                    (void*) eglGetProcAddress("eglQueryWaylandBufferWL");
+        mine->has_wayland_support = 1;
+    }
 
     // Connect the context to the surface
     r = eglMakeCurrent(mine->egl_display, mine->egl_surface,
@@ -231,7 +292,7 @@ int aura_renderer_gl_initialize(struct AuraRenderer* self)
     LOG_INFO1("Initializing GL renderer: SUCCESS");
 
     // TODO: signal
-    aura_bind_egl_wayland(mine->egl_display);
+    aura_bind_egl_wayland(mine);
 
 clear_context:
     // Release current context
@@ -297,25 +358,60 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
         int height = surface->pending.height;
     //}
 
-    if (data == NULL) {
-        LOG_DEBUG("GL renderer: wrong data!");
-        return;
-    }
-
     glUseProgram(program);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, vbo_texture);
-    glUniform1i(uniform_texture, 0);
-    glTexImage2D(GL_TEXTURE_2D, // target
-           0,  // level, 0 = base, no minimap,
-           GL_RGBA, // internalformat
-           width,  // width
-           height,  // height
-           0,  // border, always 0 in OpenGL ES
-           GL_RGBA,  // format
-           GL_UNSIGNED_BYTE, // type
-           data);
+    if (data != NULL) {
+        LOG_DEBUG(">>> A %p %d %d", data, width, height);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, vbo_texture);
+        //glUniform1i(uniform_texture, 1);
+        glTexImage2D(GL_TEXTURE_2D, // target
+               0,  // level, 0 = base, no minimap,
+               GL_RGBA, // internalformat
+               width,  // width
+               height,  // height
+               0,  // border, always 0 in OpenGL ES
+               GL_RGBA,  // format
+               GL_UNSIGNED_BYTE, // type
+               data);
+    } else {
+        LOG_DEBUG(">>> A 0x%x 0x%x", glGetError(), eglGetError());
+        /*EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
+
+        glActiveTexture(GL_TEXTURE0);
+        surface->pending.image = mine->create_image(mine->egl_display,
+                                                    mine->egl_context,
+                                                    EGL_WAYLAND_BUFFER_WL,
+                                                    xxxx_resource,
+                                                    attribs);*/
+
+        mine->query_buffer(mine->egl_display, xxxx_resource,
+                           EGL_WIDTH, &surface->pending.width);
+        mine->query_buffer(mine->egl_display, xxxx_resource,
+                           EGL_HEIGHT, &surface->pending.height);
+
+        LOG_DEBUG("SIZE: %d x %d", surface->pending.width, surface->pending.height);
+
+        if (surface->pending.image == EGL_NO_IMAGE_KHR) {
+            LOG_DEBUG("KHR: %d", eglGetError());
+            LOG_WARN1("Could not create KHR image!");
+        }
+
+        PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d =
+            (void*) eglGetProcAddress("glEGLImageTargetTexture2DOES");
+
+        GLuint tid;
+        glGenTextures(1, &tid);
+        //glActiveTexture(GL_TEXTURE0);
+
+        glBindTexture(GL_TEXTURE_2D, tid);
+        LOG_DEBUG(">>> S 0x%x 0x%x", glGetError(), eglGetError());
+        //glUniform1i(uniform_texture, 0);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        image_target_texture_2d(GL_TEXTURE_2D, surface->pending.image);
+        LOG_DEBUG(">>> Z 0x%x 0x%x", glGetError(), eglGetError());
+    }
 
     glEnableVertexAttribArray(attribute_coord2d);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
@@ -353,6 +449,8 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
     if (r == EGL_FALSE) {
         LOG_DEBUG("Failed to release current context! (%d)", eglGetError());
     }
+
+    LOG_DEBUG("**********************");
 }
 
 //------------------------------------------------------------------------------
@@ -379,12 +477,20 @@ AuraRenderer* aura_renderer_gl_create(EGLDisplay egl_display,
 
     mine->base.initialize    = aura_renderer_gl_initialize;
     mine->base.finalize      = aura_renderer_gl_finalize;
+    mine->base.attach        = aura_renderer_gl_attach;
     mine->base.draw_surfaces = aura_renderer_gl_draw_surfaces;
     mine->base.free          = aura_renderer_gl_free;
 
     mine->egl_display = egl_display;
     mine->egl_surface = egl_surface;
     mine->egl_context = egl_context;
+
+    mine->bind_display   = NULL;
+    mine->unbind_display = NULL;
+    mine->create_image   = NULL;
+    mine->destroy_image  = NULL;
+    mine->query_buffer   = NULL;
+    mine->has_wayland_support = 0;
 
     return (AuraRenderer*) mine;
 }

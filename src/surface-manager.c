@@ -7,8 +7,12 @@
 #include "utils/chain.h"
 #include "devices/drm.h"
 #include "devices/devfb.h"
+#include "surface-priv.h"
 
 #include <stddef.h>
+
+// FIXME: tmp
+#include <wayland-server.h>
 
 Chain* visible_surfaces = NULL;
 
@@ -50,6 +54,37 @@ void aura_surface_manage(SurfaceId id)
 
 //------------------------------------------------------------------------------
 
+void aura_surface_notify_frame(void)
+{
+    Link* link;
+
+    for (link = visible_surfaces->first; link; link = link->next) {
+        SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
+        void* notify_data = surface->frame_notify_data;
+
+        if (notify_data) {
+            wl_callback_send_done(notify_data, 10);
+            wl_resource_destroy(notify_data);
+            surface->frame_notify_data = NULL;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_subscribe_frame(SurfaceId id, void* notify_data)
+{
+    SurfaceData* surface = aura_surface_get(id);
+    if (surface == NULL) {
+        LOG_WARN2("Could not find surface (id: %d)", id);
+        return;
+    }
+
+    surface->frame_notify_data = notify_data;
+}
+
+//------------------------------------------------------------------------------
+
 void aura_surface_manager_redraw_all()
 {
     if (renderer == NULL) {
@@ -63,6 +98,33 @@ void aura_surface_manager_redraw_all()
 
     renderer->draw_surfaces((struct AuraRenderer*) renderer,
                             visible_surfaces);
+
+    aura_surface_notify_frame();
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_attach(SurfaceId id,
+                         int width,
+                         int height,
+                         int stride,
+                         char* data,
+                         void* resource)
+{
+    SurfaceData* surface = aura_surface_get(id);
+    if (surface == NULL) {
+        LOG_WARN2("Could not find surface (id: %d)", id);
+        return;
+    }
+
+    surface->pending.width  = width;
+    surface->pending.height = height;
+    surface->pending.stride = stride;
+    surface->pending.data   = data;
+
+    if (data == NULL && renderer && renderer->attach) {
+        renderer->attach((struct AuraRenderer*) renderer, id, resource);
+    }
 }
 
 //------------------------------------------------------------------------------

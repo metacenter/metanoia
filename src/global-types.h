@@ -25,6 +25,7 @@ struct AuraRenderer;
 typedef struct {
     int (*initialize) (struct AuraRenderer*);
     void (*finalize) (struct AuraRenderer*);
+    void (*attach) (struct AuraRenderer*, SurfaceId, void*);
     void (*draw_surfaces) (struct AuraRenderer*, Chain*);
     void (*free) (struct AuraRenderer*);
 } AuraRenderer;

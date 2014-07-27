@@ -22,21 +22,25 @@ static void surface_attach(struct wl_client* client,
                            struct wl_resource* buffer_resource,
                            int32_t sx, int32_t sy)
 {
+    int width = 0;
+    int height = 0;
+    int stride = 0;
+    char* data = NULL;
     SurfaceId id = (SurfaceId) wl_resource_get_user_data(resource);
 
     LOG_DATA3("Wayland: surface attach (sx: %d, sy: %d, id: %d)", sx, sy, id);
 
-    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_resource);
-    if (shm_buffer == NULL) {
+    struct wl_shm_buffer* shm_buffer = wl_shm_buffer_get(buffer_resource);
+    if (shm_buffer) {
+        width  = wl_shm_buffer_get_width(shm_buffer);
+        height = wl_shm_buffer_get_height(shm_buffer);
+        stride = wl_shm_buffer_get_stride(shm_buffer);
+        data   = wl_shm_buffer_get_data(shm_buffer);
+    } else {
         LOG_WARN1("Wrong shared memory buffer!");
-        return;
     }
 
-    aura_surface_attach(id,
-                        wl_shm_buffer_get_width(shm_buffer),
-                        wl_shm_buffer_get_height(shm_buffer),
-                        wl_shm_buffer_get_stride(shm_buffer),
-                        wl_shm_buffer_get_data(shm_buffer));
+    aura_surface_attach(id, width, height, stride, data, buffer_resource);
 }
 
 //-----------------------------------------------------------------------------
@@ -57,6 +61,20 @@ static void surface_frame(struct wl_client* client,
                           uint32_t callback)
 {
     LOG_NYIMP("Wayland: surface frame (cb: %d)", callback);
+
+    // TODO: subscribe for destroy
+
+    SurfaceId id = (SurfaceId) wl_resource_get_user_data(resource);
+
+    struct wl_resource* cb_resource = wl_resource_create(client,
+                                                         &wl_callback_interface,
+                                                         1, callback);
+    if (cb_resource == NULL) {
+        wl_resource_post_no_memory(resource);
+        return;
+    }
+
+    aura_surface_subscribe_frame(id, cb_resource);
 }
 
 //-----------------------------------------------------------------------------

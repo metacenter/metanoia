@@ -36,6 +36,7 @@ void aura_renderer_mmap_finalize(struct AuraRenderer* self)
 
 //------------------------------------------------------------------------------
 
+// NOTE: MMap renderer can not display surfaces passed trouhgt GPU
 void aura_renderer_mmap_draw_surfaces(struct AuraRenderer* self,
                                       Chain* surfaces)
 {
@@ -88,6 +89,7 @@ AuraRenderer* aura_renderer_mmap_create(char* buffer,
 
     mine->base.initialize    = aura_renderer_mmap_initialize;
     mine->base.finalize      = aura_renderer_mmap_finalize;
+    mine->base.attach        = NULL; // TODO
     mine->base.draw_surfaces = aura_renderer_mmap_draw_surfaces;
     mine->base.free          = aura_renderer_mmap_free;
 
