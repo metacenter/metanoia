@@ -47,6 +47,7 @@ void aura_renderer_mmap_draw_surfaces(struct AuraRenderer* self,
     Link* link;
 
     if (surfaces == NULL) {
+        LOG_WARN2("MMap renderer: no surfaces!");
         return;
     }
 

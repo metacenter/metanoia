@@ -64,7 +64,7 @@ SurfaceData* aura_surface_get(SurfaceId id)
     SurfaceData data;
     data.id = id;
 
-    return tsearch((void *) &data, &root, compare);
+    return *(SurfaceData**) tsearch((void *) &data, &root, compare);
 }
 
 //------------------------------------------------------------------------------

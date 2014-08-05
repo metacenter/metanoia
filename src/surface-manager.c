@@ -28,12 +28,11 @@ void aura_update_outputs(void)
     LOG_INFO1("Updating outputs");
     // TODO: support for many outputs
 
-    // TODO chande function names
-    //int result = aura_drm_update_devices(&output, &num);
-    //if (result < 0) {
-    //    result =
- aura_setup_framebuffer(&output, &num);
-    //}
+    // TODO change function names
+    int result = aura_drm_update_devices(&output, &num);
+    if (result < 0) {
+        result = aura_setup_framebuffer(&output, &num);
+    }
 
     renderer = output->initialize((struct AuraOutput*) output,
                                   output->width, output->height);
