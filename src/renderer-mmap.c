@@ -42,6 +42,8 @@ void aura_renderer_mmap_draw_surfaces(struct AuraRenderer* self,
 {
     AuraRendererMMap* mine = (AuraRendererMMap*) self;
 
+    LOG_DEBUG("MMap renderer: draw");
+
     Link* link;
 
     if (surfaces == NULL) {

@@ -29,10 +29,11 @@ void aura_update_outputs(void)
     // TODO: support for many outputs
 
     // TODO chande function names
-    int result = aura_drm_update_devices(&output, &num);
-    if (result < 0) {
-        result = aura_setup_framebuffer(&output, &num);
-    }
+    //int result = aura_drm_update_devices(&output, &num);
+    //if (result < 0) {
+    //    result =
+ aura_setup_framebuffer(&output, &num);
+    //}
 
     renderer = output->initialize((struct AuraOutput*) output,
                                   output->width, output->height);
@@ -61,6 +62,9 @@ void aura_surface_notify_frame(void)
     for (link = visible_surfaces->first; link; link = link->next) {
         SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
         void* notify_data = surface->frame_notify_data;
+        void* buffer_resource = surface->buffer_resource;
+
+        wl_resource_queue_event(buffer_resource, WL_BUFFER_RELEASE);
 
         if (notify_data) {
             wl_callback_send_done(notify_data, 10);
@@ -87,6 +91,8 @@ void aura_surface_subscribe_frame(SurfaceId id, void* notify_data)
 
 void aura_surface_manager_redraw_all()
 {
+    LOG_DEBUG("Redraw all");
+
     if (renderer == NULL) {
         LOG_ERROR("Wrong renderer!");
         return;
@@ -121,6 +127,7 @@ void aura_surface_attach(SurfaceId id,
     surface->pending.height = height;
     surface->pending.stride = stride;
     surface->pending.data   = data;
+    surface->buffer_resource = resource;
 
     if (data == NULL && renderer && renderer->attach) {
         renderer->attach((struct AuraRenderer*) renderer, id, resource);

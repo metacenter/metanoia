@@ -22,6 +22,7 @@ typedef struct {
     SurfaceId id;
     PendingBuffer pending;
     void* frame_notify_data; // TODO: here?
+    void* buffer_resource;
 } SurfaceData;
 
 SurfaceData* aura_surface_get(SurfaceId id);
