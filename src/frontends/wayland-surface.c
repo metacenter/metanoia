@@ -70,10 +70,15 @@ static void surface_frame(struct wl_client* client,
                                                          &wl_callback_interface,
                                                          1, callback);
     if (cb_resource == NULL) {
+        LOG_ERROR("Could not create frame callback resource!");
         wl_resource_post_no_memory(resource);
         return;
     }
 
+    // TODO: listen for destroy callback
+    wl_resource_set_implementation(cb_resource, NULL, NULL, NULL);
+
+    LOG_DEBUG("FRA res: %p %d", cb_resource, id);
     aura_surface_subscribe_frame(id, cb_resource);
 }
 

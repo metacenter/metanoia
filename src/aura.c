@@ -37,10 +37,10 @@ void sig_handler(int sig, siginfo_t *si, void *arg)
 }
 
 // FIXME: tmp: just a test
-void timer_handler (union sigval data)
+/*void timer_handler (union sigval data)
 {
     LOG_DEBUG("TIME'S UP!");
-}
+}*/
 
 
 int main()
@@ -78,7 +78,7 @@ int main()
     aura_loop_schedule_task(loop_devices,
               task_factory_get_setup_input_devices_task(dispatcher));
     aura_loop_schedule_task(loop_devices,
-              task_factory_get_update_outputs_task());
+              task_factory_get_update_outputs_task(dispatcher));
 
     // TODO: init surface manager
     aura_loop_schedule_task(loop_window_manager,
@@ -88,8 +88,6 @@ int main()
     aura_loop_run(loop_devices);
     aura_loop_run(loop_window_manager);
     aura_loop_run(loop_keyboard);
-
-    aura_event_dispatcher_timer_run(dispatcher, timer_handler, 50);
 
     // Receive and dispatch events
     aura_event_dispatcher_start(dispatcher);

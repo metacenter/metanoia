@@ -44,7 +44,7 @@ AuraTask* task_factory_get_setup_input_devices_task(AuraEventDispatcher* ed)
 
 //------------------------------------------------------------------------------
 
-AuraTask* task_factory_get_update_outputs_task()
+AuraTask* task_factory_get_update_outputs_task(AuraEventDispatcher* ed)
 {
     AuraTask* task = malloc(sizeof(AuraTask));
     if (!task) {
@@ -53,7 +53,7 @@ AuraTask* task_factory_get_update_outputs_task()
 
     task->process = (AuraTaskProcessor) aura_update_outputs;
     task->freefunc = (AuraTaskFreeFunc) aura_task_free;
-    task->data = NULL;
+    task->data = ed;
     return task;
 }
 

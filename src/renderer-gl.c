@@ -333,13 +333,13 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
     r = eglMakeCurrent(mine->egl_display, mine->egl_surface,
                        mine->egl_surface, mine->egl_context);
     if (r == EGL_FALSE) {
-        LOG_ERROR("Failed to make context current! (%d)", eglGetError());
+        LOG_ERROR("Failed to make context current! (%x)", eglGetError());
         return;
     }
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("EGL framebuffer incomplete! (%d)", eglGetError());
-        return;
+        LOG_ERROR("EGL framebuffer incomplete! (%x)", eglGetError());
+        goto release_context;
     }
 
     glClearColor(0.75, 0.25, 0.0, 1.0);
@@ -347,7 +347,7 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
 
     if (surfaces == NULL) {
         LOG_ERROR("Wrong surfaces!");
-        return;
+        goto release_context;
     }
 
     Link* link = surfaces->first;
@@ -443,11 +443,12 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
 
     eglSwapBuffers(mine->egl_display, mine->egl_surface);
 
+release_context:
     // Release current context
     r = eglMakeCurrent(mine->egl_display, EGL_NO_SURFACE,
                        EGL_NO_SURFACE, EGL_NO_CONTEXT);
     if (r == EGL_FALSE) {
-        LOG_DEBUG("Failed to release current context! (%d)", eglGetError());
+        LOG_DEBUG("Failed to release current context! (%x)", eglGetError());
     }
 
     LOG_DEBUG("**********************");

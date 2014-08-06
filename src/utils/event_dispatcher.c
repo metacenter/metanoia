@@ -142,10 +142,13 @@ int aura_event_dispatcher_timer_run(AuraEventDispatcher* self,
     its.it_value.tv_sec = 0;
     its.it_value.tv_nsec = 0;
 
-    if (miliseconds > 999)
+    if (miliseconds > 999) {
         its.it_value.tv_sec = miliseconds / 1000;
-    else
+        its.it_interval.tv_sec = miliseconds / 1000;
+    } else {
         its.it_value.tv_nsec = 1000000 * miliseconds;
+        its.it_interval.tv_nsec = 1000000 * miliseconds;
+    }
 
     result = timer_settime(timerid, 0, &its, NULL);
     if (result < 0) {
