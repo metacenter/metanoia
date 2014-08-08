@@ -321,7 +321,7 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
     AuraRendererGL* mine;
 
     // TODO: add mutex
-    LOG_DEBUG("!!!!!!!!!!!!!!!!!!!!!!!");
+    LOG_DEBUG(">>>>");
 
     if (!self) {
         LOG_ERROR("Wrong renderer!");
@@ -361,7 +361,7 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
     glUseProgram(program);
 
     if (data != NULL) {
-        LOG_DEBUG(">>> A %p %d %d", data, width, height);
+        LOG_DEBUG("*** A %p %d %d", data, width, height);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, vbo_texture);
         //glUniform1i(uniform_texture, 1);
@@ -375,7 +375,7 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
                GL_UNSIGNED_BYTE, // type
                data);
     } else {
-        LOG_DEBUG(">>> A 0x%x 0x%x", glGetError(), eglGetError());
+        LOG_DEBUG("*** A 0x%x 0x%x", glGetError(), eglGetError());
         /*EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
 
         glActiveTexture(GL_TEXTURE0);
@@ -405,12 +405,12 @@ void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
         //glActiveTexture(GL_TEXTURE0);
 
         glBindTexture(GL_TEXTURE_2D, tid);
-        LOG_DEBUG(">>> S 0x%x 0x%x", glGetError(), eglGetError());
+        LOG_DEBUG("*** S 0x%x 0x%x", glGetError(), eglGetError());
         //glUniform1i(uniform_texture, 0);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         image_target_texture_2d(GL_TEXTURE_2D, surface->pending.image);
-        LOG_DEBUG(">>> Z 0x%x 0x%x", glGetError(), eglGetError());
+        LOG_DEBUG("*** Z 0x%x 0x%x", glGetError(), eglGetError());
     }
 
     glEnableVertexAttribArray(attribute_coord2d);
@@ -451,7 +451,7 @@ release_context:
         LOG_DEBUG("Failed to release current context! (%x)", eglGetError());
     }
 
-    LOG_DEBUG("**********************");
+    LOG_DEBUG("<<<<");
 }
 
 //------------------------------------------------------------------------------

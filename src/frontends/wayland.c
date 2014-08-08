@@ -40,6 +40,20 @@ static void* display_run(void* data)
 
 //------------------------------------------------------------------------------
 
+int aura_wayland_event_loop_feeder(void* data)
+{
+    struct wl_event_loop* loop;
+    struct wl_event_source* src;
+
+    loop = wl_display_get_event_loop(wayland_display);
+    src = wl_event_loop_add_timer(loop, aura_wayland_event_loop_feeder, NULL);
+    wl_event_source_timer_update(src, 10);
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+
 void aura_wayland_initialize(void)
 {
     int result;
@@ -80,6 +94,11 @@ void aura_wayland_initialize(void)
 
     wl_display_init_shm(wayland_display);
 
+    // WORKAROUND:
+    // Wayland main loop must be fed with some kind of epoll events,
+    // otherwise it blocks. Here Wayland timer is used.
+    aura_wayland_event_loop_feeder(NULL);
+
     // Add socket
     if (wl_display_add_socket(wayland_display, scSocketName)) {
         LOG_ERROR("Failed to add Wayland socket: %s", strerror(errno));
@@ -94,6 +113,36 @@ void aura_wayland_initialize(void)
     }
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
+}
+
+//------------------------------------------------------------------------------
+
+void aura_wayland_notify_frame(SurfaceData* surface)
+{
+    LOG_DEBUG("Notify frame 1");
+    if (!surface) {
+        LOG_ERROR("Got null surface!");
+        return;
+    }
+
+    void* notify_data = surface->frame_notify_data;
+    void* buffer_resource = surface->buffer_resource;
+
+    if (buffer_resource) {
+        wl_resource_queue_event(buffer_resource, WL_BUFFER_RELEASE);
+    }
+
+    if (notify_data) {
+        // TODO: pass time as argument
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint32_t msec = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+
+        wl_callback_send_done(notify_data, msec);
+        wl_resource_destroy(notify_data);
+    }
+
+    surface->frame_notify_data = NULL;
 }
 
 //------------------------------------------------------------------------------

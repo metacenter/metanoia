@@ -20,7 +20,7 @@ void aura_surface_commit(SurfaceId id)
     }
 
     // TODO: schedule rather
-    aura_surface_manager_redraw_all();
+    //aura_surface_manager_redraw_all();
 }
 
 //------------------------------------------------------------------------------

@@ -12,6 +12,7 @@
 #include <stddef.h>
 
 // FIXME: tmp
+#include "frontends/wayland.h"
 #include <wayland-server.h>
 #include <time.h>
 
@@ -39,8 +40,7 @@ void aura_update_outputs(AuraEventDispatcher* ed)
                                   output->width, output->height);
     renderer->initialize((struct AuraRenderer*) renderer);
 
-    // TODO: first, Wayland signals must be emited in Waylands thread
-    //aura_event_dispatcher_timer_run(ed, aura_surface_manager_redraw_all, 200);
+    aura_event_dispatcher_timer_run(ed, aura_surface_manager_redraw_all, 20);
 }
 
 //------------------------------------------------------------------------------
@@ -68,22 +68,8 @@ void aura_surface_notify_frame(void)
 
     for (link = visible_surfaces->first; link; link = link->next) {
         SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
-        void* notify_data = surface->frame_notify_data;
-        void* buffer_resource = surface->buffer_resource;
-
-        if (notify_data) {
-            struct timespec ts;
-            clock_gettime(CLOCK_MONOTONIC, &ts);
-            uint32_t msec = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
-            wl_callback_send_done(notify_data, msec);
-            wl_resource_destroy(notify_data);
-            surface->frame_notify_data = NULL;
-        }
-
-        if (buffer_resource) {
-            wl_resource_queue_event(buffer_resource, WL_BUFFER_RELEASE);
-            //wl_resource_destroy(buffer_resource);
-            //surface->buffer_resource = NULL;
+        if (surface) {
+            aura_wayland_notify_frame(surface);
         }
     }
 }
