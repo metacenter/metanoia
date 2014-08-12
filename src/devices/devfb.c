@@ -4,7 +4,7 @@
 #include "devfb.h"
 #include "devices/shared.h"
 #include "renderer-mmap.h"
-#include "utils/log.h"
+#include "utils-log.h"
 
 #include <errno.h>
 #include <fcntl.h>

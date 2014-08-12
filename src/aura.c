@@ -1,8 +1,8 @@
 // file: aura.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "utils/log.h"
-#include "utils/dbus.h"
+#include "utils-log.h"
+#include "utils-dbus.h"
 #include "utils/loop.h"
 #include "utils/event_dispatcher.h"
 #include "utils/task_factory.h"
@@ -56,7 +56,7 @@ int main()
     sigaction(SIGSEGV, &sa, NULL);
 
     // Initialization
-    log_initialize();
+    aura_log_initialize();
     aura_dbus_initalize();
 
     // TODO: move to configuration.c:aura_config_apply()
@@ -103,6 +103,6 @@ int main()
     aura_loop_free(loop_devices);
 
     aura_dbus_finalize();
-    log_finalize();
+    aura_log_finalize();
     return 0;
 }

@@ -7,7 +7,7 @@
 
 // for SurfaceData, TODO: move elsewhere
 #include "surface-priv.h"
-#include "utils/log.h"
+#include "utils-log.h"
 
 #include <malloc.h>
 #include <stdio.h>

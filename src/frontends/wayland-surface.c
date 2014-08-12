@@ -4,7 +4,7 @@
 #include "frontends/wayland-surface.h"
 
 #include "surface.h"
-#include "utils/log.h"
+#include "utils-log.h"
 #include "global-types.h"
 
 //-----------------------------------------------------------------------------

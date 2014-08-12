@@ -13,9 +13,10 @@ clear:
 
 $(builddir)/aura: Makefile \
                   $(builddir)/aura.o \
-                  $(builddir)/log.o \
-                  $(builddir)/dbus.o \
-                  $(builddir)/chain.o \
+                  $(builddir)/configuration-functions.o \
+                  $(builddir)/utils-log.o \
+                  $(builddir)/utils-dbus.o \
+                  $(builddir)/utils-chain.o \
                   $(builddir)/loop.o \
                   $(builddir)/event_dispatcher.o \
                   $(builddir)/task.o \
@@ -25,6 +26,12 @@ $(builddir)/aura: Makefile \
                   $(builddir)/drm.o \
                   $(builddir)/shared.o \
                   $(builddir)/devfb.o \
+                  $(builddir)/surface-aggregator.o \
+                  $(builddir)/surface-compositor.o \
+                  $(builddir)/surface-manager.o \
+                  $(builddir)/keyboard-bindings.o \
+                  $(builddir)/renderer-mmap.o \
+                  $(builddir)/renderer-gl.o \
                   $(builddir)/wayland.o \
                   $(builddir)/wayland-compositor.o \
                   $(builddir)/wayland-surface.o \
@@ -33,18 +40,11 @@ $(builddir)/aura: Makefile \
                   $(builddir)/wayland-xdg_shell.o \
                   $(builddir)/xdg-shell-protocol.o \
                   $(builddir)/wayland-shell-surface.o \
-                  $(builddir)/surface-aggregator.o \
-                  $(builddir)/surface-compositor.o \
-                  $(builddir)/surface-manager.o \
-                  $(builddir)/keyboard-bindings.o \
-                  $(builddir)/configuration-functions.o \
-                  $(builddir)/renderer-mmap.o \
-                  $(builddir)/renderer-gl.o \
                   $(builddir)/bind-egl-wayland.o
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/log.o $(builddir)/dbus.o $(builddir)/chain.o $(builddir)/loop.o $(builddir)/event_dispatcher.o $(builddir)/task.o $(builddir)/task_factory.o $(builddir)/evdev.o $(builddir)/udev.o $(builddir)/drm.o $(builddir)/shared.o $(builddir)/devfb.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-output.o $(builddir)/wayland-shell.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-shell-surface.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/configuration-functions.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/bind-egl-wayland.o \
+	       $(builddir)/aura.o $(builddir)/configuration-functions.o $(builddir)/utils-log.o $(builddir)/utils-dbus.o $(builddir)/utils-chain.o $(builddir)/loop.o $(builddir)/event_dispatcher.o $(builddir)/task.o $(builddir)/task_factory.o $(builddir)/evdev.o $(builddir)/udev.o $(builddir)/drm.o $(builddir)/shared.o $(builddir)/devfb.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-output.o $(builddir)/wayland-shell.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-shell-surface.o $(builddir)/bind-egl-wayland.o \
 	       `pkg-config --libs dbus-1 libudev libdrm gbm wayland-server egl gl`
 
 $(builddir)/aura.o: Makefile \
@@ -62,22 +62,30 @@ $(builddir)/configuration-functions.o: Makefile \
 	@$(CC) $(WFLAGS) -o $(builddir)/configuration-functions.o -I$(srcdir) \
 	       -c $(srcdir)/configuration-functions.c
 
-$(builddir)/chain.o: Makefile \
-                     $(srcdir)/utils/chain.c \
-                     $(srcdir)/utils/chain.h
+$(builddir)/utils-chain.o: Makefile \
+                           $(srcdir)/utils-chain.c \
+                           $(srcdir)/utils-chain.h
 	@mkdir -p $(builddir)
-	@echo "  CC  chain.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/chain.o -I$(srcdir) \
-	       -c $(srcdir)/utils/chain.c
+	@echo "  CC  utils-chain.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/utils-chain.o -I$(srcdir) \
+	       -c $(srcdir)/utils-chain.c
 
-$(builddir)/dbus.o: Makefile \
-                    $(srcdir)/utils/dbus.c \
-                    $(srcdir)/utils/dbus.h
+$(builddir)/utils-dbus.o: Makefile \
+                          $(srcdir)/utils-dbus.c \
+                          $(srcdir)/utils-dbus.h
 	@mkdir -p $(builddir)
-	@echo "  CC  dbus.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/dbus.o -I$(srcdir) \
-	       -c $(srcdir)/utils/dbus.c \
+	@echo "  CC  utils-dbus.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/utils-dbus.o -I$(srcdir) \
+	       -c $(srcdir)/utils-dbus.c \
 	       `pkg-config --cflags dbus-1`
+
+$(builddir)/utils-log.o: Makefile \
+                         $(srcdir)/utils-log.c \
+                         $(srcdir)/utils-log.h
+	@mkdir -p $(builddir)
+	@echo "  CC  utils-log.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/utils-log.o -I$(srcdir) \
+	       -c $(srcdir)/utils-log.c
 
 $(builddir)/event_dispatcher.o: Makefile \
                                 $(srcdir)/utils/event_dispatcher.c \
@@ -86,14 +94,6 @@ $(builddir)/event_dispatcher.o: Makefile \
 	@echo "  CC  event_dispatcher.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/event_dispatcher.o -I$(srcdir) \
 	       -c $(srcdir)/utils/event_dispatcher.c
-
-$(builddir)/log.o: Makefile \
-                   $(srcdir)/utils/log.c \
-                   $(srcdir)/utils/log.h
-	@mkdir -p $(builddir)
-	@echo "  CC  log.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/log.o -I$(srcdir) \
-	       -c $(srcdir)/utils/log.c
 
 $(builddir)/loop.o: Makefile \
                     $(srcdir)/utils/loop.c \
@@ -168,6 +168,46 @@ $(builddir)/drm.o: Makefile \
 	       -c $(srcdir)/devices/drm.c \
 	       `pkg-config --cflags libdrm egl`
 
+$(builddir)/surface-aggregator.o: Makefile \
+                                  $(srcdir)/surface-aggregator.c \
+                                  $(srcdir)/surface-aggregator.h
+	@mkdir -p $(builddir)
+	@echo "  CC  surface-aggregator.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/surface-aggregator.o -I$(srcdir) \
+	       -c $(srcdir)/surface-aggregator.c
+
+$(builddir)/surface-compositor.o: Makefile \
+                                  $(srcdir)/surface-compositor.c \
+                                  $(srcdir)/surface-compositor.h
+	@mkdir -p $(builddir)
+	@echo "  CC  surface-compositor.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/surface-compositor.o -I$(srcdir) \
+	       -c $(srcdir)/surface-compositor.c
+
+$(builddir)/surface-manager.o: Makefile \
+                               $(srcdir)/surface-manager.c \
+                               $(srcdir)/surface-manager.h
+	@mkdir -p $(builddir)
+	@echo "  CC  surface-manager.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/surface-manager.o -I$(srcdir) \
+	       -c $(srcdir)/surface-manager.c
+
+$(builddir)/renderer-mmap.o: Makefile \
+                             $(srcdir)/renderer-mmap.c \
+                             $(srcdir)/renderer-mmap.h
+	@mkdir -p $(builddir)
+	@echo "  CC  renderer-mmap.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/renderer-mmap.o -I$(srcdir) \
+	       -c $(srcdir)/renderer-mmap.c
+
+$(builddir)/renderer-gl.o: Makefile \
+                           $(srcdir)/renderer-gl.c \
+                           $(srcdir)/renderer-gl.h
+	@mkdir -p $(builddir)
+	@echo "  CC  renderer-gl.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/renderer-gl.o -I$(srcdir) \
+	       -c $(srcdir)/renderer-gl.c
+
 $(builddir)/wayland.o: Makefile \
                        $(srcdir)/frontends/wayland.c \
                        $(srcdir)/frontends/wayland.h
@@ -231,22 +271,6 @@ $(builddir)/wayland-output.o: Makefile \
 	@$(CC) $(WFLAGS) -o $(builddir)/wayland-output.o -I$(srcdir) \
 	       -c $(srcdir)/frontends/wayland-output.c
 
-$(builddir)/renderer-mmap.o: Makefile \
-                             $(srcdir)/renderer-mmap.c \
-                             $(srcdir)/renderer-mmap.h
-	@mkdir -p $(builddir)
-	@echo "  CC  renderer-mmap.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/renderer-mmap.o -I$(srcdir) \
-	       -c $(srcdir)/renderer-mmap.c
-
-$(builddir)/renderer-gl.o: Makefile \
-                           $(srcdir)/renderer-gl.c \
-                           $(srcdir)/renderer-gl.h
-	@mkdir -p $(builddir)
-	@echo "  CC  renderer-gl.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/renderer-gl.o -I$(srcdir) \
-	       -c $(srcdir)/renderer-gl.c
-
 $(builddir)/bind-egl-wayland.o: Makefile \
                                 $(srcdir)/bind-egl-wayland.c \
                                 $(srcdir)/bind-egl-wayland.h
@@ -254,28 +278,4 @@ $(builddir)/bind-egl-wayland.o: Makefile \
 	@echo "  CC  bind-egl-wayland.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/bind-egl-wayland.o -I$(srcdir) \
 	       -c $(srcdir)/bind-egl-wayland.c
-
-$(builddir)/surface-aggregator.o: Makefile \
-                                  $(srcdir)/surface-aggregator.c \
-                                  $(srcdir)/surface-aggregator.h
-	@mkdir -p $(builddir)
-	@echo "  CC  surface-aggregator.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/surface-aggregator.o -I$(srcdir) \
-	       -c $(srcdir)/surface-aggregator.c
-
-$(builddir)/surface-compositor.o: Makefile \
-                                  $(srcdir)/surface-compositor.c \
-                                  $(srcdir)/surface-compositor.h
-	@mkdir -p $(builddir)
-	@echo "  CC  surface-compositor.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/surface-compositor.o -I$(srcdir) \
-	       -c $(srcdir)/surface-compositor.c
-
-$(builddir)/surface-manager.o: Makefile \
-                               $(srcdir)/surface-manager.c \
-                               $(srcdir)/surface-manager.h
-	@mkdir -p $(builddir)
-	@echo "  CC  surface-manager.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/surface-manager.o -I$(srcdir) \
-	       -c $(srcdir)/surface-manager.c
 

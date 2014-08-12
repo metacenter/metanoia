@@ -1,8 +1,8 @@
-// file: chain.h
+// file: utils-chain.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_CHAIN_H__
-#define __AURA_CHAIN_H__
+#ifndef __AURA_UTILS_CHAIN_H__
+#define __AURA_UTILS_CHAIN_H__
 
 typedef void (*FreeFunc) (void*);
 
@@ -32,5 +32,5 @@ void chain_prepend(Chain* chain, void* data);
 void chain_append(Chain* chain, void* data);
 void *chain_pop(Chain* chain);
 
-#endif // __AURA_CHAIN_H__
+#endif // __AURA_UTILS_CHAIN_H__
 

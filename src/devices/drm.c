@@ -2,7 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "drm.h"
-#include "utils/log.h"
+#include "utils-log.h"
 #include "renderer-gl.h"
 
 #include <errno.h>
@@ -17,7 +17,7 @@
 #include <EGL/egl.h>
 #include <gbm.h>
 
-#include "utils/dbus.h"
+#include "utils-dbus.h"
 #include <malloc.h>
 #include <libudev.h>
 #include <unistd.h>

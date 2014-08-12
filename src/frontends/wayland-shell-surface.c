@@ -3,7 +3,7 @@
 
 #include "frontends/wayland-shell-surface.h"
 
-#include "utils/log.h"
+#include "utils-log.h"
 
 //------------------------------------------------------------------------------
 

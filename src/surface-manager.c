@@ -3,8 +3,8 @@
 
 #include "surface-manager.h"
 
-#include "utils/log.h"
-#include "utils/chain.h"
+#include "utils-log.h"
+#include "utils-chain.h"
 #include "devices/drm.h"
 #include "devices/devfb.h"
 #include "surface-priv.h"
@@ -30,7 +30,7 @@ void aura_update_outputs(AuraEventDispatcher* ed)
     LOG_INFO1("Updating outputs");
     // TODO: support for many outputs
 
-    // TODO change function names
+    // TODO don't use global functions
     int result = aura_drm_update_devices(&output, &num);
     if (result < 0) {
         result = aura_setup_framebuffer(&output, &num);

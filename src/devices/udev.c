@@ -2,7 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "udev.h"
-#include "utils/log.h"
+#include "utils-log.h"
 
 #include <malloc.h>
 #include <libudev.h>

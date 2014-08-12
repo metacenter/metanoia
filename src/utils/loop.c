@@ -2,8 +2,8 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "loop.h"
-#include "log.h"
-#include "chain.h"
+#include "utils-log.h"
+#include "utils-chain.h"
 
 #include <errno.h>
 #include <malloc.h>

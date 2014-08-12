@@ -2,7 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "configuration-functions.h"
-#include "utils/log.h"
+#include "utils-log.h"
 
 #include <stdlib.h>
 #include <linux/vt.h>

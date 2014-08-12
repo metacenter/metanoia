@@ -1,7 +1,7 @@
-// file: log.h
+// file: utils-log.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "log.h"
+#include "utils-log.h"
 #include "configuration.h"
 
 #include <execinfo.h>
@@ -46,10 +46,10 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //------------------------------------------------------------------------------
 
-void log_initialize(void)
+void aura_log_initialize(void)
 {
     setbuf(stdout, NULL);
-    sLogFD = open(scConfLogFile, O_RDWR | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+    sLogFD = open(scConfLogFile, O_RDWR|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
     if (sLogFD == -1) {
         LOG_ERROR("Log file '%s' could not be opened!", scConfLogFile);
     } else {
@@ -60,7 +60,7 @@ void log_initialize(void)
 
 //------------------------------------------------------------------------------
 
-void log_finalize(void)
+void aura_log_finalize(void)
 {
     LOG_INFO1("Closing log file. Bye!");
     if (sLogFD != -1) {
@@ -81,7 +81,7 @@ void aura_log(LogLevel    log_level,
     int n;
     char buff[128];
     struct timeval tv;
-    struct tm tm = *localtime(&tv.tv_sec);
+    struct tm* tm;
 
     // Check log level
     if (log_level > scConfLogLevel) {
@@ -93,7 +93,7 @@ void aura_log(LogLevel    log_level,
 
     // Get time
     gettimeofday(&tv, NULL);
-    tm = *localtime(&tv.tv_sec);
+    tm = localtime(&tv.tv_sec);
 
     // Lock Mutex
     pthread_mutex_lock(&mutex);
@@ -101,7 +101,7 @@ void aura_log(LogLevel    log_level,
     // Fill buffer
     n = snprintf(buff, sizeof buff,
                 "%02d:%02d:%02d.%06d | %-5s | %4d | %-40s%s",
-                tm.tm_hour, tm.tm_min, tm.tm_sec, (int) tv.tv_usec,
+                tm->tm_hour, tm->tm_min, tm->tm_sec, (int) tv.tv_usec,
                 scLogLevelName[log_level], line, file, scLogEnd);
 
     // Print text

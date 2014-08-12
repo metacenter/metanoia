@@ -4,7 +4,7 @@
 #ifndef __AURA_GLOBAL_TYPES_H__
 #define __AURA_GLOBAL_TYPES_H__
 
-#include "utils/chain.h"
+#include "utils-chain.h"
 
 #include <stdint.h>
 

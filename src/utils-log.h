@@ -1,8 +1,8 @@
-// file: log.h
+// file: utils-log.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_LOG_H__
-#define __AURA_LOG_H__
+#ifndef __AURA_UTILS_LOG_H__
+#define __AURA_UTILS_LOG_H__
 
 #include "global-constants.h"
 
@@ -23,8 +23,8 @@
 #define LOG_DATA4(s,...) aura_log(LEVEL_DATA4,__LINE__,__FILE__,s,##__VA_ARGS__)
 #define LOG_INFO4(s,...) aura_log(LEVEL_INFO4,__LINE__,__FILE__,s,##__VA_ARGS__)
 
-void log_initialize(void);
-void log_finalize(void);
+void aura_log_initialize(void);
+void aura_log_finalize(void);
 
 void aura_log(LogLevel,    // log level
               const int,   // line number
@@ -34,4 +34,4 @@ void aura_log(LogLevel,    // log level
 
 void aura_print_backtrace(void);
 
-#endif // __AURA_LOG_H__
+#endif // __AURA_UTILS_LOG_H__

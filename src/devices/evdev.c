@@ -2,8 +2,8 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "evdev.h"
-#include "utils/dbus.h"
-#include "utils/log.h"
+#include "utils-dbus.h"
+#include "utils-log.h"
 #include "devices/shared.h"
 #include "keyboard-bindings.h"
 

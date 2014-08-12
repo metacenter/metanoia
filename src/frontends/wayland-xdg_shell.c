@@ -4,7 +4,7 @@
 #include "frontends/wayland-xdg_shell.h"
 #include "frontends/wayland-shell-surface.h"
 
-#include "utils/log.h"
+#include "utils-log.h"
 
 #include "xdg-shell-server-protocol.h"
 

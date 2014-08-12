@@ -7,7 +7,7 @@
 #include "frontends/wayland-xdg_shell.h"
 #include "frontends/wayland-output.h"
 
-#include "utils/log.h"
+#include "utils-log.h"
 
 #include <errno.h>
 #include <string.h>

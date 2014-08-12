@@ -3,7 +3,7 @@
 
 #include "renderer-gl.h"
 #include "frontends/wayland.h"
-#include "utils/log.h"
+#include "utils-log.h"
 
 void aura_bind_egl_wayland(AuraRendererGL* renderer)
 {

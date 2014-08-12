@@ -1,8 +1,8 @@
 // file: dbus.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "dbus.h"
-#include "log.h"
+#include "utils-dbus.h"
+#include "utils-log.h"
 
 #include <errno.h>
 #include <unistd.h>

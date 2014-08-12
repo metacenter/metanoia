@@ -1,7 +1,7 @@
-// file: chain.c
+// file: utils-chain.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "chain.h"
+#include "utils-chain.h"
 
 #include <malloc.h>
 
