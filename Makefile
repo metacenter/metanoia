@@ -14,38 +14,38 @@ clear:
 $(builddir)/aura: Makefile \
                   $(builddir)/aura.o \
                   $(builddir)/configuration-functions.o \
-                  $(builddir)/utils-log.o \
-                  $(builddir)/utils-dbus.o \
                   $(builddir)/utils-chain.o \
-                  $(builddir)/loop.o \
-                  $(builddir)/event_dispatcher.o \
-                  $(builddir)/task.o \
-                  $(builddir)/task_factory.o \
+                  $(builddir)/utils-dbus.o \
+                  $(builddir)/utils-log.o \
+                  $(builddir)/event-dispatcher.o \
+                  $(builddir)/event-loop.o \
+                  $(builddir)/event-task.o \
+                  $(builddir)/event-task-factory.o \
+                  $(builddir)/keyboard-bindings.o \
+                  $(builddir)/shared.o \
+                  $(builddir)/devfb.o \
                   $(builddir)/evdev.o \
                   $(builddir)/udev.o \
                   $(builddir)/drm.o \
-                  $(builddir)/shared.o \
-                  $(builddir)/devfb.o \
                   $(builddir)/surface-aggregator.o \
                   $(builddir)/surface-compositor.o \
                   $(builddir)/surface-manager.o \
-                  $(builddir)/keyboard-bindings.o \
                   $(builddir)/renderer-mmap.o \
                   $(builddir)/renderer-gl.o \
                   $(builddir)/wayland.o \
                   $(builddir)/wayland-compositor.o \
                   $(builddir)/wayland-surface.o \
-                  $(builddir)/wayland-output.o \
                   $(builddir)/wayland-shell.o \
+                  $(builddir)/wayland-shell-surface.o \
                   $(builddir)/wayland-xdg_shell.o \
                   $(builddir)/xdg-shell-protocol.o \
-                  $(builddir)/wayland-shell-surface.o \
+                  $(builddir)/wayland-output.o \
                   $(builddir)/bind-egl-wayland.o
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/configuration-functions.o $(builddir)/utils-log.o $(builddir)/utils-dbus.o $(builddir)/utils-chain.o $(builddir)/loop.o $(builddir)/event_dispatcher.o $(builddir)/task.o $(builddir)/task_factory.o $(builddir)/evdev.o $(builddir)/udev.o $(builddir)/drm.o $(builddir)/shared.o $(builddir)/devfb.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-output.o $(builddir)/wayland-shell.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-shell-surface.o $(builddir)/bind-egl-wayland.o \
-	       `pkg-config --libs dbus-1 libudev libdrm gbm wayland-server egl gl`
+	       $(builddir)/aura.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/keyboard-bindings.o $(builddir)/shared.o $(builddir)/devfb.o $(builddir)/evdev.o $(builddir)/udev.o $(builddir)/drm.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/bind-egl-wayland.o \
+	       `pkg-config --libs wayland-server dbus-1 gl gbm egl libdrm libudev`
 
 $(builddir)/aura.o: Makefile \
                     $(srcdir)/aura.c
@@ -87,37 +87,37 @@ $(builddir)/utils-log.o: Makefile \
 	@$(CC) $(WFLAGS) -o $(builddir)/utils-log.o -I$(srcdir) \
 	       -c $(srcdir)/utils-log.c
 
-$(builddir)/event_dispatcher.o: Makefile \
-                                $(srcdir)/utils/event_dispatcher.c \
-                                $(srcdir)/utils/event_dispatcher.h
+$(builddir)/event-dispatcher.o: Makefile \
+                                $(srcdir)/event-dispatcher.c \
+                                $(srcdir)/event-dispatcher.h
 	@mkdir -p $(builddir)
-	@echo "  CC  event_dispatcher.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/event_dispatcher.o -I$(srcdir) \
-	       -c $(srcdir)/utils/event_dispatcher.c
+	@echo "  CC  event-dispatcher.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/event-dispatcher.o -I$(srcdir) \
+	       -c $(srcdir)/event-dispatcher.c
 
-$(builddir)/loop.o: Makefile \
-                    $(srcdir)/utils/loop.c \
-                    $(srcdir)/utils/loop.h
+$(builddir)/event-loop.o: Makefile \
+                          $(srcdir)/event-loop.c \
+                          $(srcdir)/event-loop.h
 	@mkdir -p $(builddir)
-	@echo "  CC  loop.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/loop.o -I$(srcdir) \
-	       -c $(srcdir)/utils/loop.c
+	@echo "  CC  event-loop.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/event-loop.o -I$(srcdir) \
+	       -c $(srcdir)/event-loop.c
 
-$(builddir)/task.o: Makefile \
-                    $(srcdir)/utils/task.c \
-                    $(srcdir)/utils/task.h
+$(builddir)/event-task.o: Makefile \
+                          $(srcdir)/event-task.c \
+                          $(srcdir)/event-task.h
 	@mkdir -p $(builddir)
-	@echo "  CC  task.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/task.o -I$(srcdir) \
-	       -c $(srcdir)/utils/task.c
+	@echo "  CC  event-task.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/event-task.o -I$(srcdir) \
+	       -c $(srcdir)/event-task.c
 
-$(builddir)/task_factory.o: Makefile \
-                            $(srcdir)/utils/task_factory.c \
-                            $(srcdir)/utils/task_factory.h
+$(builddir)/event-task-factory.o: Makefile \
+                                  $(srcdir)/event-task-factory.c \
+                                  $(srcdir)/event-task-factory.h
 	@mkdir -p $(builddir)
-	@echo "  CC  task_factory.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/task_factory.o -I$(srcdir) \
-	       -c $(srcdir)/utils/task_factory.c
+	@echo "  CC  event-task-factory.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/event-task-factory.o -I$(srcdir) \
+	       -c $(srcdir)/event-task-factory.c
 
 $(builddir)/keyboard-bindings.o: Makefile \
                                  $(srcdir)/keyboard-bindings.c \
@@ -166,7 +166,7 @@ $(builddir)/drm.o: Makefile \
 	@echo "  CC  drm.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/drm.o -I$(srcdir) \
 	       -c $(srcdir)/devices/drm.c \
-	       `pkg-config --cflags libdrm egl`
+	       `pkg-config --cflags egl libdrm`
 
 $(builddir)/surface-aggregator.o: Makefile \
                                   $(srcdir)/surface-aggregator.c \

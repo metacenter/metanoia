@@ -3,9 +3,9 @@
 
 #include "utils-log.h"
 #include "utils-dbus.h"
-#include "utils/loop.h"
-#include "utils/event_dispatcher.h"
-#include "utils/task_factory.h"
+#include "event-dispatcher.h"
+#include "event-loop.h"
+#include "event-task-factory.h"
 
 #include <stdio.h>
 #include <errno.h>

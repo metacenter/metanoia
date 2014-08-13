@@ -4,7 +4,7 @@
 #ifndef __AURA_WAYLAND_H__
 #define __AURA_WAYLAND_H__
 
-#include "utils/event_dispatcher.h"
+#include "event-dispatcher.h"
 
 // TODO: tmp
 #include "surface-priv.h"
