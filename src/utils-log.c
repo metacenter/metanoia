@@ -21,13 +21,17 @@
 
 static const char scLogEnd[] = " | ";
 static const char scLogWelcomeText[] =
-"********************************** AURA **********************************\n";
+"***************************************** AURA "
+"*****************************************\n";
 static const char scLogGoodByeText[] =
-"**************************************************************************\n";
+"***********************************************"
+"*****************************************\n";
 static const char scLogBackTraceBegin[] =
-"----------------+-------+------+ BACKTRACE ---------------------+---------\n";
+"----------------+-------+------------+------+"
+" BACKTRACE --------+----------------------+\n";
 static const char scLogBackTraceEnd[] =
-"----------------+-------+------+--------------------------------+---------\n";
+"----------------+-------+------------+------+"
+"-------------------+----------------------+\n";
 
 static const char* scLogLevelName[] = {
         "ERROR", "NYIMP",
@@ -100,9 +104,10 @@ void aura_log(LogLevel    log_level,
 
     // Fill buffer
     n = snprintf(buff, sizeof buff,
-                "%02d:%02d:%02d.%06d | %-5s | %4d | %-40s%s",
+                "%02d:%02d:%02d.%06d | %-5s | %-10u | %4d | %-40s%s",
                 tm->tm_hour, tm->tm_min, tm->tm_sec, (int) tv.tv_usec,
-                scLogLevelName[log_level], line, file, scLogEnd);
+                scLogLevelName[log_level], (unsigned) pthread_self(),
+                line, file, scLogEnd);
 
     // Print text
     if (sLogFD != -1) {

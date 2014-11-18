@@ -63,6 +63,8 @@ static void* loop(void* data)
         return NULL;
     }
 
+    LOG_INFO1("Threads: starting loop '%s'", mine->name);
+
     mine->run = 1;
     while (mine->run) {
         pthread_mutex_lock(&mine->mutex);
@@ -99,7 +101,6 @@ int aura_loop_run(AuraLoop* self)
         return -ENOMEM;
     }
 
-    LOG_INFO1("Threads: starting loop '%s'", mine->name);
     return pthread_create(&mine->thread, NULL, loop, mine);
 }
 
