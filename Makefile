@@ -13,6 +13,7 @@ clear:
 
 $(builddir)/aura: Makefile \
                   $(builddir)/aura.o \
+                  $(builddir)/config.o \
                   $(builddir)/configuration-functions.o \
                   $(builddir)/utils-chain.o \
                   $(builddir)/utils-dbus.o \
@@ -44,7 +45,7 @@ $(builddir)/aura: Makefile \
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/keyboard-bindings.o $(builddir)/shared.o $(builddir)/devfb.o $(builddir)/evdev.o $(builddir)/udev.o $(builddir)/drm.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/bind-egl-wayland.o \
+	       $(builddir)/aura.o $(builddir)/config.o  $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/keyboard-bindings.o $(builddir)/shared.o $(builddir)/devfb.o $(builddir)/evdev.o $(builddir)/udev.o $(builddir)/drm.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/bind-egl-wayland.o \
 	       `pkg-config --libs wayland-server dbus-1 gl gbm egl libdrm libudev`
 
 $(builddir)/aura.o: Makefile \
@@ -53,6 +54,14 @@ $(builddir)/aura.o: Makefile \
 	@echo "  CC  aura.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/aura.o -I$(srcdir) \
 	       -c $(srcdir)/aura.c
+
+$(builddir)/config.o: Makefile \
+                      $(srcdir)/config.c \
+                      $(srcdir)/config.h
+	@mkdir -p $(builddir)
+	@echo "  CC  config.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/config.o -I$(srcdir) \
+	       -c $(srcdir)/config.c
 
 $(builddir)/configuration-functions.o: Makefile \
                                        $(srcdir)/configuration-functions.c \
