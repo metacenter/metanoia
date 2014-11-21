@@ -1,12 +1,12 @@
-// file: shared.h
+// file: device-common.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_DEVICES_SHARED_H__
-#define __AURA_DEVICES_SHERED_H__
+#ifndef __AURA_DEVICE_COMMON_H__
+#define __AURA_DEVICE_COMMON_H__
 
-#include <fcntl.h>
+#include <fcntl.h> // for flag definitions
 
 int aura_open(const char* node, int flags);
 
-#endif // __AURA_DEVICES_SHERED_H__
+#endif // __AURA_DEVICE_COMMON_H__
 

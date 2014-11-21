@@ -21,15 +21,15 @@ $(builddir)/aura: Makefile \
                   $(builddir)/event-loop.o \
                   $(builddir)/event-task.o \
                   $(builddir)/event-task-factory.o \
-                  $(builddir)/keyboard-bindings.o \
-                  $(builddir)/shared.o \
-                  $(builddir)/devfb.o \
-                  $(builddir)/evdev.o \
-                  $(builddir)/udev.o \
-                  $(builddir)/drm.o \
+                  $(builddir)/device-common.o \
+                  $(builddir)/device-fb.o \
+                  $(builddir)/device-drm.o \
+                  $(builddir)/device-evdev.o \
+                  $(builddir)/device-udev.o \
                   $(builddir)/surface-aggregator.o \
                   $(builddir)/surface-compositor.o \
                   $(builddir)/surface-manager.o \
+                  $(builddir)/keyboard-bindings.o \
                   $(builddir)/renderer-mmap.o \
                   $(builddir)/renderer-gl.o \
                   $(builddir)/wayland.o \
@@ -44,8 +44,8 @@ $(builddir)/aura: Makefile \
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/keyboard-bindings.o $(builddir)/shared.o $(builddir)/devfb.o $(builddir)/evdev.o $(builddir)/udev.o $(builddir)/drm.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/bind-egl-wayland.o \
-	       `pkg-config --libs wayland-server dbus-1 gl gbm egl libdrm libudev`
+	       $(builddir)/aura.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/bind-egl-wayland.o \
+	       `pkg-config --libs wayland-server libdrm dbus-1 gl libudev egl gbm`
 
 $(builddir)/aura.o: Makefile \
                     $(srcdir)/aura.c
@@ -119,54 +119,46 @@ $(builddir)/event-task-factory.o: Makefile \
 	@$(CC) $(WFLAGS) -o $(builddir)/event-task-factory.o -I$(srcdir) \
 	       -c $(srcdir)/event-task-factory.c
 
-$(builddir)/keyboard-bindings.o: Makefile \
-                                 $(srcdir)/keyboard-bindings.c \
-                                 $(srcdir)/keyboard-bindings.h
+$(builddir)/device-common.o: Makefile \
+                             $(srcdir)/device-common.c \
+                             $(srcdir)/device-common.h
 	@mkdir -p $(builddir)
-	@echo "  CC  keyboard-bindings.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/keyboard-bindings.o -I$(srcdir) \
-	       -c $(srcdir)/keyboard-bindings.c
+	@echo "  CC  device-common.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/device-common.o -I$(srcdir) \
+	       -c $(srcdir)/device-common.c
 
-$(builddir)/shared.o: Makefile \
-                      $(srcdir)/devices/shared.c \
-                      $(srcdir)/devices/shared.h
+$(builddir)/device-fb.o: Makefile \
+                         $(srcdir)/device-fb.c \
+                         $(srcdir)/device-fb.h
 	@mkdir -p $(builddir)
-	@echo "  CC  shared.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/shared.o -I$(srcdir) \
-	       -c $(srcdir)/devices/shared.c
+	@echo "  CC  device-fb.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/device-fb.o -I$(srcdir) \
+	       -c $(srcdir)/device-fb.c
 
-$(builddir)/devfb.o: Makefile \
-                     $(srcdir)/devices/devfb.c \
-                     $(srcdir)/devices/devfb.h
+$(builddir)/device-drm.o: Makefile \
+                          $(srcdir)/device-drm.c \
+                          $(srcdir)/device-drm.h
 	@mkdir -p $(builddir)
-	@echo "  CC  devfb.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/devfb.o -I$(srcdir) \
-	       -c $(srcdir)/devices/devfb.c
-
-$(builddir)/evdev.o: Makefile \
-                     $(srcdir)/devices/evdev.c \
-                     $(srcdir)/devices/evdev.h
-	@mkdir -p $(builddir)
-	@echo "  CC  evdev.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/evdev.o -I$(srcdir) \
-	       -c $(srcdir)/devices/evdev.c
-
-$(builddir)/udev.o: Makefile \
-                    $(srcdir)/devices/udev.c \
-                    $(srcdir)/devices/udev.h
-	@mkdir -p $(builddir)
-	@echo "  CC  udev.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/udev.o -I$(srcdir) \
-	       -c $(srcdir)/devices/udev.c
-
-$(builddir)/drm.o: Makefile \
-                   $(srcdir)/devices/drm.c \
-                   $(srcdir)/devices/drm.h
-	@mkdir -p $(builddir)
-	@echo "  CC  drm.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/drm.o -I$(srcdir) \
-	       -c $(srcdir)/devices/drm.c \
+	@echo "  CC  device-drm.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/device-drm.o -I$(srcdir) \
+	       -c $(srcdir)/device-drm.c \
 	       `pkg-config --cflags egl libdrm`
+
+$(builddir)/device-evdev.o: Makefile \
+                            $(srcdir)/device-evdev.c \
+                            $(srcdir)/device-evdev.h
+	@mkdir -p $(builddir)
+	@echo "  CC  device-evdev.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/device-evdev.o -I$(srcdir) \
+	       -c $(srcdir)/device-evdev.c
+
+$(builddir)/device-udev.o: Makefile \
+                           $(srcdir)/device-udev.c \
+                           $(srcdir)/device-udev.h
+	@mkdir -p $(builddir)
+	@echo "  CC  device-udev.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/device-udev.o -I$(srcdir) \
+	       -c $(srcdir)/device-udev.c
 
 $(builddir)/surface-aggregator.o: Makefile \
                                   $(srcdir)/surface-aggregator.c \
@@ -191,6 +183,14 @@ $(builddir)/surface-manager.o: Makefile \
 	@echo "  CC  surface-manager.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/surface-manager.o -I$(srcdir) \
 	       -c $(srcdir)/surface-manager.c
+
+$(builddir)/keyboard-bindings.o: Makefile \
+                                 $(srcdir)/keyboard-bindings.c \
+                                 $(srcdir)/keyboard-bindings.h
+	@mkdir -p $(builddir)
+	@echo "  CC  keyboard-bindings.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/keyboard-bindings.o -I$(srcdir) \
+	       -c $(srcdir)/keyboard-bindings.c
 
 $(builddir)/renderer-mmap.o: Makefile \
                              $(srcdir)/renderer-mmap.c \

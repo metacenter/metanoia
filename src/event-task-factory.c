@@ -2,8 +2,8 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "event-task-factory.h"
-#include "devices/evdev.h"
-#include "devices/udev.h"
+#include "device-evdev.h"
+#include "device-udev.h"
 #include "surface.h"
 #include "frontends/wayland.h"
 #include "utils-log.h"

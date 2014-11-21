@@ -5,8 +5,8 @@
 
 #include "utils-log.h"
 #include "utils-chain.h"
-#include "devices/drm.h"
-#include "devices/devfb.h"
+#include "device-drm.h"
+#include "device-fb.h"
 #include "surface-priv.h"
 
 #include <stddef.h>
