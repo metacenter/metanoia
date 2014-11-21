@@ -64,6 +64,7 @@ void aura_keyboard_remove_binding(uint32_t code,
 
 //------------------------------------------------------------------------------
 
+// TODO: named return values
 int aura_keyboard_catch_key(int code, KeyState state)
 {
     Binding searched;

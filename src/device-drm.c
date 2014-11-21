@@ -1,7 +1,7 @@
-// file: drm.c
+// file: device-drm.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "drm.h"
+#include "device-drm.h"
 #include "utils-log.h"
 #include "renderer-gl.h"
 

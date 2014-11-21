@@ -1,8 +1,8 @@
-// file: devfb.c
+// file: device-fb.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "devfb.h"
-#include "devices/shared.h"
+#include "device-fb.h"
+#include "device-common.h"
 #include "renderer-mmap.h"
 #include "utils-log.h"
 
@@ -108,8 +108,7 @@ int aura_setup_framebuffer(AuraOutput** outputs, int* num)
               screen_info.xres_virtual, screen_info.yres_virtual,
               fixed_info.line_length);
 
-
-    // TODO: put malloc elsewhere
+    // TODO: put malloc to output constructor
     AuraOutputFB* output_fb = malloc(sizeof(AuraOutputFB));
     memset(output_fb, 0, sizeof(AuraOutputFB));
 

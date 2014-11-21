@@ -1,12 +1,12 @@
-// file: drm.h
+// file: device-drm.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_DRM_H__
-#define __AURA_DRM_H__
+#ifndef __AURA_DEVICE_DRM_H__
+#define __AURA_DEVICE_DRM_H__
 
 #include "global-types.h"
 
 int aura_drm_update_devices(AuraOutput** outputs, int* num);
 
-#endif // __AURA_DRM_H__
+#endif // __AURA_DEVICE_DRM_H__
 

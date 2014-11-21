@@ -1,7 +1,7 @@
-// file: shared.c
+// file: device-common.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "shared.h"
+#include "device-common.h"
 #include "utils-dbus.h"
 #include "utils-log.h"
 

@@ -7,7 +7,7 @@
 #include "utils-log.h"
 
 // FIXME: tmp
-#include "devices/devfb.h"
+#include "device-fb.h"
 
 //------------------------------------------------------------------------------
 

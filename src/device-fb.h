@@ -1,8 +1,8 @@
-// file: devfb.h
+// file: device-fb.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_DEVFB_H__
-#define __AURA_DEVFB_H__
+#ifndef __AURA_DEVICE_FB_H__
+#define __AURA_DEVICE_FB_H__
 
 #include "global-types.h"
 
@@ -11,6 +11,6 @@ char* buffer;
 
 int aura_setup_framebuffer(AuraOutput** outputs, int* num);
 
-#endif // __AURA_DEVFB_H__
+#endif // __AURA_DEVICE_FB_H__
 
 
