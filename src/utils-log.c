@@ -68,7 +68,7 @@ void aura_log_finalize(void)
 {
     LOG_INFO1("Closing log file. Bye!");
     if (sLogFD != -1) {
-        write(sLogFD, scLogGoodByeText, sizeof scLogGoodByeText  - 1);
+        write(sLogFD, scLogGoodByeText, sizeof scLogGoodByeText - 1);
         close(sLogFD);
     }
     fputs(scLogGoodByeText, stdout);

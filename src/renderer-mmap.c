@@ -79,9 +79,9 @@ void aura_renderer_mmap_free(struct AuraRenderer* self)
 //------------------------------------------------------------------------------
 
 AuraRenderer* aura_renderer_mmap_create(char* buffer,
-                                    int width,
-                                    int height,
-                                    int stride)
+                                        int width,
+                                        int height,
+                                        int stride)
 {
     AuraRendererMMap* mine = malloc(sizeof(AuraRendererMMap));
     if (mine == NULL) {

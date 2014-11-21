@@ -1,4 +1,4 @@
-// file: dbus.c
+// file: utils-dbus.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "utils-dbus.h"
@@ -244,7 +244,6 @@ int aura_dbus_session_release_control()
     ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
     ASSERT(scSessionObject, scSessionObjectErrorMsg);
     dbus_error_init(&err);
-
 
     // Create new method call
     msg = dbus_message_new_method_call(scLogindDestination,

@@ -31,16 +31,21 @@ void aura_update_outputs(AuraEventDispatcher* ed)
     // TODO: support for many outputs
 
     // TODO don't use global functions
-    int result = aura_drm_update_devices(&output, &num);
-    if (result < 0) {
+    int result;// = aura_drm_update_devices(&output, &num);
+    //if (result < 0) {
         result = aura_setup_framebuffer(&output, &num);
+    //}
+
+    if (result < 0) {
+        LOG_ERROR("Failed to update outputs!");
+        return;
     }
 
     renderer = output->initialize((struct AuraOutput*) output,
                                   output->width, output->height);
     renderer->initialize((struct AuraRenderer*) renderer);
 
-    aura_event_dispatcher_timer_run(ed, aura_surface_manager_redraw_all, 20);
+    aura_event_dispatcher_timer_run(ed, aura_surface_manager_redraw_all, 200);
 }
 
 //------------------------------------------------------------------------------

@@ -35,13 +35,6 @@ void sig_handler(int sig, siginfo_t *si, void *arg)
     }
 }
 
-// FIXME: tmp: just a test
-/*void timer_handler (union sigval data)
-{
-    LOG_DEBUG("TIME'S UP!");
-}*/
-
-
 int main()
 {
     // Initialize signal hadler
