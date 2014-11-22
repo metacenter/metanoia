@@ -31,10 +31,10 @@ void aura_update_outputs(AuraEventDispatcher* ed)
     // TODO: support for many outputs
 
     // TODO don't use global functions
-    int result;// = aura_drm_update_devices(&output, &num);
-    //if (result < 0) {
+    int result = aura_drm_update_devices(&output, &num);
+    if (result < 0) {
         result = aura_setup_framebuffer(&output, &num);
-    //}
+    }
 
     if (result < 0) {
         LOG_ERROR("Failed to update outputs!");

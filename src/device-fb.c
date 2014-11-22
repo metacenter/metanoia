@@ -32,11 +32,12 @@ AuraRenderer* aura_devfb_output_initialize(struct AuraOutput* output,
                                            int width, int height)
 {
     struct fb_fix_screeninfo fixed_info;
+    uint8_t* buffer;
     size_t buflen;
 
     AuraOutputFB* output_fb = (AuraOutputFB*) output;
     if (output_fb == NULL) {
-        LOG_ERROR("");
+        LOG_ERROR("Null output given!");
         return NULL;
     }
 

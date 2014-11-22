@@ -17,7 +17,7 @@ typedef struct {
     int width;
     int height;
     int stride;
-    char* buffer;
+    uint8_t* buffer;
 } AuraRendererMMap;
 
 //------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ void aura_renderer_mmap_free(struct AuraRenderer* self)
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_renderer_mmap_create(char* buffer,
+AuraRenderer* aura_renderer_mmap_create(uint8_t* buffer,
                                         int width,
                                         int height,
                                         int stride)

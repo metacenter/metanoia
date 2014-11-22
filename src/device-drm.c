@@ -3,6 +3,7 @@
 
 #include "device-drm.h"
 #include "utils-log.h"
+#include "renderer-mmap.h"
 #include "renderer-gl.h"
 
 #include <errno.h>
@@ -50,12 +51,11 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-int create_dumb_buffer(int drm_fd,
-                       drmModeModeInfo *mode,
-                       uint32_t* fb_id)
+AuraRenderer* create_dumb_buffer(AuraOutputDRM* output_drm)
 {
     int result = 0;
     uint8_t* map;
+    uint32_t fb_id;
     struct drm_mode_create_dumb carg;
     struct drm_mode_destroy_dumb darg;
     struct drm_mode_map_dumb marg;
@@ -63,25 +63,24 @@ int create_dumb_buffer(int drm_fd,
     // Create dumb buffer
     LOG_DEBUG("E: %d", errno);
     memset(&carg, 0, sizeof(carg));
-    carg.width  = mode->hdisplay;
-    carg.height = mode->vdisplay;
+    carg.width  = output_drm->connector->modes[0].hdisplay;
+    carg.height = output_drm->connector->modes[0].vdisplay;
     carg.bpp = 32;
 
-    LOG_DEBUG("S: %d*%d=%d", carg.width, carg.height, carg.width*carg.height);
 
-    result = drmIoctl(drm_fd, DRM_IOCTL_MODE_CREATE_DUMB, &carg);
+    result = drmIoctl(output_drm->fd, DRM_IOCTL_MODE_CREATE_DUMB, &carg);
     if (result < 0) {
         LOG_ERROR("Cannot create dumb buffer (%d): %s", errno, strerror(errno));
-        return -errno;
+        return NULL;
     }
+    LOG_DEBUG("S: %d*%d=%d", carg.pitch, carg.height, carg.pitch*carg.height);
     LOG_DEBUG("H: %d, %d", carg.size, carg.handle);
 
     // Create framebuffer object for the dumb-buffer
-    result = drmModeAddFB(drm_fd, carg.width, carg.height, 24,
-                          carg.bpp, carg.pitch, carg.handle, fb_id);
+    result = drmModeAddFB(output_drm->fd, carg.width, carg.height, 24,
+                          carg.bpp, carg.pitch, carg.handle, &fb_id);
     if (result) {
         LOG_ERROR("Cannot create framebuffer (%d): %s", errno, strerror(errno));
-        result = -errno;
         goto clear_db;
     }
 
@@ -89,10 +88,9 @@ int create_dumb_buffer(int drm_fd,
     // Prepare buffer for memory mapping
     memset(&marg, 0, sizeof(marg));
     marg.handle = carg.handle;
-    result = drmIoctl(drm_fd, DRM_IOCTL_MODE_MAP_DUMB, &marg);
+    result = drmIoctl(output_drm->fd, DRM_IOCTL_MODE_MAP_DUMB, &marg);
     if (result) {
         LOG_ERROR("Cannot map dumb buffer (%d): %s", errno, strerror(errno));
-        result = -errno;
         goto clear_fb;
     }
 
@@ -100,7 +98,7 @@ int create_dumb_buffer(int drm_fd,
     LOG_DEBUG("E: %d", errno);
     // Perform actual memory mapping
     map = mmap(0, carg.size, PROT_READ | PROT_WRITE,
-               MAP_SHARED, drm_fd, marg.offset);
+               MAP_SHARED, output_drm->fd, marg.offset);
 
     LOG_DEBUG("E: %d", errno);
     if (map == MAP_FAILED) {
@@ -109,15 +107,56 @@ int create_dumb_buffer(int drm_fd,
         goto clear_fb;
     }
 
+    // Set mode
+    result = drmModeSetCrtc(output_drm->fd,
+                            output_drm->crtc_id,
+                            fb_id, 0, 0,
+                            &output_drm->connector->connector_id,
+                            1, &output_drm->connector->modes[0]);
+    if (result) {
+        LOG_ERROR("failed to set mode: %s\n", strerror(errno));
+        goto clear_fb;
+    }
+
+    // TODO: remove
+    int width = carg.width;
+    int height = carg.height;
+    int pitch = carg.pitch;
+    LOG_DEBUG(" %d %d %d", width, height, pitch);
+    int x, y;
+    for (y = 0; y < height; ++y) {
+        for (x = 0; x < width; ++x) {
+            if (x < width/3){
+                map[y*pitch + 4*x + 0] = 0x00;
+                map[y*pitch + 4*x + 1] = 0xFF;
+                map[y*pitch + 4*x + 2] = 0xFF;
+                map[y*pitch + 4*x + 3] = 0xFF;
+            }
+            else if (x < width*2/3) {
+                map[y*pitch + 4*x + 0] = 0xFF;
+                map[y*pitch + 4*x + 1] = 0xFF;
+                map[y*pitch + 4*x + 2] = 0x00;
+                map[y*pitch + 4*x + 3] = 0xFF;
+            }
+            else {
+                map[y*pitch + 4*x + 0] = 0xFF;
+                map[y*pitch + 4*x + 1] = 0x00;
+                map[y*pitch + 4*x + 2] = 0xFF;
+                map[y*pitch + 4*x + 3] = 0xFF;
+            }
+        }
+    }
+    return aura_renderer_mmap_create(map, carg.width, carg.height, carg.pitch);
+
 clear_fb:
-    drmModeRmFB(drm_fd, *fb_id);
+    drmModeRmFB(output_drm->fd, fb_id);
 
 clear_db:
     memset(&darg, 0, sizeof(darg));
     darg.handle = carg.handle;
-    drmIoctl(drm_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &darg);
+    drmIoctl(output_drm->fd, DRM_IOCTL_MODE_DESTROY_DUMB, &darg);
 
-    return result;
+    return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -286,16 +325,20 @@ AuraRenderer* aura_drm_output_initialize(struct AuraOutput* output,
         return NULL;
     }
 
+    errno = 0;
+    LOG_DEBUG("E: %d", errno);
     output_drm = (AuraOutputDRM*) output;
 
-    renderer = initialize_egl_with_gbm(output_drm);
-    if (renderer == NULL) {
-        //result = create_dumb_buffer(drm_fd, &connector->modes[0], &fb_id);
-        //if (result) {
+    //renderer = initialize_egl_with_gbm(output_drm);
+    //if (renderer == NULL) {
+        renderer = create_dumb_buffer(output_drm);
+        if (renderer == NULL) {
             LOG_ERROR("DRM failed!");
             return NULL;
-        //}
-    }
+        }
+    //}
+
+    // TODO: set mode (only) here
 
     return renderer;
 }

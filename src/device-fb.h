@@ -6,9 +6,6 @@
 
 #include "global-types.h"
 
-// FIXME: tmp
-char* buffer;
-
 int aura_setup_framebuffer(AuraOutput** outputs, int* num);
 
 #endif // __AURA_DEVICE_FB_H__
