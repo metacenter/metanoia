@@ -1,7 +1,7 @@
 // file: wayland-shell-surface.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "frontends/wayland-shell-surface.h"
+#include "wayland-shell-surface.h"
 
 #include "utils-log.h"
 

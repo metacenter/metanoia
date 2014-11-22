@@ -5,7 +5,7 @@
 #include "device-evdev.h"
 #include "device-udev.h"
 #include "surface.h"
-#include "frontends/wayland.h"
+#include "wayland.h"
 #include "utils-log.h"
 
 #include <malloc.h>

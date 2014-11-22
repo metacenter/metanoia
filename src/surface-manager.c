@@ -12,7 +12,7 @@
 #include <stddef.h>
 
 // FIXME: tmp
-#include "frontends/wayland.h"
+#include "wayland.h"
 #include <wayland-server.h>
 #include <time.h>
 
@@ -45,7 +45,7 @@ void aura_update_outputs(AuraEventDispatcher* ed)
                                   output->width, output->height);
     renderer->initialize((struct AuraRenderer*) renderer);
 
-    aura_event_dispatcher_timer_run(ed, aura_surface_manager_redraw_all, 200);
+    aura_event_dispatcher_timer_run(ed, aura_surface_manager_redraw_all, 100);
 }
 
 //------------------------------------------------------------------------------

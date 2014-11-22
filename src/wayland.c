@@ -1,11 +1,11 @@
 // file: wayland.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "frontends/wayland.h"
-#include "frontends/wayland-compositor.h"
-#include "frontends/wayland-shell.h"
-#include "frontends/wayland-xdg_shell.h"
-#include "frontends/wayland-output.h"
+#include "wayland.h"
+#include "wayland-compositor.h"
+#include "wayland-shell.h"
+#include "wayland-xdg_shell.h"
+#include "wayland-output.h"
 
 #include "utils-log.h"
 
@@ -47,7 +47,7 @@ int aura_wayland_event_loop_feeder(void* data)
 
     loop = wl_display_get_event_loop(wayland_display);
     src = wl_event_loop_add_timer(loop, aura_wayland_event_loop_feeder, NULL);
-    wl_event_source_timer_update(src, 10);
+    wl_event_source_timer_update(src, 100);
 
     return 0;
 }

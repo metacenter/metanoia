@@ -1,8 +1,8 @@
 // file: wayland-xdg_shell.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "frontends/wayland-xdg_shell.h"
-#include "frontends/wayland-shell-surface.h"
+#include "wayland-xdg_shell.h"
+#include "wayland-shell-surface.h"
 
 #include "utils-log.h"
 
