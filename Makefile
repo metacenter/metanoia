@@ -40,6 +40,7 @@ $(builddir)/aura: Makefile \
                   $(builddir)/wayland.o \
                   $(builddir)/wayland-compositor.o \
                   $(builddir)/wayland-surface.o \
+                  $(builddir)/wayland-region.o \
                   $(builddir)/wayland-shell.o \
                   $(builddir)/wayland-shell-surface.o \
                   $(builddir)/wayland-xdg_shell.o \
@@ -49,8 +50,8 @@ $(builddir)/aura: Makefile \
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/bind-egl-wayland.o \
-	       `pkg-config --libs libudev dbus-1 gbm wayland-server libdrm egl gl`
+	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-region.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/bind-egl-wayland.o \
+	       `pkg-config --libs libdrm dbus-1 wayland-server libudev egl gbm gl`
 
 $(gendir)/xdg-shell-server-protocol.h: Makefile \
                                        protocol/xdg-shell.xml
@@ -257,6 +258,14 @@ $(builddir)/wayland-surface.o: Makefile \
 	@echo "  CC  wayland-surface.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/wayland-surface.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/wayland-surface.c
+
+$(builddir)/wayland-region.o: Makefile \
+                              $(srcdir)/wayland-region.c \
+                              $(srcdir)/wayland-region.h
+	@mkdir -p $(builddir)
+	@echo "  CC  wayland-region.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/wayland-region.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/wayland-region.c
 
 $(builddir)/wayland-shell.o: Makefile \
                              $(srcdir)/wayland-shell.c \

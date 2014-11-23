@@ -251,6 +251,13 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='wayland-region.o',
+        inputs=['wayland-region.c'],
+        includes=['wayland-region.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='wayland-shell.o',
         inputs=['wayland-shell.c'],
         includes=['wayland-shell.h', target_xdg_shell_protocol]

@@ -22,6 +22,7 @@ typedef struct {
 
 typedef struct {
     SurfaceId id;
+    int x, y;
     PendingBuffer pending;
     void* frame_notify_data; // TODO: here?
     void* buffer_resource;

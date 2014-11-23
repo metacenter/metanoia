@@ -18,7 +18,7 @@
 
 //------------------------------------------------------------------------------
 
-static const int scVersion = 2;
+static const int scVersion = 3;
 static const char* scSocketName = "wayland-0";
 
 static struct wl_display* wayland_display;
@@ -119,17 +119,18 @@ void aura_wayland_initialize(void)
 
 void aura_wayland_notify_frame(SurfaceData* surface)
 {
-    LOG_DEBUG("Notify frame 1");
     if (!surface) {
         LOG_ERROR("Got null surface!");
         return;
     }
 
+    LOG_INFO3("Wayland: Notify frame (id: %d)", surface->id);
+
     void* notify_data = surface->frame_notify_data;
     void* buffer_resource = surface->buffer_resource;
 
     if (buffer_resource) {
-        wl_resource_queue_event(buffer_resource, WL_BUFFER_RELEASE);
+        //wl_resource_queue_event(buffer_resource, WL_BUFFER_RELEASE);
     }
 
     if (notify_data) {

@@ -3,6 +3,7 @@
 
 #include "wayland-compositor.h"
 #include "wayland-surface.h"
+#include "wayland-region.h"
 
 #include "surface.h"
 #include "utils-log.h"
@@ -38,7 +39,19 @@ static void create_region(struct wl_client* client,
                           struct wl_resource* resource,
                           uint32_t id)
 {
-    LOG_NYIMP("Wayland: create region");
+    struct wl_resource* res;
+
+    LOG_DATA3("Wayland: create region (id: %d)", id);
+
+    res = wl_resource_create(client, &wl_region_interface, 1, id);
+    if (!res) {
+        wl_resource_post_no_memory(resource);
+        return;
+    }
+
+    // TODO: add destroy callback
+    wl_resource_set_implementation(res, &region_implementation,
+                                   NULL, NULL);
 }
 
 //------------------------------------------------------------------------------

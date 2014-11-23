@@ -9,7 +9,7 @@
 
 #include <linux/input.h>
 
-static const LogLevel scConfLogLevel = LEVEL_DATA3;//LEVEL_DEBUG;
+static const LogLevel scConfLogLevel = LEVEL_INFO3;//LEVEL_DEBUG;
 static const char* scConfLogFile = "/home/user/.local/share/aura/logs/log";
 
 static const Binding scKeyboardBindings[] = {
