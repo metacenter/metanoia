@@ -114,6 +114,13 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='event-timer.o',
+        inputs=['event-timer.c'],
+        includes=['event-timer.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='event-loop.o',
         inputs=['event-loop.c'],
         includes=['event-loop.h']
@@ -155,21 +162,23 @@ t = m.add_compile_target(
         output='device-drm.o',
         inputs=['device-drm.c'],
         includes=['device-drm.h'],
-        pkgs={'libdrm', 'egl'}
+        pkgs={'libdrm', 'gbm', 'egl'}
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
         output='device-evdev.o',
         inputs=['device-evdev.c'],
-        includes=['device-evdev.h']
+        includes=['device-evdev.h'],
+        pkgs={'libudev'}
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
         output='device-udev.o',
         inputs=['device-udev.c'],
-        includes=['device-udev.h']
+        includes=['device-udev.h'],
+        pkgs={'libudev'}
     )
 aura.add_input(t)
 
@@ -220,7 +229,8 @@ aura.add_input(t)
 t = m.add_compile_target(
         output='renderer-gl.o',
         inputs=['renderer-gl.c'],
-        includes=['renderer-gl.h']
+        includes=['renderer-gl.h'],
+        pkgs={'gl'}
     )
 aura.add_input(t)
 
@@ -230,7 +240,8 @@ aura.add_input(t)
 t = m.add_compile_target(
         output='wayland.o',
         inputs=['wayland.c'],
-        includes=['wayland.h', target_xdg_shell_protocol]
+        includes=['wayland.h', target_xdg_shell_protocol],
+        pkgs={'wayland-server'}
     )
 aura.add_input(t)
 

@@ -3,11 +3,7 @@
 
 #include "surface.h"
 #include "surface-priv.h"
-
 #include "utils-log.h"
-
-// FIXME: tmp
-#include "device-fb.h"
 
 //------------------------------------------------------------------------------
 
@@ -18,9 +14,6 @@ void aura_surface_commit(SurfaceId id)
         LOG_WARN2("Could not find surface (id: %d)", id);
         return;
     }
-
-    // TODO: schedule rather
-    //aura_surface_manager_redraw_all();
 }
 
 //------------------------------------------------------------------------------

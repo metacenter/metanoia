@@ -130,7 +130,7 @@ void aura_wayland_notify_frame(SurfaceData* surface)
     void* buffer_resource = surface->buffer_resource;
 
     if (buffer_resource) {
-        //wl_resource_queue_event(buffer_resource, WL_BUFFER_RELEASE);
+        wl_resource_queue_event(buffer_resource, WL_BUFFER_RELEASE);
     }
 
     if (notify_data) {

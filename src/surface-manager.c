@@ -7,6 +7,7 @@
 #include "utils-chain.h"
 #include "device-drm.h"
 #include "device-fb.h"
+#include "event-timer.h"
 #include "surface-priv.h"
 
 #include <stddef.h>
@@ -22,6 +23,27 @@ Chain* visible_surfaces = NULL;
 AuraOutput* output = NULL;
 AuraRenderer* renderer = NULL;
 int num = 0;
+
+//------------------------------------------------------------------------------
+
+void aura_surface_manager_redraw_all()
+{
+    LOG_DEBUG("Redraw all");
+
+    if (renderer == NULL) {
+        LOG_ERROR("Wrong renderer!");
+        return;
+    }
+    if (renderer->draw_surfaces == NULL) {
+        LOG_ERROR("Wrong renderer implementation!");
+        return;
+    }
+
+    renderer->draw_surfaces((struct AuraRenderer*) renderer,
+                            visible_surfaces);
+
+    aura_surface_notify_frame();
+}
 
 //------------------------------------------------------------------------------
 
@@ -45,7 +67,7 @@ void aura_update_outputs(AuraEventDispatcher* ed)
                                   output->width, output->height);
     renderer->initialize((struct AuraRenderer*) renderer);
 
-    aura_event_dispatcher_timer_run(ed, aura_surface_manager_redraw_all, 100);
+    aura_event_timer_run(aura_surface_manager_redraw_all, 100);
 }
 
 //------------------------------------------------------------------------------
@@ -90,27 +112,6 @@ void aura_surface_subscribe_frame(SurfaceId id, void* notify_data)
     }
 
     surface->frame_notify_data = notify_data;
-}
-
-//------------------------------------------------------------------------------
-
-void aura_surface_manager_redraw_all()
-{
-    LOG_DEBUG("Redraw all");
-
-    if (renderer == NULL) {
-        LOG_ERROR("Wrong renderer!");
-        return;
-    }
-    if (renderer->draw_surfaces == NULL) {
-        LOG_ERROR("Wrong renderer implementation!");
-        return;
-    }
-
-    renderer->draw_surfaces((struct AuraRenderer*) renderer,
-                            visible_surfaces);
-
-    aura_surface_notify_frame();
 }
 
 //------------------------------------------------------------------------------

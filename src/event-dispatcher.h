@@ -12,7 +12,6 @@ typedef struct AuraEventDispatcherPriv AuraEventDispatcher;
 struct AuraEventData;
 
 typedef void (*AuraEventHandler) (void* data, struct epoll_event);
-typedef void (*AuraTimerHandler) (union sigval data);
 
 typedef struct {
     AuraEventHandler handler;
@@ -28,10 +27,6 @@ int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
 
 void aura_event_dispatcher_start(AuraEventDispatcher* self);
 void aura_event_dispatcher_stop(AuraEventDispatcher* self);
-
-int aura_event_dispatcher_timer_run(AuraEventDispatcher* self,
-                                    AuraTimerHandler timer_handler,
-                                    int miliseconds);
 
 #endif // __AURA_EVENT_DISPATCHER_H__
 
