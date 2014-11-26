@@ -54,6 +54,7 @@ class Target:
 
         elif isinstance(inp, Target):
             self.add_input(inp.output)
+            self.add_pkgs(inp.pkgs)
 
         else:
             raise Exception('Input must be passed as string! '

@@ -18,8 +18,6 @@ m.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
 
 aura = m.add_link_target(
         output='aura',
-        pkgs={'dbus-1', 'libudev', 'libdrm', 'gbm',
-              'wayland-server', 'egl', 'gl'},
         include_in_all=True
     )
 
@@ -289,6 +287,21 @@ t = m.add_compile_target(
         output='wayland-output.o',
         inputs=['wayland-output.c'],
         includes=['wayland-output.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='wayland-seat.o',
+        inputs=['wayland-seat.c'],
+        includes=['wayland-seat.h'],
+        pkgs={'xkbcommon'}
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='wayland-keyboard.o',
+        inputs=['wayland-keyboard.c'],
+        includes=['wayland-keyboard.h']
     )
 aura.add_input(t)
 
