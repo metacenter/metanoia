@@ -8,22 +8,22 @@ typedef void (*FreeFunc) (void*);
 
 typedef struct Link Link;
 struct Link {
-    Link *prev;
-    Link *next;
-    void *data;
+    Link* prev;
+    Link* next;
+    void* data;
 };
 
-Link *link_new(void *data);
+Link* link_new(void* data);
 void link_free(Link* link, FreeFunc freefunc);
 
 typedef struct {
-    Link *first;
-    Link *last;
+    Link* first;
+    Link* last;
     int len;
     FreeFunc freefunc;
 } Chain;
 
-Chain *chain_new(FreeFunc freefunc);
+Chain* chain_new(FreeFunc freefunc);
 void chain_free(Chain* chain);
 
 int chain_len(Chain* chain);

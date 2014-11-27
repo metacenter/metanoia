@@ -66,14 +66,16 @@ static void* loop(void* data)
     LOG_INFO1("Threads: starting loop '%s'", mine->name);
 
     mine->run = 1;
+    pthread_mutex_lock(&mine->mutex);
     while (mine->run) {
-        pthread_mutex_lock(&mine->mutex);
-
         while (chain_len(mine->task_chain) > 0) {
             AuraTask* task = chain_pop(mine->task_chain);
             if (task) {
                 if (task->process) {
+                    LOG_INFO1("Loop: processing task");
                     task->process(task->data);
+                } else {
+                    LOG_ERROR("Invalid task processor!");
                 }
                 if (task->freefunc) {
                     task->freefunc(task);
@@ -82,8 +84,6 @@ static void* loop(void* data)
                 LOG_ERROR("Invalid task!");
             }
         }
-
-        pthread_mutex_unlock(&mine->mutex);
 
         pthread_cond_wait(&mine->condition, &mine->mutex);
     }
@@ -141,7 +141,6 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
     pthread_mutex_lock(&mine->mutex);
     chain_append(mine->task_chain, task);
     pthread_mutex_unlock(&mine->mutex);
-
     pthread_cond_signal(&mine->condition);
     return 1;
 }

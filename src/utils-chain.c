@@ -100,7 +100,7 @@ void chain_prepend(Chain* self, void* data)
     if (self->len == 0) {
         chain_add_first(self, data);
     } else {
-        Link *link = link_new(data);
+        Link* link = link_new(data);
         link->next = self->first;
         self->first->prev = link;
         self->first = link;
@@ -119,7 +119,7 @@ void chain_append(Chain* self, void* data)
     if (self->len == 0) {
         chain_add_first(self, data);
     } else {
-        Link *link = link_new(data);
+        Link* link = link_new(data);
         link->prev = self->last;
         self->last->next = link;
         self->last = link;

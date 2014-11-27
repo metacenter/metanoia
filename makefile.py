@@ -121,6 +121,13 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='event-signals.o',
+        inputs=['event-signals.c'],
+        includes=['event-signals.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='event-loop.o',
         inputs=['event-loop.c'],
         includes=['event-loop.h']

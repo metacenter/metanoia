@@ -8,6 +8,7 @@
 #include "wayland-output.h"
 
 #include "utils-log.h"
+#include "event-signals.h"
 
 #include <errno.h>
 #include <string.h>
@@ -40,6 +41,13 @@ static void* display_run(void* data)
 
 //------------------------------------------------------------------------------
 
+static void wayland_keyboard_focus_change_handler(void* data)
+{
+    LOG_INFO1("SIGNAL HANDLED!");
+}
+
+//------------------------------------------------------------------------------
+
 int aura_wayland_event_loop_feeder(void* data)
 {
     struct wl_event_loop* loop;
@@ -54,7 +62,7 @@ int aura_wayland_event_loop_feeder(void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_initialize(void)
+void aura_wayland_initialize(AuraLoop* this_loop)
 {
     int result;
     pthread_t thread;
@@ -111,6 +119,10 @@ void aura_wayland_initialize(void)
         LOG_ERROR("Could not run Wayland display!");
         return;
     }
+
+    // Subscribe for events
+    aura_event_signal_subscribe(SIGNAL_KEYBOARD_FOCUS_CHANGED,
+            aura_task_create(wayland_keyboard_focus_change_handler, this_loop));
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
 }

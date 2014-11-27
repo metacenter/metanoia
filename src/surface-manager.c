@@ -8,6 +8,7 @@
 #include "device-drm.h"
 #include "device-fb.h"
 #include "event-timer.h"
+#include "event-signals.h"
 #include "surface-priv.h"
 
 #include <stddef.h>
@@ -81,6 +82,8 @@ void aura_surface_manage(SurfaceId id)
     }
 
     chain_append(visible_surfaces, (void*) id);
+
+    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*)id);
 }
 
 //------------------------------------------------------------------------------
