@@ -20,6 +20,7 @@ $(builddir)/aura: Makefile \
                   $(builddir)/config.o \
                   $(builddir)/configuration-functions.o \
                   $(builddir)/utils-chain.o \
+                  $(builddir)/utils-store.o \
                   $(builddir)/utils-dbus.o \
                   $(builddir)/utils-log.o \
                   $(builddir)/event-dispatcher.o \
@@ -54,8 +55,8 @@ $(builddir)/aura: Makefile \
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-region.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/wayland-seat.o $(builddir)/wayland-keyboard.o $(builddir)/bind-egl-wayland.o \
-	       `pkg-config --libs gbm libdrm xkbcommon dbus-1 libudev wayland-server gl egl`
+	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-compositor.o $(builddir)/wayland-surface.o $(builddir)/wayland-region.o $(builddir)/wayland-shell.o $(builddir)/wayland-shell-surface.o $(builddir)/wayland-xdg_shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-output.o $(builddir)/wayland-seat.o $(builddir)/wayland-keyboard.o $(builddir)/bind-egl-wayland.o \
+	       `pkg-config --libs wayland-server dbus-1 gl egl libdrm gbm xkbcommon libudev`
 
 $(gendir)/xdg-shell-server-protocol.h: Makefile \
                                        protocol/xdg-shell.xml
@@ -99,6 +100,14 @@ $(builddir)/utils-chain.o: Makefile \
 	@echo "  CC  utils-chain.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/utils-chain.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/utils-chain.c
+
+$(builddir)/utils-store.o: Makefile \
+                           $(srcdir)/utils-store.c \
+                           $(srcdir)/utils-store.h
+	@mkdir -p $(builddir)
+	@echo "  CC  utils-store.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/utils-store.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/utils-store.c
 
 $(builddir)/utils-dbus.o: Makefile \
                           $(srcdir)/utils-dbus.c \
@@ -188,7 +197,7 @@ $(builddir)/device-drm.o: Makefile \
 	@echo "  CC  device-drm.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/device-drm.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/device-drm.c \
-	       `pkg-config --cflags gbm libdrm egl`
+	       `pkg-config --cflags egl libdrm gbm`
 
 $(builddir)/device-evdev.o: Makefile \
                             $(srcdir)/device-evdev.c \

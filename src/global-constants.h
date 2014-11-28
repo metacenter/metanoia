@@ -35,6 +35,7 @@ typedef enum {
     AURA_KEY_ALT   = 0x0004,
 } KeyModifierFlag;
 
+// TBR
 static const SurfaceId scInvalidSurfaceId = 0xFFFF;
 
 #endif // __AURA_CONSTANTS_H__

@@ -89,6 +89,13 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='utils-store.o',
+        inputs=['utils-store.c'],
+        includes=['utils-store.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='utils-dbus.o',
         inputs=['utils-dbus.c'],
         includes=['utils-dbus.h'],
