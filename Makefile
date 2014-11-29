@@ -42,6 +42,7 @@ $(builddir)/aura: Makefile \
                   $(builddir)/renderer-mmap.o \
                   $(builddir)/renderer-gl.o \
                   $(builddir)/wayland.o \
+                  $(builddir)/wayland-common.o \
                   $(builddir)/wayland-protocol-compositor.o \
                   $(builddir)/wayland-protocol-surface.o \
                   $(builddir)/wayland-protocol-region.o \
@@ -56,8 +57,8 @@ $(builddir)/aura: Makefile \
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o \
-	       `pkg-config --libs gbm wayland-server dbus-1 egl libudev libdrm gl xkbcommon`
+	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-common.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o \
+	       `pkg-config --libs dbus-1 wayland-server xkbcommon libdrm egl gbm libudev gl`
 
 $(gendir)/xdg-shell-server-protocol.h: Makefile \
                                        protocol/xdg-shell.xml
@@ -206,7 +207,7 @@ $(builddir)/device-drm.o: Makefile \
 	@echo "  CC  device-drm.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/device-drm.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/device-drm.c \
-	       `pkg-config --cflags egl gbm libdrm`
+	       `pkg-config --cflags libdrm gbm egl`
 
 $(builddir)/device-evdev.o: Makefile \
                             $(srcdir)/device-evdev.c \
@@ -284,6 +285,14 @@ $(builddir)/wayland.o: Makefile \
 	@$(CC) $(WFLAGS) -o $(builddir)/wayland.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/wayland.c \
 	       `pkg-config --cflags wayland-server`
+
+$(builddir)/wayland-common.o: Makefile \
+                              $(srcdir)/wayland-common.c \
+                              $(srcdir)/wayland-common.h
+	@mkdir -p $(builddir)
+	@echo "  CC  wayland-common.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/wayland-common.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/wayland-common.c
 
 $(builddir)/wayland-protocol-compositor.o: Makefile \
                                            $(srcdir)/wayland-protocol-compositor.c \

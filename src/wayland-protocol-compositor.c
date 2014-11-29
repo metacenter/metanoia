@@ -4,6 +4,7 @@
 #include "wayland-protocol-compositor.h"
 #include "wayland-protocol-surface.h"
 #include "wayland-protocol-region.h"
+#include "wayland-common.h"
 
 #include "surface.h"
 #include "utils-log.h"
@@ -28,6 +29,13 @@ static void create_surface(struct wl_client* client,
     }
 
     new_surface_id = aura_surface_create();
+
+    AuraSurfaceWaylandData* surface_data = wayland_surface_data_new();
+    surface_data->base.id = new_surface_id;
+    surface_data->resource = res;
+
+    AuraStore* store = wayland_get_surface_store();
+    aura_store_add(store, new_surface_id, surface_data);
 
     wl_resource_set_implementation(res, &surface_implementation,
                                    (void*) new_surface_id, NULL);

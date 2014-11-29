@@ -30,6 +30,8 @@ static int compare(const void* surface1, const void* surface2)
 
 SurfaceId aura_surface_create(void)
 {
+    // TODO:mutices
+
     // Create new surface
     SurfaceData* data = malloc(sizeof(SurfaceData));
     if (data == NULL) {

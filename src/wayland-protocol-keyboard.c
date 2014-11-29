@@ -1,7 +1,7 @@
-// file: wayland-protocol-shell.c
+// file: wayland-protocol-keyboard.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "wayland-protocol-shell.h"
+#include "wayland-protocol-keyboard.h"
 
 #include "utils-log.h"
 
