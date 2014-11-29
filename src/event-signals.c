@@ -42,6 +42,11 @@ int aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
         return -1;
     }
 
+    if (!task || !task->process) {
+        LOG_WARN1("Invalid task!");
+        return -1;
+    }
+
     SignalSubscriber* ss = get_signal_subscriber();
     if (ss == NULL) {
         LOG_ERROR("Invalid Signal Subscriber!");
@@ -84,7 +89,7 @@ int aura_event_signal_emit(AuraSignalNum sig_num, void* data) {
             if (task) {
                 if (task->loop) {
                     LOG_INFO1("Signal: emited (num: %d)", sig_num);
-                    aura_loop_schedule_task(task->loop, task);
+                    aura_loop_schedule_task(task->loop, aura_task_copy(task));
                 } else {
                     LOG_WARN1("Invalid loop!");
                 }

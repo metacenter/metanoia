@@ -65,7 +65,7 @@ void aura_keyboard_remove_binding(uint32_t code,
 //------------------------------------------------------------------------------
 
 // TODO: named return values
-int aura_keyboard_catch_key(int code, KeyState state)
+bool aura_keyboard_catch_key(int code, KeyState state)
 {
     Binding searched;
     Binding** found;
@@ -77,21 +77,21 @@ int aura_keyboard_catch_key(int code, KeyState state)
             modifiers = state
                         ? modifiers |  AURA_KEY_CTRL
                         : modifiers & ~AURA_KEY_CTRL;
-            return -2;
+            return 0;
 
         case KEY_LEFTSHIFT:
         case KEY_RIGHTSHIFT:
             modifiers = state
                         ? modifiers |  AURA_KEY_SHIFT
                         : modifiers & ~AURA_KEY_SHIFT;
-            return -2;
+            return 0;
 
         case KEY_LEFTALT:
         case KEY_RIGHTALT:
             modifiers = state
                         ? modifiers |  AURA_KEY_ALT
                         : modifiers & ~AURA_KEY_ALT;
-            return -2;
+            return 0;
     }
 
     // Search for binding
@@ -101,7 +101,7 @@ int aura_keyboard_catch_key(int code, KeyState state)
 
     // If not found return negative...
     if (found == 0 || *found == 0 || (*found)->callback == 0) {
-        return -1;
+        return 0;
     }
 
     // otherwise positive.

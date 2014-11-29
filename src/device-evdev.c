@@ -5,6 +5,7 @@
 #include "device-common.h"
 #include "utils-dbus.h"
 #include "utils-log.h"
+#include "event-signals.h"
 #include "keyboard-bindings.h"
 
 #include <malloc.h>
@@ -42,7 +43,7 @@ static void handle_key(struct input_event* ev)
         bool catched = aura_keyboard_catch_key(ev->code,
                               ev->value ? AURA_KEY_PRESSED : AURA_KEY_RELEASED);
         if (!catched) {
-            // TODO: pass to client with keyboard focus
+            aura_event_signal_emit(SIGNAL_KEYBOARD_EVENT, NULL);
         }
     }
 }

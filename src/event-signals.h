@@ -9,6 +9,7 @@
 typedef enum {
     SIGNAL_FRAME = 0,
     SIGNAL_KEYBOARD_FOCUS_CHANGED,
+    SIGNAL_KEYBOARD_EVENT,
     SIGNAL_NUM,
 } AuraSignalNum;
 

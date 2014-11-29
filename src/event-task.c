@@ -8,15 +8,6 @@
 
 static AuraTask sDummyTask = {0, NULL, NULL, NULL};
 
-void aura_task_free(AuraTask* self)
-{
-    if (!self) {
-        return;
-    }
-    // Free only task, keep data
-    free(self);
-}
-
 //------------------------------------------------------------------------------
 
 AuraTask* aura_task_new(AuraTaskProcessor process,
@@ -42,6 +33,24 @@ AuraTask* aura_task_create(AuraTaskProcessor process,
                            AuraLoop* loop)
 {
     return aura_task_new(process, (AuraTaskFreeFunc)aura_task_free, loop, NULL);
+}
+
+//------------------------------------------------------------------------------
+
+AuraTask* aura_task_copy(AuraTask* task)
+{
+    return aura_task_new(task->process, task->freefunc, task->loop, task->data);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_task_free(AuraTask* self)
+{
+    if (!self) {
+        return;
+    }
+    // Free only task, keep data
+    free(self);
 }
 
 //------------------------------------------------------------------------------

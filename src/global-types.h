@@ -7,6 +7,7 @@
 #include "utils-chain.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // TBR
 typedef uint32_t SurfaceId;

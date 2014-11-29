@@ -43,7 +43,14 @@ static void* display_run(void* data)
 
 static void wayland_keyboard_focus_change_handler(void* data)
 {
-    LOG_INFO1("SIGNAL HANDLED!");
+    LOG_INFO1("FOCUS SIGNAL HANDLED!");
+}
+
+//------------------------------------------------------------------------------
+
+static void wayland_keyboard_event_handler(void* data)
+{
+    LOG_INFO1("KEY SIGNAL HANDLED!");
 }
 
 //------------------------------------------------------------------------------
@@ -123,6 +130,9 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     // Subscribe for events
     aura_event_signal_subscribe(SIGNAL_KEYBOARD_FOCUS_CHANGED,
             aura_task_create(wayland_keyboard_focus_change_handler, this_loop));
+
+    aura_event_signal_subscribe(SIGNAL_KEYBOARD_EVENT,
+            aura_task_create(wayland_keyboard_event_handler, this_loop));
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
 }

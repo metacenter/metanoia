@@ -11,8 +11,8 @@ void aura_keyboard_add_binding(const Binding* binding);
 void aura_keyboard_remove_binding(uint32_t code,
                                   uint32_t modifiers);
 
-int aura_keyboard_catch_key(int code,
-                            KeyState state);
+bool aura_keyboard_catch_key(int code,
+                             KeyState state);
 
 #endif // __AURA_KEYBOARD_BINDINGS_H__
 

@@ -25,6 +25,8 @@ AuraTask* aura_task_new(AuraTaskProcessor process,
 AuraTask* aura_task_create(AuraTaskProcessor process,
                            AuraLoop* loop);
 
+AuraTask* aura_task_copy(AuraTask* task);
+
 void aura_task_free(AuraTask *self);
 
 #endif // __AURA_EVENT_TASK_H__
