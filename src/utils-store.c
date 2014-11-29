@@ -2,7 +2,6 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "utils-store.h"
-#include "utils-log.h"
 
 #include <malloc.h>
 #include <search.h>
@@ -54,7 +53,6 @@ void aura_store_free(AuraStore* self)
 AuraItemId aura_store_generate_new_id(AuraStore* self)
 {
     if (self == NULL) {
-        LOG_ERROR("Invalid store!");
         return scInvalidItemId;
     }
 
@@ -73,8 +71,8 @@ int aura_store_add(AuraStore* self, AuraItemId id, void* data)
         return -1;
     }
 
+    // TODO: set id explicitly
     if (tsearch(data, &self->root, compare) == NULL) {
-        LOG_ERROR("Could not store new item!");
         return -1;
     }
 
@@ -92,7 +90,7 @@ void* aura_store_get(AuraStore* self, AuraItemId id)
     AuraItem item;
     item.id = id;
 
-    return tsearch((void *) &item, &self->root, compare);
+    return *(void**) tfind((void *) &item, &self->root, compare);
 }
 
 //------------------------------------------------------------------------------

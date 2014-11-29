@@ -83,7 +83,7 @@ void aura_surface_manage(SurfaceId id)
 
     chain_append(visible_surfaces, (void*) id);
 
-    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*)id);
+    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) id);
 }
 
 //------------------------------------------------------------------------------

@@ -12,7 +12,7 @@ static void get_shell_surface(struct wl_client *client,
                               uint32_t id,
                               struct wl_resource *surface_resource)
 {
-    LOG_NYIMP("Getting Wayland shell surface");
+    LOG_NYIMP("Getting Wayland shell surface (id: %d)", id);
 }
 
 //------------------------------------------------------------------------------
@@ -27,6 +27,8 @@ void aura_wayland_shell_bind(struct wl_client *client,
                              void *data, uint32_t version, uint32_t id)
 {
     struct wl_resource *resource;
+
+    LOG_DATA3("Binding Wayland shell (id: %d)", id);
 
     resource = wl_resource_create(client, &wl_shell_interface, version, id);
     if (!resource) {

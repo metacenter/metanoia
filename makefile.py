@@ -275,9 +275,9 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-common.o',
-        inputs=['wayland-common.c'],
-        includes=['wayland-common.h'],
+        output='wayland-state.o',
+        inputs=['wayland-state.c'],
+        includes=['wayland-state.h'],
     )
 aura.add_input(t)
 

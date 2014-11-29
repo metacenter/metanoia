@@ -89,7 +89,9 @@ int aura_event_signal_emit(AuraSignalNum sig_num, void* data) {
             if (task) {
                 if (task->loop) {
                     LOG_INFO1("Signal: emited (num: %d)", sig_num);
-                    aura_loop_schedule_task(task->loop, aura_task_copy(task));
+                    AuraTask* task_copy = aura_task_copy(task);
+                    task_copy->data = data;
+                    aura_loop_schedule_task(task->loop, task_copy);
                 } else {
                     LOG_WARN1("Invalid loop!");
                 }

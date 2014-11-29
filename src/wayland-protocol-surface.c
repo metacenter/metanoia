@@ -26,9 +26,9 @@ static void surface_attach(struct wl_client* client,
     int height = 0;
     int stride = 0;
     char* data = NULL;
-    SurfaceId id = (SurfaceId) wl_resource_get_user_data(resource);
+    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
 
-    LOG_DATA3("Wayland: surface attach (sx: %d, sy: %d, id: %d)", sx, sy, id);
+    LOG_DATA3("Wayland: surface attach (sx: %d, sy: %d, sid: %d)", sx, sy, sid);
 
     struct wl_shm_buffer* shm_buffer = wl_shm_buffer_get(buffer_resource);
     if (shm_buffer) {
@@ -40,7 +40,8 @@ static void surface_attach(struct wl_client* client,
         LOG_WARN1("Wrong shared memory buffer!");
     }
 
-    aura_surface_attach(id, width, height, stride, data, buffer_resource);
+    // TBR
+    aura_surface_attach(sid, width, height, stride, data, buffer_resource);
 }
 
 //-----------------------------------------------------------------------------
@@ -60,11 +61,11 @@ static void surface_frame(struct wl_client* client,
                           struct wl_resource* resource,
                           uint32_t callback)
 {
-    LOG_NYIMP("Wayland: surface frame (cb: %d)", callback);
-
     // TODO: subscribe for destroy
 
-    SurfaceId id = (SurfaceId) wl_resource_get_user_data(resource);
+    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
+
+    LOG_NYIMP("Wayland: surface frame (cb: %d, sid: %d)", callback, sid);
 
     struct wl_resource* cb_resource = wl_resource_create(client,
                                                          &wl_callback_interface,
@@ -78,8 +79,8 @@ static void surface_frame(struct wl_client* client,
     // TODO: listen for destroy callback
     wl_resource_set_implementation(cb_resource, NULL, NULL, NULL);
 
-    LOG_DEBUG("FRA res: %p %d", cb_resource, id);
-    aura_surface_subscribe_frame(id, cb_resource);
+    LOG_DEBUG("FRA res: %p %d", cb_resource, sid);
+    aura_surface_subscribe_frame(sid, cb_resource);
 }
 
 //-----------------------------------------------------------------------------
@@ -105,11 +106,11 @@ static void surface_set_input_region(struct wl_client* client,
 static void surface_commit(struct wl_client* client,
                            struct wl_resource* resource)
 {
-    SurfaceId id = (SurfaceId) wl_resource_get_user_data(resource);
+    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
 
-    LOG_DATA3("Wayland: commit (id: %d)", id);
+    LOG_DATA3("Wayland: commit (sid: %d)", sid);
 
-    aura_surface_commit(id);
+    aura_surface_commit(sid);
 }
 
 //-----------------------------------------------------------------------------

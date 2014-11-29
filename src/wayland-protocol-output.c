@@ -12,6 +12,8 @@ void aura_wayland_output_bind(struct wl_client *client,
 {
     struct wl_resource *resource;
 
+    LOG_NYIMP("Binding Wayland output (id: %d)", id);
+
     resource = wl_resource_create(client, &wl_output_interface, version, id);
     if (!resource) {
         wl_client_post_no_memory(client);

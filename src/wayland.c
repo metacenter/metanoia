@@ -4,8 +4,10 @@
 #include "wayland.h"
 #include "wayland-protocol-compositor.h"
 #include "wayland-protocol-shell.h"
+#include "wayland-protocol-seat.h"
 #include "wayland-protocol-xdg-shell.h"
 #include "wayland-protocol-output.h"
+#include "wayland-state.h"
 
 #include "utils-log.h"
 #include "event-signals.h"
@@ -43,7 +45,9 @@ static void* display_run(void* data)
 
 static void wayland_keyboard_focus_change_handler(void* data)
 {
-    LOG_INFO1("FOCUS SIGNAL HANDLED!");
+    SurfaceId sid = (SurfaceId) data;
+    LOG_INFO1("Wayland: handling keyboard focus change (%d)", sid);
+    wayland_state_keyboard_focus_update(sid);
 }
 
 //------------------------------------------------------------------------------
@@ -76,6 +80,8 @@ void aura_wayland_initialize(AuraLoop* this_loop)
 
     LOG_INFO1("Initializing Wayland...");
 
+    wayland_state_initialize();
+
     // Init Wayland
     wayland_display = wl_display_create();
     if (!wayland_display) {
@@ -100,6 +106,11 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     if (!wl_global_create(wayland_display, &wl_shell_interface, 1,
                           NULL, aura_wayland_shell_bind)) {
         LOG_ERROR("Could not create global shell!");
+    }
+
+    if (!wl_global_create(wayland_display, &wl_seat_interface, scVersion,
+                          NULL, aura_wayland_seat_bind)) {
+        LOG_ERROR("Could not create global seat!");
     }
 
     if (!wl_global_create(wayland_display, &xdg_shell_interface, 1,
