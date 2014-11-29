@@ -3,6 +3,7 @@
 
 #include "utils-log.h"
 #include "utils-dbus.h"
+#include "utils-environment.h"
 #include "event-dispatcher.h"
 #include "event-loop.h"
 #include "event-task-factory.h"
@@ -48,6 +49,7 @@ int main()
     sigaction(SIGSEGV, &sa, NULL);
 
     // Initialization
+    aura_environment_setup();
     aura_log_initialize();
     aura_dbus_initalize();
 
@@ -92,5 +94,6 @@ int main()
 
     aura_dbus_finalize();
     aura_log_finalize();
+    aura_environment_cleanup();
     return 0;
 }

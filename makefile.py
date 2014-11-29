@@ -110,6 +110,13 @@ t = m.add_compile_target(
     )
 aura.add_input(t)
 
+t = m.add_compile_target(
+        output='utils-environment.o',
+        inputs=['utils-environment.c'],
+        includes=['utils-environment.h']
+    )
+aura.add_input(t)
+
 #-------------------------------------------------------------------------------
 # EVENTS
 
