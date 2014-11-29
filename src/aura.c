@@ -49,8 +49,8 @@ int main()
     sigaction(SIGSEGV, &sa, NULL);
 
     // Initialization
-    aura_environment_setup();
     aura_log_initialize();
+    aura_environment_setup();
     aura_dbus_initalize();
 
     aura_config_apply();

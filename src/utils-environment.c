@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <string.h>
+#include <fcntl.h>
 
 static const char scDirNameTemplate[] = "/aura-XXXXXX";
 
@@ -57,6 +58,35 @@ void aura_environment_cleanup(void)
         free(aura_runtime_path);
         aura_runtime_path = NULL;
     }
+}
+
+//------------------------------------------------------------------------------
+
+int aura_environment_open_runtime_file(const char *file_name,
+                                       unsigned size)
+{
+    int fd = -1;
+
+    char* file_path = malloc(strlen(aura_runtime_path) + strlen(file_name) + 1);
+    if (!file_path) {
+        return -1;
+    }
+
+    strcpy(file_path, aura_runtime_path);
+    strcat(file_path, "/");
+    strcat(file_path, file_name);
+
+    fd = open(file_path, O_RDWR|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
+    if (fd < 0) {
+        LOG_ERROR("Creating a runtime file '%s' failed! (%m)", file_path);
+        return fd;
+    }
+
+    if (size > 0) {
+        posix_fallocate(fd, 0, size);
+    }
+
+    return fd;
 }
 
 //------------------------------------------------------------------------------

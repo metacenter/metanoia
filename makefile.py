@@ -104,6 +104,14 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='utils-keymap.o',
+        inputs=['utils-keymap.c'],
+        includes=['utils-keymap.h'],
+        pkgs={'xkbcommon'}
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='utils-log.o',
         inputs=['utils-log.c'],
         includes=['utils-log.h']
@@ -333,7 +341,6 @@ t = m.add_compile_target(
         output='wayland-protocol-seat.o',
         inputs=['wayland-protocol-seat.c'],
         includes=['wayland-protocol-seat.h'],
-        pkgs={'xkbcommon'}
     )
 aura.add_input(t)
 
