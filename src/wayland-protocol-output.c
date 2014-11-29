@@ -1,7 +1,7 @@
-// file: wayland-output.c
+// file: wayland-protocol-output.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "wayland-output.h"
+#include "wayland-protocol-output.h"
 
 #include "utils-log.h"
 

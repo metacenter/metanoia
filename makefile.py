@@ -267,44 +267,44 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-compositor.o',
-        inputs=['wayland-compositor.c'],
-        includes=['wayland-compositor.h']
+        output='wayland-protocol-compositor.o',
+        inputs=['wayland-protocol-compositor.c'],
+        includes=['wayland-protocol-compositor.h']
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-surface.o',
-        inputs=['wayland-surface.c'],
-        includes=['wayland-surface.h']
+        output='wayland-protocol-surface.o',
+        inputs=['wayland-protocol-surface.c'],
+        includes=['wayland-protocol-surface.h']
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-region.o',
-        inputs=['wayland-region.c'],
-        includes=['wayland-region.h']
+        output='wayland-protocol-region.o',
+        inputs=['wayland-protocol-region.c'],
+        includes=['wayland-protocol-region.h']
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-shell.o',
-        inputs=['wayland-shell.c'],
-        includes=['wayland-shell.h', target_xdg_shell_protocol]
+        output='wayland-protocol-shell.o',
+        inputs=['wayland-protocol-shell.c'],
+        includes=['wayland-protocol-shell.h', target_xdg_shell_protocol]
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-shell-surface.o',
-        inputs=['wayland-shell-surface.c'],
-        includes=['wayland-shell-surface.h']
+        output='wayland-protocol-shell-surface.o',
+        inputs=['wayland-protocol-shell-surface.c'],
+        includes=['wayland-protocol-shell-surface.h']
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-xdg_shell.o',
-        inputs=['wayland-xdg_shell.c'],
-        includes=['wayland-xdg_shell.h']
+        output='wayland-protocol-xdg-shell.o',
+        inputs=['wayland-protocol-xdg-shell.c'],
+        includes=['wayland-protocol-xdg-shell.h']
     )
 aura.add_input(t)
 
@@ -316,24 +316,24 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-output.o',
-        inputs=['wayland-output.c'],
-        includes=['wayland-output.h']
+        output='wayland-protocol-output.o',
+        inputs=['wayland-protocol-output.c'],
+        includes=['wayland-protocol-output.h']
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-seat.o',
-        inputs=['wayland-seat.c'],
-        includes=['wayland-seat.h'],
+        output='wayland-protocol-seat.o',
+        inputs=['wayland-protocol-seat.c'],
+        includes=['wayland-protocol-seat.h'],
         pkgs={'xkbcommon'}
     )
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='wayland-keyboard.o',
-        inputs=['wayland-keyboard.c'],
-        includes=['wayland-keyboard.h']
+        output='wayland-protocol-keyboard.o',
+        inputs=['wayland-protocol-keyboard.c'],
+        includes=['wayland-protocol-keyboard.h']
     )
 aura.add_input(t)
 

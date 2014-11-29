@@ -1,9 +1,9 @@
-// file: wayland-compositor.c
+// file: wayland-protocol-compositor.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "wayland-compositor.h"
-#include "wayland-surface.h"
-#include "wayland-region.h"
+#include "wayland-protocol-compositor.h"
+#include "wayland-protocol-surface.h"
+#include "wayland-protocol-region.h"
 
 #include "surface.h"
 #include "utils-log.h"

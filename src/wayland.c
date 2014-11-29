@@ -2,10 +2,10 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland.h"
-#include "wayland-compositor.h"
-#include "wayland-shell.h"
-#include "wayland-xdg_shell.h"
-#include "wayland-output.h"
+#include "wayland-protocol-compositor.h"
+#include "wayland-protocol-shell.h"
+#include "wayland-protocol-xdg-shell.h"
+#include "wayland-protocol-output.h"
 
 #include "utils-log.h"
 #include "event-signals.h"

@@ -1,8 +1,8 @@
-// file: wayland-seat.c
+// file: wayland-protocol-seat.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "wayland-seat.h"
-#include "wayland-keyboard.h"
+#include "wayland-protocol-seat.h"
+#include "wayland-protocol-keyboard.h"
 
 #include "utils-log.h"
 

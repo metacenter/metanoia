@@ -1,8 +1,8 @@
-// file: wayland-xdg_shell.c
+// file: wayland-protocol-xdg-shell.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "wayland-xdg_shell.h"
-#include "wayland-shell-surface.h"
+#include "wayland-protocol-xdg-shell.h"
+#include "wayland-protocol-shell-surface.h"
 
 #include "utils-log.h"
 
