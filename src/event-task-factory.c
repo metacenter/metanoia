@@ -6,6 +6,7 @@
 #include "event-task-factory.h"
 #include "device-evdev.h"
 #include "device-udev.h"
+#include "backend-gtk.h"
 #include "surface.h"
 #include "wayland.h"
 #include "utils-log.h"
@@ -13,6 +14,8 @@
 #include <malloc.h>
 
 static AuraTask sDummyTask = {0, NULL, NULL, NULL};
+
+// TODO: use tasks constructor
 
 //------------------------------------------------------------------------------
 
@@ -76,6 +79,14 @@ AuraTask* task_factory_get_initialize_wayland_task(AuraLoop* loop)
     task->loop = NULL;
     task->data = loop;
     return task;
+}
+
+//------------------------------------------------------------------------------
+
+AuraTask* task_factory_get_backend_gtk_initialize_task(AuraLoop* loop)
+{
+    return aura_task_new((AuraTaskProcessor) aura_backend_gtk_initialize,
+                         (AuraTaskFreeFunc) aura_task_free, NULL, loop);
 }
 
 //------------------------------------------------------------------------------

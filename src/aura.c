@@ -49,11 +49,11 @@ int main()
     sigaction(SIGSEGV, &sa, NULL);
 
     // Initialization
-    aura_log_initialize();
     aura_environment_setup();
-    aura_dbus_initalize();
-
     aura_config_apply();
+    if (!aura_config().run_in_test_window) {
+        aura_dbus_initalize();
+    }
 
     // Prepare loops and events
     AuraEventDispatcher* dispatcher = aura_event_dispatcher_new();
@@ -63,12 +63,17 @@ int main()
     AuraLoop* loop_keyboard = aura_loop_new("keyboard");
 
     // Continue initialization asynchronously
-    aura_loop_schedule_task(loop_devices,
-              task_factory_get_setup_device_monitor_task(dispatcher));
-    aura_loop_schedule_task(loop_devices,
-              task_factory_get_setup_input_devices_task(dispatcher));
-    aura_loop_schedule_task(loop_devices,
-              task_factory_get_update_outputs_task(dispatcher));
+    if (!aura_config().run_in_test_window) {
+        aura_loop_schedule_task(loop_devices,
+                  task_factory_get_setup_device_monitor_task(dispatcher));
+        aura_loop_schedule_task(loop_devices,
+                  task_factory_get_setup_input_devices_task(dispatcher));
+        aura_loop_schedule_task(loop_devices,
+                  task_factory_get_update_outputs_task(dispatcher));
+    } else {
+        aura_loop_schedule_task(loop_devices,
+                  task_factory_get_backend_gtk_initialize_task(loop_devices));
+    }
 
     // TODO: init surface manager
     aura_loop_schedule_task(loop_window_manager,
@@ -93,7 +98,6 @@ int main()
     aura_loop_free(loop_devices);
 
     aura_dbus_finalize();
-    aura_log_finalize();
     aura_environment_cleanup();
     return 0;
 }

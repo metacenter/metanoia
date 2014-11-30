@@ -16,6 +16,10 @@ m.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
 
 #-------------------------------------------------------------------------------
 
+with_gtk_support = True;
+
+#-------------------------------------------------------------------------------
+
 aura = m.add_link_target(
         output='aura',
         include_in_all=True
@@ -359,6 +363,24 @@ t = m.add_compile_target(
         inputs=['bind-egl-wayland.c'],
         includes=['bind-egl-wayland.h']
     )
+aura.add_input(t)
+
+#-------------------------------------------------------------------------------
+
+if with_gtk_support:
+    t = m.add_compile_target(
+            output='backend-gtk.o',
+            inputs=['backend-gtk.c'],
+            includes=['backend-gtk.h'],
+            pkgs={'gtk+-3.0'}
+        )
+else:
+    t = m.add_compile_target(
+            output='backend-gtk.o',
+            inputs=['backend-gtk-dummy.c'],
+            includes=['backend-gtk.h'],
+        )
+
 aura.add_input(t)
 
 #-------------------------------------------------------------------------------

@@ -15,5 +15,7 @@ AuraTask* task_factory_get_update_outputs_task(AuraEventDispatcher* ed);
 
 AuraTask* task_factory_get_initialize_wayland_task(AuraLoop* loop);
 
+AuraTask* task_factory_get_backend_gtk_initialize_task(AuraLoop* loop);
+
 #endif // __AURA_EVENT_TASK_FACTORY_H__
 

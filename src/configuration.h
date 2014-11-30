@@ -4,13 +4,14 @@
 #ifndef __AURA_CONFIGURATION_H__
 #define __AURA_CONFIGURATION_H__
 
-#include "global-constants.h"
 #include "configuration-functions.h"
 
 #include <linux/input.h>
 
-static const LogLevel scConfLogLevel = LEVEL_INFO3;//LEVEL_DEBUG;
-static const char* scConfLogFile = "/home/user/.local/share/aura/logs/log";
+static const AuraConfig scConfig = {
+        .run_in_test_window = 1,
+        .log_level = LEVEL_INFO3
+    };
 
 static const Binding scKeyboardBindings[] = {
         {KEY_F7,  AURA_KEY_CTRL | AURA_KEY_ALT, aura_vt_activate_7},

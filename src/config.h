@@ -5,6 +5,14 @@
 #define __AURA_CONFIG_H__
 
 #include "utils-keymap.h"
+#include "global-constants.h"
+
+typedef struct AuraConfig {
+    bool run_in_test_window;
+    LogLevel log_level;
+} AuraConfig;
+
+AuraConfig aura_config();
 
 void aura_config_apply();
 

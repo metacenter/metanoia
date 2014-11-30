@@ -6,11 +6,17 @@
 
 #include "global-constants.h"
 
+typedef enum AuraFilePath {
+    RUNTIME_PATH,
+    DATA_PATH
+} AuraPath;
+
 int aura_environment_setup(void);
 
 void aura_environment_cleanup(void);
 
-int aura_environment_open_runtime_file(const char *file_name,
-                                       unsigned size);
+int aura_environment_open_file(const char *file_name,
+                               unsigned size,
+                               AuraPath path);
 
 #endif // __AURA_UTILS_ENVIRONMENT_H__

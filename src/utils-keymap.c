@@ -82,8 +82,8 @@ int aura_utils_keymap_initialize(AuraKeymap* self)
     self->keymap_size = strlen(keymap_str) + 1;
 
     char* name = "keymap_us";
-    self->keymap_fd = aura_environment_open_runtime_file(name,
-                                                         self->keymap_size);
+    self->keymap_fd = aura_environment_open_file(name, self->keymap_size,
+                                                 RUNTIME_PATH);
     if (self->keymap_fd < 0) {
         LOG_ERROR("Creating a keymap file for %u bytes failed! (%m)",
                   self->keymap_size);

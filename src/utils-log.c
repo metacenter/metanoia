@@ -1,8 +1,9 @@
 // file: utils-log.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
+#include "config.h"
 #include "utils-log.h"
-#include "configuration.h"
+#include "utils-environment.h"
 
 #include <execinfo.h>
 #include <fcntl.h>
@@ -42,8 +43,11 @@ static const char* scLogLevelName[] = {
         "WARN4", "DATA4", "INFO4",
     };
 
+// Log file
+static const char* scConfLogFile = "logs/log";
+
 // Log file descriptor
-static int sLogFD;
+static int sLogFD = -1;
 
 // Mutex
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -53,9 +57,9 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 void aura_log_initialize(void)
 {
     setbuf(stdout, NULL);
-    sLogFD = open(scConfLogFile, O_RDWR|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
+    sLogFD = aura_environment_open_file(scConfLogFile, 0, DATA_PATH);
     if (sLogFD == -1) {
-        LOG_ERROR("Log file '%s' could not be opened!", scConfLogFile);
+        LOG_ERROR("Log file could not be opened!");
     } else {
         write(sLogFD, scLogWelcomeText, sizeof scLogWelcomeText - 1);
     }
@@ -88,7 +92,7 @@ void aura_log(LogLevel    log_level,
     struct tm* tm;
 
     // Check log level
-    if (log_level > scConfLogLevel) {
+    if (log_level > aura_config().log_level) {
         return;
     }
     if (log_level >= sizeof scLogLevelName) {
