@@ -11,6 +11,5 @@
 struct wl_display* get_wayland_display();
 
 void aura_wayland_initialize(AuraLoop* this_loop);
-void aura_wayland_notify_frame(SurfaceData* surface);
 
 #endif // __AURA_WAYLAND_H__

@@ -11,13 +11,6 @@
 #include "event-signals.h"
 #include "surface-priv.h"
 
-#include <stddef.h>
-
-// FIXME: tmp
-#include "wayland.h"
-#include <wayland-server.h>
-#include <time.h>
-
 Chain* visible_surfaces = NULL;
 
 // FIXME: tmp
@@ -43,7 +36,14 @@ void aura_surface_manager_redraw_all()
     renderer->draw_surfaces((struct AuraRenderer*) renderer,
                             visible_surfaces);
 
-    aura_surface_notify_frame();
+    // TODO: pass as list
+    if (visible_surfaces) {
+    Link* link;
+        for (link = visible_surfaces->first; link; link = link->next) {
+            SurfaceId sid = (SurfaceId) link->data;
+            aura_event_signal_emit(SIGNAL_SCREEN_REFRESH, (void*) sid);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -84,37 +84,6 @@ void aura_surface_manage(SurfaceId id)
     chain_append(visible_surfaces, (void*) id);
 
     aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) id);
-}
-
-//------------------------------------------------------------------------------
-
-void aura_surface_notify_frame(void)
-{
-    Link* link;
-
-    if (visible_surfaces == NULL) {
-        return;
-    }
-
-    for (link = visible_surfaces->first; link; link = link->next) {
-        SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
-        if (surface) {
-            aura_wayland_notify_frame(surface);
-        }
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void aura_surface_subscribe_frame(SurfaceId id, void* notify_data)
-{
-    SurfaceData* surface = aura_surface_get(id);
-    if (surface == NULL) {
-        LOG_WARN2("Could not find surface (id: %d)", id);
-        return;
-    }
-
-    surface->frame_notify_data = notify_data;
 }
 
 //------------------------------------------------------------------------------

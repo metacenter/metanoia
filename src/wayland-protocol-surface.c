@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-protocol-surface.h"
+#include "wayland-state.h"
 
 #include "surface.h"
 #include "utils-log.h"
@@ -40,7 +41,9 @@ static void surface_attach(struct wl_client* client,
         LOG_WARN1("Wrong shared memory buffer!");
     }
 
-    // TBR
+    wayland_state_surface_attach(sid, buffer_resource);
+
+    // TODO: do this on commit
     aura_surface_attach(sid, width, height, stride, data, buffer_resource);
 }
 
@@ -67,20 +70,19 @@ static void surface_frame(struct wl_client* client,
 
     LOG_NYIMP("Wayland: surface frame (cb: %d, sid: %d)", callback, sid);
 
-    struct wl_resource* cb_resource = wl_resource_create(client,
-                                                         &wl_callback_interface,
-                                                         1, callback);
-    if (cb_resource == NULL) {
+    struct wl_resource* rc = wl_resource_create(client,
+                                                &wl_callback_interface,
+                                                1, callback);
+    if (rc == NULL) {
         LOG_ERROR("Could not create frame callback resource!");
         wl_resource_post_no_memory(resource);
         return;
     }
 
     // TODO: listen for destroy callback
-    wl_resource_set_implementation(cb_resource, NULL, NULL, NULL);
+    wl_resource_set_implementation(rc, NULL, NULL, NULL);
 
-    LOG_DEBUG("FRA res: %p %d", cb_resource, sid);
-    aura_surface_subscribe_frame(sid, cb_resource);
+    wayland_state_subscribe_frame(sid, rc);
 }
 
 //-----------------------------------------------------------------------------

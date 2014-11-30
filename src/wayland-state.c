@@ -61,14 +61,14 @@ void wayland_state_finalize()
 
 //------------------------------------------------------------------------------
 
-void wayland_state_add_surface(AuraItemId sid, struct wl_resource* resource)
+void wayland_state_add_surface(AuraItemId sid, struct wl_resource* rc)
 {
     pthread_mutex_lock(&mutex);
 
     LOG_INFO3("Wayland: adding surface (sid: %d)", sid);
     AuraSurfaceWaylandData* surface_data = wayland_surface_data_new();
     surface_data->base.id = sid;
-    surface_data->resource = resource;
+    surface_data->resource = rc;
 
     aura_store_add(sState.surfaces, sid, surface_data);
 
@@ -77,14 +77,53 @@ void wayland_state_add_surface(AuraItemId sid, struct wl_resource* resource)
 
 //------------------------------------------------------------------------------
 
-void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_resource)
+void wayland_state_surface_attach(AuraItemId sid, struct wl_resource* rc)
+{
+    pthread_mutex_lock(&mutex);
+
+    AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces, sid);
+    if (!data) {
+        // This is not a Wayland surface
+        LOG_INFO3("SID %d does not resolve to any surface", sid);
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    data->buffer_resource = rc;
+
+    pthread_mutex_unlock(&mutex);
+
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_subscribe_frame(AuraItemId sid, struct wl_resource* rc)
+{
+    pthread_mutex_lock(&mutex);
+
+    AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces, sid);
+    if (!data) {
+        // This is not a Wayland surface
+        LOG_INFO3("SID %d does not resolve to any surface", sid);
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    data->frame_resource = rc;
+
+    pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_rc)
 {
     pthread_mutex_lock(&mutex);
 
     LOG_INFO2("Wayland: adding keyboard resource");
 
     // Store new resource
-    chain_append(sState.keyboard_resources, keyboard_resource);
+    chain_append(sState.keyboard_resources, keyboard_rc);
 
     // TODO: If client is focused, sent enter event
     /*struct wl_client* new_client = wl_resource_get_client(keyboard_resource);
@@ -145,6 +184,43 @@ void wayland_state_keyboard_focus_update(AuraItemId sid)
 
     // Update current client
     sState.keyboard_focused_client = new_client;
+
+    pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_screen_refresh(AuraItemId sid)
+{
+    pthread_mutex_lock(&mutex);
+
+    LOG_INFO2("Wayland: screen refresh (sid: %d)", sid);
+
+    AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces, sid);
+    if (!data) {
+        // This is not a Wayland surface
+        LOG_INFO3("SID %d does not resolve to any surface", sid);
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    // Release buffer resource
+    if (data->buffer_resource) {
+        wl_resource_queue_event(data->buffer_resource, WL_BUFFER_RELEASE);
+    }
+
+    // Notify frame and release frame resource
+    if (data->frame_resource) {
+        LOG_INFO3("Wayland: Sending frame (id: %d)", sid);
+
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint32_t msec = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+
+        wl_callback_send_done(data->frame_resource, msec);
+        wl_resource_destroy(data->frame_resource);
+        data->frame_resource = NULL;
+    }
 
     pthread_mutex_unlock(&mutex);
 }

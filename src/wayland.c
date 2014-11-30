@@ -43,12 +43,12 @@ static void* display_run(void* data)
 
 //------------------------------------------------------------------------------
 
-/*static void wayland_frame_hadler(void* data)
+static void wayland_screen_refresh_handler(void* data)
 {
-    // TODO
-    //LOG_INFO1("Wayland: handling surface frame (%d)", sid);
-    //wayland_state_notify_frame(sid);
-}*/
+    SurfaceId sid = (SurfaceId) data;
+    LOG_INFO1("Wayland: handling screen refresh");
+    wayland_state_screen_refresh(sid);
+}
 
 //------------------------------------------------------------------------------
 
@@ -152,8 +152,8 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     }
 
     // Subscribe for events
-    //aura_event_signal_subscribe(SIGNAL_FRAME,
-    //        aura_task_create(wayland_frame_handler, this_loop));
+    aura_event_signal_subscribe(SIGNAL_SCREEN_REFRESH,
+            aura_task_create(wayland_screen_refresh_handler, this_loop));
 
     aura_event_signal_subscribe(SIGNAL_KEYBOARD_FOCUS_CHANGED,
             aura_task_create(wayland_keyboard_focus_change_handler, this_loop));
@@ -162,38 +162,6 @@ void aura_wayland_initialize(AuraLoop* this_loop)
             aura_task_create(wayland_keyboard_event_handler, this_loop));
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
-}
-
-//------------------------------------------------------------------------------
-
-void aura_wayland_notify_frame(SurfaceData* surface)
-{
-    if (!surface) {
-        LOG_ERROR("Got null surface!");
-        return;
-    }
-
-    LOG_INFO3("Wayland: Notify frame (id: %d)", surface->id);
-
-    void* notify_data = surface->frame_notify_data;
-    void* buffer_resource = surface->buffer_resource;
-
-    if (buffer_resource) {
-        wl_resource_queue_event(buffer_resource, WL_BUFFER_RELEASE);
-    }
-
-    if (notify_data) {
-        LOG_INFO3("Wayland: Sending frame (%p, id: %d)", notify_data, surface->id);
-        // TODO: pass time as argument
-        struct timespec ts;
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        uint32_t msec = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
-
-        wl_callback_send_done(notify_data, msec);
-        wl_resource_destroy(notify_data);
-    }
-
-    surface->frame_notify_data = NULL;
 }
 
 //------------------------------------------------------------------------------
