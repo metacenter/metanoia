@@ -42,6 +42,7 @@ int aura_environment_setup(void)
     }
 
     LOG_INFO1("Runtime path: '%s'", aura_runtime_path);
+    return 0;
 
 cleanup:
     free(aura_runtime_path_template);
@@ -71,6 +72,9 @@ int aura_environment_open_runtime_file(const char *file_name,
     if (!file_path) {
         return -1;
     }
+
+    LOG_DEBUG("Creating a file '%s' in runtime directory '%s'",
+              file_name, aura_runtime_path);
 
     strcpy(file_path, aura_runtime_path);
     strcat(file_path, "/");

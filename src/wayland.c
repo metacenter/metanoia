@@ -63,7 +63,14 @@ static void wayland_keyboard_focus_change_handler(void* data)
 
 static void wayland_keyboard_event_handler(void* data)
 {
-    LOG_INFO1("KEY SIGNAL HANDLED!");
+    LOG_INFO1("Wayland: handling keyboard event");
+
+    AuraKeyData* key_data = data;
+    if (!key_data) {
+        return;
+    }
+
+    wayland_state_key(key_data->time, key_data->code, key_data->value);
 }
 
 //------------------------------------------------------------------------------
@@ -93,14 +100,14 @@ void aura_wayland_initialize(AuraLoop* this_loop)
 
     LOG_INFO1("Initializing Wayland...");
 
-    wayland_state_initialize();
-
     // Init Wayland
     wayland_display = wl_display_create();
     if (!wayland_display) {
         LOG_ERROR("Could not initialize Wafyland!");
         return;
     }
+
+    wayland_state_initialize(wayland_display);
 
     LOG_DEBUG("WLD: %p", wayland_display);
 

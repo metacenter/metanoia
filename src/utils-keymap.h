@@ -8,6 +8,7 @@ typedef struct AuraKeymapPriv AuraKeymapPriv;
 
 typedef struct AuraKeymap {
     AuraKeymapPriv* priv;
+    unsigned format;
     int keymap_fd;
     unsigned keymap_size;
 } AuraKeymap;

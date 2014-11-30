@@ -15,10 +15,15 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 //------------------------------------------------------------------------------
 
 static struct {
+    struct wl_display* display;
     AuraStore* surfaces;
     Chain* keyboard_resources;
-    struct wl_client* keyboard_focused_client;
+    AuraItemId keyboard_focused_sid;
 } sState;
+
+
+// FIXME: tmp
+uint32_t serial = 0;
 
 //------------------------------------------------------------------------------
 
@@ -35,7 +40,7 @@ AuraSurfaceWaylandData* wayland_surface_data_new()
 
 //------------------------------------------------------------------------------
 
-int wayland_state_initialize()
+int wayland_state_initialize(struct wl_display* display)
 {
     sState.surfaces = aura_store_new();
     if (!sState.surfaces) {
@@ -47,7 +52,8 @@ int wayland_state_initialize()
         return -1;
     }
 
-    sState.keyboard_focused_client = NULL;
+    sState.display = display;
+    sState.keyboard_focused_sid = scInvalidItemId;
 
     return 0;
 }
@@ -92,7 +98,6 @@ void wayland_state_surface_attach(AuraItemId sid, struct wl_resource* rc)
     data->buffer_resource = rc;
 
     pthread_mutex_unlock(&mutex);
-
 }
 
 //------------------------------------------------------------------------------
@@ -126,64 +131,117 @@ void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_rc)
     chain_append(sState.keyboard_resources, keyboard_rc);
 
     // TODO: If client is focused, sent enter event
-    /*struct wl_client* new_client = wl_resource_get_client(keyboard_resource);
-    if (new_client == sState.keyboard_focused_client) {
+    AuraSurfaceWaylandData* data =
+                   aura_store_get(sState.surfaces, sState.keyboard_focused_sid);
+    if (!data) {
+        // This is not a Wayland surface
+        LOG_INFO3("New SID does not resolve to any surface");
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    struct wl_client* focused_client = wl_resource_get_client(data->resource);
+    struct wl_client* new_client = wl_resource_get_client(keyboard_rc);
+    if (new_client == focused_client) {
         struct wl_array array;
         wl_array_init(&array);
-        wl_keyboard_send_enter(keyboard_resource, 0, surface_resource, &array);
-    }*/
+        serial = wl_display_next_serial(sState.display);
+        wl_keyboard_send_enter(keyboard_rc, serial, data->resource, &array);
+    }
 
     pthread_mutex_unlock(&mutex);
 }
 
 //------------------------------------------------------------------------------
 
-void wayland_state_keyboard_focus_update(AuraItemId sid)
+void wayland_state_keyboard_focus_update(AuraItemId new_sid)
 {
     pthread_mutex_lock(&mutex);
 
-    LOG_INFO2("Wayland: keyboard focus update (sid: %d)", sid);
-    AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces, sid);
-    if (!data) {
+    AuraItemId old_sid = sState.keyboard_focused_sid;
+    LOG_INFO2("Wayland: keyboard focus update (oldsid: %u, newsid: %u)",
+              old_sid, new_sid);
+
+    AuraSurfaceWaylandData* new_data = aura_store_get(sState.surfaces, new_sid);
+    if (!new_data) {
         // This is not a Wayland surface
-        LOG_INFO3("SID %d does not resolve to any surface", sid);
+        LOG_INFO3("New SID does not resolve to any surface");
         pthread_mutex_unlock(&mutex);
         return;
     }
+    struct wl_client* new_client = wl_resource_get_client(new_data->resource);
 
-    struct wl_client* new_client = wl_resource_get_client(data->resource);
-    struct wl_client* old_client = sState.keyboard_focused_client;
-
-    struct wl_array array;
-    wl_array_init(&array);
+    AuraSurfaceWaylandData* old_data = NULL;
+    struct wl_client* old_client = NULL;
+    if (old_sid != scInvalidItemId) {
+        old_data = aura_store_get(sState.surfaces, old_sid);
+        old_client = wl_resource_get_client(old_data->resource);
+    }
 
     // Check if new and old clients are different
     if (new_client == old_client) {
+        sState.keyboard_focused_sid = new_sid;
         pthread_mutex_unlock(&mutex);
         return;
     }
 
     // Clear current client
-    sState.keyboard_focused_client = NULL;
+    sState.keyboard_focused_sid = scInvalidItemId;
 
     // Send 'leave' and 'enter' event to all clients' keyboard objects
+    struct wl_array array;
+    wl_array_init(&array);
     Link* link = sState.keyboard_resources->first;
     while (link) {
-        struct wl_resource* res = link->data;
-        struct wl_client* res_client = wl_resource_get_client(res);
+        struct wl_resource* rc = link->data;
+        struct wl_client* rc_client = wl_resource_get_client(rc);
 
-        if (res_client == old_client) {
+        if (rc_client == old_client) {
             // TODO: wl_keyboard_send_leave
         }
-        if (res_client == new_client) {
-            wl_keyboard_send_enter(res, 0, data->resource, &array);
+        if (rc_client == new_client) {
+            wl_keyboard_send_enter(rc, 0, new_data->resource, &array);
         }
 
         link = link->next;
     }
 
     // Update current client
-    sState.keyboard_focused_client = new_client;
+    sState.keyboard_focused_sid = new_sid;
+
+    pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
+{
+    pthread_mutex_lock(&mutex);
+
+    if (sState.keyboard_focused_sid == scInvalidItemId) {
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    LOG_INFO2("Wayland: key (sid: %u, time: %u, key: %u, state: %u)",
+              sState.keyboard_focused_sid, time, key, state);
+
+    AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces,
+                                                  sState.keyboard_focused_sid);
+    if (!data) {
+        // This is not a Wayland surface
+        LOG_INFO3("Given SID does not resolve to any surface");
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    serial = wl_display_next_serial(sState.display);
+    Link* link = sState.keyboard_resources->first;
+    while (link) {
+        struct wl_resource* rc = link->data;
+        wl_keyboard_send_key(rc, serial, time, key, state);
+        link = link->next;
+    }
 
     pthread_mutex_unlock(&mutex);
 }
@@ -194,7 +252,7 @@ void wayland_state_screen_refresh(AuraItemId sid)
 {
     pthread_mutex_lock(&mutex);
 
-    LOG_INFO2("Wayland: screen refresh (sid: %d)", sid);
+    LOG_INFO2("Wayland: screen refresh (sid: %u)", sid);
 
     AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces, sid);
     if (!data) {
@@ -211,7 +269,7 @@ void wayland_state_screen_refresh(AuraItemId sid)
 
     // Notify frame and release frame resource
     if (data->frame_resource) {
-        LOG_INFO3("Wayland: Sending frame (id: %d)", sid);
+        LOG_INFO3("Wayland: Sending frame (id: %u)", sid);
 
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);

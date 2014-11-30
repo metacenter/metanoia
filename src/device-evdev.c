@@ -16,9 +16,6 @@
 #include <string.h>
 #include <linux/input.h>
 
-// TODO: remove?
-#include <linux/vt.h>
-
 //------------------------------------------------------------------------------
 
 static const char scIdInputMouse[]       = "ID_INPUT_MOUSE";
@@ -43,7 +40,12 @@ static void handle_key(struct input_event* ev)
         bool catched = aura_keyboard_catch_key(ev->code,
                               ev->value ? AURA_KEY_PRESSED : AURA_KEY_RELEASED);
         if (!catched) {
-            aura_event_signal_emit(SIGNAL_KEYBOARD_EVENT, NULL);
+            // TODO: add contructor
+            AuraKeyData* data = malloc(sizeof(AuraKeyData));
+            data->time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
+            data->code = ev->code;
+            data->value = ev->value;
+            aura_event_signal_emit(SIGNAL_KEYBOARD_EVENT, data);
         }
     }
 }
@@ -175,6 +177,4 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
 }
 
 //------------------------------------------------------------------------------
-
-
 

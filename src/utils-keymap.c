@@ -58,6 +58,7 @@ int aura_utils_keymap_initialize(AuraKeymap* self)
 {
     // Create context
     self->priv->context = xkb_context_new(0);
+    self->format = XKB_KEYMAP_FORMAT_TEXT_V1;
 
     // Set keymap from names
     struct xkb_rule_names names;
@@ -72,7 +73,7 @@ int aura_utils_keymap_initialize(AuraKeymap* self)
 
     // Save keymap to file
     char* keymap_str = xkb_keymap_get_as_string(self->priv->keymap,
-                                                XKB_KEYMAP_FORMAT_TEXT_V1);
+                                                self->format);
     if (keymap_str == NULL) {
         LOG_ERROR("Failed to get string version of keymap!");
         return -1;

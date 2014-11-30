@@ -6,6 +6,7 @@
 #include "wayland-state.h"
 
 #include "utils-log.h"
+#include "config.h"
 
 //------------------------------------------------------------------------------
 
@@ -22,20 +23,33 @@ static void get_keyboard(struct wl_client *client,
                          struct wl_resource *resource,
                          uint32_t id)
 {
-    struct wl_resource* res;
+    struct wl_resource* rc;
 
     LOG_DATA3("Wayland: get keyboard (id: %d)", id);
 
-    res = wl_resource_create(client, &wl_keyboard_interface,
-                             wl_resource_get_version(resource), id);
-    if (res == NULL) {
+    rc = wl_resource_create(client, &wl_keyboard_interface,
+                            wl_resource_get_version(resource), id);
+    if (rc == NULL) {
         wl_client_post_no_memory(client);
         return;
     }
 
-    wl_resource_set_implementation(res, &keyboard_implementation, NULL, NULL);
+    wl_resource_set_implementation(rc, &keyboard_implementation, NULL, NULL);
 
-    wayland_state_add_keyboard_resource(res);
+    // Store resource
+    wayland_state_add_keyboard_resource(rc);
+
+    // Send keymap to client
+    AuraKeymap* keymap = aura_config_get_keymap();
+    if (!keymap) {
+        return;
+    }
+
+    LOG_DATA3("Wayland keyboard map send (format: %d, fd: %d, size: %d)",
+              keymap->format, keymap->keymap_fd, keymap->keymap_size);
+    wl_keyboard_send_keymap(rc, (uint32_t) keymap->format,
+                                (uint32_t) keymap->keymap_fd,
+                                (uint32_t) keymap->keymap_size);
 }
 
 //------------------------------------------------------------------------------
