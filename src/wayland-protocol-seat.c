@@ -33,9 +33,9 @@ static void get_keyboard(struct wl_client *client,
         return;
     }
 
-    wayland_state_add_keyboard_resource(res, resource);
-
     wl_resource_set_implementation(res, &keyboard_implementation, NULL, NULL);
+
+    wayland_state_add_keyboard_resource(res);
 }
 
 //------------------------------------------------------------------------------

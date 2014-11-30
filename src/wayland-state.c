@@ -77,8 +77,7 @@ void wayland_state_add_surface(AuraItemId sid, struct wl_resource* resource)
 
 //------------------------------------------------------------------------------
 
-void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_resource,
-                                         struct wl_resource* surface_resource)
+void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_resource)
 {
     pthread_mutex_lock(&mutex);
 
@@ -87,20 +86,20 @@ void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_resource,
     // Store new resource
     chain_append(sState.keyboard_resources, keyboard_resource);
 
-    // If client is focused, sent enter event
-    struct wl_client* new_client = wl_resource_get_client(keyboard_resource);
+    // TODO: If client is focused, sent enter event
+    /*struct wl_client* new_client = wl_resource_get_client(keyboard_resource);
     if (new_client == sState.keyboard_focused_client) {
         struct wl_array array;
         wl_array_init(&array);
         wl_keyboard_send_enter(keyboard_resource, 0, surface_resource, &array);
-    }
+    }*/
 
     pthread_mutex_unlock(&mutex);
 }
 
 //------------------------------------------------------------------------------
 
-int wayland_state_keyboard_focus_update(AuraItemId sid)
+void wayland_state_keyboard_focus_update(AuraItemId sid)
 {
     pthread_mutex_lock(&mutex);
 
@@ -109,7 +108,8 @@ int wayland_state_keyboard_focus_update(AuraItemId sid)
     if (!data) {
         // This is not a Wayland surface
         LOG_INFO3("SID %d does not resolve to any surface", sid);
-        return 0;
+        pthread_mutex_unlock(&mutex);
+        return;
     }
 
     struct wl_client* new_client = wl_resource_get_client(data->resource);
@@ -120,7 +120,8 @@ int wayland_state_keyboard_focus_update(AuraItemId sid)
 
     // Check if new and old clients are different
     if (new_client == old_client) {
-        return 0;
+        pthread_mutex_unlock(&mutex);
+        return;
     }
 
     // Clear current client
@@ -146,7 +147,6 @@ int wayland_state_keyboard_focus_update(AuraItemId sid)
     sState.keyboard_focused_client = new_client;
 
     pthread_mutex_unlock(&mutex);
-    return 0;
 }
 
 //------------------------------------------------------------------------------

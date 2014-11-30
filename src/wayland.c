@@ -43,6 +43,15 @@ static void* display_run(void* data)
 
 //------------------------------------------------------------------------------
 
+/*static void wayland_frame_hadler(void* data)
+{
+    // TODO
+    //LOG_INFO1("Wayland: handling surface frame (%d)", sid);
+    //wayland_state_notify_frame(sid);
+}*/
+
+//------------------------------------------------------------------------------
+
 static void wayland_keyboard_focus_change_handler(void* data)
 {
     SurfaceId sid = (SurfaceId) data;
@@ -62,10 +71,14 @@ static void wayland_keyboard_event_handler(void* data)
 int aura_wayland_event_loop_feeder(void* data)
 {
     struct wl_event_loop* loop;
-    struct wl_event_source* src;
+    static struct wl_event_source* src = NULL;
 
+    LOG_DEBUG("--- Wayland loop feeder ---");
     loop = wl_display_get_event_loop(wayland_display);
-    src = wl_event_loop_add_timer(loop, aura_wayland_event_loop_feeder, NULL);
+    if (!src) {
+        src = wl_event_loop_add_timer(loop,
+                aura_wayland_event_loop_feeder, NULL);
+    }
     wl_event_source_timer_update(src, 100);
 
     return 0;
@@ -139,6 +152,9 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     }
 
     // Subscribe for events
+    //aura_event_signal_subscribe(SIGNAL_FRAME,
+    //        aura_task_create(wayland_frame_handler, this_loop));
+
     aura_event_signal_subscribe(SIGNAL_KEYBOARD_FOCUS_CHANGED,
             aura_task_create(wayland_keyboard_focus_change_handler, this_loop));
 
@@ -167,6 +183,7 @@ void aura_wayland_notify_frame(SurfaceData* surface)
     }
 
     if (notify_data) {
+        LOG_INFO3("Wayland: Sending frame (%p, id: %d)", notify_data, surface->id);
         // TODO: pass time as argument
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);

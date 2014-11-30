@@ -21,10 +21,11 @@ void wayland_state_finalize();
 
 void wayland_state_add_surface(AuraItemId sid, struct wl_resource* resource);
 
-void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_resource,
-                                         struct wl_resource* surface_resource);
+//void wayland_state_notify_frame(AuraItemId sid);
 
-int wayland_state_keyboard_focus_update(AuraItemId sid);
+void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_resource);
+
+void wayland_state_keyboard_focus_update(AuraItemId sid);
 
 #endif // __AURA_WAYLAND_STATE_H__
 

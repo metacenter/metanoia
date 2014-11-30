@@ -32,7 +32,7 @@ void aura_surface_manager_redraw_all()
     LOG_DEBUG("Redraw all");
 
     if (renderer == NULL) {
-        LOG_ERROR("Wrong renderer!");
+        LOG_ERROR("Invalid renderer!");
         return;
     }
     if (renderer->draw_surfaces == NULL) {
