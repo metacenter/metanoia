@@ -60,14 +60,15 @@ static void handle_event(AuraEventData* data, struct epoll_event* epev)
 
     struct input_event ev;
     int fd = data->fd;
-    uint32_t flags = data->flags;
+    uint32_t flags = data->data.flags;
 
     while (1) {
         int size = read(fd, &ev, sizeof(struct input_event));
 
         if (size != sizeof(struct input_event)) {
-            if (size != -1)
+            if (size != -1) {
                 LOG_ERROR("Wrong data size! (%d)", size);
+            }
             return;
         }
 
@@ -167,7 +168,7 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
         AuraEventData* data = malloc(sizeof(AuraEventData));
         data->fd = fd;
         data->handler = (AuraEventHandler) handle_event;
-        data->flags = flags;
+        data->data.flags = flags;
         aura_event_dispatcher_add_event_source(ed, data);
     }
 

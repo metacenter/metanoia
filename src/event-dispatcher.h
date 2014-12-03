@@ -5,28 +5,36 @@
 #define __AURA_EVENT_DISPATCHER_H__
 
 #include <sys/epoll.h>
-#include <sys/signal.h>
 
+typedef struct AuraEventData AuraEventData;
 typedef struct AuraEventDispatcherPriv AuraEventDispatcher;
 
-struct AuraEventData;
+typedef void (*AuraEventHandler) (AuraEventData* data, struct epoll_event);
 
-typedef void (*AuraEventHandler) (void* data, struct epoll_event);
-
-typedef struct {
+struct AuraEventData {
     AuraEventHandler handler;
     int fd;
-    uint32_t flags;
-} AuraEventData;
+    union {
+        uint32_t flags;
+        void* ptr;
+    } data;
+};
 
 AuraEventDispatcher* aura_event_dispatcher_new(void);
 void aura_event_dispatcher_free(AuraEventDispatcher* self);
+
+int aura_event_dispatcher_is_running(AuraEventDispatcher* self);
+
+int aura_event_dispatcher_initialize(AuraEventDispatcher* self);
 
 int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
                                            AuraEventData* data);
 
 void aura_event_dispatcher_start(AuraEventDispatcher* self);
 void aura_event_dispatcher_stop(AuraEventDispatcher* self);
+
+void aura_event_dispatcher_default_signal_handler(AuraEventData* data,
+                                                  struct epoll_event event);
 
 #endif // __AURA_EVENT_DISPATCHER_H__
 

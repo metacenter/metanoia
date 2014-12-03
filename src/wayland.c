@@ -10,6 +10,7 @@
 #include "wayland-state.h"
 
 #include "utils-log.h"
+#include "utils-environment.h"
 #include "event-signals.h"
 
 #include <errno.h>
@@ -37,6 +38,7 @@ struct wl_display* get_wayland_display()
 
 static void* display_run(void* data)
 {
+    aura_environment_block_system_signals();
     wl_display_run((struct wl_display*) data);
     return NULL;
 }

@@ -4,6 +4,7 @@
 #include "event-loop.h"
 #include "utils-log.h"
 #include "utils-chain.h"
+#include "utils-environment.h"
 
 #include <errno.h>
 #include <malloc.h>
@@ -64,6 +65,7 @@ static void* loop(void* data)
     }
 
     LOG_INFO1("Threads: starting loop '%s'", mine->name);
+    aura_environment_block_system_signals();
 
     mine->run = 1;
     pthread_mutex_lock(&mine->mutex);
@@ -88,7 +90,7 @@ static void* loop(void* data)
         pthread_cond_wait(&mine->condition, &mine->mutex);
     }
 
-    LOG_INFO1("Threads: stoping loop '%s'", mine->name);
+    LOG_INFO1("Threads: stopped loop '%s'", mine->name);
     return NULL;
 }
 
@@ -114,7 +116,10 @@ void aura_loop_stop(AuraLoop* self)
     }
 
     LOG_INFO1("Threads: stopping loop '%s'", mine->name);
+    pthread_mutex_lock(&mine->mutex);
     mine->run = 0;
+    pthread_mutex_unlock(&mine->mutex);
+    pthread_cond_signal(&mine->condition);
 }
 
 //-------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 
 #include "event-loop.h"
 
-void aura_backend_gtk_initialize(AuraLoop* this_loop);
+void aura_backend_gtk_run(AuraLoop* this_loop);
 
 #endif // __AURA_BACKEND_GTK_H__
 

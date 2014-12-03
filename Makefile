@@ -18,7 +18,7 @@ clean:
 $(builddir)/aura: Makefile \
                   $(builddir)/aura.o \
                   $(builddir)/config.o \
-                  $(builddir)/configuration-functions.o \
+                  $(builddir)/global-functions.o \
                   $(builddir)/utils-chain.o \
                   $(builddir)/utils-store.o \
                   $(builddir)/utils-dbus.o \
@@ -30,7 +30,7 @@ $(builddir)/aura: Makefile \
                   $(builddir)/event-signals.o \
                   $(builddir)/event-loop.o \
                   $(builddir)/event-task.o \
-                  $(builddir)/event-task-factory.o \
+                  $(builddir)/event-factory.o \
                   $(builddir)/device-common.o \
                   $(builddir)/device-fb.o \
                   $(builddir)/device-drm.o \
@@ -59,8 +59,8 @@ $(builddir)/aura: Makefile \
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/configuration-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-task-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o \
-	       `pkg-config --libs gbm dbus-1 libdrm xkbcommon egl libudev gl wayland-server gtk+-3.0`
+	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/global-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o \
+	       `pkg-config --libs wayland-server libudev gtk+-3.0 dbus-1 xkbcommon libdrm egl gbm gl`
 
 $(gendir)/xdg-shell-server-protocol.h: Makefile \
                                        protocol/xdg-shell.xml
@@ -89,13 +89,13 @@ $(builddir)/config.o: Makefile \
 	@$(CC) $(WFLAGS) -o $(builddir)/config.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/config.c
 
-$(builddir)/configuration-functions.o: Makefile \
-                                       $(srcdir)/configuration-functions.c \
-                                       $(srcdir)/configuration-functions.h
+$(builddir)/global-functions.o: Makefile \
+                                $(srcdir)/global-functions.c \
+                                $(srcdir)/global-functions.h
 	@mkdir -p $(builddir)
-	@echo "  CC  configuration-functions.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/configuration-functions.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/configuration-functions.c
+	@echo "  CC  global-functions.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/global-functions.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/global-functions.c
 
 $(builddir)/utils-chain.o: Makefile \
                            $(srcdir)/utils-chain.c \
@@ -187,13 +187,13 @@ $(builddir)/event-task.o: Makefile \
 	@$(CC) $(WFLAGS) -o $(builddir)/event-task.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/event-task.c
 
-$(builddir)/event-task-factory.o: Makefile \
-                                  $(srcdir)/event-task-factory.c \
-                                  $(srcdir)/event-task-factory.h
+$(builddir)/event-factory.o: Makefile \
+                             $(srcdir)/event-factory.c \
+                             $(srcdir)/event-factory.h
 	@mkdir -p $(builddir)
-	@echo "  CC  event-task-factory.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/event-task-factory.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/event-task-factory.c
+	@echo "  CC  event-factory.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/event-factory.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/event-factory.c
 
 $(builddir)/device-common.o: Makefile \
                              $(srcdir)/device-common.c \
@@ -218,7 +218,7 @@ $(builddir)/device-drm.o: Makefile \
 	@echo "  CC  device-drm.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/device-drm.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/device-drm.c \
-	       `pkg-config --cflags egl gbm libdrm`
+	       `pkg-config --cflags libdrm egl gbm`
 
 $(builddir)/device-evdev.o: Makefile \
                             $(srcdir)/device-evdev.c \

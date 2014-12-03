@@ -8,6 +8,7 @@
 #include <memory.h>
 #include <string.h>
 #include <fcntl.h>
+#include <signal.h>
 
 static const char scRuntimeDirTemplate[] = "/aura-XXXXXX";
 static const char scDataDirTemplate[] = "/aura";
@@ -17,7 +18,63 @@ char* aura_runtime_path = NULL;
 
 //------------------------------------------------------------------------------
 
-int aura_environment_data_path_setup(void)
+void aura_environment_block_system_signals(void)
+{
+    sigset_t mask;
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGTERM);
+    sigprocmask(SIG_BLOCK, &mask, NULL);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_environment_unblock_system_signals(void)
+{
+    sigset_t mask;
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGTERM);
+    sigprocmask(SIG_UNBLOCK, &mask, NULL);
+}
+
+//------------------------------------------------------------------------------
+
+static void aura_environment_async_signal_handler(int sig,
+                                                  siginfo_t* si,
+                                                  void* arg)
+{
+    switch (sig) {
+        case SIGINT:
+        case SIGTERM:
+        case SIGSEGV:
+            LOG_INFO1("Signal '%d' received asynchronously", sig);
+            aura_print_backtrace();
+            abort();
+        default:
+            LOG_INFO2("Unhandled signal: '%d'", sig);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+static void aura_environment_signal_handler_set_up(void)
+{
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sigaction));
+    sigemptyset(&sa.sa_mask);
+
+    sa.sa_sigaction = aura_environment_async_signal_handler;
+    sa.sa_flags = SA_SIGINFO;
+
+    sigaction(SIGINT,  &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGSEGV, &sa, NULL);
+}
+
+//------------------------------------------------------------------------------
+
+static int aura_environment_data_path_setup(void)
 {
     char* data_path = getenv("XDG_DATA_HOME");
     if (!data_path) {
@@ -41,7 +98,7 @@ int aura_environment_data_path_setup(void)
 
 //------------------------------------------------------------------------------
 
-int aura_environment_runtime_path_setup(void)
+static int aura_environment_runtime_path_setup(void)
 {
     int result = 0;
 
@@ -79,10 +136,16 @@ cleanup:
 
 int aura_environment_setup(void)
 {
+    // Set up async signal handler
+    aura_environment_signal_handler_set_up();
+
+    // Create $XDG_DATA_HOME/aura directory
     int result1 = aura_environment_data_path_setup();
 
+    // Open log file
     aura_log_initialize();
 
+    // Create temporary $XDG_RUNTIME_DIR/aura-XXXXXX directory
     int result2 = aura_environment_runtime_path_setup();
 
     if (result1 < 0 || result2 < 0) {

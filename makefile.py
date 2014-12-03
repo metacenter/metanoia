@@ -76,9 +76,9 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='configuration-functions.o',
-        inputs=['configuration-functions.c'],
-        includes=['configuration-functions.h']
+        output='global-functions.o',
+        inputs=['global-functions.c'],
+        includes=['global-functions.h']
     )
 aura.add_input(t)
 
@@ -168,9 +168,9 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='event-task-factory.o',
-        inputs=['event-task-factory.c'],
-        includes=['event-task-factory.h']
+        output='event-factory.o',
+        inputs=['event-factory.c'],
+        includes=['event-factory.h']
     )
 aura.add_input(t)
 

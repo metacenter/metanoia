@@ -11,6 +11,10 @@ typedef enum AuraFilePath {
     DATA_PATH
 } AuraPath;
 
+void aura_environment_block_system_signals(void);
+
+void aura_environment_unblock_system_signals(void);
+
 int aura_environment_setup(void);
 
 void aura_environment_cleanup(void);
