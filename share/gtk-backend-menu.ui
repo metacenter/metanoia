@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  vim: tabstop=2 expandtab list
+-->
+<interface>
+  <requires lib="gtk+" version="3.12"/>
+  <object class="GtkMenuButton" id="menu_button">
+    <property name="visible">True</property>
+    <property name="can_focus">True</property>
+    <property name="receives_default">True</property>
+    <property name="menu-model">menu</property>
+    <child>
+      <object class="GtkImage" id="image">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="icon_name">display</property>
+        <property name="icon_size">5</property>
+      </object>
+    </child>
+  </object>
+  <menu id="menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Enaled</attribute>
+        <attribute name="action">win.enabled</attribute>
+      </item>
+    </section>
+    <section>
+      <attribute name="label" translatable="yes">Resolution</attribute>
+      <item>
+        <attribute name="label" translatable="yes">600x800</attribute>
+        <attribute name="action">win.tmp</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

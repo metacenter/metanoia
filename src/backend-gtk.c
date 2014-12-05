@@ -10,7 +10,18 @@
 
 //------------------------------------------------------------------------------
 
+#define NUM_VIEW_GROUPS 4
+
+static const char* scMainGuiPath = "share/gtk-backend-main.ui";
+static const char* scMenuGuiPath = "share/gtk-backend-menu.ui";
+
 GtkWidget* window;
+
+struct {
+    GtkWidget* da;
+    GtkWidget* mb;
+    GtkWidget* id;
+} group[NUM_VIEW_GROUPS];
 
 //------------------------------------------------------------------------------
 
@@ -27,17 +38,42 @@ static void* aura_backend_gtk_main(void* data)
 
 static void aura_backend_gtk_build()
 {
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    int i;
+    GtkWidget* box_inner;
+    GtkWidget* header_bar;
 
-    GtkWidget* box_main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget* header_bar = gtk_header_bar_new();
+    // Build main window
+    GtkBuilder* builder = gtk_builder_new();
+    if (gtk_builder_add_from_file(builder, scMainGuiPath, NULL) == 0) {
+        LOG_ERROR("Gtk builder returned error!");
+    }
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
+    box_inner = GTK_WIDGET(gtk_builder_get_object(builder, "box_inner"));
+    header_bar = GTK_WIDGET(gtk_builder_get_object(builder, "header_bar"));
+    g_object_unref(builder);
 
-    gtk_window_set_title(GTK_WINDOW(window), "Aura Testing Window");
-    gtk_header_bar_set_title(GTK_HEADER_BAR(header_bar), "Aura Testing Window");
-    gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header_bar), 1);
+    // Add drawing areas
+    for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
+        group[i].da = gtk_drawing_area_new();
+        gtk_box_pack_start(GTK_BOX(box_inner), GTK_WIDGET(group[i].da), 0,0,5);
+    }
 
-    gtk_box_pack_start(GTK_BOX(box_main), header_bar, 0, 1, 0);
-    gtk_container_add(GTK_CONTAINER(window), box_main);
+    // Add display menus
+    for (i = NUM_VIEW_GROUPS-1; i > -1; --i) {
+        builder = gtk_builder_new();
+        if (gtk_builder_add_from_file(builder, scMenuGuiPath, NULL) == 0) {
+            LOG_ERROR("Gtk builder returned error!");
+        }
+
+        group[i].mb = GTK_WIDGET(gtk_builder_get_object(builder,"menu_button"));
+
+        gtk_header_bar_pack_start(GTK_HEADER_BAR(header_bar),
+                                  GTK_WIDGET(group[i].mb));
+        g_object_unref(builder);
+    }
+
+    // Bind signals
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -54,9 +90,6 @@ void aura_backend_gtk_run(AuraLoop* this_loop)
     gtk_init(&argc, &argv);
 
     aura_backend_gtk_build();
-
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
     gtk_widget_show_all(window);
 
     // Run wayland display in separate thread
