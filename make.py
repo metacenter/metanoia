@@ -123,7 +123,7 @@ class Make:
                 if len(t.pkgs):
                     wr(' \\\n\t       ', end='')
                     wr('`pkg-config --cflags {0}`' \
-                       .format(' '.join(t.pkgs)), end='')
+                       .format(' '.join(sorted(t.pkgs))), end='')
 
             def wr_link(t, output_path, input_paths):
                 wr('\n\t@mkdir -p $(builddir)')
@@ -134,7 +134,7 @@ class Make:
                 if len(t.pkgs):
                     wr(' \\\n\t       ', end='')
                     wr('`pkg-config --libs {0}`' \
-                       .format(' '.join(t.pkgs)), end='')
+                       .format(' '.join(sorted(t.pkgs))), end='')
 
             def wr_gen(t, output_path, input_paths):
                 wr('\n\t@mkdir -p $(gendir)')

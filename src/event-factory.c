@@ -6,6 +6,7 @@
 #include "device-evdev.h"
 #include "device-udev.h"
 #include "backend-gtk.h"
+#include "output-collector.h"
 #include "surface.h"
 #include "wayland.h"
 #include "utils-environment.h"
@@ -32,14 +33,6 @@ AuraTask* factorize_setup_input_devices_task(AuraEventDispatcher* ed)
 
 //------------------------------------------------------------------------------
 
-AuraTask* factorize_update_outputs_task(AuraEventDispatcher* ed)
-{
-    return aura_task_new((AuraTaskProcessor) aura_update_outputs,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, ed);
-}
-
-//------------------------------------------------------------------------------
-
 AuraTask* factorize_initialize_wayland_task(AuraLoop* loop)
 {
     return aura_task_new((AuraTaskProcessor) aura_wayland_initialize,
@@ -51,6 +44,22 @@ AuraTask* factorize_initialize_wayland_task(AuraLoop* loop)
 AuraTask* factorize_backend_gtk_run_task(AuraLoop* loop)
 {
     return aura_task_new((AuraTaskProcessor) aura_backend_gtk_run,
+                         (AuraTaskFreeFunc) aura_task_free, NULL, loop);
+}
+
+//------------------------------------------------------------------------------
+
+AuraTask* factorize_initialize_surface_manager_task(AuraLoop* loop)
+{
+    return aura_task_new((AuraTaskProcessor) aura_surface_manager_initialize,
+                         (AuraTaskFreeFunc) aura_task_free, NULL, loop);
+}
+
+//------------------------------------------------------------------------------
+
+AuraTask* factorize_initialize_output_collector_task(AuraLoop* loop)
+{
+    return aura_task_new((AuraTaskProcessor) aura_output_collector_initialize,
                          (AuraTaskFreeFunc) aura_task_free, NULL, loop);
 }
 

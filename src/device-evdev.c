@@ -62,24 +62,22 @@ static void handle_event(AuraEventData* data, struct epoll_event* epev)
     int fd = data->fd;
     uint32_t flags = data->data.flags;
 
-    while (1) {
-        int size = read(fd, &ev, sizeof(struct input_event));
+    int size = read(fd, &ev, sizeof(struct input_event));
 
-        if (size != sizeof(struct input_event)) {
-            if (size != -1) {
-                LOG_ERROR("Wrong data size! (%d)", size);
-            }
-            return;
+    if (size != sizeof(struct input_event)) {
+        if (size != -1) {
+            LOG_ERROR("Wrong data size! (%d)", size);
         }
+        return;
+    }
 
-        LOG_DATA4("Event: {time: %ld.%06ld, type: %i, code: %i, value: %i}",
-                  ev.time.tv_sec, ev.time.tv_usec,
-                  (uint32_t) ev.type, (uint32_t) ev.code, (uint32_t) ev.value);
-        LOG_DATA4("Event data: {flag: %o}", flags);
+    LOG_DATA4("Event: {time: %ld.%06ld, type: %i, code: %i, value: %i}",
+              ev.time.tv_sec, ev.time.tv_usec,
+              (uint32_t) ev.type, (uint32_t) ev.code, (uint32_t) ev.value);
+    LOG_DATA4("Event data: {flag: %o}", flags);
 
-        if (flags & scIdInputKeyboardFlag) {
-            handle_key(&ev);
-        }
+    if (flags & scIdInputKeyboardFlag) {
+        handle_key(&ev);
     }
 }
 
@@ -162,6 +160,12 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
 
         // Add event source
         fd = aura_open(devnode, O_RDONLY);
+        if (fd < 0) {
+            LOG_INFO1("Failed to open device '%s'", devnode);
+            continue;
+        }
+
+        memset(name, 0, sizeof(name));
         ioctl(fd, EVIOCGNAME(sizeof(name)), name);
         LOG_INFO1("Found input device: '%s' (%s)", name, devnode);
 

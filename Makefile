@@ -36,6 +36,7 @@ $(builddir)/aura: Makefile \
                   $(builddir)/device-drm.o \
                   $(builddir)/device-evdev.o \
                   $(builddir)/device-udev.o \
+                  $(builddir)/output-collector.o \
                   $(builddir)/surface-aggregator.o \
                   $(builddir)/surface-compositor.o \
                   $(builddir)/surface-manager.o \
@@ -59,8 +60,8 @@ $(builddir)/aura: Makefile \
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/global-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o \
-	       `pkg-config --libs wayland-server libudev gtk+-3.0 dbus-1 xkbcommon libdrm egl gbm gl`
+	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/global-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/output-collector.o $(builddir)/surface-aggregator.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o \
+	       `pkg-config --libs dbus-1 egl gbm gl gtk+-3.0 libdrm libudev wayland-server xkbcommon`
 
 $(gendir)/xdg-shell-server-protocol.h: Makefile \
                                        protocol/xdg-shell.xml
@@ -218,7 +219,7 @@ $(builddir)/device-drm.o: Makefile \
 	@echo "  CC  device-drm.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/device-drm.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/device-drm.c \
-	       `pkg-config --cflags libdrm egl gbm`
+	       `pkg-config --cflags egl gbm libdrm`
 
 $(builddir)/device-evdev.o: Makefile \
                             $(srcdir)/device-evdev.c \
@@ -237,6 +238,14 @@ $(builddir)/device-udev.o: Makefile \
 	@$(CC) $(WFLAGS) -o $(builddir)/device-udev.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/device-udev.c \
 	       `pkg-config --cflags libudev`
+
+$(builddir)/output-collector.o: Makefile \
+                                $(srcdir)/output-collector.c \
+                                $(srcdir)/output-collector.h
+	@mkdir -p $(builddir)
+	@echo "  CC  output-collector.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/output-collector.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/output-collector.c
 
 $(builddir)/surface-aggregator.o: Makefile \
                                   $(srcdir)/surface-aggregator.c \

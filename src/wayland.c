@@ -82,7 +82,7 @@ int aura_wayland_event_loop_feeder(void* data)
     struct wl_event_loop* loop;
     static struct wl_event_source* src = NULL;
 
-    LOG_DEBUG("--- Wayland loop feeder ---");
+    LOG_INFO4("--- Wayland loop feeder ---");
     loop = wl_display_get_event_loop(wayland_display);
     if (!src) {
         src = wl_event_loop_add_timer(loop,

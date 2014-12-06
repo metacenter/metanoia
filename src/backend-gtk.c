@@ -5,8 +5,11 @@
 #include "utils-log.h"
 #include "utils-environment.h"
 #include "global-functions.h"
+#include "renderer-mmap.h"
 
 #include <gtk/gtk.h>
+#include <malloc.h>
+#include <memory.h>
 
 //------------------------------------------------------------------------------
 
@@ -15,13 +18,129 @@
 static const char* scMainGuiPath = "share/gtk-backend-main.ui";
 static const char* scMenuGuiPath = "share/gtk-backend-menu.ui";
 
+typedef struct {
+    AuraOutput base;
+    int num;
+} AuraOutputGTK;
+
+//------------------------------------------------------------------------------
+
 GtkWidget* window;
 
 struct {
     GtkWidget* da;
     GtkWidget* mb;
     GtkWidget* id;
+    uint8_t* data;
+    cairo_surface_t* source;
+    cairo_surface_t* cs; // TBR: after support for mode setting
 } group[NUM_VIEW_GROUPS];
+
+//------------------------------------------------------------------------------
+
+static void clear_surface(int n)
+{
+    if (group[n].cs) {
+        cairo_surface_destroy(group[n].cs);
+    }
+
+    group[n].cs = gdk_window_create_similar_surface
+                       (gtk_widget_get_window(group[n].da), CAIRO_CONTENT_COLOR,
+                        gtk_widget_get_allocated_width(group[n].da),
+                        gtk_widget_get_allocated_height(group[n].da));
+
+    cairo_t *cr = cairo_create(group[n].cs);
+    cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+}
+
+//------------------------------------------------------------------------------
+
+AuraRenderer* aura_backend_gtk_output_initialize(struct AuraOutput* output,
+                                                 int width, int height)
+{
+    AuraOutputGTK* output_gtk = (AuraOutputGTK*) output;
+    if (!output_gtk) {
+        LOG_ERROR("Invalid output!");
+        return NULL;
+    }
+    int n = output_gtk->num;
+
+    LOG_INFO1("Initializing GTK output...");
+
+    // Create data and surface
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
+    group[n].data = malloc(4 * stride * height);
+    group[n].source = cairo_image_surface_create_for_data(group[n].data,
+                                    CAIRO_FORMAT_RGB24, width, height, stride);
+
+    // Clear drawing area
+    gtk_widget_set_size_request(group[n].da, width, height);
+    gtk_widget_queue_draw_area(group[n].da, 0, 0, width, height);
+    clear_surface(output_gtk->num);
+
+    LOG_INFO1("Initializing GTK output: SUCCESS");
+
+    return aura_renderer_mmap_create(group[n].data, width, height, stride);
+}
+
+//------------------------------------------------------------------------------
+
+int aura_backend_gtk_get_outputs(AuraOutput** outputs, int* num)
+{
+    AuraOutputGTK* output_gtk = malloc(sizeof(AuraOutputGTK));
+    memset(output_gtk, 0, sizeof(AuraOutputGTK));
+
+    output_gtk->base.width = 800;
+    output_gtk->base.height = 600;
+    output_gtk->base.initialize = aura_backend_gtk_output_initialize;
+
+    output_gtk->num = 0;
+
+    *outputs = (AuraOutput*) output_gtk;
+
+    *num = 1;
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+
+static gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data)
+{
+
+    int n = (int) data;
+    if (group[n].source) {
+        cairo_set_source_surface(cr, group[n].source, 0, 0);
+        cairo_rectangle(cr, 0, 0, gtk_widget_get_allocated_width(widget),
+                                  gtk_widget_get_allocated_height(widget));
+        cairo_fill(cr);
+    }
+    return FALSE;
+}
+
+//------------------------------------------------------------------------------
+
+static gboolean on_configure_event(GtkWidget* widget,
+                                   GdkEventConfigure* event,
+                                   gpointer data)
+{
+    int n = (int) data;
+    clear_surface(n);
+    return TRUE;
+}
+
+//------------------------------------------------------------------------------
+
+static gboolean on_timer(void* data)
+{
+    int i;
+    for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
+        // FIXME:draw only enabled displays
+        gtk_widget_queue_draw(group[i].da);
+    }
+    return TRUE;
+}
 
 //------------------------------------------------------------------------------
 
@@ -55,6 +174,12 @@ static void aura_backend_gtk_build()
     // Add drawing areas
     for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
         group[i].da = gtk_drawing_area_new();
+
+        g_signal_connect(group[i].da, "draw",
+                         G_CALLBACK(on_draw), (gpointer) i);
+        g_signal_connect(group[i].da, "configure-event",
+                         G_CALLBACK(on_configure_event), (gpointer) i);
+
         gtk_box_pack_start(GTK_BOX(box_inner), GTK_WIDGET(group[i].da), 0,0,5);
     }
 
@@ -74,6 +199,9 @@ static void aura_backend_gtk_build()
 
     // Bind signals
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    // Run timer
+    g_timeout_add(100, (GSourceFunc) on_timer, NULL);
 }
 
 //------------------------------------------------------------------------------

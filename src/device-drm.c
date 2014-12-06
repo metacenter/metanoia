@@ -118,34 +118,6 @@ AuraRenderer* create_dumb_buffer(AuraOutputDRM* output_drm)
         goto clear_fb;
     }
 
-    // TODO: remove
-    int width = carg.width;
-    int height = carg.height;
-    int pitch = carg.pitch;
-    LOG_DEBUG(" %d %d %d", width, height, pitch);
-    int x, y;
-    for (y = 0; y < height; ++y) {
-        for (x = 0; x < width; ++x) {
-            if (x < width/3){
-                map[y*pitch + 4*x + 0] = 0x00;
-                map[y*pitch + 4*x + 1] = 0xFF;
-                map[y*pitch + 4*x + 2] = 0xFF;
-                map[y*pitch + 4*x + 3] = 0xFF;
-            }
-            else if (x < width*2/3) {
-                map[y*pitch + 4*x + 0] = 0xFF;
-                map[y*pitch + 4*x + 1] = 0xFF;
-                map[y*pitch + 4*x + 2] = 0x00;
-                map[y*pitch + 4*x + 3] = 0xFF;
-            }
-            else {
-                map[y*pitch + 4*x + 0] = 0xFF;
-                map[y*pitch + 4*x + 1] = 0x00;
-                map[y*pitch + 4*x + 2] = 0xFF;
-                map[y*pitch + 4*x + 3] = 0xFF;
-            }
-        }
-    }
     return aura_renderer_mmap_create(map, carg.width, carg.height, carg.pitch);
 
 clear_fb:
@@ -316,7 +288,7 @@ clear_fb:
 //------------------------------------------------------------------------------
 
 AuraRenderer* aura_drm_output_initialize(struct AuraOutput* output,
-                                         int widht, int height)
+                                         int width, int height)
 {
     AuraOutputDRM* output_drm;
     AuraRenderer* renderer;

@@ -36,21 +36,60 @@ void aura_renderer_mmap_finalize(struct AuraRenderer* self)
 
 //------------------------------------------------------------------------------
 
+static void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
+{
+    uint8_t* b = mine->buffer;
+    int w = mine->width;
+    int h = mine->height;
+    int s = mine->stride;
+
+    int x, y;
+    for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+            if (x < w/3){
+                b[y*s + 4*x + 0] = 0x00;
+                b[y*s + 4*x + 1] = 0xFF;
+                b[y*s + 4*x + 2] = 0xFF;
+                b[y*s + 4*x + 3] = 0xFF;
+            }
+            else if (x < w*2/3) {
+                b[y*s + 4*x + 0] = 0xFF;
+                b[y*s + 4*x + 1] = 0xFF;
+                b[y*s + 4*x + 2] = 0x00;
+                b[y*s + 4*x + 3] = 0xFF;
+            }
+            else {
+                b[y*s + 4*x + 0] = 0xFF;
+                b[y*s + 4*x + 1] = 0x00;
+                b[y*s + 4*x + 2] = 0xFF;
+                b[y*s + 4*x + 3] = 0xFF;
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
 // NOTE: MMap renderer can not display surfaces passed trouhgt GPU
 void aura_renderer_mmap_draw_surfaces(struct AuraRenderer* self,
                                       Chain* surfaces)
 {
     AuraRendererMMap* mine = (AuraRendererMMap*) self;
 
-    LOG_DEBUG("MMap renderer: draw");
+    LOG_INFO3("MMap renderer: draw");
 
-    Link* link;
+    aura_renderer_mmap_draw_bg_image(mine);
 
     if (surfaces == NULL) {
-        LOG_WARN2("MMap renderer: no surfaces!");
+        LOG_WARN3("MMap renderer: no surfaces!");
         return;
     }
 
+    Link* link;
+    uint8_t* b = mine->buffer;
+    //int w = mine->width;
+    //int h = mine->height;
+    int s = mine->stride;
     for (link = surfaces->first; link; link = link->next) {
         SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
         char* data = surface->pending.data;
@@ -58,10 +97,10 @@ void aura_renderer_mmap_draw_surfaces(struct AuraRenderer* self,
         int x, y;
         for (y = 0; y < surface->pending.height; ++y) {
             for (x = 0; x < surface->pending.width; ++x) {
-                mine->buffer[y*mine->stride+4*x+0] = data[y*stride + 4*x + 0];
-                mine->buffer[y*mine->stride+4*x+1] = data[y*stride + 4*x + 1];
-                mine->buffer[y*mine->stride+4*x+2] = data[y*stride + 4*x + 2];
-                mine->buffer[y*mine->stride+4*x+3] = data[y*stride + 4*x + 3];
+                b[y*s + 4*x + 0] = data[y*stride + 4*x + 0];
+                b[y*s + 4*x + 1] = data[y*stride + 4*x + 1];
+                b[y*s + 4*x + 2] = data[y*stride + 4*x + 2];
+                b[y*s + 4*x + 3] = data[y*stride + 4*x + 3];
             }
         }
     }

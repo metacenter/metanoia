@@ -5,25 +5,17 @@
 
 #include "utils-log.h"
 #include "utils-chain.h"
-#include "device-drm.h"
-#include "device-fb.h"
 #include "event-timer.h"
 #include "event-signals.h"
 #include "surface-priv.h"
 
 Chain* visible_surfaces = NULL;
-
-// FIXME: tmp
-AuraOutput* output = NULL;
 AuraRenderer* renderer = NULL;
-int num = 0;
 
 //------------------------------------------------------------------------------
 
-void aura_surface_manager_redraw_all()
+static void aura_surface_manager_redraw_all()
 {
-    LOG_DEBUG("Redraw all");
-
     if (renderer == NULL) {
         LOG_ERROR("Invalid renderer!");
         return;
@@ -48,31 +40,7 @@ void aura_surface_manager_redraw_all()
 
 //------------------------------------------------------------------------------
 
-void aura_update_outputs(AuraEventDispatcher* ed)
-{
-    LOG_INFO1("Updating outputs");
-    // TODO: support for many outputs
-
-    // TODO don't use global functions
-    int result = aura_drm_update_devices(&output, &num);
-    if (result < 0) {
-        result = aura_setup_framebuffer(&output, &num);
-    }
-
-    if (result < 0) {
-        LOG_ERROR("Failed to update outputs!");
-        return;
-    }
-
-    renderer = output->initialize((struct AuraOutput*) output,
-                                  output->width, output->height);
-    renderer->initialize((struct AuraRenderer*) renderer);
-
-    aura_event_timer_run(aura_surface_manager_redraw_all, 100);
-}
-
-//------------------------------------------------------------------------------
-
+// TBR
 void aura_surface_manage(SurfaceId id)
 {
     // TODO: finish this
@@ -88,6 +56,7 @@ void aura_surface_manage(SurfaceId id)
 
 //------------------------------------------------------------------------------
 
+// TBR
 void aura_surface_attach(SurfaceId id,
                          int width,
                          int height,
@@ -110,6 +79,37 @@ void aura_surface_attach(SurfaceId id,
     if (data == NULL && renderer && renderer->attach) {
         renderer->attach((struct AuraRenderer*) renderer, id, resource);
     }
+}
+
+//------------------------------------------------------------------------------
+
+static void on_display_found(void* data)
+{
+    AuraRenderer* renderer_new = (AuraRenderer*) data;
+    if (renderer_new == NULL) {
+        LOG_ERROR("New renderer is invalid!");
+        return;
+    }
+
+    LOG_INFO1("Adding new renderer!");
+
+    // TODO: support for more renderers
+    renderer = renderer_new;
+    renderer->initialize((struct AuraRenderer*) renderer);
+    aura_event_timer_run(aura_surface_manager_redraw_all, 100);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_manager_initialize(AuraLoop* this_loop)
+{
+    if (this_loop == 0) {
+        LOG_ERROR("Invalid loop!");
+        return;
+    }
+
+    aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
+         aura_task_create(on_display_found, this_loop));
 }
 
 //------------------------------------------------------------------------------

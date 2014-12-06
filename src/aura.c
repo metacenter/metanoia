@@ -31,21 +31,23 @@ int main()
     AuraLoop* loop_keyboard = aura_loop_new("keyboard");
 
     // Continue initialization asynchronously
-    if (!aura_config().run_in_test_window) {
-        task = factorize_setup_device_monitor_task(dispatcher);
-        aura_loop_schedule_task(loop_devices, task);
+    task = factorize_setup_device_monitor_task(dispatcher);
+    aura_loop_schedule_task(loop_devices, task);
 
-        task = factorize_setup_input_devices_task(dispatcher);
-        aura_loop_schedule_task(loop_devices, task);
+    task = factorize_setup_input_devices_task(dispatcher);
+    aura_loop_schedule_task(loop_devices, task);
 
-        task = factorize_update_outputs_task(dispatcher);
-        aura_loop_schedule_task(loop_devices, task);
-    } else {
+    if (aura_config().run_in_test_window) {
         task = factorize_backend_gtk_run_task(loop_devices);
         aura_loop_schedule_task(loop_devices, task);
     }
 
-    // TODO: init surface manager
+    task = factorize_initialize_output_collector_task(loop_devices);
+    aura_loop_schedule_task(loop_devices, task);
+
+    task = factorize_initialize_surface_manager_task(loop_window_manager);
+    aura_loop_schedule_task(loop_window_manager, task);
+
     task = factorize_initialize_wayland_task(loop_window_manager);
     aura_loop_schedule_task(loop_window_manager, task);
 

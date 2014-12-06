@@ -10,7 +10,7 @@
 
 static const AuraConfig scConfig = {
         .run_in_test_window = 1,
-        .log_level = LEVEL_INFO3
+        .log_level = LEVEL_DEBUG
     };
 
 static const Binding scKeyboardBindings[] = {

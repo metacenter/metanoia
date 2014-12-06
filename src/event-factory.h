@@ -11,13 +11,15 @@ AuraTask* factorize_setup_input_devices_task(AuraEventDispatcher* ed);
 
 AuraTask* factorize_setup_device_monitor_task(AuraEventDispatcher* ed);
 
-AuraTask* factorize_update_outputs_task(AuraEventDispatcher* ed);
-
-AuraTask* factorize_initialize_wayland_task(AuraLoop* loop);
-
 AuraTask* factorize_backend_gtk_run_task(AuraLoop* loop);
 
 AuraTask* factorize_stop_dispatcher_task(AuraEventDispatcher* dispatcher);
+
+AuraTask* factorize_initialize_wayland_task(AuraLoop* loop);
+
+AuraTask* factorize_initialize_surface_manager_task(AuraLoop* loop);
+
+AuraTask* factorize_initialize_output_collector_task(AuraLoop* loop);
 
 AuraEventData* factorize_signal_event_data(AuraEventDispatcher* dispatcher);
 

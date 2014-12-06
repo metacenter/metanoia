@@ -175,7 +175,7 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 #-------------------------------------------------------------------------------
-#
+# DEVICES
 
 t = m.add_compile_target(
         output='device-common.o',
@@ -212,6 +212,16 @@ t = m.add_compile_target(
         inputs=['device-udev.c'],
         includes=['device-udev.h'],
         pkgs={'libudev'}
+    )
+aura.add_input(t)
+
+#-------------------------------------------------------------------------------
+#
+
+t = m.add_compile_target(
+        output='output-collector.o',
+        inputs=['output-collector.c'],
+        includes=['output-collector.h']
     )
 aura.add_input(t)
 
