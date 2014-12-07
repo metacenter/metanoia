@@ -26,7 +26,7 @@ static void surface_attach(struct wl_client* client,
     int width = 0;
     int height = 0;
     int stride = 0;
-    char* data = NULL;
+    uint8_t* data = NULL;
     SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
 
     LOG_WAYL3("Wayland: surface attach (sx: %d, sy: %d, sid: %d)", sx, sy, sid);
@@ -43,8 +43,12 @@ static void surface_attach(struct wl_client* client,
 
     wayland_state_surface_attach(sid, buffer_resource);
 
-    // TODO: do this on commit
-    aura_surface_attach(sid, width, height, stride, data, buffer_resource);
+    if (!data) {
+        aura_surface_attach_egl(sid, buffer_resource);
+    } else {
+        // TODO: do this on commit
+        aura_surface_commit(sid, width, height, stride, data);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -112,7 +116,7 @@ static void surface_commit(struct wl_client* client,
 
     LOG_WAYL3("Wayland: commit (sid: %d)", sid);
 
-    aura_surface_commit(sid);
+    //aura_surface_commit(sid);
 }
 
 //-----------------------------------------------------------------------------

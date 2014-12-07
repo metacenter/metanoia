@@ -152,18 +152,18 @@ void aura_renderer_gl_attach(struct AuraRenderer* self,
 
     SurfaceData* surface = aura_surface_get(surfaceId);
 
-    //glBindTexture(GL_TEXTURE_2D, surface->pending.texture);
-    //glGenTextures(1, &surface->pending.texture);
-    //glBindTexture(GL_TEXTURE_2D, surface->pending.texture);
+    //glBindTexture(GL_TEXTURE_2D, surface->buffer.texture);
+    //glGenTextures(1, &surface->buffer.texture);
+    //glBindTexture(GL_TEXTURE_2D, surface->buffer.texture);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    surface->pending.image = mine->create_image(mine->egl_display,
-                                                EGL_NO_CONTEXT,
-                                                EGL_WAYLAND_BUFFER_WL,
-                                                resource,
-                                                attribs);
+    surface->buffer.image = mine->create_image(mine->egl_display,
+                                               EGL_NO_CONTEXT,
+                                               EGL_WAYLAND_BUFFER_WL,
+                                               resource,
+                                               attribs);
 
-    if (surface->pending.image == EGL_NO_IMAGE_KHR) {
+    if (surface->buffer.image == EGL_NO_IMAGE_KHR) {
         LOG_DEBUG("KHR: %d", eglGetError());
         LOG_WARN1("Could not create KHR image!");
         return;
@@ -172,7 +172,7 @@ void aura_renderer_gl_attach(struct AuraRenderer* self,
     /*PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d =
         (void*) eglGetProcAddress("glEGLImageTargetTexture2DOES");
 
-    image_target_texture_2d(GL_TEXTURE_2D, surface->pending.image);*/
+    image_target_texture_2d(GL_TEXTURE_2D, surface->buffer.image);*/
 
     LOG_DEBUG("ATT: %d", eglGetError());
 }
@@ -353,9 +353,9 @@ void aura_renderer_gl_draw(struct AuraRenderer* self,
     Link* link = surfaces->first;
     //for (link = surfaces->first; link; link = link->next) {
         SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
-        char* data = surface->pending.data;
-        int width = surface->pending.width;
-        int height = surface->pending.height;
+        uint8_t* data = surface->buffer.data;
+        int width = surface->buffer.width;
+        int height = surface->buffer.height;
     //}
 
     glUseProgram(program);
@@ -379,20 +379,20 @@ void aura_renderer_gl_draw(struct AuraRenderer* self,
         /*EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
 
         glActiveTexture(GL_TEXTURE0);
-        surface->pending.image = mine->create_image(mine->egl_display,
-                                                    mine->egl_context,
-                                                    EGL_WAYLAND_BUFFER_WL,
-                                                    xxxx_resource,
-                                                    attribs);*/
+        surface->buffer.image = mine->create_image(mine->egl_display,
+                                                   mine->egl_context,
+                                                   EGL_WAYLAND_BUFFER_WL,
+                                                   xxxx_resource,
+                                                   attribs);*/
 
         mine->query_buffer(mine->egl_display, xxxx_resource,
-                           EGL_WIDTH, &surface->pending.width);
+                           EGL_WIDTH, &surface->buffer.width);
         mine->query_buffer(mine->egl_display, xxxx_resource,
-                           EGL_HEIGHT, &surface->pending.height);
+                           EGL_HEIGHT, &surface->buffer.height);
 
-        LOG_DEBUG("SIZE: %d x %d", surface->pending.width, surface->pending.height);
+        LOG_DEBUG("SIZE: %d x %d", surface->buffer.width, surface->buffer.height);
 
-        if (surface->pending.image == EGL_NO_IMAGE_KHR) {
+        if (surface->buffer.image == EGL_NO_IMAGE_KHR) {
             LOG_DEBUG("KHR: %d", eglGetError());
             LOG_WARN1("Could not create KHR image!");
         }
@@ -409,7 +409,7 @@ void aura_renderer_gl_draw(struct AuraRenderer* self,
         //glUniform1i(uniform_texture, 0);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        image_target_texture_2d(GL_TEXTURE_2D, surface->pending.image);
+        image_target_texture_2d(GL_TEXTURE_2D, surface->buffer.image);
         LOG_DEBUG("*** Z 0x%x 0x%x", glGetError(), eglGetError());
     }
 

@@ -12,7 +12,7 @@ AuraRenderer* aura_renderer_mmap_create(AuraOutput* output,
 
 void aura_renderer_mmap_set_buffer(AuraRenderer* self,
                                    int num,
-                                   uint8_t* buffer,
+                                   uint8_t* data,
                                    int stride);
 
 #endif // __AURA_RENDERER_MMAP_H__

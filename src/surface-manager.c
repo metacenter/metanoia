@@ -56,13 +56,8 @@ void aura_surface_manage(SurfaceId id)
 
 //------------------------------------------------------------------------------
 
-// TBR
-void aura_surface_attach(SurfaceId id,
-                         int width,
-                         int height,
-                         int stride,
-                         char* data,
-                         void* resource)
+void aura_surface_attach_egl(SurfaceId id,
+                             void* resource)
 {
     SurfaceData* surface = aura_surface_get(id);
     if (surface == NULL) {
@@ -70,15 +65,30 @@ void aura_surface_attach(SurfaceId id,
         return;
     }
 
-    surface->pending.width  = width;
-    surface->pending.height = height;
-    surface->pending.stride = stride;
-    surface->pending.data   = data;
-    surface->buffer_resource = resource;
-
-    if (data == NULL && renderer && renderer->attach) {
+    // TODO: log at init if renderer supports egl
+    if (renderer && renderer->attach) {
         renderer->attach((struct AuraRenderer*) renderer, id, resource);
     }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_commit(SurfaceId id,
+                         int width,
+                         int height,
+                         int stride,
+                         uint8_t* data)
+{
+    SurfaceData* surface = aura_surface_get(id);
+    if (surface == 0) {
+        LOG_WARN2("Could not find surface (id: %d)", id);
+        return;
+    }
+
+    surface->buffer.width  = width;
+    surface->buffer.height = height;
+    surface->buffer.stride = stride;
+    surface->buffer.data   = data;
 }
 
 //------------------------------------------------------------------------------

@@ -6,14 +6,5 @@
 
 #include "global-types.h"
 
-void aura_surface_attach(SurfaceId id,
-                         int width,
-                         int height,
-                         int stride,
-                         char* data,
-                         void* resource);
-
-void aura_surface_commit(SurfaceId id);
-
 #endif // __AURA_SURFACE_COMPOSITOR_H__
 

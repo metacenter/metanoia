@@ -19,8 +19,8 @@ typedef struct {
     int front;
     struct {
         int stride;
-        uint8_t* buffer;
-    } map[2];
+        uint8_t* data;
+    } buffer[2];
     AuraOutput* output;
 } AuraRendererMMap;
 
@@ -43,31 +43,29 @@ void aura_renderer_mmap_finalize(struct AuraRenderer* self)
 void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
 {
     int current_buffer = mine->front ^ 1;
-    uint8_t* b = mine->map[current_buffer].buffer;
-    int w = mine->width;
-    int h = mine->height;
-    int s = mine->map[current_buffer].stride;
+    uint8_t* D = mine->buffer[current_buffer].data;
+    int W = mine->width;
+    int H = mine->height;
+    int S = mine->buffer[current_buffer].stride;
 
     int x, y;
-    for (y = 0; y < h; ++y) {
-        for (x = 0; x < w; ++x) {
-            if (x < w/3){
-                b[y*s + 4*x + 0] = 0x00;
-                b[y*s + 4*x + 1] = 0xFF;
-                b[y*s + 4*x + 2] = 0xFF;
-                b[y*s + 4*x + 3] = 0xFF;
-            }
-            else if (x < w*2/3) {
-                b[y*s + 4*x + 0] = 0xFF;
-                b[y*s + 4*x + 1] = 0xFF;
-                b[y*s + 4*x + 2] = 0x00;
-                b[y*s + 4*x + 3] = 0xFF;
-            }
-            else {
-                b[y*s + 4*x + 0] = 0xFF;
-                b[y*s + 4*x + 1] = 0x00;
-                b[y*s + 4*x + 2] = 0xFF;
-                b[y*s + 4*x + 3] = 0xFF;
+    for (y = 0; y < H; ++y) {
+        for (x = 0; x < W; ++x) {
+            if (x < W/3){
+                D[y*S + 4*x + 0] = 0x00;
+                D[y*S + 4*x + 1] = 0xFF;
+                D[y*S + 4*x + 2] = 0xFF;
+                D[y*S + 4*x + 3] = 0xFF;
+            } else if (x < W*2/3) {
+                D[y*S + 4*x + 0] = 0xFF;
+                D[y*S + 4*x + 1] = 0xFF;
+                D[y*S + 4*x + 2] = 0x00;
+                D[y*S + 4*x + 3] = 0xFF;
+            } else {
+                D[y*S + 4*x + 0] = 0xFF;
+                D[y*S + 4*x + 1] = 0x00;
+                D[y*S + 4*x + 2] = 0xFF;
+                D[y*S + 4*x + 3] = 0xFF;
             }
         }
     }
@@ -85,23 +83,23 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
     }
 
     int current_buffer = mine->front ^ 1;
-    uint8_t* b = mine->map[current_buffer].buffer;
-    //int w = mine->width;
-    //int h = mine->height;
-    int s = mine->map[current_buffer].stride;
+    uint8_t* D = mine->buffer[current_buffer].data;
+    //int W = mine->width;
+    //int H = mine->height;
+    int S = mine->buffer[current_buffer].stride;
 
     Link* link;
     for (link = surfaces->first; link; link = link->next) {
         SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
-        char* data = surface->pending.data;
-        int stride = surface->pending.stride;
+        uint8_t* d = surface->buffer.data;
+        int s = surface->buffer.stride;
         int x, y;
-        for (y = 0; y < surface->pending.height; ++y) {
-            for (x = 0; x < surface->pending.width; ++x) {
-                b[y*s + 4*x + 0] = data[y*stride + 4*x + 0];
-                b[y*s + 4*x + 1] = data[y*stride + 4*x + 1];
-                b[y*s + 4*x + 2] = data[y*stride + 4*x + 2];
-                b[y*s + 4*x + 3] = data[y*stride + 4*x + 3];
+        for (y = 0; y < surface->buffer.height; ++y) {
+            for (x = 0; x < surface->buffer.width; ++x) {
+                D[y*S + 4*x + 0] = d[y*s + 4*x + 0];
+                D[y*S + 4*x + 1] = d[y*s + 4*x + 1];
+                D[y*S + 4*x + 2] = d[y*s + 4*x + 2];
+                D[y*S + 4*x + 3] = d[y*s + 4*x + 3];
             }
         }
     }
@@ -115,7 +113,7 @@ void aura_renderer_mmap_swap_buffers(AuraRendererMMap* mine)
     int new_front = mine->front ^ 1;
 
     // Check if second buffer was provided
-    if (!mine->map[new_front].buffer) {
+    if (!mine->buffer[new_front].data) {
         return;
     }
 
@@ -176,10 +174,10 @@ AuraRenderer* aura_renderer_mmap_create(AuraOutput* output,
     mine->width = width;
     mine->height = height;
     mine->front = 0;
-    mine->map[0].buffer = NULL;
-    mine->map[0].stride = width;
-    mine->map[1].buffer = NULL;
-    mine->map[1].stride = width;
+    mine->buffer[0].data = NULL;
+    mine->buffer[0].stride = width;
+    mine->buffer[1].data = NULL;
+    mine->buffer[1].stride = width;
     mine->output = output;
 
     return (AuraRenderer*) mine;
@@ -189,7 +187,7 @@ AuraRenderer* aura_renderer_mmap_create(AuraOutput* output,
 
 void aura_renderer_mmap_set_buffer(AuraRenderer* self,
                                    int num,
-                                   uint8_t* buffer,
+                                   uint8_t* data,
                                    int stride)
 {
     AuraRendererMMap* mine = (AuraRendererMMap*) self;
@@ -197,8 +195,8 @@ void aura_renderer_mmap_set_buffer(AuraRenderer* self,
         return;
     }
 
-    mine->map[num].buffer = buffer;
-    mine->map[num].stride = stride;
+    mine->buffer[num].data   = data;
+    mine->buffer[num].stride = stride;
 }
 
 //------------------------------------------------------------------------------

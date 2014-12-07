@@ -15,17 +15,15 @@ typedef struct {
     int width;
     int height;
     int stride;
-    char* data;
+    uint8_t* data;
     GLuint texture;
     EGLImageKHR image;
-} PendingBuffer;
+} DrawBuffer;
 
 typedef struct {
     SurfaceId id;
     int x, y;
-    PendingBuffer pending;
-    void* frame_notify_data; // TODO: here?
-    void* buffer_resource;
+    DrawBuffer buffer;
 } SurfaceData;
 
 SurfaceData* aura_surface_get(SurfaceId id);
