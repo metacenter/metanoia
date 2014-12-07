@@ -23,7 +23,7 @@ void aura_outputs_update()
 
     LOG_INFO1("Updating outputs");
 
-    if (! aura_config().run_in_test_window) {
+    if (! aura_settings().run_in_test_window) {
         result = aura_drm_update_devices(&output, &num);
         if (result < 0) {
             result = aura_setup_framebuffer(&output, &num);

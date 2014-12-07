@@ -17,7 +17,7 @@ int main()
     // Initialization
     aura_environment_setup();
     aura_config_apply();
-    if (!aura_config().run_in_test_window) {
+    if (!aura_settings().run_in_test_window) {
         aura_dbus_initalize();
     }
 
@@ -37,7 +37,7 @@ int main()
     task = factorize_setup_input_devices_task(dispatcher);
     aura_loop_schedule_task(loop_devices, task);
 
-    if (aura_config().run_in_test_window) {
+    if (aura_settings().run_in_test_window) {
         task = factorize_backend_gtk_run_task(loop_devices);
         aura_loop_schedule_task(loop_devices, task);
     }
