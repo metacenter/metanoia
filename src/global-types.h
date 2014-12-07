@@ -28,18 +28,9 @@ typedef struct {
     int (*initialize) (struct AuraRenderer*);
     void (*finalize) (struct AuraRenderer*);
     void (*attach) (struct AuraRenderer*, SurfaceId, void*);
-    void (*draw_surfaces) (struct AuraRenderer*, Chain*);
+    void (*draw) (struct AuraRenderer*, Chain*);
     void (*free) (struct AuraRenderer*);
 } AuraRenderer;
-
-// Screen output // TODO move to separate file
-struct AuraOutput;
-typedef struct {
-    // TODO: keep list of available modes instead of just width and height
-    int width;
-    int height;
-    AuraRenderer* (*initialize) (struct AuraOutput*, int, int);
-} AuraOutput;
 
 // Key event data
 typedef struct {

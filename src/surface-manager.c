@@ -20,13 +20,13 @@ static void aura_surface_manager_redraw_all()
         LOG_ERROR("Invalid renderer!");
         return;
     }
-    if (renderer->draw_surfaces == NULL) {
+    if (renderer->draw == NULL) {
         LOG_ERROR("Wrong renderer implementation!");
         return;
     }
 
-    renderer->draw_surfaces((struct AuraRenderer*) renderer,
-                            visible_surfaces);
+    renderer->draw((struct AuraRenderer*) renderer,
+                   visible_surfaces);
 
     // TODO: pass as list
     if (visible_surfaces) {

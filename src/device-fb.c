@@ -28,7 +28,7 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_devfb_output_initialize(struct AuraOutput* output,
+AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
                                            int width, int height)
 {
     struct fb_fix_screeninfo fixed_info;
@@ -56,7 +56,7 @@ AuraRenderer* aura_devfb_output_initialize(struct AuraOutput* output,
     }
 
 
-    AuraRenderer* renderer = aura_renderer_mmap_create(width, height);
+    AuraRenderer* renderer = aura_renderer_mmap_create(output, width, height);
     aura_renderer_mmap_set_buffer(renderer, 0, buffer, fixed_info.line_length);
     return renderer;
 }
@@ -90,10 +90,11 @@ int aura_setup_framebuffer(AuraOutput** outputs, int* num)
     AuraOutputFB* output_fb = malloc(sizeof(AuraOutputFB));
     memset(output_fb, 0, sizeof(AuraOutputFB));
 
-    output_fb->base.width = screen_info.xres_virtual;
-    output_fb->base.height = screen_info.yres_virtual;
-    output_fb->base.initialize = aura_devfb_output_initialize;
-
+    aura_output_initialize(&output_fb->base,
+                           screen_info.xres_virtual,
+                           screen_info.yres_virtual,
+                           aura_devfb_output_initialize,
+                           NULL);
     output_fb->fd = fd;
 
     *outputs = (AuraOutput*) output_fb;
@@ -101,3 +102,6 @@ int aura_setup_framebuffer(AuraOutput** outputs, int* num)
 
     return 1;
 }
+
+//------------------------------------------------------------------------------
+

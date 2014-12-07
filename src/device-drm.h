@@ -4,7 +4,7 @@
 #ifndef __AURA_DEVICE_DRM_H__
 #define __AURA_DEVICE_DRM_H__
 
-#include "global-types.h"
+#include "output.h"
 
 int aura_drm_update_devices(AuraOutput** outputs, int* num);
 

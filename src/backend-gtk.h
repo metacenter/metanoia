@@ -5,7 +5,7 @@
 #define __AURA_BACKEND_GTK_H__
 
 #include "event-loop.h"
-#include "global-types.h"
+#include "output.h"
 
 int aura_backend_gtk_get_outputs(AuraOutput** outputs, int* num);
 

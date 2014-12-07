@@ -21,6 +21,7 @@ typedef struct {
         int stride;
         uint8_t* buffer;
     } map[2];
+    AuraOutput* output;
 } AuraRendererMMap;
 
 //------------------------------------------------------------------------------
@@ -39,12 +40,13 @@ void aura_renderer_mmap_finalize(struct AuraRenderer* self)
 
 //------------------------------------------------------------------------------
 
-static void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
+void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
 {
-    uint8_t* b = mine->map[mine->front].buffer;
+    int current_buffer = mine->front ^ 1;
+    uint8_t* b = mine->map[current_buffer].buffer;
     int w = mine->width;
     int h = mine->height;
-    int s = mine->map[mine->front].stride;
+    int s = mine->map[current_buffer].stride;
 
     int x, y;
     for (y = 0; y < h; ++y) {
@@ -74,29 +76,21 @@ static void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
 //------------------------------------------------------------------------------
 
 // NOTE: MMap renderer can not display surfaces passed trouhgt GPU
-void aura_renderer_mmap_draw_surfaces(struct AuraRenderer* self,
+void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
                                       Chain* surfaces)
 {
-    AuraRendererMMap* mine = (AuraRendererMMap*) self;
-    if (!mine) {
-        LOG_ERROR("Invalid renderer!");
-        return;
-    }
-
-    LOG_INFO3("MMap renderer: draw");
-
-    aura_renderer_mmap_draw_bg_image(mine);
-
     if (surfaces == NULL) {
         LOG_WARN3("MMap renderer: no surfaces!");
         return;
     }
 
-    Link* link;
-    uint8_t* b = mine->map[mine->front].buffer;
+    int current_buffer = mine->front ^ 1;
+    uint8_t* b = mine->map[current_buffer].buffer;
     //int w = mine->width;
     //int h = mine->height;
-    int s = mine->map[mine->front].stride;
+    int s = mine->map[current_buffer].stride;
+
+    Link* link;
     for (link = surfaces->first; link; link = link->next) {
         SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
         char* data = surface->pending.data;
@@ -115,6 +109,45 @@ void aura_renderer_mmap_draw_surfaces(struct AuraRenderer* self,
 
 //------------------------------------------------------------------------------
 
+void aura_renderer_mmap_swap_buffers(AuraRendererMMap* mine)
+{
+    int ok = 1;
+    int new_front = mine->front ^ 1;
+
+    // Check if second buffer was provided
+    if (!mine->map[new_front].buffer) {
+        return;
+    }
+
+    // Swap buffer on device
+    if (mine->output && mine->output->swap_buffers) {
+        ok = (mine->output->swap_buffers(mine->output) == 0);
+    }
+
+    // Swap buffer
+    if (ok) {
+        mine->front = new_front;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_renderer_mmap_draw(struct AuraRenderer* self,
+                             Chain* surfaces)
+{
+    AuraRendererMMap* mine = (AuraRendererMMap*) self;
+    if (!mine) {
+        LOG_ERROR("Invalid renderer!");
+        return;
+    }
+
+    aura_renderer_mmap_draw_bg_image(mine);
+    aura_renderer_mmap_draw_surfaces(mine, surfaces);
+    aura_renderer_mmap_swap_buffers(mine);
+}
+
+//------------------------------------------------------------------------------
+
 void aura_renderer_mmap_free(struct AuraRenderer* self)
 {
     if (self) {
@@ -124,7 +157,8 @@ void aura_renderer_mmap_free(struct AuraRenderer* self)
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_renderer_mmap_create(int width, int height)
+AuraRenderer* aura_renderer_mmap_create(AuraOutput* output,
+                                        int width, int height)
 {
     AuraRendererMMap* mine = malloc(sizeof(AuraRendererMMap));
     if (!mine) {
@@ -133,11 +167,11 @@ AuraRenderer* aura_renderer_mmap_create(int width, int height)
 
     memset(mine, 0, sizeof(AuraRendererMMap));
 
-    mine->base.initialize    = aura_renderer_mmap_initialize;
-    mine->base.finalize      = aura_renderer_mmap_finalize;
-    mine->base.attach        = NULL; // TODO
-    mine->base.draw_surfaces = aura_renderer_mmap_draw_surfaces;
-    mine->base.free          = aura_renderer_mmap_free;
+    mine->base.initialize = aura_renderer_mmap_initialize;
+    mine->base.finalize   = aura_renderer_mmap_finalize;
+    mine->base.attach     = NULL; // TODO
+    mine->base.draw       = aura_renderer_mmap_draw;
+    mine->base.free       = aura_renderer_mmap_free;
 
     mine->width = width;
     mine->height = height;
@@ -146,6 +180,7 @@ AuraRenderer* aura_renderer_mmap_create(int width, int height)
     mine->map[0].stride = width;
     mine->map[1].buffer = NULL;
     mine->map[1].stride = width;
+    mine->output = output;
 
     return (AuraRenderer*) mine;
 }

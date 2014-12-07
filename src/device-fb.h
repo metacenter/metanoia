@@ -4,7 +4,7 @@
 #ifndef __AURA_DEVICE_FB_H__
 #define __AURA_DEVICE_FB_H__
 
-#include "global-types.h"
+#include "output.h"
 
 int aura_setup_framebuffer(AuraOutput** outputs, int* num);
 

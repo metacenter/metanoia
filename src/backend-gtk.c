@@ -8,12 +8,14 @@
 #include "renderer-mmap.h"
 
 #include <gtk/gtk.h>
+#include <pthread.h>
 #include <malloc.h>
 #include <memory.h>
 
 //------------------------------------------------------------------------------
 
 #define NUM_VIEW_GROUPS 4
+#define NUM_BUFFERS 2
 
 static const char* scMainGuiPath = "share/gtk-backend-main.ui";
 static const char* scMenuGuiPath = "share/gtk-backend-menu.ui";
@@ -25,39 +27,37 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
+pthread_mutex_t mutex_buffer = PTHREAD_MUTEX_INITIALIZER;
+
 GtkWidget* window;
 
 struct {
     GtkWidget* da;
     GtkWidget* mb;
     GtkWidget* id;
-    uint8_t* data;
-    cairo_surface_t* source;
-    cairo_surface_t* cs; // TBR: after support for mode setting
+    int front;
+    struct {
+        uint8_t* buffer;
+        cairo_surface_t* source;
+    } data[NUM_BUFFERS];
 } group[NUM_VIEW_GROUPS];
 
 //------------------------------------------------------------------------------
 
 static void clear_surface(int n)
 {
-    if (group[n].cs) {
-        cairo_surface_destroy(group[n].cs);
+    int i;
+    for (i = 0; i < NUM_BUFFERS; ++i) {
+        cairo_t *cr = cairo_create(group[n].data[i].source);
+        cairo_set_source_rgb(cr, 0, 0, 0);
+        cairo_paint(cr);
+        cairo_destroy(cr);
     }
-
-    group[n].cs = gdk_window_create_similar_surface
-                       (gtk_widget_get_window(group[n].da), CAIRO_CONTENT_COLOR,
-                        gtk_widget_get_allocated_width(group[n].da),
-                        gtk_widget_get_allocated_height(group[n].da));
-
-    cairo_t *cr = cairo_create(group[n].cs);
-    cairo_set_source_rgb(cr, 0, 0, 0);
-    cairo_paint(cr);
-    cairo_destroy(cr);
 }
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_backend_gtk_output_initialize(struct AuraOutput* output,
+AuraRenderer* aura_backend_gtk_output_initialize(AuraOutput* output,
                                                  int width, int height)
 {
     AuraOutputGTK* output_gtk = (AuraOutputGTK*) output;
@@ -70,10 +70,14 @@ AuraRenderer* aura_backend_gtk_output_initialize(struct AuraOutput* output,
     LOG_INFO1("Initializing GTK output...");
 
     // Create data and surface
+    int i;
     int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
-    group[n].data = malloc(4 * stride * height);
-    group[n].source = cairo_image_surface_create_for_data(group[n].data,
-                                    CAIRO_FORMAT_RGB24, width, height, stride);
+    for (i = 0; i < NUM_BUFFERS; ++i) {
+        group[n].data[i].buffer = malloc(4 * stride * height);
+        group[n].data[i].source =
+                    cairo_image_surface_create_for_data(group[n].data[i].buffer,
+                                     CAIRO_FORMAT_RGB24, width, height, stride);
+    }
 
     // Clear drawing area
     gtk_widget_set_size_request(group[n].da, width, height);
@@ -82,21 +86,41 @@ AuraRenderer* aura_backend_gtk_output_initialize(struct AuraOutput* output,
 
     LOG_INFO1("Initializing GTK output: SUCCESS");
 
-    AuraRenderer* renderer = aura_renderer_mmap_create(width, height);
-    aura_renderer_mmap_set_buffer(renderer, 0, group[n].data, stride);
+    AuraRenderer* renderer = aura_renderer_mmap_create(output, width, height);
+    aura_renderer_mmap_set_buffer(renderer, 0, group[n].data[0].buffer, stride);
+    aura_renderer_mmap_set_buffer(renderer, 1, group[n].data[1].buffer, stride);
     return renderer;
+}
+
+//------------------------------------------------------------------------------
+
+int aura_backend_gtk_output_swap_buffers(AuraOutput* output)
+{
+    pthread_mutex_lock(&mutex_buffer);
+
+    AuraOutputGTK* output_gtk = (AuraOutputGTK*) output;
+    if (!output_gtk) {
+        LOG_ERROR("Invalid output!");
+        return -1;
+    }
+
+    group[output_gtk->num].front ^= 1;
+    pthread_mutex_unlock(&mutex_buffer);
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 
 int aura_backend_gtk_get_outputs(AuraOutput** outputs, int* num)
 {
+    // TODO: support for many screens
+
     AuraOutputGTK* output_gtk = malloc(sizeof(AuraOutputGTK));
     memset(output_gtk, 0, sizeof(AuraOutputGTK));
 
-    output_gtk->base.width = 800;
-    output_gtk->base.height = 600;
-    output_gtk->base.initialize = aura_backend_gtk_output_initialize;
+    aura_output_initialize(&output_gtk->base, 800, 600,
+                           aura_backend_gtk_output_initialize,
+                           aura_backend_gtk_output_swap_buffers);
 
     output_gtk->num = 0;
 
@@ -110,14 +134,19 @@ int aura_backend_gtk_get_outputs(AuraOutput** outputs, int* num)
 
 static gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data)
 {
+    pthread_mutex_lock(&mutex_buffer);
 
     int n = (int) data;
-    if (group[n].source) {
-        cairo_set_source_surface(cr, group[n].source, 0, 0);
+    cairo_surface_t* source = group[n].data[group[n].front].source;
+
+    if (source) {
+        cairo_set_source_surface(cr, source, 0, 0);
         cairo_rectangle(cr, 0, 0, gtk_widget_get_allocated_width(widget),
                                   gtk_widget_get_allocated_height(widget));
         cairo_fill(cr);
     }
+
+    pthread_mutex_unlock(&mutex_buffer);
     return FALSE;
 }
 
@@ -203,7 +232,14 @@ static void aura_backend_gtk_build()
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     // Run timer
-    g_timeout_add(100, (GSourceFunc) on_timer, NULL);
+    g_timeout_add(20, (GSourceFunc) on_timer, NULL);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_backend_gtk_initialize(void)
+{
+    memset(&group, 0, sizeof(group));
 }
 
 //------------------------------------------------------------------------------
@@ -216,6 +252,8 @@ void aura_backend_gtk_run(AuraLoop* this_loop)
     int argc = 1;
     char* args[] = {"aura", '\0'};
     char** argv = args;
+
+    aura_backend_gtk_initialize();
 
     gtk_init(&argc, &argv);
 

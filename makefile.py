@@ -216,7 +216,14 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 #-------------------------------------------------------------------------------
-#
+# OUTPUT
+
+t = m.add_compile_target(
+        output='output.o',
+        inputs=['output.c'],
+        includes=['output.h']
+    )
+aura.add_input(t)
 
 t = m.add_compile_target(
         output='output-collector.o',

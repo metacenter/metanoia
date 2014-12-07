@@ -314,8 +314,8 @@ void aura_renderer_gl_finalize(struct AuraRenderer* self)
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_draw_surfaces(struct AuraRenderer* self,
-                                    Chain* surfaces)
+void aura_renderer_gl_draw(struct AuraRenderer* self,
+                           Chain* surfaces)
 {
     int r;
     AuraRendererGL* mine;
@@ -476,11 +476,11 @@ AuraRenderer* aura_renderer_gl_create(EGLDisplay egl_display,
 
     memset(mine, 0, sizeof(AuraRendererGL));
 
-    mine->base.initialize    = aura_renderer_gl_initialize;
-    mine->base.finalize      = aura_renderer_gl_finalize;
-    mine->base.attach        = aura_renderer_gl_attach;
-    mine->base.draw_surfaces = aura_renderer_gl_draw_surfaces;
-    mine->base.free          = aura_renderer_gl_free;
+    mine->base.initialize = aura_renderer_gl_initialize;
+    mine->base.finalize   = aura_renderer_gl_finalize;
+    mine->base.attach     = aura_renderer_gl_attach;
+    mine->base.draw       = aura_renderer_gl_draw;
+    mine->base.free       = aura_renderer_gl_free;
 
     mine->egl_display = egl_display;
     mine->egl_surface = egl_surface;

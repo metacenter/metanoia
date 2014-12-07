@@ -4,9 +4,11 @@
 #ifndef __AURA_RENDERER_MMAP_H__
 #define __AURA_RENDERER_MMAP_H__
 
-#include "global-types.h"
+#include "output.h"
 
-AuraRenderer* aura_renderer_mmap_create(int width, int height);
+AuraRenderer* aura_renderer_mmap_create(AuraOutput* output,
+                                        int width,
+                                        int height);
 
 void aura_renderer_mmap_set_buffer(AuraRenderer* self,
                                    int num,

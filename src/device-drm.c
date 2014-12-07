@@ -121,9 +121,9 @@ clear_db:
 
 static AuraRenderer* create_dumb_buffers(AuraOutputDRM* output_drm)
 {
-    AuraRenderer* renderer =
-     aura_renderer_mmap_create(output_drm->base.width, output_drm->base.height);
-
+    AuraRenderer* renderer = aura_renderer_mmap_create((AuraOutput*) output_drm,
+                                                       output_drm->base.width,
+                                                       output_drm->base.height);
     create_dumb_buffer(output_drm, renderer, 0);
     create_dumb_buffer(output_drm, renderer, 1);
 
@@ -286,10 +286,9 @@ clear_fb:
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_drm_output_initialize(struct AuraOutput* output,
+AuraRenderer* aura_drm_output_initialize(AuraOutput* output,
                                          int width, int height)
 {
-    int result;
     AuraRenderer* renderer;
 
     AuraOutputDRM* output_drm = (AuraOutputDRM*) output;
@@ -307,16 +306,43 @@ AuraRenderer* aura_drm_output_initialize(struct AuraOutput* output,
     //}
 
     // Set mode
-    result = drmModeSetCrtc(output_drm->fd,
-                            output_drm->crtc,
-                            output_drm->fb[0], 0, 0,
-                            &output_drm->connector,
-                            1, &output_drm->mode);
-    if (result) {
-        LOG_ERROR("Failed to set mode: %m");
+    int r = drmModeSetCrtc(output_drm->fd,
+                           output_drm->crtc,
+                           output_drm->fb[0], 0, 0,
+                           &output_drm->connector, 1,
+                           &output_drm->mode);
+    if (r) {
+        LOG_ERROR("Failed to set mode for connector %u (%m)",
+                   output_drm->connector);
     }
 
     return renderer;
+}
+
+//------------------------------------------------------------------------------
+
+int aura_drm_output_swap_buffers(AuraOutput* output)
+{
+    AuraOutputDRM* output_drm = (AuraOutputDRM*) output;
+    if (!output_drm) {
+        return -1;
+    }
+
+    int new_front = output_drm->front ^ 1;
+
+    int r = drmModeSetCrtc(output_drm->fd,
+                           output_drm->crtc,
+                           output_drm->fb[new_front], 0, 0,
+                           &output_drm->connector, 1,
+                           &output_drm->mode);
+    if (r) {
+        LOG_WARN1("Failed to set mode for connector %u (%m)",
+                   output_drm->connector);
+        return -1;
+    }
+
+    output_drm->front = new_front;
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -357,9 +383,11 @@ int update_device(int drm_fd,
     AuraOutputDRM* output_drm = malloc(sizeof(AuraOutputDRM));
     memset(output_drm, 0, sizeof(AuraOutputDRM));
 
-    output_drm->base.width = connector->modes[0].hdisplay;
-    output_drm->base.height = connector->modes[0].vdisplay;
-    output_drm->base.initialize = aura_drm_output_initialize;
+    aura_output_initialize(&output_drm->base,
+                           connector->modes[0].hdisplay,
+                           connector->modes[0].vdisplay,
+                           aura_drm_output_initialize,
+                           aura_drm_output_swap_buffers);
 
     output_drm->fd = drm_fd;
     output_drm->front = 0;
