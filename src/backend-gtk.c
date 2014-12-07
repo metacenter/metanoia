@@ -82,7 +82,9 @@ AuraRenderer* aura_backend_gtk_output_initialize(struct AuraOutput* output,
 
     LOG_INFO1("Initializing GTK output: SUCCESS");
 
-    return aura_renderer_mmap_create(group[n].data, width, height, stride);
+    AuraRenderer* renderer = aura_renderer_mmap_create(width, height);
+    aura_renderer_mmap_set_buffer(renderer, 0, group[n].data, stride);
+    return renderer;
 }
 
 //------------------------------------------------------------------------------

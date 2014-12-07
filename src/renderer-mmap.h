@@ -6,10 +6,12 @@
 
 #include "global-types.h"
 
-AuraRenderer* aura_renderer_mmap_create(uint8_t* buffer,
-                                        int width,
-                                        int height,
-                                        int stride);
+AuraRenderer* aura_renderer_mmap_create(int width, int height);
+
+void aura_renderer_mmap_set_buffer(AuraRenderer* self,
+                                   int num,
+                                   uint8_t* buffer,
+                                   int stride);
 
 #endif // __AURA_RENDERER_MMAP_H__
 

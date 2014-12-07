@@ -120,7 +120,7 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     }
 
     // FIXME: not here
-    if (!wl_global_create(wayland_display, &wl_output_interface, 1,
+    if (!wl_global_create(wayland_display, &wl_output_interface, scVersion,
                           NULL, aura_wayland_output_bind)) {
         LOG_ERROR("Could not create global output!");
     }

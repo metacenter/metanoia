@@ -55,33 +55,10 @@ AuraRenderer* aura_devfb_output_initialize(struct AuraOutput* output,
         return NULL;
     }
 
-    // TODO: remove
-    int x, y;
-    for (y = 0; y < height; ++y) {
-        for (x = 0; x < width; ++x) {
-            if (x < width/3){
-                buffer[y*fixed_info.line_length + 4*x + 0] = 0xFF;
-                buffer[y*fixed_info.line_length + 4*x + 1] = 0x00;
-                buffer[y*fixed_info.line_length + 4*x + 2] = 0x00;
-                buffer[y*fixed_info.line_length + 4*x + 3] = 0xFF;
-            }
-            else if (x < width*2/3) {
-                buffer[y*fixed_info.line_length + 4*x + 0] = 0x00;
-                buffer[y*fixed_info.line_length + 4*x + 1] = 0xFF;
-                buffer[y*fixed_info.line_length + 4*x + 2] = 0x00;
-                buffer[y*fixed_info.line_length + 4*x + 3] = 0xFF;
-            }
-            else {
-                buffer[y*fixed_info.line_length + 4*x + 0] = 0x00;
-                buffer[y*fixed_info.line_length + 4*x + 1] = 0x00;
-                buffer[y*fixed_info.line_length + 4*x + 2] = 0xFF;
-                buffer[y*fixed_info.line_length + 4*x + 3] = 0xFF;
-            }
-        }
-    }
 
-    return aura_renderer_mmap_create(buffer, width, height,
-                                     fixed_info.line_length);
+    AuraRenderer* renderer = aura_renderer_mmap_create(width, height);
+    aura_renderer_mmap_set_buffer(renderer, 0, buffer, fixed_info.line_length);
+    return renderer;
 }
 
 //------------------------------------------------------------------------------

@@ -45,97 +45,96 @@ static const char* scConnectorStateName[] = {
 typedef struct {
     AuraOutput base;
     int fd;
-    uint32_t crtc_id;
-    drmModeConnector* connector;
+    int front;
+    uint32_t crtc;
+    uint32_t connector;
+    uint32_t fb[2];
+    drmModeModeInfo mode;
 } AuraOutputDRM;
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* create_dumb_buffer(AuraOutputDRM* output_drm)
+static int create_dumb_buffer(AuraOutputDRM* output_drm,
+                              AuraRenderer* renderer,
+                              int num)
 {
     int result = 0;
     uint8_t* map;
-    uint32_t fb_id;
     struct drm_mode_create_dumb carg;
     struct drm_mode_destroy_dumb darg;
     struct drm_mode_map_dumb marg;
 
     // Create dumb buffer
-    LOG_DEBUG("E: %d", errno);
     memset(&carg, 0, sizeof(carg));
-    carg.width  = output_drm->connector->modes[0].hdisplay;
-    carg.height = output_drm->connector->modes[0].vdisplay;
+    carg.width  = output_drm->mode.hdisplay;
+    carg.height = output_drm->mode.vdisplay;
     carg.bpp = 32;
-
 
     result = drmIoctl(output_drm->fd, DRM_IOCTL_MODE_CREATE_DUMB, &carg);
     if (result < 0) {
-        LOG_ERROR("Cannot create dumb buffer (%d): %s", errno, strerror(errno));
-        return NULL;
+        LOG_ERROR("Cannot create dumb buffer (%m)");
+        return -1;
     }
-    LOG_DEBUG("S: %d*%d=%d", carg.pitch, carg.height, carg.pitch*carg.height);
-    LOG_DEBUG("H: %d, %d", carg.size, carg.handle);
 
     // Create framebuffer object for the dumb-buffer
-    result = drmModeAddFB(output_drm->fd, carg.width, carg.height, 24,
-                          carg.bpp, carg.pitch, carg.handle, &fb_id);
+    result = drmModeAddFB(output_drm->fd, carg.width, carg.height,
+                          24, carg.bpp, carg.pitch, carg.handle,
+                          &output_drm->fb[num]);
     if (result) {
-        LOG_ERROR("Cannot create framebuffer (%d): %s", errno, strerror(errno));
+        LOG_ERROR("Cannot create framebuffer (%m)");
         goto clear_db;
     }
 
-    LOG_DEBUG("H: %d, %d", carg.size, carg.handle);
     // Prepare buffer for memory mapping
     memset(&marg, 0, sizeof(marg));
     marg.handle = carg.handle;
     result = drmIoctl(output_drm->fd, DRM_IOCTL_MODE_MAP_DUMB, &marg);
     if (result) {
-        LOG_ERROR("Cannot map dumb buffer (%d): %s", errno, strerror(errno));
+        LOG_ERROR("Cannot map dumb buffer (%m)");
         goto clear_fb;
     }
 
-    LOG_DEBUG("H: %d %d", carg.size, marg.offset);
-    LOG_DEBUG("E: %d", errno);
     // Perform actual memory mapping
     map = mmap(0, carg.size, PROT_READ | PROT_WRITE,
                MAP_SHARED, output_drm->fd, marg.offset);
 
-    LOG_DEBUG("E: %d", errno);
     if (map == MAP_FAILED) {
-        LOG_ERROR("Cannot mmap dumb buffer (%d): %s", errno, strerror(errno));
-        result = -errno;
+        LOG_ERROR("Cannot mmap dumb buffer (%m)");
         goto clear_fb;
     }
 
-    // Set mode
-    result = drmModeSetCrtc(output_drm->fd,
-                            output_drm->crtc_id,
-                            fb_id, 0, 0,
-                            &output_drm->connector->connector_id,
-                            1, &output_drm->connector->modes[0]);
-    if (result) {
-        LOG_ERROR("failed to set mode: %s\n", strerror(errno));
-        goto clear_fb;
-    }
-
-    return aura_renderer_mmap_create(map, carg.width, carg.height, carg.pitch);
+    aura_renderer_mmap_set_buffer(renderer, num, map, carg.pitch);
+    return 0;
 
 clear_fb:
-    drmModeRmFB(output_drm->fd, fb_id);
+    drmModeRmFB(output_drm->fd, output_drm->fb[num]);
 
 clear_db:
     memset(&darg, 0, sizeof(darg));
     darg.handle = carg.handle;
     drmIoctl(output_drm->fd, DRM_IOCTL_MODE_DESTROY_DUMB, &darg);
 
-    return NULL;
+    return -1;
+}
+
+//------------------------------------------------------------------------------
+
+static AuraRenderer* create_dumb_buffers(AuraOutputDRM* output_drm)
+{
+    AuraRenderer* renderer =
+     aura_renderer_mmap_create(output_drm->base.width, output_drm->base.height);
+
+    create_dumb_buffer(output_drm, renderer, 0);
+    create_dumb_buffer(output_drm, renderer, 1);
+
+    return (AuraRenderer*) renderer;
 }
 
 //------------------------------------------------------------------------------
 
 AuraRenderer* initialize_egl_with_gbm(AuraOutputDRM* output_drm)
 {
-    int r; // TODO EGLint ?
+    /*int r; // TODO EGLint ?
     uint32_t fb_id;
     uint32_t width, height, stride, handle;
     EGLint major, minor, n;
@@ -254,7 +253,7 @@ AuraRenderer* initialize_egl_with_gbm(AuraOutputDRM* output_drm)
 
     // Set mode
     r = drmModeSetCrtc(output_drm->fd,
-                       output_drm->crtc_id,
+                       output_drm->crtc,
                        fb_id, 0, 0,
                        &output_drm->connector->connector_id,
                        1, mode);
@@ -281,7 +280,7 @@ AuraRenderer* initialize_egl_with_gbm(AuraOutputDRM* output_drm)
     return aura_renderer_gl_create(egl_display, egl_surface, egl_context);
 
 clear_fb:
-    drmModeRmFB(output_drm->fd, fb_id);
+    drmModeRmFB(output_drm->fd, fb_id);*/
     return NULL;
 }
 
@@ -290,33 +289,39 @@ clear_fb:
 AuraRenderer* aura_drm_output_initialize(struct AuraOutput* output,
                                          int width, int height)
 {
-    AuraOutputDRM* output_drm;
+    int result;
     AuraRenderer* renderer;
 
-    if (!output) {
+    AuraOutputDRM* output_drm = (AuraOutputDRM*) output;
+    if (!output_drm) {
         return NULL;
     }
 
-    errno = 0;
-    LOG_DEBUG("E: %d", errno);
-    output_drm = (AuraOutputDRM*) output;
-
     //renderer = initialize_egl_with_gbm(output_drm);
     //if (renderer == NULL) {
-        renderer = create_dumb_buffer(output_drm);
+        renderer = create_dumb_buffers(output_drm);
         if (renderer == NULL) {
             LOG_ERROR("DRM failed!");
             return NULL;
         }
     //}
 
-    // TODO: set mode (only) here
+    // Set mode
+    result = drmModeSetCrtc(output_drm->fd,
+                            output_drm->crtc,
+                            output_drm->fb[0], 0, 0,
+                            &output_drm->connector,
+                            1, &output_drm->mode);
+    if (result) {
+        LOG_ERROR("Failed to set mode: %m");
+    }
 
     return renderer;
 }
 
 //------------------------------------------------------------------------------
 
+// XXX: simply return output
 int update_device(int drm_fd,
                   drmModeRes* resources,
                   drmModeConnector* connector,
@@ -348,16 +353,21 @@ int update_device(int drm_fd,
         return -EFAULT;
     }
 
+    // Create output
     AuraOutputDRM* output_drm = malloc(sizeof(AuraOutputDRM));
     memset(output_drm, 0, sizeof(AuraOutputDRM));
 
-    output_drm->base.width = connector->modes[0].vdisplay;
-    output_drm->base.height = connector->modes[0].hdisplay;
+    output_drm->base.width = connector->modes[0].hdisplay;
+    output_drm->base.height = connector->modes[0].vdisplay;
     output_drm->base.initialize = aura_drm_output_initialize;
 
     output_drm->fd = drm_fd;
-    output_drm->connector = connector;
-    output_drm->crtc_id = encoder->crtc_id;
+    output_drm->front = 0;
+    output_drm->crtc = encoder->crtc_id;
+    output_drm->connector = connector->connector_id;
+    output_drm->fb[0] = -1;
+    output_drm->fb[1] = -1;
+    output_drm->mode = connector->modes[0];
 
     *output = (AuraOutput*) output_drm;
 
@@ -376,6 +386,7 @@ int aura_drm_update_devices(AuraOutput** outputs, int* num)
     LOG_INFO1("Updating DRM devices");
 
     // Find and open DRM device
+    // TODO: try all devices, there may be more than one connected
     for (i = 0; i < sizeof(scModuleName); ++i) {
         fd = drmOpen(scModuleName[i], NULL);
         if (fd > 0) {
@@ -389,17 +400,6 @@ int aura_drm_update_devices(AuraOutput** outputs, int* num)
         return -1;
     }
 
-/*char node[] = "/dev/dri/card0";
-
-struct stat st;
-int r = stat(node, &st);
-if (r >= 0) {
-    fd = aura_dbus_session_take_device(major(st.st_rdev), minor(st.st_rdev));
-    LOG_DEBUG("FD: %d", fd);
-} else {
-    LOG_ERROR("NO STAT");
-}*/
-
     uint64_t has_dumb;
     if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0 || !has_dumb) {
         LOG_ERROR("drm device does not support dumb buffers");
@@ -407,11 +407,10 @@ if (r >= 0) {
         return -1;
     }
 
-int ret = drmSetMaster(fd);
-LOG_DEBUG("MASTER: %d", ret);
-if (ret == -1) {
-    LOG_ERROR("Set Master: %s", strerror(errno));
-}
+    int ret = drmSetMaster(fd);
+    if (ret == -1) {
+        LOG_ERROR("Set Master: %s", strerror(errno));
+    }
 
     // Get resources
     resources = drmModeGetResources(fd);
@@ -421,27 +420,21 @@ if (ret == -1) {
     }
 
     // TODO: put malloc elsewhere
-    *outputs = malloc(sizeof(AuraOutput));
-    (*outputs)->width = 1366;
-    (*outputs)->height = 768;
-    *num = 1;
+    *num = 0;
 
     // Find a connected connector
     for (i = 0; i < resources->count_connectors; ++i) {
         connector = drmModeGetConnector(fd, resources->connectors[i]);
-        if (connector)
-        {
+        if (connector) {
             LOG_INFO2("Connector: %s (%s)",
                        scConnectorTypeName[connector->connector_type],
                        scConnectorStateName[connector->connection]);
             // If connector is connected - update device
             if (connector->connection == DRM_MODE_CONNECTED) {
                 update_device(fd, resources, connector, outputs);
+                (*num) += 1;
             }
-            else
-            {
-                drmModeFreeConnector(connector);
-            }
+            drmModeFreeConnector(connector);
         }
         connector = NULL;
     }
