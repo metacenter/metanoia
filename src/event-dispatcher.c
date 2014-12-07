@@ -86,7 +86,7 @@ int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
 
     struct epoll_event event;
     event.data.ptr = data;
-    event.events = EPOLLIN | EPOLLET;
+    event.events = EPOLLIN;
 
     return epoll_ctl(mine->epfd, EPOLL_CTL_ADD, data->fd, &event);
 }
