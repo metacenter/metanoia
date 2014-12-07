@@ -5,8 +5,7 @@
 
 #include "renderer-gl.h"
 
-// for SurfaceData, TODO: move elsewhere
-#include "surface-priv.h"
+#include "surface.h"
 #include "utils-log.h"
 
 #include <malloc.h>
@@ -37,8 +36,9 @@ void* xxxx_resource = NULL;
 char* shader_source_read(const char* filename)
 {
     FILE* input = fopen(filename, "rb");
-    if(input == NULL)
+    if(!input) {
         return NULL;
+    }
 
     if (fseek(input, 0, SEEK_END) == -1) {
         return NULL;
@@ -150,7 +150,7 @@ void aura_renderer_gl_attach(struct AuraRenderer* self,
 
     EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
 
-    SurfaceData* surface = aura_surface_get(surfaceId);
+    AuraSurfaceData* surface = aura_surface_get(surfaceId);
 
     //glBindTexture(GL_TEXTURE_2D, surface->buffer.texture);
     //glGenTextures(1, &surface->buffer.texture);
@@ -352,7 +352,7 @@ void aura_renderer_gl_draw(struct AuraRenderer* self,
 
     Link* link = surfaces->first;
     //for (link = surfaces->first; link; link = link->next) {
-        SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
+        AuraSurfaceData* surface = aura_surface_get((SurfaceId) link->data);
         uint8_t* data = surface->buffer.data;
         int width = surface->buffer.width;
         int height = surface->buffer.height;

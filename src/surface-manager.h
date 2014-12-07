@@ -6,13 +6,18 @@
 
 #include "global-types.h"
 #include "event-loop.h"
+#include "surface-data.h"
 
 void aura_surface_manager_initialize(AuraLoop* this_loop);
 
-void aura_surface_attach_egl(SurfaceId id,
+SurfaceId aura_surface_create(void);
+
+AuraSurfaceData* aura_surface_get(SurfaceId sid);
+
+void aura_surface_attach_egl(SurfaceId sid,
                              void* resource);
 
-void aura_surface_commit(SurfaceId id,
+void aura_surface_commit(SurfaceId sid,
                          int width,
                          int height,
                          int stride,

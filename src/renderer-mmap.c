@@ -3,8 +3,7 @@
 
 #include "renderer-mmap.h"
 
-// for SurfaceData, TODO: move elsewhere
-#include "surface-priv.h"
+#include "surface.h"
 #include "utils-log.h"
 
 #include <malloc.h>
@@ -90,7 +89,7 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
 
     Link* link;
     for (link = surfaces->first; link; link = link->next) {
-        SurfaceData* surface = aura_surface_get((SurfaceId) link->data);
+        AuraSurfaceData* surface = aura_surface_get((SurfaceId) link->data);
         uint8_t* d = surface->buffer.data;
         int s = surface->buffer.stride;
         int x, y;

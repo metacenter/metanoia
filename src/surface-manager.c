@@ -5,16 +5,22 @@
 
 #include "utils-log.h"
 #include "utils-chain.h"
+#include "utils-store.h"
 #include "event-timer.h"
 #include "event-signals.h"
 #include "surface-priv.h"
 
-Chain* visible_surfaces = NULL;
-AuraRenderer* renderer = NULL;
+#include <malloc.h>
+#include <memory.h>
+
+static AuraStore* sStore = NULL;
+static Chain* visible_surfaces = NULL; // TODO: move to compositor
+static AuraRenderer* renderer = NULL; // TODO: move to compositor
 
 //------------------------------------------------------------------------------
 
-static void aura_surface_manager_redraw_all()
+// TODO: move to compositor
+void aura_surface_manager_redraw_all()
 {
     if (renderer == NULL) {
         LOG_ERROR("Invalid renderer!");
@@ -30,7 +36,7 @@ static void aura_surface_manager_redraw_all()
 
     // TODO: pass as list
     if (visible_surfaces) {
-    Link* link;
+        Link* link;
         for (link = visible_surfaces->first; link; link = link->next) {
             SurfaceId sid = (SurfaceId) link->data;
             aura_event_signal_emit(SIGNAL_SCREEN_REFRESH, (void*) sid);
@@ -40,48 +46,60 @@ static void aura_surface_manager_redraw_all()
 
 //------------------------------------------------------------------------------
 
-// TBR
-void aura_surface_manage(SurfaceId id)
+SurfaceId aura_surface_create(void)
 {
-    // TODO: finish this
-
-    if (visible_surfaces == NULL) {
-        visible_surfaces = chain_new(NULL);
+    // Create new surface
+    AuraSurfaceData* data = aura_surface_data_new();
+    if (data == NULL) {
+        LOG_ERROR("Could not create new surface!");
+        return scInvalidSurfaceId;
     }
 
-    chain_append(visible_surfaces, (void*) id);
+    AuraItemId sid = aura_store_generate_new_id(sStore);
+    aura_store_add(sStore, sid, data);
 
-    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) id);
+    // Do this as strategy
+    chain_append(visible_surfaces, (void*) sid);
+    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) sid);
+
+    return sid;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_surface_attach_egl(SurfaceId id,
+AuraSurfaceData* aura_surface_get(SurfaceId sid)
+{
+    return aura_store_get(sStore, sid);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_attach_egl(SurfaceId sid,
                              void* resource)
 {
-    SurfaceData* surface = aura_surface_get(id);
+    AuraSurfaceData* surface = aura_surface_get(sid);
     if (surface == NULL) {
-        LOG_WARN2("Could not find surface (id: %d)", id);
+        LOG_WARN2("Could not find surface (sid: %d)", sid);
         return;
     }
 
     // TODO: log at init if renderer supports egl
     if (renderer && renderer->attach) {
-        renderer->attach((struct AuraRenderer*) renderer, id, resource);
+        renderer->attach((struct AuraRenderer*) renderer, sid, resource);
     }
 }
 
 //------------------------------------------------------------------------------
 
-void aura_surface_commit(SurfaceId id,
+void aura_surface_commit(SurfaceId sid,
                          int width,
                          int height,
                          int stride,
                          uint8_t* data)
 {
-    SurfaceData* surface = aura_surface_get(id);
+    AuraSurfaceData* surface = aura_surface_get(sid);
     if (surface == 0) {
-        LOG_WARN2("Could not find surface (id: %d)", id);
+        LOG_WARN2("Could not find surface (sid: %d)", sid);
         return;
     }
 
@@ -93,6 +111,7 @@ void aura_surface_commit(SurfaceId id,
 
 //------------------------------------------------------------------------------
 
+// TODO: Move to compositor
 static void on_display_found(void* data)
 {
     AuraRenderer* renderer_new = (AuraRenderer*) data;
@@ -117,6 +136,9 @@ void aura_surface_manager_initialize(AuraLoop* this_loop)
         LOG_ERROR("Invalid loop!");
         return;
     }
+
+    visible_surfaces = chain_new(NULL);
+    sStore = aura_store_new();
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
          aura_task_create(on_display_found, this_loop));

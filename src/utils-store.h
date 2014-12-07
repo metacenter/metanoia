@@ -15,7 +15,8 @@ typedef struct AuraItem {
 typedef struct AuraStore AuraStore;
 
 
-static const AuraItemId scInvalidItemId = 0xFFFF;
+static const AuraItemId scInvalidItemId = 0x0000;
+static const AuraItemId scValidItemMask = 0xFFFC;
 
 
 AuraStore* aura_store_new(void);

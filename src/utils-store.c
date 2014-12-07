@@ -58,7 +58,7 @@ AuraItemId aura_store_generate_new_id(AuraStore* self)
 
     AuraItem item;
     do {
-        item.id = (AuraItemId) (rand() & 0xFF);
+        item.id = (AuraItemId) (rand() & scValidItemMask);
     } while (tfind((void *) &item, &self->root, compare) != NULL);
     return item.id;
 }
@@ -67,12 +67,13 @@ AuraItemId aura_store_generate_new_id(AuraStore* self)
 
 int aura_store_add(AuraStore* self, AuraItemId id, void* data)
 {
+    AuraItem* item = (AuraItem*) data;
     if (!self) {
         return -1;
     }
 
-    // TODO: set id explicitly
-    if (tsearch(data, &self->root, compare) == NULL) {
+    item->id = id;
+    if (tsearch(item, &self->root, compare) == NULL) {
         return -1;
     }
 

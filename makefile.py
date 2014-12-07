@@ -236,9 +236,9 @@ aura.add_input(t)
 #
 
 t = m.add_compile_target(
-        output='surface-aggregator.o',
-        inputs=['surface-aggregator.c'],
-        includes=['surface-aggregator.h']
+        output='surface-data.o',
+        inputs=['surface-data.c'],
+        includes=['surface-data.h']
     )
 aura.add_input(t)
 

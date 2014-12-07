@@ -4,8 +4,6 @@
 #ifndef __AURA_SURFACE_H__
 #define __AURA_SURFACE_H__
 
-#include "surface-aggregator.h"
-#include "surface-compositor.h"
 #include "surface-manager.h"
 
 #endif // __AURA_SURFACE_H__

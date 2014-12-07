@@ -4,31 +4,5 @@
 #ifndef __AURA_SURFACE_PRIV_H__
 #define __AURA_SURFACE_PRIV_H__
 
-#include "global-types.h"
-
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-
-typedef struct {
-    int width;
-    int height;
-    int stride;
-    uint8_t* data;
-    GLuint texture;
-    EGLImageKHR image;
-} DrawBuffer;
-
-typedef struct {
-    SurfaceId id;
-    int x, y;
-    DrawBuffer buffer;
-} SurfaceData;
-
-SurfaceData* aura_surface_get(SurfaceId id);
-
-void aura_surface_manage(SurfaceId id);
-
 #endif // __AURA_SURFACE_PRIV_H__
 
