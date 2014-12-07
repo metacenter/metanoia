@@ -29,7 +29,7 @@ static void surface_attach(struct wl_client* client,
     char* data = NULL;
     SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
 
-    LOG_DATA3("Wayland: surface attach (sx: %d, sy: %d, sid: %d)", sx, sy, sid);
+    LOG_WAYL3("Wayland: surface attach (sx: %d, sy: %d, sid: %d)", sx, sy, sid);
 
     struct wl_shm_buffer* shm_buffer = wl_shm_buffer_get(buffer_resource);
     if (shm_buffer) {
@@ -38,7 +38,7 @@ static void surface_attach(struct wl_client* client,
         stride = wl_shm_buffer_get_stride(shm_buffer);
         data   = wl_shm_buffer_get_data(shm_buffer);
     } else {
-        LOG_WARN1("Wrong shared memory buffer!");
+        LOG_WARN3("Wrong shared memory buffer!");
     }
 
     wayland_state_surface_attach(sid, buffer_resource);
@@ -110,7 +110,7 @@ static void surface_commit(struct wl_client* client,
 {
     SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
 
-    LOG_DATA3("Wayland: commit (sid: %d)", sid);
+    LOG_WAYL3("Wayland: commit (sid: %d)", sid);
 
     aura_surface_commit(sid);
 }

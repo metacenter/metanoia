@@ -101,7 +101,7 @@ bool aura_dbus_initalize(void)
 
     // Get session ID
     if (aura_dbus_session_get_session_by_pid(getpid(), &scSessionObject)) {
-        LOG_DATA2("Session DBus path is: '%s'", scSessionObject);
+        LOG_INFO2("Session DBus path is: '%s'", scSessionObject);
     } else {
         LOG_WARN2("Could not get session DBus path!");
         scSessionObject = NULL;

@@ -50,7 +50,7 @@ void aura_keyboard_add_binding(const Binding* binding)
         return;
     }
 
-    LOG_DATA2("Created binding (code: %d, modifiers: %d)",
+    LOG_INFO2("Created binding (code: %d, modifiers: %d)",
               binding->code, binding->modifiers);
 }
 

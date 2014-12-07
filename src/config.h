@@ -9,7 +9,6 @@
 
 typedef struct AuraConfig {
     bool run_in_test_window;
-    LogLevel log_level;
 } AuraConfig;
 
 AuraConfig aura_config();

@@ -10,7 +10,7 @@
 static void keyboard_release(struct wl_client *client,
                              struct wl_resource *resource)
 {
-    LOG_INFO3("Wayland: keyboard release");
+    LOG_WAYL2("Wayland: keyboard release");
     wl_resource_destroy(resource);
 }
 

@@ -34,15 +34,6 @@ static const char scLogBackTraceEnd[] =
 "----------------+-------+------------+------+"
 "-------------------+----------------------+\n";
 
-static const char* scLogLevelName[] = {
-        "ERROR", "NYIMP",
-        "WARN1", "DATA1", "INFO1",
-        "WARN2", "DATA2", "INFO2",
-        "DEBUG",
-        "WARN3", "DATA3", "INFO3",
-        "WARN4", "DATA4", "INFO4",
-    };
-
 // Log file
 static const char* scConfLogFile = "logs/log";
 
@@ -80,7 +71,7 @@ void aura_log_finalize(void)
 
 //------------------------------------------------------------------------------
 
-void aura_log(LogLevel    log_level,
+void aura_log(const char* log_level,
               const int   line,
               const char* file,
               const char* format,
@@ -90,14 +81,6 @@ void aura_log(LogLevel    log_level,
     char buff[128];
     struct timeval tv;
     struct tm* tm;
-
-    // Check log level
-    if (log_level > aura_config().log_level) {
-        return;
-    }
-    if (log_level >= sizeof scLogLevelName) {
-        log_level = LEVEL_DEBUG;
-    }
 
     // Get time
     gettimeofday(&tv, NULL);
@@ -110,7 +93,7 @@ void aura_log(LogLevel    log_level,
     n = snprintf(buff, sizeof buff,
                 "%02d:%02d:%02d.%06d | %-5s | %-10u | %4d | %-40s%s",
                 tm->tm_hour, tm->tm_min, tm->tm_sec, (int) tv.tv_usec,
-                scLogLevelName[log_level], (unsigned) pthread_self(),
+                log_level, (unsigned) pthread_self(),
                 line, file, scLogEnd);
 
     // Print text

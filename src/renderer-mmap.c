@@ -80,7 +80,7 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
                                       Chain* surfaces)
 {
     if (surfaces == NULL) {
-        LOG_WARN3("MMap renderer: no surfaces!");
+        LOG_WARN4("MMap renderer: no surfaces!");
         return;
     }
 

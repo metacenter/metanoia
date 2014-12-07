@@ -9,8 +9,7 @@
 #include <linux/input.h>
 
 static const AuraConfig scConfig = {
-        .run_in_test_window = 0, // TODO: this should be detected in runtime
-        .log_level = LEVEL_DEBUG
+        .run_in_test_window = 1, // TODO: this should be detected in runtime
     };
 
 static const Binding scKeyboardBindings[] = {

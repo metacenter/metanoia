@@ -48,7 +48,7 @@ static void* display_run(void* data)
 static void wayland_screen_refresh_handler(void* data)
 {
     SurfaceId sid = (SurfaceId) data;
-    LOG_INFO1("Wayland: handling screen refresh");
+    LOG_WAYL3("Wayland: handling screen refresh");
     wayland_state_screen_refresh(sid);
 }
 
@@ -57,7 +57,7 @@ static void wayland_screen_refresh_handler(void* data)
 static void wayland_keyboard_focus_change_handler(void* data)
 {
     SurfaceId sid = (SurfaceId) data;
-    LOG_INFO1("Wayland: handling keyboard focus change (%d)", sid);
+    LOG_WAYL2("Wayland: handling keyboard focus change (%d)", sid);
     wayland_state_keyboard_focus_update(sid);
 }
 
@@ -65,7 +65,7 @@ static void wayland_keyboard_focus_change_handler(void* data)
 
 static void wayland_keyboard_event_handler(void* data)
 {
-    LOG_INFO1("Wayland: handling keyboard event");
+    LOG_WAYL4("Wayland: handling keyboard event");
 
     AuraKeyData* key_data = data;
     if (!key_data) {
@@ -82,7 +82,7 @@ int aura_wayland_event_loop_feeder(void* data)
     struct wl_event_loop* loop;
     static struct wl_event_source* src = NULL;
 
-    LOG_INFO4("--- Wayland loop feeder ---");
+    LOG_WAYL4("--- Wayland loop feeder ---");
     loop = wl_display_get_event_loop(wayland_display);
     if (!src) {
         src = wl_event_loop_add_timer(loop,
@@ -111,15 +111,12 @@ void aura_wayland_initialize(AuraLoop* this_loop)
 
     wayland_state_initialize(wayland_display);
 
-    LOG_DEBUG("WLD: %p", wayland_display);
-
-    // Create singleton objects
+    // Create singleton objects // FIXME: not here
     if (!wl_global_create(wayland_display, &wl_compositor_interface, scVersion,
                           NULL, aura_wayland_compositor_bind)) {
         LOG_ERROR("Could not create global display!");
     }
 
-    // FIXME: not here
     if (!wl_global_create(wayland_display, &wl_output_interface, scVersion,
                           NULL, aura_wayland_output_bind)) {
         LOG_ERROR("Could not create global output!");

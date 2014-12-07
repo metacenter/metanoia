@@ -107,12 +107,12 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
 
     mine->run = 1;
     while (mine->run) {
-        LOG_INFO4("Waiting for events...");
+        LOG_EVNT4("Waiting for events...");
         r = epoll_wait(mine->epfd, &event, 1, -1);
         if (r > 0) {
             AuraEventData* data = event.data.ptr;
             if (data) {
-                LOG_INFO4("New event from %d", data->fd);
+                LOG_EVNT4("New event from %d", data->fd);
                 if (data->handler) {
                     data->handler(data, event);
                 }
@@ -164,7 +164,7 @@ void aura_event_dispatcher_default_signal_handler(AuraEventData* data,
         if (dispather && aura_event_dispatcher_is_running(dispather)) {
             aura_event_dispatcher_stop(dispather);
         } else {
-            LOG_WARN1("Invalid dispatcher!");
+            LOG_ERROR("Invalid dispatcher!");
         }
     } else {
         LOG_INFO2("Unhandled signal: '%d'", fdsi.ssi_signo);

@@ -74,7 +74,7 @@ static void* loop(void* data)
             AuraTask* task = chain_pop(mine->task_chain);
             if (task) {
                 if (task->process) {
-                    LOG_INFO1("Loop: processing task");
+                    LOG_EVNT4("Loop: processing task");
                     task->process(task->data);
                 } else {
                     LOG_ERROR("Invalid task processor!");

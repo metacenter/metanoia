@@ -25,7 +25,7 @@ static void get_keyboard(struct wl_client *client,
 {
     struct wl_resource* rc;
 
-    LOG_DATA3("Wayland: get keyboard (id: %d)", id);
+    LOG_WAYL2("Wayland: get keyboard (id: %d)", id);
 
     rc = wl_resource_create(client, &wl_keyboard_interface,
                             wl_resource_get_version(resource), id);
@@ -45,7 +45,7 @@ static void get_keyboard(struct wl_client *client,
         return;
     }
 
-    LOG_DATA3("Wayland keyboard map send (format: %d, fd: %d, size: %d)",
+    LOG_WAYL2("Wayland keyboard map send (format: %d, fd: %d, size: %d)",
               keymap->format, keymap->keymap_fd, keymap->keymap_size);
     wl_keyboard_send_keymap(rc, (uint32_t) keymap->format,
                                 (uint32_t) keymap->keymap_fd,

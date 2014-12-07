@@ -7,24 +7,6 @@
 #include "global-types.h"
 
 typedef enum {
-    LEVEL_ERROR,
-    LEVEL_NYIMP,
-    LEVEL_WARN1,
-    LEVEL_DATA1,
-    LEVEL_INFO1,
-    LEVEL_WARN2,
-    LEVEL_DATA2,
-    LEVEL_INFO2,
-    LEVEL_DEBUG,
-    LEVEL_WARN3,
-    LEVEL_DATA3,
-    LEVEL_INFO3,
-    LEVEL_WARN4,
-    LEVEL_DATA4,
-    LEVEL_INFO4,
-} LogLevel;
-
-typedef enum {
     AURA_KEY_RELEASED,
     AURA_KEY_PRESSED,
 } KeyState;

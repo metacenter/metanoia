@@ -28,7 +28,7 @@ void handle_device(AuraEventData* data, struct epoll_event* epev)
         return;
     }
 
-    LOG_DATA2("Device pluged: node: '%s', subsystem: '%s', "
+    LOG_INFO2("Device pluged: node: '%s', subsystem: '%s', "
               "devtype: '%s', action: '%s'",
               udev_device_get_devnode(dev), udev_device_get_subsystem(dev),
               udev_device_get_devtype(dev), udev_device_get_action(dev));

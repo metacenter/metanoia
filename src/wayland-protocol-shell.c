@@ -28,7 +28,7 @@ void aura_wayland_shell_bind(struct wl_client *client,
 {
     struct wl_resource *resource;
 
-    LOG_DATA3("Binding Wayland shell (id: %d)", id);
+    LOG_WAYL2("Binding Wayland shell (id: %d)", id);
 
     resource = wl_resource_create(client, &wl_shell_interface, version, id);
     if (!resource) {

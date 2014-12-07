@@ -59,7 +59,7 @@ int aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
         ss->tab[sig_num] = chain;
     }
 
-    LOG_INFO1("Subscription for signal %d", sig_num);
+    LOG_EVNT2("Subscription for signal %d", sig_num);
     chain_append(chain, task);
 
     return 0;
@@ -81,27 +81,27 @@ int aura_event_signal_emit(AuraSignalNum sig_num, void* data) {
 
     Chain* chain = ss->tab[sig_num];
     if (chain != NULL) {
-        LOG_INFO1("Signal: emit (num: %d; %d listeners)", sig_num, chain->len);
+        LOG_EVNT4("Signal: emit (num: %d; %d listeners)", sig_num, chain->len);
 
         Link* link = chain->first;
         while(link) {
             AuraTask* task = link->data;
             if (task) {
                 if (task->loop) {
-                    LOG_INFO1("Signal: emited (num: %d)", sig_num);
+                    LOG_EVNT4("Signal: emited (num: %d)", sig_num);
                     AuraTask* task_copy = aura_task_copy(task);
                     task_copy->data = data;
                     aura_loop_schedule_task(task->loop, task_copy);
                 } else {
-                    LOG_WARN1("Invalid loop!");
+                    LOG_WARN3("Invalid loop!");
                 }
             } else {
-                LOG_WARN1("Invalid task!");
+                LOG_WARN3("Invalid task!");
             }
             link = link->next;
         }
     } else {
-        LOG_INFO1("Signal: emit (num: %d, no listeners)", sig_num);
+        LOG_EVNT3("Signal: emit (num: %d, no listeners)", sig_num);
     }
 
     return 0;
