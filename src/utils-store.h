@@ -27,6 +27,8 @@ AuraItemId aura_store_generate_new_id(AuraStore* self);
 
 int aura_store_add(AuraStore* self, AuraItemId id, void* data);
 
+int aura_store_delete(AuraStore* self, AuraItemId id);
+
 void* aura_store_get(AuraStore* self, AuraItemId id);
 
 #endif // __AURA_STORE_H__

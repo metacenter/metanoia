@@ -90,6 +90,12 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
     Link* link;
     for (link = surfaces->first; link; link = link->next) {
         AuraSurfaceData* surface = aura_surface_get((SurfaceId) link->data);
+
+        // FIXME: tmp
+        if (!surface || !surface->visible) {
+            continue;
+        }
+
         uint8_t* d = surface->buffer.data;
         int s = surface->buffer.stride;
         int x, y;

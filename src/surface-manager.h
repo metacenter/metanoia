@@ -12,6 +12,8 @@ void aura_surface_manager_initialize(AuraLoop* this_loop);
 
 SurfaceId aura_surface_create(void);
 
+void aura_surface_destroy(SurfaceId sid);
+
 AuraSurfaceData* aura_surface_get(SurfaceId sid);
 
 void aura_surface_attach_egl(SurfaceId sid,

@@ -10,9 +10,16 @@
 
 //------------------------------------------------------------------------------
 
-static void xdg_destroy_shell_surface(struct wl_resource *resource)
+static void xdg_surface_unbind(struct wl_resource *resource)
 {
-    LOG_NYIMP("Wayland: destroy shell surface");
+    LOG_NYIMP("Wayland: unbind XDG shell surface");
+}
+
+//------------------------------------------------------------------------------
+
+static void xdg_shell_unbind(struct wl_resource *resource)
+{
+    LOG_NYIMP("Wayland: unbind XDG shell");
 }
 
 //------------------------------------------------------------------------------
@@ -31,18 +38,18 @@ static void xdg_get_xdg_surface(struct wl_client *client,
                                 uint32_t id,
                                 struct wl_resource *surface_resource)
 {
-    struct wl_resource* res;
+    struct wl_resource* rc;
 
     LOG_NYIMP("Wayland: get XDG surface (id: %d)", id);
 
-    res = wl_resource_create(client, &xdg_surface_interface, 1, id);
-    if (!res) {
+    rc = wl_resource_create(client, &xdg_surface_interface, 1, id);
+    if (!rc) {
         wl_client_post_no_memory(client);
         return;
     }
 
-    wl_resource_set_implementation(res, &shell_surface_implementation,
-                                   NULL, xdg_destroy_shell_surface);
+    wl_resource_set_implementation(rc, &shell_surface_implementation,
+                                   NULL, xdg_surface_unbind);
 }
 
 //------------------------------------------------------------------------------
@@ -84,16 +91,16 @@ static const struct xdg_shell_interface xdg_shell_implementation = {
 void aura_wayland_xdg_shell_bind(struct wl_client *client,
                                  void *data, uint32_t version, uint32_t id)
 {
-    struct wl_resource *resource;
+    struct wl_resource* rc;
 
-    resource = wl_resource_create(client, &xdg_shell_interface, version, id);
-    if (!resource) {
+    rc = wl_resource_create(client, &xdg_shell_interface, version, id);
+    if (!rc) {
         wl_client_post_no_memory(client);
         return;
     }
 
-    wl_resource_set_implementation(resource, &xdg_shell_implementation,
-                                   NULL, NULL);
+    wl_resource_set_implementation(rc, &xdg_shell_implementation,
+                                   NULL, xdg_shell_unbind);
 }
 
 //------------------------------------------------------------------------------

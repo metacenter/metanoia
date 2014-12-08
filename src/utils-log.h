@@ -7,7 +7,7 @@
 #include "global-constants.h"
 
 // Log level definitions
-// To disable define as '\0'
+// To disable define as '0'
 // NYIMP - not yet implemented
 // 1 - rare, important
 // 2 - rare, not important
@@ -16,23 +16,23 @@
 // 5 - not important, but worth logging
 #define LEVEL_ERROR "ERROR"
 #define LEVEL_NYIMP "NYIMP"
-#define LEVEL_DEBUG '\0'
+#define LEVEL_DEBUG "DEBUG"
 #define LEVEL_WARN1 "WARN1"
 #define LEVEL_INFO1 "INFO1"
 #define LEVEL_WAYL1 "WAYL1"
 #define LEVEL_WARN2 "WARN2"
 #define LEVEL_INFO2 "INFO2"
 #define LEVEL_WAYL2 "WAYL2"
-#define LEVEL_EVNT2 '\0'
+#define LEVEL_EVNT2 0
 #define LEVEL_WARN3 "WARN3"
-#define LEVEL_INFO3 '\0'
-#define LEVEL_WAYL3 '\0'
-#define LEVEL_EVNT3 '\0'
-#define LEVEL_WARN4 '\0'
-#define LEVEL_INFO4 '\0'
-#define LEVEL_WAYL4 '\0'
-#define LEVEL_EVNT4 '\0'
-#define LEVEL_WAYL5 '\0'
+#define LEVEL_INFO3 0
+#define LEVEL_WAYL3 0
+#define LEVEL_EVNT3 0
+#define LEVEL_WARN4 0
+#define LEVEL_INFO4 0
+#define LEVEL_WAYL4 0
+#define LEVEL_EVNT4 0
+#define LEVEL_WAYL5 0
 
 #define _LOG_(L, S, ...) \
  do{if(LEVEL_##L)aura_log(LEVEL_##L,__LINE__,__FILE__,S,##__VA_ARGS__);}while(0)

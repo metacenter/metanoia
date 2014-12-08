@@ -10,6 +10,20 @@
 
 //------------------------------------------------------------------------------
 
+static void keyboard_unbind(struct wl_resource *resource)
+{
+    LOG_NYIMP("Wayland: unbind keyboard");
+}
+
+//------------------------------------------------------------------------------
+
+static void seat_unbind(struct wl_resource *resource)
+{
+    LOG_NYIMP("Wayland: unbind seat");
+}
+
+//------------------------------------------------------------------------------
+
 static void get_pointer(struct wl_client *client,
                         struct wl_resource *resource,
                         uint32_t id)
@@ -34,7 +48,8 @@ static void get_keyboard(struct wl_client *client,
         return;
     }
 
-    wl_resource_set_implementation(rc, &keyboard_implementation, NULL, NULL);
+    wl_resource_set_implementation(rc, &keyboard_implementation,
+                                   NULL, keyboard_unbind);
 
     // Store resource
     wayland_state_add_keyboard_resource(rc);
@@ -74,22 +89,23 @@ static const struct wl_seat_interface seat_implementation = {
 void aura_wayland_seat_bind(struct wl_client *client,
                             void *data, uint32_t version, uint32_t id)
 {
-    struct wl_resource *resource;
+    struct wl_resource* rc;
 
     LOG_NYIMP("Binding Wayland seat (id: %d)", id);
 
-    resource = wl_resource_create(client, &wl_seat_interface, version, id);
-    if (!resource) {
+    rc = wl_resource_create(client, &wl_seat_interface, version, id);
+    if (!rc) {
         wl_client_post_no_memory(client);
         return;
     }
 
     // TODO: pass unbind callback
-    wl_resource_set_implementation(resource, &seat_implementation, NULL, NULL);
+    wl_resource_set_implementation(rc, &seat_implementation,
+                                   NULL, seat_unbind);
 
     // TODO:
-    wl_seat_send_capabilities(resource, WL_SEAT_CAPABILITY_KEYBOARD);
-    wl_seat_send_name(resource, "seat0");
+    wl_seat_send_capabilities(rc, WL_SEAT_CAPABILITY_KEYBOARD);
+    wl_seat_send_name(rc, "seat0");
 }
 
 //------------------------------------------------------------------------------

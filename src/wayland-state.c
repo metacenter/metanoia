@@ -71,12 +71,25 @@ void wayland_state_add_surface(AuraItemId sid, struct wl_resource* rc)
 {
     pthread_mutex_lock(&mutex);
 
-    LOG_INFO3("Wayland: adding surface (sid: %d)", sid);
+    LOG_INFO2("Wayland: adding surface (sid: %d)", sid);
     AuraSurfaceWaylandData* surface_data = wayland_surface_data_new();
     surface_data->base.id = sid;
     surface_data->resource = rc;
 
     aura_store_add(sState.surfaces, sid, surface_data);
+
+    pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_remove_surface(AuraItemId sid)
+{
+    pthread_mutex_lock(&mutex);
+
+    LOG_INFO2("Wayland: removing surface (sid: %d)", sid);
+
+    aura_store_delete(sState.surfaces, sid);
 
     pthread_mutex_unlock(&mutex);
 }
@@ -269,7 +282,7 @@ void wayland_state_screen_refresh(AuraItemId sid)
 
     // Notify frame and release frame resource
     if (data->frame_resource) {
-        LOG_WAYL3("Wayland: Sending frame (id: %u)", sid);
+        LOG_WAYL4("Wayland: Sending frame (id: %u)", sid);
 
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);

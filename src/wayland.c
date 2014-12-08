@@ -127,14 +127,14 @@ void aura_wayland_initialize(AuraLoop* this_loop)
         LOG_ERROR("Could not create global shell!");
     }
 
-    if (!wl_global_create(wayland_display, &wl_seat_interface, scVersion,
-                          NULL, aura_wayland_seat_bind)) {
-        LOG_ERROR("Could not create global seat!");
-    }
-
     if (!wl_global_create(wayland_display, &xdg_shell_interface, 1,
                           NULL, aura_wayland_xdg_shell_bind)) {
         LOG_ERROR("Could not create global XDG shell!");
+    }
+
+    if (!wl_global_create(wayland_display, &wl_seat_interface, scVersion,
+                          NULL, aura_wayland_seat_bind)) {
+        LOG_ERROR("Could not create global seat!");
     }
 
     wl_display_init_shm(wayland_display);

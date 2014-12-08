@@ -24,6 +24,8 @@ void wayland_state_finalize();
 
 void wayland_state_add_surface(AuraItemId sid, struct wl_resource* rc);
 
+void wayland_state_remove_surface(AuraItemId sid);
+
 void wayland_state_surface_attach(AuraItemId sid, struct wl_resource* rc);
 
 void wayland_state_subscribe_frame(AuraItemId sid, struct wl_resource* rc);

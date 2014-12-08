@@ -52,7 +52,7 @@ void aura_store_free(AuraStore* self)
 
 AuraItemId aura_store_generate_new_id(AuraStore* self)
 {
-    if (self == NULL) {
+    if (!self) {
         return scInvalidItemId;
     }
 
@@ -67,15 +67,30 @@ AuraItemId aura_store_generate_new_id(AuraStore* self)
 
 int aura_store_add(AuraStore* self, AuraItemId id, void* data)
 {
-    AuraItem* item = (AuraItem*) data;
     if (!self) {
         return -1;
     }
 
+    AuraItem* item = (AuraItem*) data;
     item->id = id;
     if (tsearch(item, &self->root, compare) == NULL) {
         return -1;
     }
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+
+int aura_store_delete(AuraStore* self, AuraItemId id)
+{
+    if (!self) {
+        return -1;
+    }
+
+    AuraItem item;
+    item.id = id;
+    tdelete(&item, &self->root, compare);
 
     return 0;
 }
@@ -91,7 +106,11 @@ void* aura_store_get(AuraStore* self, AuraItemId id)
     AuraItem item;
     item.id = id;
 
-    return *(void**) tfind((void *) &item, &self->root, compare);
+    void** result = tfind((void*) &item, &self->root, compare);
+    if (result) {
+        return *result;
+    }
+    return NULL;
 }
 
 //------------------------------------------------------------------------------

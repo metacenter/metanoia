@@ -22,11 +22,11 @@ static AuraRenderer* renderer = NULL; // TODO: move to compositor
 // TODO: move to compositor
 void aura_surface_manager_redraw_all()
 {
-    if (renderer == NULL) {
+    if (!renderer) {
         LOG_ERROR("Invalid renderer!");
         return;
     }
-    if (renderer->draw == NULL) {
+    if (!renderer->draw) {
         LOG_ERROR("Wrong renderer implementation!");
         return;
     }
@@ -50,7 +50,7 @@ SurfaceId aura_surface_create(void)
 {
     // Create new surface
     AuraSurfaceData* data = aura_surface_data_new();
-    if (data == NULL) {
+    if (!data) {
         LOG_ERROR("Could not create new surface!");
         return scInvalidSurfaceId;
     }
@@ -67,6 +67,13 @@ SurfaceId aura_surface_create(void)
 
 //------------------------------------------------------------------------------
 
+void aura_surface_destroy(SurfaceId sid)
+{
+    aura_store_delete(sStore, sid);
+}
+
+//------------------------------------------------------------------------------
+
 AuraSurfaceData* aura_surface_get(SurfaceId sid)
 {
     return aura_store_get(sStore, sid);
@@ -78,7 +85,7 @@ void aura_surface_attach_egl(SurfaceId sid,
                              void* resource)
 {
     AuraSurfaceData* surface = aura_surface_get(sid);
-    if (surface == NULL) {
+    if (!surface) {
         LOG_WARN2("Could not find surface (sid: %d)", sid);
         return;
     }
@@ -98,7 +105,7 @@ void aura_surface_commit(SurfaceId sid,
                          uint8_t* data)
 {
     AuraSurfaceData* surface = aura_surface_get(sid);
-    if (surface == 0) {
+    if (!surface) {
         LOG_WARN2("Could not find surface (sid: %d)", sid);
         return;
     }
@@ -107,6 +114,20 @@ void aura_surface_commit(SurfaceId sid,
     surface->buffer.height = height;
     surface->buffer.stride = stride;
     surface->buffer.data   = data;
+    surface->visible = 1;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_hide(SurfaceId sid)
+{
+    AuraSurfaceData* surface = aura_surface_get(sid);
+    if (!surface) {
+        LOG_WARN2("Could not find surface (sid: %d)", sid);
+        return;
+    }
+
+    surface->visible = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -115,7 +136,7 @@ void aura_surface_commit(SurfaceId sid,
 static void on_display_found(void* data)
 {
     AuraRenderer* renderer_new = (AuraRenderer*) data;
-    if (renderer_new == NULL) {
+    if (!renderer_new) {
         LOG_ERROR("New renderer is invalid!");
         return;
     }
