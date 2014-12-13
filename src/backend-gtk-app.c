@@ -64,7 +64,7 @@ static void aura_app_activate(GApplication* app)
     win = aura_win_new(AURA_APP(app));
     gtk_window_present(GTK_WINDOW(win));
 
-    LOG_INFO1("Backend GTK: application activated");
+    LOG_INFO1("GTK Backend: application activated");
 
     // Inform compositor about new outputs
     aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);

@@ -3,6 +3,7 @@
 
 #include "backend-gtk-app.h"
 #include "backend-gtk-win.h"
+#include "utils-log.h"
 
 #include <gtk/gtk.h>
 #include <malloc.h>
@@ -10,12 +11,8 @@
 
 #define NUM_VIEW_GROUPS 4
 #define NUM_BUFFERS 2
+#define NUM_STARTUP_DISPLAYS 2
 #define DEFAULT_RESOLUTION 1
-
-typedef struct {
-    int width;
-    int height;
-} AuraResolution;
 
 static const gchar* scMainGuiResPath = "/org/aura/res/backend-gtk-main.ui";
 static const gchar* scMenuGuiResPath = "/org/aura/res/backend-gtk-menu.ui";
@@ -32,13 +29,34 @@ AuraResolution resolution[] = {
     };
 
 //------------------------------------------------------------------------------
+// HELPERS
 
-void
-user_function (GSimpleAction *simple,
-               GVariant      *value,
-               gpointer       user_data)
+GVariant* aura_backend_gtk_pack_resolution_variant(AuraResolution resolution)
 {
-    printf(">>> %d\n", (int)user_data);
+    GVariant** tuple = g_new(GVariant*, 2);
+    tuple[0] = g_variant_new_int32(resolution.width);
+    tuple[1] = g_variant_new_int32(resolution.height);
+    return g_variant_new_tuple(tuple, 2);
+}
+
+//------------------------------------------------------------------------------
+
+AuraResolution aura_backend_gtk_unpack_resolution_variant(GVariant* variant)
+{
+    AuraResolution result = {0, 0};
+    if (g_variant_n_children(variant) != 2) {
+        return result;
+    }
+
+    GVariant* tmp = g_variant_get_child_value(variant, 0);
+    result.width = g_variant_get_int32(tmp);
+    g_variant_unref(tmp);
+
+    tmp = g_variant_get_child_value(variant, 1);
+    result.height = g_variant_get_int32(tmp);
+    g_variant_unref(tmp);
+
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -62,6 +80,36 @@ static void clear_surface(int n)
 }
 
 //------------------------------------------------------------------------------
+
+void aura_backend_gtk_group_set_enabled(int n, int enabled)
+{
+    group[n].enabled = enabled;
+
+    // Hide/show display
+    if (enabled) {
+        gtk_widget_show(group[n].area);
+    } else {
+        gtk_widget_hide(group[n].area);
+    }
+
+    // Disable/enable actions
+    g_simple_action_set_enabled(group[n].resolution_action, !enabled);
+
+    // Change menu button image
+    gtk_image_set_from_icon_name(GTK_IMAGE(group[n].menu_image),
+                           enabled ? "display" : "preferences-desktop-display",
+                           GTK_ICON_SIZE_DND);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_backend_gtk_group_toggle_enabled(int n)
+{
+    aura_backend_gtk_group_set_enabled(n, !group[n].enabled);
+}
+
+//------------------------------------------------------------------------------
+// EVENTS
 
 static gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data)
 {
@@ -105,6 +153,33 @@ static gboolean on_timer(void* data)
 }
 
 //------------------------------------------------------------------------------
+
+void on_display_activation(GSimpleAction* action,
+                           GParamSpec* pspec,
+                           gpointer data)
+{
+    int n = (int) data;
+    LOG_INFO1("GTK backend: display '%d' toogled", n);
+    aura_backend_gtk_group_toggle_enabled(n);
+}
+
+//------------------------------------------------------------------------------
+
+void on_resolution_change(GSimpleAction* action,
+                          GParamSpec* pspec,
+                          gpointer data)
+{
+    int n = (int) data;
+    GVariant* variant;
+    g_object_get(action, "state", &variant, NULL);
+    group[n].resolution = aura_backend_gtk_unpack_resolution_variant(variant);
+
+    LOG_INFO1("GTK backend: resolution of display '%d' changed to '%d x %d'",
+                      n, group[n].resolution.width, group[n].resolution.height);
+}
+
+//------------------------------------------------------------------------------
+// OUTPUT IMPLEMENTATION
 
 AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AuraWin* win,
                                                        int n,
@@ -155,6 +230,7 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
     GtkBuilder* builder = gtk_builder_new_from_resource(scMenuGuiResPath);
     GtkWidget* button = GTK_WIDGET(gtk_builder_get_object(builder, "button"));
     GMenu* menu = G_MENU(gtk_builder_get_object(builder, "menu"));
+    group[i].menu_image = GTK_WIDGET(gtk_builder_get_object(builder, "image"));
 
     // Add 'enabled' menu item and action
     name = g_strdup_printf("enabled%d", i);
@@ -169,7 +245,8 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
     action = G_ACTION(g_simple_action_new_stateful(name,
                            g_variant_get_type(action_variant), action_variant));
     g_action_map_add_action(action_map, action);
-    g_signal_connect(action, "activate", G_CALLBACK(user_function), (void*) i);
+    g_signal_connect(action, "activate",
+                     G_CALLBACK(on_display_activation), (gpointer) i);
 
     // Add 'resolution' section
     GMenu* resolution_section = g_menu_new();
@@ -179,28 +256,33 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
     name = g_strdup_printf("resolution%d", i);
     win_name = g_strdup_printf("win.%s", name);
 
+    action_variant =
+       aura_backend_gtk_pack_resolution_variant(resolution[DEFAULT_RESOLUTION]);
+    //action_variant = g_variant_new_string(name);
+    action = G_ACTION(g_simple_action_new_stateful(name,
+                           g_variant_get_type(action_variant), action_variant));
+    group[i].resolution_action = G_SIMPLE_ACTION(action);
+
     int j;
     for (j = 0; j < sizeof(resolution)/sizeof(AuraResolution); ++j)
     {
         gchar* label = g_strdup_printf("%4d x %4d", resolution[j].width,
                                                     resolution[j].height);
 
-        item_variant = g_variant_new_string(g_strdup_printf("res%d", j));
+        item_variant = aura_backend_gtk_pack_resolution_variant(resolution[j]);
+        //item_variant = g_variant_new_string(g_strdup_printf("res%d", j));
 
         item = g_menu_item_new(label, win_name);
         g_menu_item_set_action_and_target_value(item, win_name, item_variant);
         g_menu_append_item(resolution_section, item);
-
-        action_variant = g_variant_new_string(name);
-        action = G_ACTION(g_simple_action_new_stateful(name,
-                           g_variant_get_type(action_variant), action_variant));
-        g_action_map_add_action(action_map, action);
-        g_signal_connect(action, "notify::state",
-                         G_CALLBACK(user_function), (void*) i);
     }
 
-    action_variant =
-             g_variant_new_string(g_strdup_printf("res%d", DEFAULT_RESOLUTION));
+    g_action_map_add_action(action_map, action);
+    g_signal_connect(action, "notify::state",
+                     G_CALLBACK(on_resolution_change), (gpointer) i);
+
+    //action_variant =
+    //         g_variant_new_string(g_strdup_printf("res%d", DEFAULT_RESOLUTION));
     g_simple_action_set_state(G_SIMPLE_ACTION(action), action_variant);
 
     return button;
@@ -208,21 +290,20 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
 
 //------------------------------------------------------------------------------
 
-GtkWidget* aura_backend_gtk_display_area(int i)
+GtkWidget* aura_backend_gtk_build_display_area(int i)
 {
     GtkBuilder* builder = gtk_builder_new_from_resource(scAreaGuiResPath);
-    GtkWidget* area = GTK_WIDGET(gtk_builder_get_object(builder, "area"));
+    group[i].area = GTK_WIDGET(gtk_builder_get_object(builder, "area"));
     group[i].da = GTK_WIDGET(gtk_builder_get_object(builder, "drawing_area"));
 
     g_signal_connect(group[i].da, "draw", G_CALLBACK(on_draw), (gpointer) i);
     g_signal_connect(group[i].da, "configure-event",
                                G_CALLBACK(on_configure_event), (gpointer) i);
-    return area;
+    return group[i].area;
 }
 
 //------------------------------------------------------------------------------
 // GTK WINDOW
-//------------------------------------------------------------------------------
 
 struct _AuraWin
 {
@@ -253,15 +334,19 @@ static void aura_win_init(AuraWin* win)
     AuraWinPrivate* priv = aura_win_get_instance_private(win);
     gtk_widget_init_template(GTK_WIDGET(win));
 
+    gtk_header_bar_set_subtitle(GTK_HEADER_BAR(priv->header_bar),
+                                "Build: " __TIME__ " " __DATE__);
     // Build UI
     gint i;
-    for (i = NUM_VIEW_GROUPS-1; i > -1; --i) {
+    for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
         GtkWidget* button =
                        aura_backend_gtk_build_menu_button(G_ACTION_MAP(win), i);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(priv->header_bar), button);
 
-        GtkWidget* area = aura_backend_gtk_display_area(i);
-        gtk_box_pack_end(GTK_BOX(priv->box_inner), area, 1, 0, 0);
+        GtkWidget* area = aura_backend_gtk_build_display_area(i);
+        gtk_box_pack_start(GTK_BOX(priv->box_inner), area, 1, 0, 0);
+
+        aura_backend_gtk_group_set_enabled(i, i < NUM_STARTUP_DISPLAYS);
     }
 
     // Run timer

@@ -16,9 +16,19 @@ typedef struct _AuraAppClass AuraAppClass;
 #define NUM_BUFFERS 2
 
 typedef struct {
+    int width;
+    int height;
+} AuraResolution;
+
+typedef struct {
+    int enabled;
     GtkWidget* da;
+    GtkWidget* area;
+    GtkWidget* menu_image;
+    GSimpleAction* resolution_action;
     int stride;
     int front;
+    AuraResolution resolution;
     struct {
         uint8_t* data;
         cairo_surface_t* source;
