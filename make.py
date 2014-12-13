@@ -79,9 +79,9 @@ class LinkTarget(Target):
 
 class GeneratedTarget(Target):
     generator = None
-    def __init__(self, output, inputs, generator=None,
+    def __init__(self, output, inputs, includes=list(), generator=None,
                  input_dir=str(), output_dir=str()):
-        Target.__init__(self, output, inputs,
+        Target.__init__(self, output, inputs, includes=includes,
                         input_dir=input_dir, output_dir=output_dir)
         self.generator = generator
 
@@ -97,9 +97,10 @@ class Make:
     wflags = list()
     lflags = list()
 
-    builddir = 'build'
-    gendir = 'gen'
     srcdir = 'src'
+    builddir = 'build'
+    resdir = 'res'
+    gendir = 'gen'
 
     all = list()
     targets = list()
@@ -168,6 +169,7 @@ class Make:
             wr()
             wr('srcdir={0}'.format(self.srcdir))
             wr('builddir={0}'.format(self.builddir))
+            wr('resdir={0}'.format(self.resdir))
             wr('gendir={0}'.format(self.gendir))
             wr()
             if len(self.all):
@@ -279,15 +281,17 @@ class Make:
                              generator=None,
                              output=None,
                              inputs=list(),
+                             includes=list(),
                              input_dir='',
                              output_dir='$(gendir)'):
         try:
-            self.validate_arguments(output, inputs, list(), set(), input_dir)
+            self.validate_arguments(output, inputs, includes, set(), input_dir)
         except Exception as e:
             print(e.message)
             return
 
-        target = GeneratedTarget(output, inputs, generator=generator,
+        target = GeneratedTarget(output, inputs,
+                                 includes=includes, generator=generator,
                                  input_dir=input_dir, output_dir=output_dir)
         self.targets.append(target)
         return target
@@ -340,11 +344,23 @@ class Make:
         else:
             print('LFLAGS must be passed as list of strings!')
 
+    def set_source_directory(self, path):
+        if isinstance(path, str):
+            self.srcdir = path
+        else:
+            print('Source directory must be passed as string!')
+
     def set_build_directory(self, path):
         if isinstance(path, str):
             self.builddir = path
         else:
             print('Build directory must be passed as string!')
+
+    def set_resource_directory(self, path):
+        if isinstance(path, str):
+            self.resdir = path
+        else:
+            print('Resource directory must be passed as string!')
 
     def set_gen_directory(self, path):
         if isinstance(path, str):
@@ -352,23 +368,20 @@ class Make:
         else:
             print('Gen directory must be passed as string!')
 
-    def set_source_directory(self, path):
-        if isinstance(path, str):
-            self.srcdir = path
-        else:
-            print('Source directory must be passed as string!')
-
     #---------------------------------------------------------------------------
     # GETTERS
     #---------------------------------------------------------------------------
 
+    def get_source_directory(self):
+        return '$(srcdir)', self.srcdir
+
     def get_build_directory(self):
         return '$(builddir)', self.builddir
 
+    def get_resource_directory(self):
+        return '$(resdir)', self.resdir
+
     def get_gen_directory(self):
         return '$(gendir)', self.gendir
-
-    def get_source_directory(self):
-        return '$(srcdir)', self.srcdir
 
 #-------------------------------------------------------------------------------

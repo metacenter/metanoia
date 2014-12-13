@@ -1,12 +1,14 @@
 CC=gcc
 WSSHG=wayland-scanner server-header
 WSCG=wayland-scanner code
+GLCR=glib-compile-resources
 
 WFLAGS=-Wall
 LFLAGS=-rdynamic -ldl -lrt -lpthread -lm
 
 srcdir=src
 builddir=build
+resdir=res
 gendir=gen
 
 all: $(builddir)/aura
@@ -57,24 +59,36 @@ $(builddir)/aura: Makefile \
                   $(builddir)/wayland-protocol-seat.o \
                   $(builddir)/wayland-protocol-keyboard.o \
                   $(builddir)/bind-egl-wayland.o \
-                  $(builddir)/backend-gtk.o
+                  $(builddir)/backend-gtk.o \
+                  $(builddir)/backend-gtk-app.o \
+                  $(builddir)/backend-gtk-win.o \
+                  $(builddir)/backend-gtk-res.o
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/global-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/output.o $(builddir)/output-collector.o $(builddir)/surface-data.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o \
+	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/global-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/output.o $(builddir)/output-collector.o $(builddir)/surface-data.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o $(builddir)/backend-gtk-app.o $(builddir)/backend-gtk-win.o $(builddir)/backend-gtk-res.o \
 	       `pkg-config --libs dbus-1 egl gbm gl gtk+-3.0 libdrm libudev wayland-server xkbcommon`
 
 $(gendir)/xdg-shell-server-protocol.h: Makefile \
-                                       protocol/xdg-shell.xml
+                                       $(resdir)/xdg-shell.xml
 	@mkdir -p $(gendir)
 	@echo "  GEN xdg-shell-server-protocol.h"
-	@$(WSSHG)  < "protocol/xdg-shell.xml" > "$(gendir)/xdg-shell-server-protocol.h"
+	@$(WSSHG)  < "$(resdir)/xdg-shell.xml" > "$(gendir)/xdg-shell-server-protocol.h"
 
 $(gendir)/xdg-shell-protocol.c: Makefile \
-                                protocol/xdg-shell.xml
+                                $(resdir)/xdg-shell.xml
 	@mkdir -p $(gendir)
 	@echo "  GEN xdg-shell-protocol.c"
-	@$(WSCG)  < "protocol/xdg-shell.xml" > "$(gendir)/xdg-shell-protocol.c"
+	@$(WSCG)  < "$(resdir)/xdg-shell.xml" > "$(gendir)/xdg-shell-protocol.c"
+
+$(gendir)/backend-gtk-res.c: Makefile \
+                             $(resdir)/aura.gresource.xml \
+                             $(resdir)/backend-gtk-main.ui \
+                             $(resdir)/backend-gtk-menu.ui \
+                             $(resdir)/backend-gtk-area.ui
+	@mkdir -p $(gendir)
+	@echo "  GEN backend-gtk-res.c"
+	@$(GLCR) $(resdir)/aura.gresource.xml --target=$(gendir)/backend-gtk-res.c --generate-source
 
 $(builddir)/aura.o: Makefile \
                     $(srcdir)/aura.c
@@ -418,5 +432,31 @@ $(builddir)/backend-gtk.o: Makefile \
 	@echo "  CC  backend-gtk.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/backend-gtk.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/backend-gtk.c \
+	       `pkg-config --cflags gtk+-3.0`
+
+$(builddir)/backend-gtk-app.o: Makefile \
+                               $(srcdir)/backend-gtk-app.c \
+                               $(srcdir)/backend-gtk-app.h
+	@mkdir -p $(builddir)
+	@echo "  CC  backend-gtk-app.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/backend-gtk-app.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/backend-gtk-app.c \
+	       `pkg-config --cflags gtk+-3.0`
+
+$(builddir)/backend-gtk-win.o: Makefile \
+                               $(srcdir)/backend-gtk-win.c \
+                               $(srcdir)/backend-gtk-win.h
+	@mkdir -p $(builddir)
+	@echo "  CC  backend-gtk-win.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/backend-gtk-win.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/backend-gtk-win.c \
+	       `pkg-config --cflags gtk+-3.0`
+
+$(builddir)/backend-gtk-res.o: Makefile \
+                               $(gendir)/backend-gtk-res.c
+	@mkdir -p $(builddir)
+	@echo "  CC  backend-gtk-res.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/backend-gtk-res.o -I$(srcdir) -I$(gendir) \
+	       -c $(gendir)/backend-gtk-res.c \
 	       `pkg-config --cflags gtk+-3.0`
 

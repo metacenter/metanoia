@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  vim: tabstop=2 expandtab list
+-->
+<gresources>
+  <gresource prefix="/org/aura">
+    <file preprocess="xml-stripblanks">res/backend-gtk-main.ui</file>
+    <file preprocess="xml-stripblanks">res/backend-gtk-menu.ui</file>
+    <file preprocess="xml-stripblanks">res/backend-gtk-area.ui</file>
+  </gresource>
+</gresources>

@@ -9,6 +9,7 @@ m = make.Make()
 
 m.set_source_directory('src')
 m.set_build_directory('build')
+m.set_resource_directory('res')
 m.set_gen_directory('gen')
 
 m.set_wflags(['-Wall'])
@@ -26,7 +27,7 @@ aura = m.add_link_target(
     )
 
 #-------------------------------------------------------------------------------
-# PROTOCOL
+# RESOUCES
 
 wsshg = make.Generator(
         command_body='wayland-scanner server-header',
@@ -42,18 +43,35 @@ wscg = make.Generator(
     )
 m.add_generator(wscg)
 
+glcr = make.Generator(
+        command_body='glib-compile-resources',
+        command_args='{inputs} --target={output} --generate-source',
+        shortcut='GLCR'
+    )
+m.add_generator(glcr)
+
 target_xdg_shell_protocol = m.add_generated_target(
         generator=wsshg,
         output='xdg-shell-server-protocol.h',
         inputs=['xdg-shell.xml'],
-        input_dir='protocol'
+        input_dir=m.get_resource_directory()[0]
     )
 
 target_xdg_shell_protocol_code = m.add_generated_target(
         generator=wscg,
         output='xdg-shell-protocol.c',
         inputs=['xdg-shell.xml'],
-        input_dir='protocol'
+        input_dir=m.get_resource_directory()[0]
+    )
+
+target_gtk_resources = m.add_generated_target(
+        generator=glcr,
+        output='backend-gtk-res.c',
+        inputs=['aura.gresource.xml'],
+        includes=['backend-gtk-main.ui',
+                  'backend-gtk-menu.ui',
+                  'backend-gtk-area.ui'],
+        input_dir=m.get_resource_directory()[0]
     )
 
 #-------------------------------------------------------------------------------
@@ -383,6 +401,7 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 #-------------------------------------------------------------------------------
+# GTK BACKEND
 
 if with_gtk_support:
     t = m.add_compile_target(
@@ -391,14 +410,39 @@ if with_gtk_support:
             includes=['backend-gtk.h'],
             pkgs={'gtk+-3.0'}
         )
+    aura.add_input(t)
+
+    t = m.add_compile_target(
+            output='backend-gtk-app.o',
+            inputs=['backend-gtk-app.c'],
+            includes=['backend-gtk-app.h'],
+            pkgs={'gtk+-3.0'}
+        )
+    aura.add_input(t)
+
+    t = m.add_compile_target(
+            output='backend-gtk-win.o',
+            inputs=['backend-gtk-win.c'],
+            includes=['backend-gtk-win.h'],
+            pkgs={'gtk+-3.0'}
+        )
+    aura.add_input(t)
+
+    t = m.add_compile_target(
+            output='backend-gtk-res.o',
+            inputs=['backend-gtk-res.c'],
+            input_dir=m.get_gen_directory()[0],
+            pkgs={'gtk+-3.0'}
+        )
+    aura.add_input(t)
+
 else:
     t = m.add_compile_target(
             output='backend-gtk.o',
             inputs=['backend-gtk-dummy.c'],
             includes=['backend-gtk.h'],
         )
-
-aura.add_input(t)
+    aura.add_input(t)
 
 #-------------------------------------------------------------------------------
 
