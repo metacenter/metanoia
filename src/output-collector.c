@@ -12,35 +12,44 @@
 // FIXME: tmp
 // TODO: support for many outputs
 AuraOutput* output = 0;
-AuraRenderer* rend = 0;
 int num = 0;
 
 //------------------------------------------------------------------------------
 
 void aura_outputs_update()
 {
-    int result = -1;
+    int num = 0;
 
     LOG_INFO1("Updating outputs");
 
+    Chain* actual_outputs = chain_new(0);
+
     if (!aura_settings().run_in_test_window) {
-        result = aura_drm_update_devices(&output, &num);
-        if (result < 0) {
-            result = aura_setup_framebuffer(&output, &num);
+        num = aura_drm_update_devices(actual_outputs);
+        if (num < 1) {
+            num = aura_devfb_setup_framebuffer(actual_outputs);
         }
     } else {
-        result = aura_backend_gtk_get_outputs(&output, &num);
+        num = aura_backend_gtk_get_outputs(actual_outputs);
     }
 
-    if (result < 0) {
+    if (num < 1) {
         LOG_WARN1("No valid outputs!");
         return;
     }
 
-    rend = output->initialize((struct AuraOutput*) output,
-                               output->width, output->height);
+    Link* link;
+    for (link = actual_outputs->first; link; link = link->next) {
+        AuraOutput* output = (AuraOutput*) link->data;
+        AuraRenderer* renderer =
+                      output->initialize(output, output->width, output->height);
 
-    aura_event_signal_emit(SIGNAL_DISPLAY_FOUND, rend);
+        if (renderer) {
+            aura_event_signal_emit(SIGNAL_DISPLAY_FOUND, renderer);
+        } else {
+            LOG_WARN1("Invalid renderer!");
+        }
+    }
 }
 
 //------------------------------------------------------------------------------

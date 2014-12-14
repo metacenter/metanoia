@@ -68,23 +68,29 @@ int aura_backend_gtk_output_swap_buffers(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
-int aura_backend_gtk_get_outputs(AuraOutput** outputs, int* num)
+AuraOutputGTK* aura_backend_gtk_output_new(int width, int height, int num)
 {
-    // TODO: support for many screens
-
     AuraOutputGTK* output_gtk = malloc(sizeof(AuraOutputGTK));
     memset(output_gtk, 0, sizeof(AuraOutputGTK));
 
-    aura_output_initialize(&output_gtk->base, 800, 600,
+    aura_output_initialize(&output_gtk->base,
+                           width, height,
                            aura_backend_gtk_output_initialize,
                            aura_backend_gtk_output_swap_buffers);
 
-    output_gtk->num = 0;
+    output_gtk->num = num;
+    return output_gtk;
+}
 
-    *outputs = (AuraOutput*) output_gtk;
+//------------------------------------------------------------------------------
 
-    *num = 1;
-    return *num;
+int aura_backend_gtk_get_outputs(Chain* outputs)
+{
+    // TODO: support for many screens
+
+    AuraOutputGTK* output = aura_backend_gtk_output_new(800, 600, 0);
+    chain_append(outputs, output);
+    return 1;
 }
 
 //------------------------------------------------------------------------------

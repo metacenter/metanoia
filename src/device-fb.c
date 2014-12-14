@@ -37,7 +37,7 @@ AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
 
     AuraOutputFB* output_fb = (AuraOutputFB*) output;
     if (output_fb == NULL) {
-        LOG_ERROR("Null output given!");
+        LOG_ERROR("Invalid output!");
         return NULL;
     }
 
@@ -46,6 +46,7 @@ AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
         return NULL;
     }
 
+    // Map framebuffer
     // TODO: set resolution first
     buflen = height * fixed_info.line_length;
     buffer = mmap(NULL, buflen, PROT_READ | PROT_WRITE,
@@ -55,15 +56,31 @@ AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
         return NULL;
     }
 
-
+    // Prepare renderer
     AuraRenderer* renderer = aura_renderer_mmap_create(output, width, height);
     aura_renderer_mmap_set_buffer(renderer, 0, buffer, fixed_info.line_length);
+    aura_renderer_mmap_set_buffer(renderer, 1, buffer, fixed_info.line_length);
     return renderer;
 }
 
 //------------------------------------------------------------------------------
 
-int aura_setup_framebuffer(AuraOutput** outputs, int* num)
+AuraOutputFB* aura_devfb_output_new(int width, int height, int fd)
+{
+    AuraOutputFB* output_fb = malloc(sizeof(AuraOutputFB));
+    memset(output_fb, 0, sizeof(AuraOutputFB));
+
+    aura_output_initialize(&output_fb->base,
+                           width, height,
+                           aura_devfb_output_initialize,
+                           NULL);
+    output_fb->fd = fd;
+    return output_fb;
+}
+
+//------------------------------------------------------------------------------
+
+int aura_devfb_setup_framebuffer(Chain* outputs)
 {
     struct fb_var_screeninfo screen_info;
     struct fb_fix_screeninfo fixed_info;
@@ -86,19 +103,9 @@ int aura_setup_framebuffer(AuraOutput** outputs, int* num)
               screen_info.xres_virtual, screen_info.yres_virtual,
               fixed_info.line_length);
 
-    // TODO: put malloc to output constructor
-    AuraOutputFB* output_fb = malloc(sizeof(AuraOutputFB));
-    memset(output_fb, 0, sizeof(AuraOutputFB));
-
-    aura_output_initialize(&output_fb->base,
-                           screen_info.xres_virtual,
-                           screen_info.yres_virtual,
-                           aura_devfb_output_initialize,
-                           NULL);
-    output_fb->fd = fd;
-
-    *outputs = (AuraOutput*) output_fb;
-    *num = 1;
+    AuraOutputFB* output = aura_devfb_output_new(screen_info.xres_virtual,
+                                                 screen_info.yres_virtual, fd);
+    chain_append(outputs, output);
 
     return 1;
 }

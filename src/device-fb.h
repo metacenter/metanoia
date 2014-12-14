@@ -6,7 +6,7 @@
 
 #include "output.h"
 
-int aura_setup_framebuffer(AuraOutput** outputs, int* num);
+int aura_devfb_setup_framebuffer(Chain* outputs);
 
 #endif // __AURA_DEVICE_FB_H__
 

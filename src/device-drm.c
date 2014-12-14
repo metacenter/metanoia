@@ -27,6 +27,18 @@
 
 //------------------------------------------------------------------------------
 
+typedef struct {
+    AuraOutput base;
+    int fd;
+    int front;
+    uint32_t crtc;
+    uint32_t connector;
+    uint32_t fb[2];
+    drmModeModeInfo mode;
+} AuraOutputDRM;
+
+//------------------------------------------------------------------------------
+
 static const char* scModuleName[] = {
         "i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "msm", NULL
     };
@@ -41,18 +53,7 @@ static const char* scConnectorStateName[] = {
     };
 
 //------------------------------------------------------------------------------
-
-typedef struct {
-    AuraOutput base;
-    int fd;
-    int front;
-    uint32_t crtc;
-    uint32_t connector;
-    uint32_t fb[2];
-    drmModeModeInfo mode;
-} AuraOutputDRM;
-
-//------------------------------------------------------------------------------
+// DUMB BUFFERS
 
 static int create_dumb_buffer(AuraOutputDRM* output_drm,
                               AuraRenderer* renderer,
@@ -131,6 +132,7 @@ static AuraRenderer* create_dumb_buffers(AuraOutputDRM* output_drm)
 }
 
 //------------------------------------------------------------------------------
+// EGL
 
 AuraRenderer* initialize_egl_with_gbm(AuraOutputDRM* output_drm)
 {
@@ -285,6 +287,7 @@ clear_fb:
 }
 
 //------------------------------------------------------------------------------
+// OUTPUT
 
 AuraRenderer* aura_drm_output_initialize(AuraOutput* output,
                                          int width, int height)
@@ -347,11 +350,38 @@ int aura_drm_output_swap_buffers(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
-// XXX: simply return output
-int update_device(int drm_fd,
-                  drmModeRes* resources,
-                  drmModeConnector* connector,
-                  AuraOutput** output)
+AuraOutputDRM* aura_drm_output_new(int width,
+                                   int height,
+                                   int drm_fd,
+                                   uint32_t crtc,
+                                   uint32_t connector,
+                                   drmModeModeInfo mode)
+{
+    AuraOutputDRM* output_drm = malloc(sizeof(AuraOutputDRM));
+    memset(output_drm, 0, sizeof(AuraOutputDRM));
+
+    aura_output_initialize(&output_drm->base,
+                           width, height,
+                           aura_drm_output_initialize,
+                           aura_drm_output_swap_buffers);
+
+    output_drm->fd = drm_fd;
+    output_drm->front = 0;
+    output_drm->crtc = crtc;
+    output_drm->connector = connector;
+    output_drm->fb[0] = -1;
+    output_drm->fb[1] = -1;
+    output_drm->mode = mode;
+
+    return output_drm;
+}
+
+//------------------------------------------------------------------------------
+// DEVICE
+
+AuraOutputDRM* update_device(int drm_fd,
+                             drmModeRes* resources,
+                             drmModeConnector* connector)
 {
     int i;
     drmModeEncoder* encoder = NULL;
@@ -361,7 +391,7 @@ int update_device(int drm_fd,
     // Check if there is at least one valid mode
     if (connector->count_modes == 0) {
         LOG_ERROR("No valid mode!");
-        return -EFAULT;
+        return NULL;
     }
 
     // Find encoder
@@ -376,36 +406,23 @@ int update_device(int drm_fd,
 
     if (!encoder) {
         LOG_ERROR("No encoder!");
-        return -EFAULT;
+        return NULL;
     }
 
     // Create output
-    AuraOutputDRM* output_drm = malloc(sizeof(AuraOutputDRM));
-    memset(output_drm, 0, sizeof(AuraOutputDRM));
-
-    aura_output_initialize(&output_drm->base,
-                           connector->modes[0].hdisplay,
-                           connector->modes[0].vdisplay,
-                           aura_drm_output_initialize,
-                           aura_drm_output_swap_buffers);
-
-    output_drm->fd = drm_fd;
-    output_drm->front = 0;
-    output_drm->crtc = encoder->crtc_id;
-    output_drm->connector = connector->connector_id;
-    output_drm->fb[0] = -1;
-    output_drm->fb[1] = -1;
-    output_drm->mode = connector->modes[0];
-
-    *output = (AuraOutput*) output_drm;
-
+    AuraOutputDRM* output = aura_drm_output_new(connector->modes[0].hdisplay,
+                                                connector->modes[0].vdisplay,
+                                                drm_fd,
+                                                encoder->crtc_id,
+                                                connector->connector_id,
+                                                connector->modes[0]);
     drmModeFreeEncoder(encoder);
-    return 1;
+    return output;
 }
 
 //------------------------------------------------------------------------------
 
-int aura_drm_update_devices(AuraOutput** outputs, int* num)
+int aura_drm_update_devices(Chain* outputs)
 {
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
@@ -447,20 +464,22 @@ int aura_drm_update_devices(AuraOutput** outputs, int* num)
         return -1;
     }
 
-    // TODO: put malloc elsewhere
-    *num = 0;
+    int num = 0;
 
     // Find a connected connector
     for (i = 0; i < resources->count_connectors; ++i) {
         connector = drmModeGetConnector(fd, resources->connectors[i]);
         if (connector) {
             LOG_INFO2("Connector: %s (%s)",
-                       scConnectorTypeName[connector->connector_type],
-                       scConnectorStateName[connector->connection]);
+                      scConnectorTypeName[connector->connector_type],
+                      scConnectorStateName[connector->connection]);
             // If connector is connected - update device
             if (connector->connection == DRM_MODE_CONNECTED) {
-                update_device(fd, resources, connector, outputs);
-                (*num) += 1;
+                AuraOutputDRM* output = update_device(fd, resources, connector);
+                if (output) {
+                    chain_append(outputs, output);
+                    num += 1;
+                }
             }
             drmModeFreeConnector(connector);
         }
@@ -470,6 +489,8 @@ int aura_drm_update_devices(AuraOutput** outputs, int* num)
     // Free memory
     drmModeFreeResources(resources);
 
-    return 1;
+    return num;
 }
+
+//------------------------------------------------------------------------------
 

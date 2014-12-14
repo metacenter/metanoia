@@ -6,7 +6,7 @@
 
 #include "output.h"
 
-int aura_drm_update_devices(AuraOutput** outputs, int* num);
+int aura_drm_update_devices(Chain* outputs);
 
 #endif // __AURA_DEVICE_DRM_H__
 
