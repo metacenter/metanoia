@@ -10,21 +10,9 @@
 
 AuraWin* win;
 
-struct _AuraApp
-{
-    GtkApplication parent;
-};
-
-struct _AuraAppClass
-{
-    GtkApplicationClass parent_class;
-};
-
-G_DEFINE_TYPE(AuraApp, aura_app, GTK_TYPE_APPLICATION);
-
 //------------------------------------------------------------------------------
 
-AuraViewGroup* aura_backend_gtk_prepare_view_group(int n, int w, int h)
+AuraViewGroup* aura_backend_gtk_app_prepare_view_group(int n, int w, int h)
 {
     if (!win) {
         return NULL;
@@ -43,6 +31,32 @@ void aura_backend_gtk_app_swap_buffers(int n)
 
     aura_backend_gtk_win_swap_buffers(win, n);
 }
+
+//------------------------------------------------------------------------------
+
+AuraResolution aura_backend_gtk_app_get_resolution(int n)
+{
+    if (!win) {
+        return (AuraResolution) {-2, -2};
+    }
+
+    return aura_backend_gtk_win_get_resolution(win, n);
+}
+
+//------------------------------------------------------------------------------
+// APPLICATION
+
+struct _AuraApp
+{
+    GtkApplication parent;
+};
+
+struct _AuraAppClass
+{
+    GtkApplicationClass parent_class;
+};
+
+G_DEFINE_TYPE(AuraApp, aura_app, GTK_TYPE_APPLICATION);
 
 //------------------------------------------------------------------------------
 

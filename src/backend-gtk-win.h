@@ -23,4 +23,6 @@ AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AuraWin* win,
 
 void aura_backend_gtk_win_swap_buffers(AuraWin* win, int n);
 
+AuraResolution aura_backend_gtk_win_get_resolution(AuraWin* win, int n);
+
 #endif // __AURA_BACKEND_GTK_WIN_H__

@@ -34,7 +34,7 @@ AuraRenderer* aura_backend_gtk_output_initialize(AuraOutput* output,
     LOG_INFO1("Initializing GTK output...");
 
     AuraViewGroup* group =
-            aura_backend_gtk_prepare_view_group(output_gtk->num, width, height);
+        aura_backend_gtk_app_prepare_view_group(output_gtk->num, width, height);
     if (!group) {
         LOG_WARN1("Initializing GTK output: no displays");
         return NULL;
@@ -86,11 +86,21 @@ AuraOutputGTK* aura_backend_gtk_output_new(int width, int height, int num)
 
 int aura_backend_gtk_get_outputs(Chain* outputs)
 {
-    // TODO: support for many screens
+    AuraResolution resolution;
+    int i = 0, n = 0;
+    do {
+        resolution = aura_backend_gtk_app_get_resolution(i);
+        if (resolution.width > 0 && resolution.height > 0) {
+            AuraOutputGTK* output =
+                              aura_backend_gtk_output_new(resolution.width,
+                                                          resolution.height, i);
+            chain_append(outputs, output);
+            n +=1;
+        }
+        i += 1;
+    } while (resolution.width >= 0 && resolution.height >= 0);
 
-    AuraOutputGTK* output = aura_backend_gtk_output_new(800, 600, 0);
-    chain_append(outputs, output);
-    return 1;
+    return n;
 }
 
 //------------------------------------------------------------------------------
@@ -98,7 +108,6 @@ int aura_backend_gtk_get_outputs(Chain* outputs)
 static void* aura_backend_gtk_main(void* data)
 {
     aura_environment_block_system_signals();
-    //gtk_main();
 
     int argc = 1;
     char* args[] = {"aura", '\0'};

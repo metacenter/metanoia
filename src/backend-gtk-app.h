@@ -38,8 +38,10 @@ typedef struct {
 GType    aura_app_get_type(void);
 AuraApp* aura_app_new(void);
 
-AuraViewGroup* aura_backend_gtk_prepare_view_group(int n, int w, int h);
+AuraViewGroup* aura_backend_gtk_app_prepare_view_group(int n, int w, int h);
 
 void aura_backend_gtk_app_swap_buffers();
+
+AuraResolution aura_backend_gtk_app_get_resolution(int n);
 
 #endif // __AURA_BACKEND_GTK_APP_H__

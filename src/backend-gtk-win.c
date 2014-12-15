@@ -4,6 +4,7 @@
 #include "backend-gtk-app.h"
 #include "backend-gtk-win.h"
 #include "utils-log.h"
+#include "event-signals.h"
 
 #include <gtk/gtk.h>
 #include <malloc.h>
@@ -11,7 +12,7 @@
 
 #define NUM_VIEW_GROUPS 4
 #define NUM_BUFFERS 2
-#define NUM_STARTUP_DISPLAYS 2
+#define NUM_STARTUP_DISPLAYS 1
 #define DEFAULT_RESOLUTION 1
 
 static const gchar* scMainGuiResPath = "/org/aura/res/backend-gtk-main.ui";
@@ -64,6 +65,11 @@ AuraResolution aura_backend_gtk_unpack_resolution_variant(GVariant* variant)
 void aura_backend_gtk_initialize_groups(void)
 {
     memset(&group, 0, sizeof(group));
+
+    int i;
+    for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
+        group[i].resolution = resolution[DEFAULT_RESOLUTION];
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -161,6 +167,7 @@ void on_display_activation(GSimpleAction* action,
     int n = (int) data;
     LOG_INFO1("GTK backend: display '%d' toogled", n);
     aura_backend_gtk_group_toggle_enabled(n);
+    aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -212,6 +219,21 @@ void aura_backend_gtk_win_swap_buffers(AuraWin* win, int n)
     pthread_mutex_lock(&mutex_buffer);
     group[n].front ^= 1;
     pthread_mutex_unlock(&mutex_buffer);
+}
+
+//------------------------------------------------------------------------------
+
+AuraResolution aura_backend_gtk_win_get_resolution(AuraWin* win, int n)
+{
+    if (n < 0 || NUM_VIEW_GROUPS <= n) {
+        return (AuraResolution) {-1, -1};
+    }
+
+    if (!group[n].enabled) {
+        return (AuraResolution) {0, 0};
+    }
+
+    return group[n].resolution;
 }
 
 //------------------------------------------------------------------------------
