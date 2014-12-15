@@ -65,15 +65,31 @@ AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
 
 //------------------------------------------------------------------------------
 
-AuraOutputFB* aura_devfb_output_new(int width, int height, int fd)
+void aura_devfb_output_free(AuraOutput* output)
+{
+    if (!output) {
+        return;
+    }
+
+    if (output->unique_name) {
+        free(output->unique_name);
+    }
+    free(output);
+}
+
+//------------------------------------------------------------------------------
+
+AuraOutputFB* aura_devfb_output_new(int width, int height, char* id, int fd)
 {
     AuraOutputFB* output_fb = malloc(sizeof(AuraOutputFB));
     memset(output_fb, 0, sizeof(AuraOutputFB));
 
     aura_output_initialize(&output_fb->base,
                            width, height,
+                           strdup(id),
                            aura_devfb_output_initialize,
-                           NULL);
+                           NULL,
+                           aura_devfb_output_free);
     output_fb->fd = fd;
     return output_fb;
 }
@@ -104,7 +120,8 @@ int aura_devfb_setup_framebuffer(Chain* outputs)
               fixed_info.line_length);
 
     AuraOutputFB* output = aura_devfb_output_new(screen_info.xres_virtual,
-                                                 screen_info.yres_virtual, fd);
+                                                 screen_info.yres_virtual,
+                                                 fixed_info.id, fd);
     chain_append(outputs, output);
 
     return 1;

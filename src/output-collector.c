@@ -12,7 +12,6 @@
 // FIXME: tmp
 // TODO: support for many outputs
 AuraOutput* output = 0;
-int num = 0;
 
 //------------------------------------------------------------------------------
 
@@ -41,6 +40,13 @@ void aura_outputs_update()
     Link* link;
     for (link = actual_outputs->first; link; link = link->next) {
         AuraOutput* output = (AuraOutput*) link->data;
+        if (!output || !output->unique_name) {
+            LOG_WARN1("Invalid output found!");
+            continue;
+        }
+
+        LOG_INFO1("Initializing output '%s'", output->unique_name);
+
         AuraRenderer* renderer =
                       output->initialize(output, output->width, output->height);
 

@@ -350,8 +350,23 @@ int aura_drm_output_swap_buffers(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
+void aura_drm_output_free(AuraOutput* output)
+{
+    if (!output) {
+        return;
+    }
+
+    if (output->unique_name) {
+        free(output->unique_name);
+    }
+    free(output);
+}
+
+//------------------------------------------------------------------------------
+
 AuraOutputDRM* aura_drm_output_new(int width,
                                    int height,
+                                   char* connector_name,
                                    int drm_fd,
                                    uint32_t crtc,
                                    uint32_t connector,
@@ -362,8 +377,10 @@ AuraOutputDRM* aura_drm_output_new(int width,
 
     aura_output_initialize(&output_drm->base,
                            width, height,
+                           strdup(connector_name),
                            aura_drm_output_initialize,
-                           aura_drm_output_swap_buffers);
+                           aura_drm_output_swap_buffers,
+                           aura_drm_output_free);
 
     output_drm->fd = drm_fd;
     output_drm->front = 0;
@@ -410,12 +427,14 @@ AuraOutputDRM* update_device(int drm_fd,
     }
 
     // Create output
-    AuraOutputDRM* output = aura_drm_output_new(connector->modes[0].hdisplay,
-                                                connector->modes[0].vdisplay,
-                                                drm_fd,
-                                                encoder->crtc_id,
-                                                connector->connector_id,
-                                                connector->modes[0]);
+    AuraOutputDRM* output =
+        aura_drm_output_new(connector->modes[0].hdisplay,
+                            connector->modes[0].vdisplay,
+                            (char*) scConnectorStateName[connector->connection],
+                            drm_fd,
+                            encoder->crtc_id,
+                            connector->connector_id,
+                            connector->modes[0]);
     drmModeFreeEncoder(encoder);
     return output;
 }

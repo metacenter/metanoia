@@ -68,6 +68,20 @@ int aura_backend_gtk_output_swap_buffers(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
+void aura_backend_gtk_output_free(AuraOutput* output)
+{
+    if (!output) {
+        return;
+    }
+
+    if (output->unique_name) {
+        free(output->unique_name);
+    }
+    free(output);
+}
+
+//------------------------------------------------------------------------------
+
 AuraOutputGTK* aura_backend_gtk_output_new(int width, int height, int num)
 {
     AuraOutputGTK* output_gtk = malloc(sizeof(AuraOutputGTK));
@@ -75,8 +89,10 @@ AuraOutputGTK* aura_backend_gtk_output_new(int width, int height, int num)
 
     aura_output_initialize(&output_gtk->base,
                            width, height,
+                           g_strdup_printf("GTK-output-%d", num),
                            aura_backend_gtk_output_initialize,
-                           aura_backend_gtk_output_swap_buffers);
+                           aura_backend_gtk_output_swap_buffers,
+                           aura_backend_gtk_output_free);
 
     output_gtk->num = num;
     return output_gtk;
