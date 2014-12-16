@@ -21,7 +21,7 @@ Link* link_new(void* data)
 
 //------------------------------------------------------------------------------
 
-void link_free(Link* self, FreeFunc freefunc)
+void link_free(Link* self, AuraFreeFunc freefunc)
 {
     if (!self) {
         return;
@@ -34,7 +34,7 @@ void link_free(Link* self, FreeFunc freefunc)
 
 //------------------------------------------------------------------------------
 
-Chain* chain_new(FreeFunc freefunc)
+Chain* chain_new(AuraFreeFunc freefunc)
 {
     Chain* self = malloc(sizeof(Chain));
     if (!self) {
@@ -148,6 +148,29 @@ void* chain_pop(Chain* self)
         self->last = NULL;
     }
     return result;
+}
+
+//------------------------------------------------------------------------------
+
+Chain* chain_subtract(Chain* minuend,
+                      Chain* subtrahent,
+                      AuraCompareFunc compare)
+{
+    Chain* difference = chain_new(minuend->freefunc);
+
+    Link* mlink;
+    for (mlink = minuend->first; mlink; mlink = mlink->next) {
+        int found = 0;
+        Link* slink;
+        for (slink = subtrahent->first; slink && !found; slink = slink->next) {
+            found = !compare(mlink->data, slink->data);
+        }
+        if (!found) {
+            chain_append(difference, mlink->data);
+        }
+    }
+
+    return difference;
 }
 
 //------------------------------------------------------------------------------

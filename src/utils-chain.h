@@ -4,7 +4,10 @@
 #ifndef __AURA_UTILS_CHAIN_H__
 #define __AURA_UTILS_CHAIN_H__
 
-typedef void (*FreeFunc) (void*);
+// TODO: use 'aura' prefix
+// TODO: ref and unref instead of free
+typedef void (*AuraFreeFunc) (void*);
+typedef int (*AuraCompareFunc) (void*, void*);
 
 typedef struct Link Link;
 struct Link {
@@ -14,23 +17,27 @@ struct Link {
 };
 
 Link* link_new(void* data);
-void link_free(Link* link, FreeFunc freefunc);
+void link_free(Link* link, AuraFreeFunc freefunc);
 
 typedef struct {
     Link* first;
     Link* last;
     int len;
-    FreeFunc freefunc;
+    AuraFreeFunc freefunc;
 } Chain;
 
-Chain* chain_new(FreeFunc freefunc);
+Chain* chain_new(AuraFreeFunc freefunc);
 void chain_free(Chain* chain);
 
 int chain_len(Chain* chain);
 
 void chain_prepend(Chain* chain, void* data);
 void chain_append(Chain* chain, void* data);
-void *chain_pop(Chain* chain);
+void* chain_pop(Chain* chain);
+
+Chain* chain_subtract(Chain* minuend,
+                      Chain* subtrahent,
+                      AuraCompareFunc compare);
 
 #endif // __AURA_UTILS_CHAIN_H__
 

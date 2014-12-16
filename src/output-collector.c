@@ -9,18 +9,13 @@
 #include "backend-gtk.h"
 #include "config.h"
 
-// FIXME: tmp
-// TODO: support for many outputs
-AuraOutput* output = 0;
+Chain* outputs = 0;
 
 //------------------------------------------------------------------------------
 
-void aura_outputs_update()
+Chain* aura_outputs_fetch_actual_outputs()
 {
     int num = 0;
-
-    LOG_INFO1("Updating outputs");
-
     Chain* actual_outputs = chain_new(0);
 
     if (!aura_settings().run_in_test_window) {
@@ -34,11 +29,16 @@ void aura_outputs_update()
 
     if (num < 1) {
         LOG_WARN1("No valid outputs!");
-        return;
     }
 
+    return actual_outputs;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_outputs_notify_outputs_found(Chain* outputs) {
     Link* link;
-    for (link = actual_outputs->first; link; link = link->next) {
+    for (link = outputs->first; link; link = link->next) {
         AuraOutput* output = (AuraOutput*) link->data;
         if (!output || !output->unique_name) {
             LOG_WARN1("Invalid output found!");
@@ -46,7 +46,6 @@ void aura_outputs_update()
         }
 
         LOG_INFO1("Initializing output '%s'", output->unique_name);
-
         AuraRenderer* renderer =
                       output->initialize(output, output->width, output->height);
 
@@ -56,6 +55,46 @@ void aura_outputs_update()
             LOG_WARN1("Invalid renderer!");
         }
     }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_outputs_notify_outputs_lost(Chain* outputs) {
+    Link* link;
+    for (link = outputs->first; link; link = link->next) {
+        AuraOutput* output = (AuraOutput*) link->data;
+        if (!output || !output->unique_name) {
+            LOG_WARN1("Invalid output found!");
+            continue;
+        }
+
+        LOG_INFO1("Removing output '%s'", output->unique_name);
+        aura_event_signal_emit(SIGNAL_DISPLAY_LOST, 0);
+    }
+
+}
+
+//------------------------------------------------------------------------------
+
+void aura_outputs_update()
+{
+    LOG_INFO1("Updating outputs");
+
+    Chain* actual_outputs = aura_outputs_fetch_actual_outputs();
+
+    Chain* found_outputs = chain_subtract(actual_outputs, outputs,
+                                         (AuraCompareFunc) aura_output_compare);
+
+    Chain* lost_outputs = chain_subtract(outputs, actual_outputs,
+                                         (AuraCompareFunc) aura_output_compare);
+
+    aura_outputs_notify_outputs_found(found_outputs);
+    aura_outputs_notify_outputs_lost(lost_outputs);
+
+    chain_free(found_outputs);
+    chain_free(lost_outputs);
+    chain_free(outputs);
+    outputs = actual_outputs;
 }
 
 //------------------------------------------------------------------------------
@@ -74,6 +113,7 @@ void aura_output_collector_initialize(AuraLoop* this_loop)
         return;
     }
 
+    outputs = chain_new(0);
     aura_outputs_update();
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_DISCOVERED,
