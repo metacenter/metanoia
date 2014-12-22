@@ -18,6 +18,7 @@ struct AuraOutput {
     int width;
     int height;
     char* unique_name;
+    AuraRenderer* renderer;
     AuraOutputInitRendererFunc initialize;
     AuraOutputSwapFunc swap_buffers;
     AuraOutputFreeFunc free;

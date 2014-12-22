@@ -23,6 +23,7 @@ typedef struct {
 } Binding;
 
 // Renderer strategy interface // TODO: move to separate file
+// TODO: move 'attach' elsewhere
 struct AuraRenderer;
 typedef struct {
     int (*initialize) (struct AuraRenderer*);
@@ -30,6 +31,7 @@ typedef struct {
     void (*attach) (struct AuraRenderer*, SurfaceId, void*);
     void (*draw) (struct AuraRenderer*, Chain*);
     void (*free) (struct AuraRenderer*);
+    void* data;
 } AuraRenderer;
 
 // Key event data

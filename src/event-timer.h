@@ -5,13 +5,17 @@
 #define __AURA_EVENT_TIMER_H__
 
 #include <sys/signal.h>
+#include <time.h>
 
 typedef struct AuraEventDispatcherPriv AuraEventDispatcher;
 
 typedef void (*AuraTimerHandler) (union sigval data);
 
-int aura_event_timer_run(AuraTimerHandler timer_handler,
-                         int miliseconds);
+timer_t aura_event_timer_run(int miliseconds,
+                             AuraTimerHandler timer_handler,
+                             void* data);
+
+void aura_event_timer_delete(timer_t timerid);
 
 #endif // __AURA_EVENT_TIMER_H__
 

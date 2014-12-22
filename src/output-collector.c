@@ -36,9 +36,9 @@ Chain* aura_outputs_fetch_actual_outputs()
 
 //------------------------------------------------------------------------------
 
-void aura_outputs_notify_outputs_found(Chain* outputs) {
+void aura_outputs_notify_outputs_found(Chain* found_outputs) {
     Link* link;
-    for (link = outputs->first; link; link = link->next) {
+    for (link = found_outputs->first; link; link = link->next) {
         AuraOutput* output = (AuraOutput*) link->data;
         if (!output || !output->unique_name) {
             LOG_WARN1("Invalid output found!");
@@ -46,11 +46,13 @@ void aura_outputs_notify_outputs_found(Chain* outputs) {
         }
 
         LOG_INFO1("Initializing output '%s'", output->unique_name);
-        AuraRenderer* renderer =
+        output->renderer =
                       output->initialize(output, output->width, output->height);
 
-        if (renderer) {
-            aura_event_signal_emit(SIGNAL_DISPLAY_FOUND, renderer);
+        chain_append(outputs, output);
+
+        if (output->renderer) {
+            aura_event_signal_emit(SIGNAL_DISPLAY_FOUND, output->renderer);
         } else {
             LOG_WARN1("Invalid renderer!");
         }
@@ -59,9 +61,9 @@ void aura_outputs_notify_outputs_found(Chain* outputs) {
 
 //------------------------------------------------------------------------------
 
-void aura_outputs_notify_outputs_lost(Chain* outputs) {
+void aura_outputs_notify_outputs_lost(Chain* lost_outputs) {
     Link* link;
-    for (link = outputs->first; link; link = link->next) {
+    for (link = lost_outputs->first; link; link = link->next) {
         AuraOutput* output = (AuraOutput*) link->data;
         if (!output || !output->unique_name) {
             LOG_WARN1("Invalid output found!");
@@ -69,9 +71,9 @@ void aura_outputs_notify_outputs_lost(Chain* outputs) {
         }
 
         LOG_INFO1("Removing output '%s'", output->unique_name);
-        aura_event_signal_emit(SIGNAL_DISPLAY_LOST, 0);
+        chain_remove(outputs, output, (AuraCompareFunc) aura_output_compare);
+        aura_event_signal_emit(SIGNAL_DISPLAY_LOST, output->renderer);
     }
-
 }
 
 //------------------------------------------------------------------------------
@@ -93,8 +95,7 @@ void aura_outputs_update()
 
     chain_free(found_outputs);
     chain_free(lost_outputs);
-    chain_free(outputs);
-    outputs = actual_outputs;
+    chain_free(actual_outputs);
 }
 
 //------------------------------------------------------------------------------

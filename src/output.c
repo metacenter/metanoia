@@ -22,6 +22,7 @@ int aura_output_initialize(AuraOutput* self,
     self->width = width;
     self->height = height;
     self->unique_name = unique_name;
+    self->renderer = 0;
     self->initialize = initialize;
     self->swap_buffers = swap_buffers;
     self->free = free;

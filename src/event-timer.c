@@ -9,14 +9,13 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <string.h>
-#include <time.h>
 
 //------------------------------------------------------------------------------
 
-int aura_event_timer_run(AuraTimerHandler timer_handler,
-                         int miliseconds)
+timer_t aura_event_timer_run(int miliseconds,
+                             AuraTimerHandler timer_handler,
+                             void* data)
 {
-    int result;
     timer_t timerid;
     struct sigevent se;
     struct itimerspec its;
@@ -26,10 +25,11 @@ int aura_event_timer_run(AuraTimerHandler timer_handler,
     se.sigev_notify = SIGEV_THREAD;
     se.sigev_notify_attributes = NULL;
     se.sigev_notify_function = timer_handler;
+    se.sigev_value.sival_ptr = data;
 
     if (timer_create(CLOCK_MONOTONIC, &se, &timerid) < 0) {
         LOG_ERROR("Could not create timer: %s", strerror(errno));
-        return -1;
+        return 0;
     }
 
     its.it_interval.tv_sec = 0;
@@ -45,15 +45,21 @@ int aura_event_timer_run(AuraTimerHandler timer_handler,
         its.it_interval.tv_nsec = 1000000 * miliseconds;
     }
 
-    result = timer_settime(timerid, 0, &its, NULL);
-    if (result < 0) {
+    if (timer_settime(timerid, 0, &its, NULL) < 0) {
         LOG_ERROR("Could not start timer: %s", strerror(errno));
-        return -1;
+        return 0;
     }
 
     LOG_INFO2("Timer started (ms: %d)", miliseconds);
 
-    return result;
+    return timerid;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_event_timer_delete(timer_t timerid)
+{
+    timer_delete(timerid);
 }
 
 //------------------------------------------------------------------------------

@@ -152,6 +152,42 @@ void* chain_pop(Chain* self)
 
 //------------------------------------------------------------------------------
 
+void chain_remove(Chain* self, void* data, AuraCompareFunc compare)
+{
+    int found = 0;
+    Link* link;
+    for (link = self->first; link; link = link->next) {
+        found = !compare(data, link->data);
+        if (found) {
+            break;
+        }
+    }
+
+    if (!found) {
+        return;
+    }
+
+    Link* prev = link->prev;
+    Link* next = link->next;
+
+    if (prev) {
+        prev->next = next;
+    } else {
+        self->first = next;
+    }
+
+    if (next) {
+        next->prev = prev;
+    } else {
+        self->last = prev;
+    }
+
+    self->len -= 1;
+    link_free(link, self->freefunc);
+}
+
+//------------------------------------------------------------------------------
+
 Chain* chain_subtract(Chain* minuend,
                       Chain* subtrahent,
                       AuraCompareFunc compare)

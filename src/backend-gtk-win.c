@@ -366,7 +366,7 @@ static void aura_win_init(AuraWin* win)
         gtk_header_bar_pack_start(GTK_HEADER_BAR(priv->header_bar), button);
 
         GtkWidget* area = aura_backend_gtk_build_display_area(i);
-        gtk_box_pack_start(GTK_BOX(priv->box_inner), area, 1, 0, 0);
+        gtk_box_pack_start(GTK_BOX(priv->box_inner), area, 1, 0, 5);
 
         aura_backend_gtk_group_set_enabled(i, i < NUM_STARTUP_DISPLAYS);
     }

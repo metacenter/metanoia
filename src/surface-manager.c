@@ -15,12 +15,11 @@
 
 static AuraStore* sStore = NULL;
 static Chain* visible_surfaces = NULL; // TODO: move to compositor
-static AuraRenderer* renderer = NULL; // TODO: move to compositor
 
 //------------------------------------------------------------------------------
 
 // TODO: move to compositor
-void aura_surface_manager_redraw_all()
+void aura_surface_manager_redraw_all(AuraRenderer* renderer)
 {
     if (!renderer) {
         LOG_ERROR("Invalid renderer!");
@@ -58,7 +57,7 @@ SurfaceId aura_surface_create(void)
     AuraItemId sid = aura_store_generate_new_id(sStore);
     aura_store_add(sStore, sid, data);
 
-    // Do this as strategy
+    // TODO: Do this as strategy
     chain_append(visible_surfaces, (void*) sid);
     aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) sid);
 
@@ -91,9 +90,10 @@ void aura_surface_attach_egl(SurfaceId sid,
     }
 
     // TODO: log at init if renderer supports egl
-    if (renderer && renderer->attach) {
-        renderer->attach((struct AuraRenderer*) renderer, sid, resource);
-    }
+    // TODO: move 'attach' out from renderer
+    //if (renderer && renderer->attach) {
+    //    renderer->attach((struct AuraRenderer*) renderer, sid, resource);
+    //}
 }
 
 //------------------------------------------------------------------------------
@@ -133,20 +133,36 @@ void aura_surface_hide(SurfaceId sid)
 //------------------------------------------------------------------------------
 
 // TODO: Move to compositor
-static void on_display_found(void* data)
+void on_display_found(void* data)
 {
-    AuraRenderer* renderer_new = (AuraRenderer*) data;
-    if (!renderer_new) {
-        LOG_ERROR("New renderer is invalid!");
+    AuraRenderer* renderer = (AuraRenderer*) data;
+    if (!renderer) {
+        LOG_ERROR("Invalid renderer");
         return;
     }
 
     LOG_INFO1("Adding new renderer!");
 
     // TODO: support for more renderers
-    renderer = renderer_new;
     renderer->initialize((struct AuraRenderer*) renderer);
-    aura_event_timer_run(aura_surface_manager_redraw_all, 100);
+    renderer->data = aura_event_timer_run(100, // TODO: user displays frame rate
+                             (AuraTimerHandler) aura_surface_manager_redraw_all,
+                             data);
+}
+
+//------------------------------------------------------------------------------
+
+void on_display_lost(void* data)
+{
+    AuraRenderer* renderer = (AuraRenderer*) data;
+    if (!renderer) {
+        LOG_ERROR("Invalid renderer");
+        return;
+    }
+
+    LOG_INFO2("Deleting renderer timer");
+    timer_t timerid = renderer->data;
+    aura_event_timer_delete(timerid);
 }
 
 //------------------------------------------------------------------------------
@@ -163,6 +179,9 @@ void aura_surface_manager_initialize(AuraLoop* this_loop)
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
          aura_task_create(on_display_found, this_loop));
+
+    aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
+         aura_task_create(on_display_lost, this_loop));
 }
 
 //------------------------------------------------------------------------------
