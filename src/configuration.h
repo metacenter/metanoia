@@ -13,6 +13,7 @@ static const AuraConfig scConfig = {
 
 static const Binding scKeyboardBindings[] = {
         {KEY_ESC, AURA_KEY_CTRL | AURA_KEY_ALT, aura_quit},
+        {KEY_F1,  AURA_KEY_CTRL | AURA_KEY_ALT, aura_refresh_displays},
         {0}
     };
 

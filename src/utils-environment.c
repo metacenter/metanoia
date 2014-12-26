@@ -78,7 +78,7 @@ static int aura_environment_data_path_setup(void)
 {
     char* data_path = getenv("XDG_DATA_HOME");
     if (!data_path) {
-        data_path = "/tmp";
+        data_path = "/var";
     }
 
     aura_data_path = malloc(strlen(data_path) + sizeof(scDataDirTemplate));

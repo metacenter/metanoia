@@ -6,5 +6,7 @@
 
 void aura_quit();
 
+void aura_refresh_displays();
+
 #endif // __AURA_GLOBAL_FUNCTIONS_H__
 

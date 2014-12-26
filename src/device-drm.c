@@ -1,6 +1,7 @@
 // file: device-drm.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
+// TODO: cleanup headers
 #include "device-drm.h"
 #include "utils-log.h"
 #include "renderer-mmap.h"
@@ -24,18 +25,23 @@
 #include <unistd.h>
 #include <string.h>
 #include <linux/input.h>
+#include <pthread.h>
 
 //------------------------------------------------------------------------------
+
+#define INVALID_CRTC_ID 0
 
 typedef struct {
     AuraOutput base;
     int fd;
     int front;
-    uint32_t crtc;
-    uint32_t connector;
+    uint32_t crtc_id;
+    uint32_t connector_id;
     uint32_t fb[2];
     drmModeModeInfo mode;
 } AuraOutputDRM;
+
+static int fd = -1;
 
 //------------------------------------------------------------------------------
 
@@ -51,6 +57,47 @@ static const char* scConnectorTypeName[] = {
 static const char* scConnectorStateName[] = {
         "NONE", "connected", "disconnected", "Unknown", NULL
     };
+
+pthread_mutex_t drm_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+//------------------------------------------------------------------------------
+
+void aura_drm_log(int drm_fd, drmModeRes* resources)
+{
+    int i;
+
+    // Log CRTC info
+    for (i = 0; i < resources->count_crtcs; ++i) {
+        drmModeCrtcPtr crtc = drmModeGetCrtc(drm_fd, resources->crtcs[i]);
+        if (crtc) {
+            LOG_INFO2("CRTC (id: %u, buffer: %u)",
+                      crtc->crtc_id, crtc->buffer_id);
+        }
+        drmModeFreeCrtc(crtc);
+    }
+
+    // Log enocoder info
+    for (i = 0; i < resources->count_encoders; ++i) {
+        drmModeEncoderPtr encoder =
+                              drmModeGetEncoder(drm_fd, resources->encoders[i]);
+        if (encoder) {
+            LOG_INFO2("Encoder (id: %u, CTRC: %u, mask: 0x%o)",
+                       encoder->encoder_id, encoder->crtc_id,
+                       encoder->possible_crtcs);
+        }
+        drmModeFreeEncoder(encoder);
+    }
+
+    // Log framebuffer info
+    for (i = 0; i < resources->count_fbs; ++i) {
+        drmModeFBPtr fb = drmModeGetFB(drm_fd, resources->fbs[i]);
+        if (fb) {
+            LOG_INFO2("Framebuffer (id: %u, w: %u, h: %u)",
+                      fb->fb_id, fb->width, fb->height);
+        }
+        drmModeFreeFB(fb);
+    }
+}
 
 //------------------------------------------------------------------------------
 // DUMB BUFFERS
@@ -85,6 +132,8 @@ static int create_dumb_buffer(AuraOutputDRM* output_drm,
         LOG_ERROR("Cannot create framebuffer (%m)");
         goto clear_db;
     }
+
+    LOG_DEBUG("FRAMEBUFFER %u", output_drm->fb[num]);
 
     // Prepare buffer for memory mapping
     memset(&marg, 0, sizeof(marg));
@@ -249,7 +298,7 @@ AuraRenderer* initialize_egl_with_gbm(AuraOutputDRM* output_drm)
     r = drmModeAddFB(output_drm->fd, width, height,
                      24, 32, stride, handle, &fb_id);
     if (r) {
-        LOG_ERROR("Failed to create DRM framebuffer: %s\n", strerror(errno));
+        LOG_ERROR("Failed to create DRM framebuffer: %m");
         return NULL;
     }
 
@@ -260,7 +309,7 @@ AuraRenderer* initialize_egl_with_gbm(AuraOutputDRM* output_drm)
                        &output_drm->connector->connector_id,
                        1, mode);
     if (r) {
-        LOG_ERROR("failed to set mode: %s\n", strerror(errno));
+        LOG_ERROR("failed to set mode: %m");
         goto clear_fb;
     }
 
@@ -292,7 +341,7 @@ clear_fb:
 AuraRenderer* aura_drm_output_initialize(AuraOutput* output,
                                          int width, int height)
 {
-    AuraRenderer* renderer;
+    AuraRenderer* renderer = NULL;
 
     AuraOutputDRM* output_drm = (AuraOutputDRM*) output;
     if (!output_drm) {
@@ -300,23 +349,30 @@ AuraRenderer* aura_drm_output_initialize(AuraOutput* output,
     }
 
     //renderer = initialize_egl_with_gbm(output_drm);
-    //if (renderer == NULL) {
+    if (renderer == NULL) {
         renderer = create_dumb_buffers(output_drm);
-        if (renderer == NULL) {
-            LOG_ERROR("DRM failed!");
-            return NULL;
-        }
-    //}
+    }
+    if (renderer == NULL) {
+        LOG_ERROR("DRM failed!");
+        return NULL;
+    }
 
     // Set mode
     int r = drmModeSetCrtc(output_drm->fd,
-                           output_drm->crtc,
+                           output_drm->crtc_id,
                            output_drm->fb[0], 0, 0,
-                           &output_drm->connector, 1,
+                           &output_drm->connector_id, 1,
                            &output_drm->mode);
     if (r) {
-        LOG_ERROR("Failed to set mode for connector %u (%m)",
-                   output_drm->connector);
+        LOG_ERROR("Failed to set mode for connector "
+                  "(id: %u, crtc_id: %u, fb0: %u, fb1: %u, error: '%m')",
+                  output_drm->connector_id, output_drm->crtc_id,
+                  output_drm->fb[0], output_drm->fb[1]);
+    } else {
+        LOG_INFO2("Set mode for connector "
+                  "(id: %u, crtc_id: %u, fb0: %u, fb1: %u)",
+                  output_drm->connector_id, output_drm->crtc_id,
+                  output_drm->fb[0], output_drm->fb[1]);
     }
 
     return renderer;
@@ -326,26 +382,35 @@ AuraRenderer* aura_drm_output_initialize(AuraOutput* output,
 
 int aura_drm_output_swap_buffers(AuraOutput* output)
 {
+    pthread_mutex_lock(&drm_mutex);
+    int result = 0;
+
     AuraOutputDRM* output_drm = (AuraOutputDRM*) output;
     if (!output_drm) {
-        return -1;
+        result = -1;
+        goto unlock;
     }
 
     int new_front = output_drm->front ^ 1;
 
     int r = drmModeSetCrtc(output_drm->fd,
-                           output_drm->crtc,
+                           output_drm->crtc_id,
                            output_drm->fb[new_front], 0, 0,
-                           &output_drm->connector, 1,
+                           &output_drm->connector_id, 1,
                            &output_drm->mode);
     if (r) {
-        LOG_WARN1("Failed to set mode for connector %u (%m)",
-                   output_drm->connector);
-        return -1;
+        LOG_ERROR("Failed to set mode for connector "
+                  "(id: %u, crtc_id: %u, error: '%m')",
+                  output_drm->connector_id, output_drm->crtc_id);
+        result = -1;
+        goto unlock;
     }
 
     output_drm->front = new_front;
-    return 0;
+
+unlock:
+    pthread_mutex_unlock(&drm_mutex);
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -368,8 +433,8 @@ AuraOutputDRM* aura_drm_output_new(int width,
                                    int height,
                                    char* connector_name,
                                    int drm_fd,
-                                   uint32_t crtc,
-                                   uint32_t connector,
+                                   uint32_t crtc_id,
+                                   uint32_t connector_id,
                                    drmModeModeInfo mode)
 {
     AuraOutputDRM* output_drm = malloc(sizeof(AuraOutputDRM));
@@ -384,8 +449,8 @@ AuraOutputDRM* aura_drm_output_new(int width,
 
     output_drm->fd = drm_fd;
     output_drm->front = 0;
-    output_drm->crtc = crtc;
-    output_drm->connector = connector;
+    output_drm->crtc_id = crtc_id;
+    output_drm->connector_id = connector_id;
     output_drm->fb[0] = -1;
     output_drm->fb[1] = -1;
     output_drm->mode = mode;
@@ -396,14 +461,76 @@ AuraOutputDRM* aura_drm_output_new(int width,
 //------------------------------------------------------------------------------
 // DEVICE
 
+int is_crtc_in_use(Chain* drm_outputs, uint32_t crtc_id)
+{
+    int is_in_use = 0;
+    Link* link;
+    for (link = drm_outputs->first; link; link = link->next) {
+        AuraOutputDRM* output_drm = (AuraOutputDRM*) link->data;
+        if (output_drm->crtc_id == crtc_id) {
+            is_in_use = 1;
+            break;
+        }
+    }
+    return is_in_use;
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t find_crtc(int drm_fd,
+                   drmModeRes* resources,
+                   drmModeConnector* connector,
+                   Chain* drm_outputs)
+{
+    // Try to reuse old encoder
+    if (connector->encoder_id) {
+        drmModeEncoderPtr encoder =
+                               drmModeGetEncoder(drm_fd, connector->encoder_id);
+        if (encoder
+        &&  encoder->crtc_id != INVALID_CRTC_ID
+        && !is_crtc_in_use(drm_outputs, encoder->crtc_id)) {
+            return encoder->crtc_id;
+        }
+    }
+
+    // If connector is not bound to encoder find new CRTC
+    int i, j;
+    for (i = 0; i < connector->count_encoders; ++i) {
+        drmModeEncoderPtr encoder =
+                              drmModeGetEncoder(drm_fd, connector->encoders[i]);
+        for (j = 0; j < resources->count_crtcs; ++j) {
+            if (!(encoder->possible_crtcs & (1 << j))) {
+                continue;
+            }
+
+            drmModeCrtcPtr crtc = drmModeGetCrtc(drm_fd, resources->crtcs[j]);
+            if (!crtc) {
+                continue;
+            }
+
+            if (is_crtc_in_use(drm_outputs, crtc->crtc_id)) {
+                continue;
+            }
+
+            uint32_t crtc_id = crtc->crtc_id;
+            drmModeFreeCrtc(crtc);
+            drmModeFreeEncoder(encoder);
+            return crtc_id;
+        }
+        drmModeFreeEncoder(encoder);
+    }
+
+    return INVALID_CRTC_ID;
+}
+
+//------------------------------------------------------------------------------
+
 AuraOutputDRM* update_device(int drm_fd,
                              drmModeRes* resources,
-                             drmModeConnector* connector)
+                             drmModeConnector* connector,
+                             Chain* drm_outputs)
 {
-    int i;
-    drmModeEncoder* encoder = NULL;
-
-    LOG_INFO2("Updating connector %u", connector->connector_id);
+    LOG_INFO2("Updating connector (id: %u)", connector->connector_id);
 
     // Check if there is at least one valid mode
     if (connector->count_modes == 0) {
@@ -411,31 +538,23 @@ AuraOutputDRM* update_device(int drm_fd,
         return NULL;
     }
 
-    // Find encoder
-    for (i = 0; i < resources->count_encoders; ++i) {
-        encoder = drmModeGetEncoder(drm_fd, resources->encoders[i]);
-        if (encoder && encoder->encoder_id == connector->encoder_id) {
-            break;
-        }
-        drmModeFreeEncoder(encoder);
-        encoder = NULL;
-    }
-
-    if (!encoder) {
-        LOG_ERROR("No encoder!");
+    uint32_t crtc_id = find_crtc(drm_fd, resources, connector, drm_outputs);
+    if (crtc_id == INVALID_CRTC_ID) {
+        LOG_ERROR("CRTC not found!");
         return NULL;
     }
 
+    LOG_INFO2("Updating connector (CRTC: %u)", crtc_id);
+
     // Create output
     AuraOutputDRM* output =
-        aura_drm_output_new(connector->modes[0].hdisplay,
-                            connector->modes[0].vdisplay,
-                            (char*) scConnectorStateName[connector->connection],
-                            drm_fd,
-                            encoder->crtc_id,
-                            connector->connector_id,
-                            connector->modes[0]);
-    drmModeFreeEncoder(encoder);
+     aura_drm_output_new(connector->modes[0].hdisplay,
+                         connector->modes[0].vdisplay,
+                         (char*) scConnectorTypeName[connector->connector_type],
+                         drm_fd,
+                         crtc_id,
+                         connector->connector_id,
+                         connector->modes[0]);
     return output;
 }
 
@@ -443,71 +562,88 @@ AuraOutputDRM* update_device(int drm_fd,
 
 int aura_drm_update_devices(Chain* outputs)
 {
+    pthread_mutex_lock(&drm_mutex);
+
+    int i;
+    int num = -1;
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
-    int fd, i;
+    Chain* drm_outputs = chain_new(NULL);
 
     LOG_INFO1("Updating DRM devices");
 
     // Find and open DRM device
     // TODO: try all devices, there may be more than one connected
-    for (i = 0; i < sizeof(scModuleName); ++i) {
-        fd = drmOpen(scModuleName[i], NULL);
-        if (fd > 0) {
-            break;
+    if (fd < 0) {
+        for (i = 0; i < sizeof(scModuleName); ++i) {
+            fd = drmOpen(scModuleName[i], NULL);
+            if (fd > 0) {
+                break;
+            }
         }
-    }
-    if (fd > 0) {
-        LOG_INFO1("Found DRM device (%s)", scModuleName[i]);
-    } else {
-        LOG_ERROR("Could not open DRM device!");
-        return -1;
+        if (fd > 0) {
+            LOG_INFO1("Found DRM device (%s)", scModuleName[i]);
+        } else {
+            LOG_ERROR("Could not open DRM device!");
+            goto unlock;
+        }
     }
 
     uint64_t has_dumb;
     if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0 || !has_dumb) {
         LOG_ERROR("drm device does not support dumb buffers");
         close(fd);
-        return -1;
+        goto unlock;
     }
 
     int ret = drmSetMaster(fd);
     if (ret == -1) {
-        LOG_ERROR("Set Master: %s", strerror(errno));
+        LOG_ERROR("Set Master: %m");
     }
 
     // Get resources
     resources = drmModeGetResources(fd);
     if (!resources) {
-        LOG_ERROR("drmModeGetResources failed: %s", strerror(errno));
-        return -1;
+        LOG_ERROR("drmModeGetResources failed: %m");
+        goto unlock;
     }
 
-    int num = 0;
+    aura_drm_log(fd, resources);
 
-    // Find a connected connector
+    num = 0;
+    // Find a connected connectors
     for (i = 0; i < resources->count_connectors; ++i) {
         connector = drmModeGetConnector(fd, resources->connectors[i]);
-        if (connector) {
-            LOG_INFO2("Connector: %s (%s)",
-                      scConnectorTypeName[connector->connector_type],
-                      scConnectorStateName[connector->connection]);
-            // If connector is connected - update device
-            if (connector->connection == DRM_MODE_CONNECTED) {
-                AuraOutputDRM* output = update_device(fd, resources, connector);
-                if (output) {
-                    chain_append(outputs, output);
-                    num += 1;
-                }
-            }
-            drmModeFreeConnector(connector);
+        if (!connector) {
+            continue;
         }
-        connector = NULL;
+
+        LOG_INFO2("Connector: %s (%s)",
+                  scConnectorTypeName[connector->connector_type],
+                  scConnectorStateName[connector->connection]);
+
+        // If connector is connected - update device
+        if (connector->connection == DRM_MODE_CONNECTED) {
+            AuraOutputDRM* output =
+                           update_device(fd, resources, connector, drm_outputs);
+            if (output) {
+                chain_append(drm_outputs, output);
+                num += 1;
+            }
+        }
+        drmModeFreeConnector(connector);
+    }
+
+    Link* link;
+    for (link = drm_outputs->first; link; link = link->next) {
+        chain_append(outputs, link->data);
     }
 
     // Free memory
     drmModeFreeResources(resources);
 
+unlock:
+    pthread_mutex_unlock(&drm_mutex);
     return num;
 }
 

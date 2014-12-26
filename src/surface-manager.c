@@ -145,7 +145,7 @@ void on_display_found(void* data)
 
     // TODO: support for more renderers
     renderer->initialize((struct AuraRenderer*) renderer);
-    renderer->data = aura_event_timer_run(100, // TODO: user displays frame rate
+    renderer->data = aura_event_timer_run(100, // TODO: use displays frame rate
                              (AuraTimerHandler) aura_surface_manager_redraw_all,
                              data);
 }

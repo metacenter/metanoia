@@ -3,8 +3,10 @@
 
 #include "device-udev.h"
 #include "utils-log.h"
+#include "event-signals.h"
 
 #include <malloc.h>
+#include <string.h>
 #include <libudev.h>
 
 //------------------------------------------------------------------------------
@@ -28,12 +30,14 @@ void handle_device(AuraEventData* data, struct epoll_event* epev)
         return;
     }
 
-    LOG_INFO2("Device pluged: node: '%s', subsystem: '%s', "
-              "devtype: '%s', action: '%s'",
+    LOG_INFO2("Device pluged "
+              "(node: '%s', subsystem: '%s', devtype: '%s', action: '%s')",
               udev_device_get_devnode(dev), udev_device_get_subsystem(dev),
               udev_device_get_devtype(dev), udev_device_get_action(dev));
 
-    // TODO
+    if (strcmp("drm", udev_device_get_subsystem(dev)) == 0) {
+        aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
+    }
 
     udev_device_unref(dev);
 }
