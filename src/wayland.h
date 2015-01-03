@@ -6,8 +6,6 @@
 
 #include "event-loop.h"
 
-// TODO: tmp
-#include "surface-priv.h"
 struct wl_display* get_wayland_display();
 
 void aura_wayland_initialize(AuraLoop* this_loop);

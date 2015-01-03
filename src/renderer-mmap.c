@@ -3,7 +3,7 @@
 
 #include "renderer-mmap.h"
 
-#include "surface.h"
+#include "surface-manager.h"
 #include "utils-log.h"
 
 #include <malloc.h>

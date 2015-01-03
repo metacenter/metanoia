@@ -261,13 +261,6 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
-        output='surface-compositor.o',
-        inputs=['surface-compositor.c'],
-        includes=['surface-compositor.h']
-    )
-aura.add_input(t)
-
-t = m.add_compile_target(
         output='surface-manager.o',
         inputs=['surface-manager.c'],
         includes=['surface-manager.h']

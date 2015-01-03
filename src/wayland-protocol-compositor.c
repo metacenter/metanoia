@@ -6,7 +6,7 @@
 #include "wayland-protocol-region.h"
 #include "wayland-state.h"
 
-#include "surface.h"
+#include "surface-manager.h"
 #include "utils-log.h"
 #include "global-types.h"
 
