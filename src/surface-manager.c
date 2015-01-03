@@ -90,7 +90,6 @@ void aura_surface_commit(SurfaceId sid,
     surface->buffer.height = height;
     surface->buffer.stride = stride;
     surface->buffer.data   = data;
-    surface->visible = 1;
 }
 
 //------------------------------------------------------------------------------

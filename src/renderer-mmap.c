@@ -6,6 +6,7 @@
 #include "surface-manager.h"
 #include "utils-log.h"
 
+#include <math.h>
 #include <malloc.h>
 #include <string.h>
 
@@ -83,28 +84,31 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
 
     int current_buffer = mine->front ^ 1;
     uint8_t* D = mine->buffer[current_buffer].data;
-    //int W = mine->width;
-    //int H = mine->height;
+    int W = mine->width;
+    int H = mine->height;
     int S = mine->buffer[current_buffer].stride;
 
     Link* link;
     for (link = surfaces->first; link; link = link->next) {
         AuraSurfaceData* surface = aura_surface_get((SurfaceId) link->data);
-
-        // FIXME: tmp
-        if (!surface || !surface->visible) {
+        if (!surface) {
             continue;
         }
 
         uint8_t* d = surface->buffer.data;
         int s = surface->buffer.stride;
         int x, y;
-        for (y = 0; y < surface->buffer.height; ++y) {
-            for (x = 0; x < surface->buffer.width; ++x) {
-                D[y*S + 4*x + 0] = d[y*s + 4*x + 0];
-                D[y*S + 4*x + 1] = d[y*s + 4*x + 1];
-                D[y*S + 4*x + 2] = d[y*s + 4*x + 2];
-                D[y*S + 4*x + 3] = d[y*s + 4*x + 3];
+        int w = fmin(surface->buffer.width, W - surface->x);
+        int h = fmin(surface->buffer.height, H - surface->y);
+
+        for (y = 0; y < h; ++y) {
+            for (x = 0; x < w; ++x) {
+                int P = S * (y + surface->y) + 4 * (x + surface->x);
+                int p = s * y + 4 * x;
+                D[P + 0] = d[p + 0];
+                D[P + 1] = d[p + 1];
+                D[P + 2] = d[p + 2];
+                D[P + 3] = d[p + 3];
             }
         }
     }

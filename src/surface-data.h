@@ -24,7 +24,6 @@ typedef struct {
 typedef struct {
     AuraItem base;
     int x, y;
-    int visible;
     AuraDrawBuffer buffer;
 } AuraSurfaceData;
 
