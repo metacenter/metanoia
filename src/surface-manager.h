@@ -8,8 +8,6 @@
 #include "event-loop.h"
 #include "surface-data.h"
 
-void aura_surface_manager_initialize(AuraLoop* this_loop);
-
 SurfaceId aura_surface_create(void);
 
 void aura_surface_destroy(SurfaceId sid);

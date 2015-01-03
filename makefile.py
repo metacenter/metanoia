@@ -285,7 +285,38 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 #-------------------------------------------------------------------------------
-#
+# EXHIBITOR
+
+t = m.add_compile_target(
+        output='exhibitor.o',
+        inputs=['exhibitor.c'],
+        includes=['exhibitor.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='exhibitor-display.o',
+        inputs=['exhibitor-display.c'],
+        includes=['exhibitor-display.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='exhibitor-compositor.o',
+        inputs=['exhibitor-compositor.c'],
+        includes=['exhibitor-compositor.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='exhibitor-strategist.o',
+        inputs=['exhibitor-strategist.c'],
+        includes=['exhibitor-strategist.h']
+    )
+aura.add_input(t)
+
+#-------------------------------------------------------------------------------
+# RENDERERS
 
 t = m.add_compile_target(
         output='renderer-mmap.o',
@@ -303,7 +334,7 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 #-------------------------------------------------------------------------------
-#
+# WAYLAD FRONTEND
 
 t = m.add_compile_target(
         output='wayland.o',

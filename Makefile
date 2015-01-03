@@ -44,6 +44,10 @@ $(builddir)/aura: Makefile \
                   $(builddir)/surface-compositor.o \
                   $(builddir)/surface-manager.o \
                   $(builddir)/keyboard-bindings.o \
+                  $(builddir)/exhibitor.o \
+                  $(builddir)/exhibitor-display.o \
+                  $(builddir)/exhibitor-compositor.o \
+                  $(builddir)/exhibitor-strategist.o \
                   $(builddir)/renderer-mmap.o \
                   $(builddir)/renderer-gl.o \
                   $(builddir)/wayland.o \
@@ -66,7 +70,7 @@ $(builddir)/aura: Makefile \
 	@mkdir -p $(builddir)
 	@echo "  LD  aura"
 	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/global-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/output.o $(builddir)/output-collector.o $(builddir)/surface-data.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o $(builddir)/backend-gtk-app.o $(builddir)/backend-gtk-win.o $(builddir)/backend-gtk-res.o \
+	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/global-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/output.o $(builddir)/output-collector.o $(builddir)/surface-data.o $(builddir)/surface-compositor.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/exhibitor.o $(builddir)/exhibitor-display.o $(builddir)/exhibitor-compositor.o $(builddir)/exhibitor-strategist.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o $(builddir)/backend-gtk-app.o $(builddir)/backend-gtk-win.o $(builddir)/backend-gtk-res.o \
 	       `pkg-config --libs dbus-1 egl gbm gl gtk+-3.0 libdrm libudev wayland-server xkbcommon`
 
 $(gendir)/xdg-shell-server-protocol.h: Makefile \
@@ -301,6 +305,38 @@ $(builddir)/keyboard-bindings.o: Makefile \
 	@echo "  CC  keyboard-bindings.o"
 	@$(CC) $(WFLAGS) -o $(builddir)/keyboard-bindings.o -I$(srcdir) -I$(gendir) \
 	       -c $(srcdir)/keyboard-bindings.c
+
+$(builddir)/exhibitor.o: Makefile \
+                         $(srcdir)/exhibitor.c \
+                         $(srcdir)/exhibitor.h
+	@mkdir -p $(builddir)
+	@echo "  CC  exhibitor.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/exhibitor.c
+
+$(builddir)/exhibitor-display.o: Makefile \
+                                 $(srcdir)/exhibitor-display.c \
+                                 $(srcdir)/exhibitor-display.h
+	@mkdir -p $(builddir)
+	@echo "  CC  exhibitor-display.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor-display.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/exhibitor-display.c
+
+$(builddir)/exhibitor-compositor.o: Makefile \
+                                    $(srcdir)/exhibitor-compositor.c \
+                                    $(srcdir)/exhibitor-compositor.h
+	@mkdir -p $(builddir)
+	@echo "  CC  exhibitor-compositor.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor-compositor.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/exhibitor-compositor.c
+
+$(builddir)/exhibitor-strategist.o: Makefile \
+                                    $(srcdir)/exhibitor-strategist.c \
+                                    $(srcdir)/exhibitor-strategist.h
+	@mkdir -p $(builddir)
+	@echo "  CC  exhibitor-strategist.o"
+	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor-strategist.o -I$(srcdir) -I$(gendir) \
+	       -c $(srcdir)/exhibitor-strategist.c
 
 $(builddir)/renderer-mmap.o: Makefile \
                              $(srcdir)/renderer-mmap.c \

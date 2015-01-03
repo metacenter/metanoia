@@ -17,7 +17,7 @@ AuraTask* factorize_stop_dispatcher_task(AuraEventDispatcher* dispatcher);
 
 AuraTask* factorize_initialize_wayland_task(AuraLoop* loop);
 
-AuraTask* factorize_initialize_surface_manager_task(AuraLoop* loop);
+AuraTask* factorize_initialize_exhibitor_task(AuraLoop* loop);
 
 AuraTask* factorize_initialize_output_collector_task(AuraLoop* loop);
 

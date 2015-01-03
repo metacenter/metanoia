@@ -7,7 +7,7 @@
 #include "device-udev.h"
 #include "backend-gtk.h"
 #include "output-collector.h"
-#include "surface.h"
+#include "exhibitor.h"
 #include "wayland.h"
 #include "utils-environment.h"
 
@@ -49,9 +49,9 @@ AuraTask* factorize_backend_gtk_run_task(AuraLoop* loop)
 
 //------------------------------------------------------------------------------
 
-AuraTask* factorize_initialize_surface_manager_task(AuraLoop* loop)
+AuraTask* factorize_initialize_exhibitor_task(AuraLoop* loop)
 {
-    return aura_task_new((AuraTaskProcessor) aura_surface_manager_initialize,
+    return aura_task_new((AuraTaskProcessor) aura_exhibitor_initialize,
                          (AuraTaskFreeFunc) aura_task_free, NULL, loop);
 }
 

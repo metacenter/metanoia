@@ -47,6 +47,10 @@ void aura_surface_manager_redraw_all(AuraRenderer* renderer)
 
 SurfaceId aura_surface_create(void)
 {
+    if (!sStore) {
+        sStore = aura_store_new();
+    }
+
     // Create new surface
     AuraSurfaceData* data = aura_surface_data_new();
     if (!data) {
@@ -56,6 +60,8 @@ SurfaceId aura_surface_create(void)
 
     AuraItemId sid = aura_store_generate_new_id(sStore);
     aura_store_add(sStore, sid, data);
+
+    aura_event_signal_emit(SIGNAL_SURFACE_CREATED, (void*) sid);
 
     // TODO: Do this as strategy
     chain_append(visible_surfaces, (void*) sid);
@@ -167,7 +173,8 @@ void on_display_lost(void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_surface_manager_initialize(AuraLoop* this_loop)
+// TBR
+/*void aura_surface_manager_initialize(AuraLoop* this_loop)
 {
     if (this_loop == 0) {
         LOG_ERROR("Invalid loop!");
@@ -175,14 +182,13 @@ void aura_surface_manager_initialize(AuraLoop* this_loop)
     }
 
     visible_surfaces = chain_new(NULL);
-    sStore = aura_store_new();
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
          aura_task_create(on_display_found, this_loop));
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
          aura_task_create(on_display_lost, this_loop));
-}
+}*/
 
 //------------------------------------------------------------------------------
 
