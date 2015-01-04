@@ -25,8 +25,8 @@ void aura_config_apply()
     aura_utils_keymap_initialize(keymap);
 
     int i;
-    for (i=0; i < sizeof(scKeyboardBindings)/sizeof(Binding)-1; ++i) {
-        aura_keyboard_add_binding(&scKeyboardBindings[i]);
+    for (i=0; i < sizeof(scArgmands)/sizeof(AuraArgmand)-1; ++i) {
+        aura_keyboard_add_argmand(AURA_NORMAL_MODE, &scArgmands[i]);
     }
 
     // Apply evironment variables

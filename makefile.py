@@ -277,6 +277,20 @@ t = m.add_compile_target(
     )
 aura.add_input(t)
 
+t = m.add_compile_target(
+        output='keyboard-mode.o',
+        inputs=['keyboard-mode.c'],
+        includes=['keyboard-mode.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='keyboard-argmand.o',
+        inputs=['keyboard-argmand.c'],
+        includes=['keyboard-argmand.h']
+    )
+aura.add_input(t)
+
 #-------------------------------------------------------------------------------
 # EXHIBITOR
 

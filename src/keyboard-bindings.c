@@ -2,74 +2,88 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "keyboard-bindings.h"
+#include "keyboard-mode.h"
+
 #include "utils-log.h"
 
 #include <malloc.h>
 #include <search.h>
 #include <linux/input.h>
 
-static void* binding_tree = 0;
+//------------------------------------------------------------------------------
+
+static Chain* stack = NULL;
+static Chain* modes = NULL;
 static uint32_t modifiers = 0;
 
 //------------------------------------------------------------------------------
 
-static int compare(const Binding* binding1, const Binding* binding2)
+void aura_keyboard_add_argmand(AuraModeEnum modeid, const AuraArgmand* argmand)
 {
-    if (binding1->modifiers < binding2->modifiers) return -1;
-    if (binding1->modifiers > binding2->modifiers) return  1;
+    AuraMode* mode = NULL;
 
-    if (binding1->code < binding2->code) return -1;
-    if (binding1->code > binding2->code) return  1;
+    // Check argmand validity
+    if (argmand == 0 || argmand->execute == 0) {
+        LOG_WARN1("Invalid argmand!");
+        return;
+    }
 
-    return 0;
+    if (!modes) {
+        modes = chain_new(0);
+    }
+
+    // Try to find mode
+    Link* link;
+    for (link = modes->first; link; link = link->next) {
+        mode = (AuraMode*) link->data;
+        if (mode->modeid != modeid) {
+            mode = NULL;
+        } else {
+            break;
+        }
+    }
+
+    // If mode not found - create it
+    if (!mode) {
+        mode = aura_mode_new(modeid);
+        chain_append(modes, mode);
+        if (modeid == AURA_NORMAL_MODE) {
+            mode->active = 1;
+        }
+    }
+
+    // Add argmand
+    aura_mode_add_argmand(mode, argmand);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_keyboard_add_binding(const Binding* binding)
+AuraArgmand* aura_keyboard_find_argmand(Chain* modes,
+                                        int code,
+                                        uint32_t modifiers)
 {
-    if (binding == 0 || binding->callback == 0) {
-        LOG_WARN1("Invalid binding!");
-        return;
+    AuraArgmand* argmand = NULL;
+
+    Link* link;
+    for (link = modes->first; link; link = link->next) {
+        AuraMode* mode = (AuraMode*) link->data;
+        if (!mode->active) {
+            continue;
+        }
+
+        argmand = aura_mode_find_argmand(mode, code, modifiers);
+        if (argmand) {
+            break;
+        }
     }
 
-    // Skip if already exists
-    if (tfind((void *) binding, &binding_tree, (CompareFunc) compare) != NULL) {
-        LOG_WARN2("Binding already exists! (code: %d, modifiers: %d)",
-                  binding->code, binding->modifiers);
-        return;
-    }
-
-    // Add binding
-    Binding* bind = malloc(sizeof(Binding));
-    *bind = *binding;
-
-    if (tsearch((void *) bind, &binding_tree, (CompareFunc) compare) == NULL) {
-        LOG_ERROR("Could not store binding!");
-        free(bind);
-        return;
-    }
-
-    LOG_INFO2("Created binding (code: %d, modifiers: %d)",
-              binding->code, binding->modifiers);
+    return argmand;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_keyboard_remove_binding(uint32_t code,
-                                  uint32_t modifiers)
+bool aura_keyboard_catch_key(int code, AuraKeyState state)
 {
-    // TODO
-}
-
-//------------------------------------------------------------------------------
-
-// TODO: named return values
-bool aura_keyboard_catch_key(int code, KeyState state)
-{
-    Binding searched;
-    Binding** found;
-
     // Update modifiers
     switch (code) {
         case KEY_LEFTCTRL:
@@ -94,18 +108,16 @@ bool aura_keyboard_catch_key(int code, KeyState state)
             return 0;
     }
 
-    // Search for binding
-    searched.code = code;
-    searched.modifiers = modifiers;
-    found = tfind((void*) &searched, &binding_tree, (CompareFunc) compare);
-
-    // If not found return negative...
-    if (found == 0 || *found == 0 || (*found)->callback == 0) {
+    if (state == AURA_KEY_RELEASED) {
         return 0;
     }
 
-    // otherwise positive.
-    (*found)->callback();
+    AuraArgmand* argmand = aura_keyboard_find_argmand(modes, code, modifiers);
+    if (!argmand) {
+        return 0;
+    }
+
+    argmand->execute(stack);
     return 1;
 }
 

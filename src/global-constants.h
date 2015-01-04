@@ -9,13 +9,18 @@
 typedef enum {
     AURA_KEY_RELEASED,
     AURA_KEY_PRESSED,
-} KeyState;
+} AuraKeyState;
 
 typedef enum {
     AURA_KEY_CTRL  = 0x0001,
     AURA_KEY_SHIFT = 0x0002,
     AURA_KEY_ALT   = 0x0004,
-} KeyModifierFlag;
+} AuraKeyModifierFlag;
+
+typedef enum {
+    AURA_NORMAL_MODE,
+    AURA_MODE_NUM,
+} AuraModeEnum;
 
 // TBR
 static const SurfaceId scInvalidSurfaceId = 0xFFFF;
