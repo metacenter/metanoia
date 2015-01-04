@@ -18,4 +18,6 @@ Chain* aura_compositor_get_visible_surfaces(AuraCompositor* self);
 
 void aura_compositor_manage_surface(AuraCompositor* self, SurfaceId sid);
 
+void aura_compositor_pop_surface(AuraCompositor* self, SurfaceId sid);
+
 #endif // __AURA_EXHIBITOR_COMPOSITOR_H__

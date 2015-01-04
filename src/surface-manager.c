@@ -94,3 +94,12 @@ void aura_surface_commit(SurfaceId sid,
 
 //------------------------------------------------------------------------------
 
+int aura_surface_compare(SurfaceId first, SurfaceId second)
+{
+    if (first < second) return -1;
+    if (first > second) return  1;
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+

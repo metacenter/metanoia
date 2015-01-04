@@ -17,6 +17,6 @@ AuraSurfaceData* aura_surface_data_new()
 
     memset(self, 0, sizeof(AuraSurfaceData));
 
-	return self;
+    return self;
 }
 

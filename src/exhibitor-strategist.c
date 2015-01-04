@@ -14,6 +14,8 @@ void aura_strategist_on_surface_created(AuraExhibitor* exhibitor, SurfaceId sid)
 {
     // Put surface on current workspace on current display
     aura_compositor_manage_surface(exhibitor->display->compositor, sid);
+    // FIXME: move to compositor strategy
+    chain_append(exhibitor->surface_history, (void*) sid);
 }
 
 //------------------------------------------------------------------------------

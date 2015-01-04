@@ -20,4 +20,6 @@ typedef struct {
 
 void aura_exhibitor_initialize(AuraLoop* this_loop);
 
+void aura_exhibitor_pop_history_surface();
+
 #endif // __AURA_EXHIBITOR_H__

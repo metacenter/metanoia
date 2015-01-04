@@ -23,5 +23,7 @@ void aura_surface_commit(SurfaceId sid,
                          int stride,
                          uint8_t* buffer);
 
+int aura_surface_compare(SurfaceId first, SurfaceId second);
+
 #endif // __AURA_SURFACE_MANAGER_H__
 

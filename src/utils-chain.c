@@ -152,7 +152,7 @@ void* chain_pop(Chain* self)
 
 //------------------------------------------------------------------------------
 
-void chain_remove(Chain* self, void* data, AuraCompareFunc compare)
+int chain_remove(Chain* self, void* data, AuraCompareFunc compare)
 {
     int found = 0;
     Link* link;
@@ -164,7 +164,7 @@ void chain_remove(Chain* self, void* data, AuraCompareFunc compare)
     }
 
     if (!found) {
-        return;
+        return -1;
     }
 
     Link* prev = link->prev;
@@ -184,6 +184,7 @@ void chain_remove(Chain* self, void* data, AuraCompareFunc compare)
 
     self->len -= 1;
     link_free(link, self->freefunc);
+    return 1;
 }
 
 //------------------------------------------------------------------------------

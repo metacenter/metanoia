@@ -6,6 +6,7 @@
 
 #include "utils-log.h"
 #include "event-signals.h"
+#include "surface-manager.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -122,6 +123,49 @@ void aura_exhibitor_initialize(AuraLoop* this_loop)
 
     aura_event_signal_subscribe(SIGNAL_SURFACE_CREATED,
          aura_task_create(aura_exhibitor_on_surface_created, this_loop));
+}
+
+//------------------------------------------------------------------------------
+
+void aura_exhibitor_pop_surface(SurfaceId sid)
+{
+    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    chain_remove(exhibitor->surface_history,
+                (void*) sid, (AuraCompareFunc) aura_surface_compare);
+    chain_append(exhibitor->surface_history, (void*) sid);
+
+    AuraSurfaceData* surface = aura_surface_get(sid);
+    if (surface) {
+        aura_compositor_pop_surface(surface->group.compositor, sid);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_exhibitor_pop_history_surface(int position)
+{
+    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+
+    Link* link = NULL;
+    SurfaceId sid = scInvalidSurfaceId;
+    if (position < 0) {
+        int i = 1;
+        link = exhibitor->surface_history->first;
+        for (; link && i < -position; ++i, link = link->next);
+    } else {
+        int i = 0;
+        link = exhibitor->surface_history->last;
+        for (; link && i < position; ++i, link = link->prev);
+    }
+
+    if (link) {
+        sid = (SurfaceId) link->data;
+    }
+    if (sid == scInvalidSurfaceId) {
+        return;
+    }
+
+    aura_exhibitor_pop_surface(sid);
 }
 
 //------------------------------------------------------------------------------

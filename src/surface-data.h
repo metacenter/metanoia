@@ -6,6 +6,7 @@
 
 #include "global-types.h"
 #include "utils-store.h"
+#include "exhibitor-compositor.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -22,9 +23,14 @@ typedef struct {
 } AuraDrawBuffer;
 
 typedef struct {
+    AuraCompositor* compositor;
+} AuraSurfaceGroup;
+
+typedef struct {
     AuraItem base;
     int x, y;
     AuraDrawBuffer buffer;
+    AuraSurfaceGroup group;
 } AuraSurfaceData;
 
 AuraSurfaceData* aura_surface_data_new();
