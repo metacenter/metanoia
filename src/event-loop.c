@@ -15,7 +15,8 @@
 typedef struct {
     char* name;
     pthread_t thread;
-    pthread_mutex_t mutex;
+    pthread_mutex_t schedule_mutex;
+    pthread_mutex_t process_mutex;
     pthread_cond_t condition;
     bool run;
     Chain* task_chain;
@@ -31,7 +32,8 @@ AuraLoop* aura_loop_new(const char* name)
     }
 
     mine->name = strdup(name);
-    pthread_mutex_init(&mine->mutex, NULL);
+    pthread_mutex_init(&mine->schedule_mutex, NULL);
+    pthread_mutex_init(&mine->process_mutex, NULL);
     pthread_cond_init(&mine->condition, NULL);
     mine->run = 0;
     mine->task_chain = chain_new(NULL);
@@ -68,10 +70,12 @@ static void* loop(void* data)
     aura_environment_block_system_signals();
 
     mine->run = 1;
-    pthread_mutex_lock(&mine->mutex);
+    pthread_mutex_lock(&mine->process_mutex);
     while (mine->run) {
         while (chain_len(mine->task_chain) > 0) {
+            pthread_mutex_lock(&mine->schedule_mutex);
             AuraTask* task = chain_pop(mine->task_chain);
+            pthread_mutex_unlock(&mine->schedule_mutex);
             if (task) {
                 if (task->process) {
                     LOG_EVNT4("Loop: processing task");
@@ -87,7 +91,7 @@ static void* loop(void* data)
             }
         }
 
-        pthread_cond_wait(&mine->condition, &mine->mutex);
+        pthread_cond_wait(&mine->condition, &mine->process_mutex);
     }
 
     LOG_INFO1("Threads: stopped loop '%s'", mine->name);
@@ -116,9 +120,9 @@ void aura_loop_stop(AuraLoop* self)
     }
 
     LOG_INFO1("Threads: stopping loop '%s'", mine->name);
-    pthread_mutex_lock(&mine->mutex);
+    pthread_mutex_lock(&mine->process_mutex);
     mine->run = 0;
-    pthread_mutex_unlock(&mine->mutex);
+    pthread_mutex_unlock(&mine->process_mutex);
     pthread_cond_signal(&mine->condition);
 }
 
@@ -143,9 +147,9 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
         return -ENOMEM;
     }
 
-    pthread_mutex_lock(&mine->mutex);
+    pthread_mutex_lock(&mine->schedule_mutex);
     chain_append(mine->task_chain, task);
-    pthread_mutex_unlock(&mine->mutex);
+    pthread_mutex_unlock(&mine->schedule_mutex);
     pthread_cond_signal(&mine->condition);
     return 1;
 }
