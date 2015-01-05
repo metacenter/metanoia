@@ -32,11 +32,6 @@ SurfaceId aura_surface_create(void)
     AuraItemId sid = aura_store_generate_new_id(sStore);
     aura_store_add(sStore, sid, data);
 
-    aura_event_signal_emit(SIGNAL_SURFACE_CREATED, (void*) sid);
-
-    // TODO: Do this as strategy
-    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) sid);
-
     return sid;
 }
 
@@ -86,10 +81,19 @@ void aura_surface_commit(SurfaceId sid,
         return;
     }
 
+    int is_first_time_commited = !surface->buffer.data;
+
     surface->buffer.width  = width;
     surface->buffer.height = height;
     surface->buffer.stride = stride;
     surface->buffer.data   = data;
+
+    if (is_first_time_commited) {
+        aura_event_signal_emit(SIGNAL_SURFACE_CREATED, (void*) sid);
+
+        // TODO: Do this as strategy
+        aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) sid);
+    }
 }
 
 //------------------------------------------------------------------------------
