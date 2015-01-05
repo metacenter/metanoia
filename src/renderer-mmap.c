@@ -105,10 +105,12 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
             for (x = 0; x < w; ++x) {
                 int P = S * (y + surface->y) + 4 * (x + surface->x);
                 int p = s * y + 4 * x;
-                D[P + 0] = d[p + 0];
-                D[P + 1] = d[p + 1];
-                D[P + 2] = d[p + 2];
-                D[P + 3] = d[p + 3];
+                float a = d[p+3]/255.0;
+                float A = (255-d[p+3])/255.0;
+                D[P + 0] = (int) (a*d[p+0] + A*D[P+0]);
+                D[P + 1] = (int) (a*d[p+1] + A*D[P+1]);
+                D[P + 2] = (int) (a*d[p+2] + A*D[P+2]);
+                D[P + 3] = 255;
             }
         }
     }
