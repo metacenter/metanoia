@@ -422,6 +422,13 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='wayland-protocol-pointer.o',
+        inputs=['wayland-protocol-pointer.c'],
+        includes=['wayland-protocol-pointer.h']
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='wayland-protocol-keyboard.o',
         inputs=['wayland-protocol-keyboard.c'],
         includes=['wayland-protocol-keyboard.h']
