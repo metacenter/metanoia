@@ -7,10 +7,12 @@
 #include "exhibitor.h"
 #include "global-types.h"
 
-typedef void (*AuraStrategistOnSurfaceCreatedFunc) (AuraExhibitor*, SurfaceId);
+typedef void (*AuraStrategistOnSurfaceCreatedFunc)  (AuraExhibitor*, SurfaceId);
+typedef void (*AuraStrategistOnSurfaceDestroyedFunc)(AuraExhibitor*, SurfaceId);
 
 typedef struct {
-    AuraStrategistOnSurfaceCreatedFunc on_surface_created;
+    AuraStrategistOnSurfaceCreatedFunc   on_surface_created;
+    AuraStrategistOnSurfaceDestroyedFunc on_surface_destroyed;
 } AuraStrategist;
 
 AuraStrategist* aura_strategist_create();

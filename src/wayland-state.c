@@ -179,6 +179,7 @@ void wayland_state_keyboard_focus_update(AuraItemId new_sid)
     if (!new_data) {
         // This is not a Wayland surface
         LOG_WAYL5("New SID does not resolve to any surface");
+        sState.keyboard_focused_sid = scInvalidItemId;
         pthread_mutex_unlock(&mutex);
         return;
     }

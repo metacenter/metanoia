@@ -108,21 +108,17 @@ void aura_exhibitor_on_surface_created(void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_initialize(AuraLoop* this_loop)
+void aura_exhibitor_on_surface_destroyed(void* data)
 {
-    if (this_loop == 0) {
-        LOG_ERROR("Invalid loop!");
+    SurfaceId sid = (SurfaceId) data;
+    if (sid == scInvalidSurfaceId) {
         return;
     }
 
-    aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
-         aura_task_create(aura_exhibitor_on_display_found, this_loop));
-
-    aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
-         aura_task_create(aura_exhibitor_on_display_lost, this_loop));
-
-    aura_event_signal_subscribe(SIGNAL_SURFACE_CREATED,
-         aura_task_create(aura_exhibitor_on_surface_created, this_loop));
+    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    exhibitor->priv->strategist->on_surface_destroyed(exhibitor, sid);
+    chain_remove(exhibitor->surface_history, (void*) sid,
+                 (AuraCompareFunc) aura_surface_compare);
 }
 
 //------------------------------------------------------------------------------
@@ -166,6 +162,28 @@ void aura_exhibitor_pop_history_surface(int position)
     }
 
     aura_exhibitor_pop_surface(sid);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_exhibitor_initialize(AuraLoop* this_loop)
+{
+    if (this_loop == 0) {
+        LOG_ERROR("Invalid loop!");
+        return;
+    }
+
+    aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
+         aura_task_create(aura_exhibitor_on_display_found, this_loop));
+
+    aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
+         aura_task_create(aura_exhibitor_on_display_lost, this_loop));
+
+    aura_event_signal_subscribe(SIGNAL_SURFACE_CREATED,
+         aura_task_create(aura_exhibitor_on_surface_created, this_loop));
+
+    aura_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,
+         aura_task_create(aura_exhibitor_on_surface_destroyed, this_loop));
 }
 
 //------------------------------------------------------------------------------

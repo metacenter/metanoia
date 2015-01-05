@@ -4,18 +4,35 @@
 #include "exhibitor-strategist.h"
 
 #include "utils-log.h"
+#include "event-signals.h"
 
 #include "malloc.h"
 #include "memory.h"
 
 //------------------------------------------------------------------------------
 
-void aura_strategist_on_surface_created(AuraExhibitor* exhibitor, SurfaceId sid)
+void aura_strategist_on_surface_created(AuraExhibitor* exhibitor,
+                                        SurfaceId sid)
 {
     // Put surface on current workspace on current display
     aura_compositor_manage_surface(exhibitor->display->compositor, sid);
+
     // FIXME: move to compositor strategy
     chain_append(exhibitor->surface_history, (void*) sid);
+    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) sid);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_strategist_on_surface_destroyed(AuraExhibitor* exhibitor,
+                                          SurfaceId sid)
+{
+    // TODO: remove surface from workspace
+    //aura_compositor_unmanage_surface(exhibitor->display->compositor, sid);
+
+    // TODO: move to compositor strategy
+    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED,
+                           (void*) scInvalidSurfaceId);
 }
 
 //------------------------------------------------------------------------------
@@ -30,7 +47,8 @@ AuraStrategist* aura_strategist_create()
 
     memset(self, 0, sizeof(AuraStrategist));
 
-    self->on_surface_created = aura_strategist_on_surface_created;
+    self->on_surface_created   = aura_strategist_on_surface_created;
+    self->on_surface_destroyed = aura_strategist_on_surface_destroyed;
     return self;
 }
 

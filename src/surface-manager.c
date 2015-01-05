@@ -39,6 +39,7 @@ SurfaceId aura_surface_create(void)
 
 void aura_surface_destroy(SurfaceId sid)
 {
+    aura_event_signal_emit(SIGNAL_SURFACE_DESTROYED, (void*) sid);
     aura_store_delete(sStore, sid);
 }
 
@@ -90,9 +91,6 @@ void aura_surface_commit(SurfaceId sid,
 
     if (is_first_time_commited) {
         aura_event_signal_emit(SIGNAL_SURFACE_CREATED, (void*) sid);
-
-        // TODO: Do this as strategy
-        aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) sid);
     }
 }
 
