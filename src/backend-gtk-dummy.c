@@ -3,12 +3,24 @@
 
 #include "backend-gtk.h"
 #include "utils-log.h"
+#include "global-functions.h"
+
+#define MSG "This version of Aura was compiled without GTK support!"
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_initialize(AuraLoop* this_loop)
+int aura_backend_gtk_get_outputs(Chain* outputs)
 {
-    LOG_WARN1("This version of Aura was compiled without GTK support!");
+    LOG_WARN1(MSG);
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_backend_gtk_run(AuraLoop* this_loop)
+{
+    LOG_WARN1(MSG);
+    aura_quit();
 }
 
 //------------------------------------------------------------------------------

@@ -27,7 +27,7 @@ aura = m.add_link_target(
     )
 
 #-------------------------------------------------------------------------------
-# RESOUCES
+# GENERATORS
 
 wsshg = make.Generator(
         command_body='wayland-scanner server-header',
@@ -46,6 +46,9 @@ glcr = make.Generator(
         command_args='{inputs} --target={output} --generate-source',
     )
 m.add_generator(glcr)
+
+#-------------------------------------------------------------------------------
+# RESOUCES
 
 target_xdg_shell_protocol = m.add_generated_target(
         generator=wsshg,
@@ -437,7 +440,7 @@ if with_gtk_support:
 
 else:
     t = m.add_compile_target(
-            output='backend-gtk.o',
+            output='backend-gtk-dummy.o',
             inputs=['backend-gtk-dummy.c'],
         )
     aura.add_input(t)
