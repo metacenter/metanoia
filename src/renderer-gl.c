@@ -333,12 +333,12 @@ void aura_renderer_gl_draw(struct AuraRenderer* self,
     r = eglMakeCurrent(mine->egl_display, mine->egl_surface,
                        mine->egl_surface, mine->egl_context);
     if (r == EGL_FALSE) {
-        LOG_ERROR("Failed to make context current! (%x)", eglGetError());
+        LOG_ERROR("Failed to make context current! (0x%x)", eglGetError());
         return;
     }
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("EGL framebuffer incomplete! (%x)", eglGetError());
+        LOG_ERROR("EGL framebuffer incomplete! (0x%x)", eglGetError());
         goto release_context;
     }
 
@@ -448,7 +448,7 @@ release_context:
     r = eglMakeCurrent(mine->egl_display, EGL_NO_SURFACE,
                        EGL_NO_SURFACE, EGL_NO_CONTEXT);
     if (r == EGL_FALSE) {
-        LOG_DEBUG("Failed to release current context! (%x)", eglGetError());
+        LOG_DEBUG("Failed to release current context! (0x%x)", eglGetError());
     }
 
     LOG_DEBUG("<<<<");

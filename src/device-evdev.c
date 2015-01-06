@@ -88,7 +88,7 @@ static void handle_event(AuraEventData* data, struct epoll_event* epev)
     LOG_EVNT4("Event: {time: %ld.%06ld, type: %i, code: %i, value: %i}",
               ev.time.tv_sec, ev.time.tv_usec,
               (uint32_t) ev.type, (uint32_t) ev.code, (uint32_t) ev.value);
-    LOG_EVNT4("Event data: {flag: %o}", flags);
+    LOG_EVNT4("Event data: {flag: 0x%x}", flags);
 
     if (flags & scIdInputKeyboardFlag)
         handle_key(&ev);
