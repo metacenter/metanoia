@@ -3,6 +3,7 @@
 # vim: tabstop=4 expandtab colorcolumn=81 list
 
 import os.path
+import subprocess
 
 #-------------------------------------------------------------------------------
 
@@ -13,10 +14,14 @@ class Generator:
     command_args = None
     shortcut = None
 
-    def __init__(self, command_body, command_args, shortcut):
+    def __init__(self, command_body, command_args):
         self.command_body = command_body
         self.command_args = command_args
-        self.shortcut = shortcut
+
+    def get_command(self, output_path, input_paths):
+        inputs = ' '.join(input_paths)
+        args = self.command_args.format(output=output_path, inputs=inputs)
+        return '{0} {1}'.format(self.command_body, args)
 
 #-------------------------------------------------------------------------------
 
@@ -26,17 +31,17 @@ class Target:
     proc = None
     output = None
     inputs = list()
-    includes = list()
+    deps = list()
     pkgs = set()
     input_dir = str()
     output_dir = str()
 
     def __init__(self, output, inputs,
-                 includes=list(), pkgs=set(),
+                 deps=list(), pkgs=set(),
                  input_dir=str(), output_dir=str()):
         self.output = output
         self.inputs = inputs
-        self.includes = includes
+        self.deps = deps
         self.pkgs = pkgs
         self.input_dir = input_dir
         self.output_dir = output_dir
@@ -79,9 +84,9 @@ class LinkTarget(Target):
 
 class GeneratedTarget(Target):
     generator = None
-    def __init__(self, output, inputs, includes=list(), generator=None,
+    def __init__(self, output, inputs, deps=list(), generator=None,
                  input_dir=str(), output_dir=str()):
-        Target.__init__(self, output, inputs, includes=includes,
+        Target.__init__(self, output, inputs, deps=deps,
                         input_dir=input_dir, output_dir=output_dir)
         self.generator = generator
 
@@ -112,37 +117,62 @@ class Make:
 
     def run_makefile(self, args):
         with open('Makefile', 'w') as mf:
+            def get_command_output(args):
+                return subprocess.check_output(args).decode("utf-8")[:-1]
+
             def wr(string='', end='\n'):
                 print(string, file=mf, end=end)
 
-            def wr_compile(t, output_path, input_paths):
-                wr('\n\t@mkdir -p $(builddir)')
-                wr('\t@echo "  CC  {0}"'.format(t.output))
-                wr('\t@$(CC) $(WFLAGS) -o {0} -I$(srcdir) -I$(gendir) \\' \
-                    .format(output_path))
+            def wr_compile_command(t, output_path, input_paths):
+                wr('\n\t@mkdir -p {0}'.format(self.builddir))
+                wr('\t@echo "  CC   {0}"'.format(t.output))
+                wr('\t@{0} {1} -o {2} -I{3} -I{4} \\'
+                    .format(self.cc, ' '.join(self.wflags), output_path,
+                            self.srcdir, self.gendir))
                 wr('\t       -c {0}'.format(' '.join(input_paths)), end='')
                 if len(t.pkgs):
-                    wr(' \\\n\t       ', end='')
-                    wr('`pkg-config --cflags {0}`' \
-                       .format(' '.join(sorted(t.pkgs))), end='')
+                    command = ['pkg-config', '--cflags']
+                    command.extend(sorted(t.pkgs))
+                    output = get_command_output(command)
+                    if output:
+                        wr(' \\\n\t       {0}'.format(output), end='')
 
-            def wr_link(t, output_path, input_paths):
-                wr('\n\t@mkdir -p $(builddir)')
-                wr('\t@echo "  LD  {0}"'.format(t.output))
-                wr('\t@$(CC) $(LFLAGS) -o {0} \\' \
-                    .format(output_path))
+            def wr_link_command(t, output_path, input_paths):
+                wr('\n\t@mkdir -p {0}'.format(self.builddir))
+                wr('\t@echo "  LD   {0}"'.format(t.output))
+                wr('\t@{0} {1} -o {2} \\' \
+                    .format(self.cc, ' '.join(self.lflags), output_path))
                 wr('\t       {0}'.format(' '.join(input_paths)), end='')
                 if len(t.pkgs):
-                    wr(' \\\n\t       ', end='')
-                    wr('`pkg-config --libs {0}`' \
-                       .format(' '.join(sorted(t.pkgs))), end='')
+                    command = ['pkg-config', '--libs']
+                    command.extend(sorted(t.pkgs))
+                    output = get_command_output(command)
+                    if output:
+                        wr(' \\\n\t       {0}'.format(output), end='')
 
-            def wr_gen(t, output_path, input_paths):
-                wr('\n\t@mkdir -p $(gendir)')
-                wr('\t@echo "  GEN {0}"'.format(t.output))
-                args = t.generator.command_args.format(output=output_path,
-                                                inputs=' '.join(input_paths))
-                wr('\t@$({0}) {1}'.format(t.generator.shortcut, args), end='')
+            def wr_gen_command(t, output_path, input_paths):
+                wr('\n\t@mkdir -p {0}'.format(self.gendir))
+                wr('\t@echo "  GEN  {0}"'.format(t.output))
+                command = t.generator.get_command(output_path, input_paths)
+                wr('\t@{0}'.format(command), end='')
+
+            def wr_gen_target(t, output_path, dep_paths):
+                padding = (len(output_path) + 2) * ' '
+                dependences = list()
+                dependences.extend(input_paths)
+                dependences.extend(dep_paths)
+                wr('{0}: Makefile'.format(output_path), end='')
+                for d in dependences:
+                    wr(' \\\n{0}{1}'.format(padding, d), end='')
+
+            def wr_compile_target(t, output_path, input_paths, dep_paths):
+                command = ['gcc', '-MM', '-MT', output_path, '-Igen']
+                command.extend(input_paths)
+                dep_str = get_command_output(command)
+                dep_list = [s for s in dep_str.split(' ')[2:] if len(s) > 8]
+                dep_paths.extend(dep_list)
+                wr_gen_target(t, output_path, dep_paths)
+
 
             def make_path_list(objects, default_dir):
                 result = list()
@@ -159,44 +189,24 @@ class Make:
 
             print('  >> Makefile')
 
-            wr('CC={0}'.format(self.cc))
-            for gen in self.generators:
-                if gen.shortcut is not None and gen.command_body is not None:
-                    wr('{0}={1}'.format(gen.shortcut, gen.command_body))
-            wr()
-            wr('WFLAGS={0}'.format(' '.join(self.wflags)))
-            wr('LFLAGS={0}'.format(' '.join(self.lflags)))
-            wr()
-            wr('srcdir={0}'.format(self.srcdir))
-            wr('builddir={0}'.format(self.builddir))
-            wr('resdir={0}'.format(self.resdir))
-            wr('gendir={0}'.format(self.gendir))
-            wr()
             if len(self.all):
                 wr('all: {0}\n'.format(' '.join(self.all)))
-            wr('clean:\n\trm -r $(builddir) $(gendir)\n\n')
+            wr('clean:\n\trm -rf {0} {1}\n'.format(self.builddir, self.gendir))
 
             for t in self.targets:
                 output_path = os.path.join(t.output_dir, t.output)
-                padding = (len(output_path) + 2) * ' '
-
-                wr('{0}: Makefile'.format(output_path), end='')
-
-                input_paths    = make_path_list(t.inputs, t.input_dir)
-                includes_paths = make_path_list(t.includes, t.input_dir)
-
-                dependences = list()
-                dependences.extend(input_paths)
-                dependences.extend(includes_paths)
-                for d in dependences:
-                    wr(' \\\n{0}{1}'.format(padding, d), end='')
+                input_paths = make_path_list(t.inputs, t.input_dir)
+                dep_paths   = make_path_list(t.deps, t.input_dir)
 
                 if isinstance(t, CompileTarget):
-                    wr_compile(t, output_path, input_paths)
+                    wr_compile_target(t, output_path, input_paths, dep_paths)
+                    wr_compile_command(t, output_path, input_paths)
                 elif isinstance(t, LinkTarget):
-                    wr_link(t, output_path, input_paths)
+                    wr_gen_target(t, output_path, dep_paths)
+                    wr_link_command(t, output_path, input_paths)
                 elif isinstance(t, GeneratedTarget):
-                    wr_gen(t, output_path, input_paths)
+                    wr_gen_target(t, output_path, dep_paths)
+                    wr_gen_command(t, output_path, input_paths)
                 else:
                     print("Unknown process type!")
                 wr('\n')
@@ -205,7 +215,8 @@ class Make:
     # METHODS
     #---------------------------------------------------------------------------
 
-    def validate_arguments(self, output, inputs, includes, pkgs, input_dir):
+    def validate_arguments(self, output, inputs, deps,
+                           pkgs, input_dir, output_dir):
         if output is None:
             raise Exception('No output path specified!')
 
@@ -218,10 +229,10 @@ class Make:
             raise Exception('Input must be passed as list of strings!, '
                             'Got {0}'.format(type(inputs)));
 
-        if  (not isinstance(includes, list)) \
-        and (not isinstance(includes, tuple)):
-            raise Exception('Includes must be passed as list of strings! '
-                            'Got {0}'.format(type(includes)));
+        if  (not isinstance(deps, list)) \
+        and (not isinstance(deps, tuple)):
+            raise Exception('Dependences must be passed as list of strings! '
+                            'Got {0}'.format(type(deps)));
 
         if not isinstance(pkgs, set):
             raise Exception('Packages must be passed as set of strings! '
@@ -231,22 +242,30 @@ class Make:
             raise Exception('Input directory must be passed as string! '
                             'Got {0}'.format(type(input_dir)))
 
+        if not isinstance(output_dir, str):
+            raise Exception('Output directory must be passed as string! '
+                            'Got {0}'.format(type(input_dir)))
+
     #---------------------------------------------------------------------------
 
     def add_compile_target(self,
                            output=None,
                            inputs=list(),
-                           includes=list(),
+                           deps=list(),
                            pkgs=set(),
-                           input_dir='$(srcdir)',
-                           output_dir='$(builddir)'):
+                           input_dir='',
+                           output_dir=''):
         try:
-            self.validate_arguments(output, inputs, includes, pkgs, input_dir)
+            self.validate_arguments(output, inputs, deps,
+                                    pkgs, input_dir, output_dir)
         except Exception as e:
             print(e.message)
             return
 
-        target = CompileTarget(output, inputs, includes=includes, pkgs=pkgs,
+        input_dir  = input_dir  if input_dir  != '' else self.srcdir
+        output_dir = output_dir if output_dir != '' else self.builddir
+
+        target = CompileTarget(output, inputs, deps=deps, pkgs=pkgs,
                                input_dir=input_dir, output_dir=output_dir)
         self.targets.append(target)
         return target
@@ -257,21 +276,25 @@ class Make:
                         output=None,
                         inputs=list(),
                         pkgs=set(),
-                        input_dir='$(builddir)',
-                        output_dir='$(builddir)',
+                        input_dir='',
+                        output_dir='',
                         include_in_all=False):
         try:
-            self.validate_arguments(output, inputs, list(), pkgs, input_dir)
+            self.validate_arguments(output, inputs, list(),
+                                    pkgs, input_dir, output_dir)
         except Exception as e:
             print(e.message)
             return
+
+        input_dir  = input_dir  if input_dir  != '' else self.builddir
+        output_dir = output_dir if output_dir != '' else self.builddir
 
         target = LinkTarget(output, inputs, pkgs=pkgs,
                             input_dir=input_dir, output_dir=output_dir)
         self.targets.append(target)
 
         if include_in_all:
-            self.all.append(os.path.join('$(builddir)', output))
+            self.all.append(os.path.join(self.builddir, output))
 
         return target
 
@@ -281,17 +304,21 @@ class Make:
                              generator=None,
                              output=None,
                              inputs=list(),
-                             includes=list(),
+                             deps=list(),
                              input_dir='',
-                             output_dir='$(gendir)'):
+                             output_dir=''):
         try:
-            self.validate_arguments(output, inputs, includes, set(), input_dir)
+            self.validate_arguments(output, inputs, deps,
+                                    set(), input_dir, output_dir)
         except Exception as e:
             print(e.message)
             return
 
+        input_dir  = input_dir  if input_dir  != '' else self.resdir
+        output_dir = output_dir if output_dir != '' else self.gendir
+
         target = GeneratedTarget(output, inputs,
-                                 includes=includes, generator=generator,
+                                 deps=deps, generator=generator,
                                  input_dir=input_dir, output_dir=output_dir)
         self.targets.append(target)
         return target
@@ -373,15 +400,15 @@ class Make:
     #---------------------------------------------------------------------------
 
     def get_source_directory(self):
-        return '$(srcdir)', self.srcdir
+        return self.srcdir
 
     def get_build_directory(self):
-        return '$(builddir)', self.builddir
+        return self.builddir
 
     def get_resource_directory(self):
-        return '$(resdir)', self.resdir
+        return self.resdir
 
     def get_gen_directory(self):
-        return '$(gendir)', self.gendir
+        return self.gendir
 
 #-------------------------------------------------------------------------------

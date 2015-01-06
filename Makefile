@@ -1,525 +1,880 @@
-CC=gcc
-WSSHG=wayland-scanner server-header
-WSCG=wayland-scanner code
-GLCR=glib-compile-resources
-
-WFLAGS=-Wall
-LFLAGS=-rdynamic -ldl -lrt -lpthread -lm
-
-srcdir=src
-builddir=build
-resdir=res
-gendir=gen
-
-all: $(builddir)/aura
+all: build/aura
 
 clean:
-	rm -r $(builddir) $(gendir)
+	rm -rf build gen
 
+build/aura: Makefile \
+            build/aura.o \
+            build/config.o \
+            build/global-functions.o \
+            build/utils-chain.o \
+            build/utils-store.o \
+            build/utils-dbus.o \
+            build/utils-keymap.o \
+            build/utils-log.o \
+            build/utils-environment.o \
+            build/event-dispatcher.o \
+            build/event-timer.o \
+            build/event-signals.o \
+            build/event-loop.o \
+            build/event-task.o \
+            build/event-factory.o \
+            build/device-common.o \
+            build/device-fb.o \
+            build/device-drm.o \
+            build/device-evdev.o \
+            build/device-udev.o \
+            build/output.o \
+            build/output-collector.o \
+            build/surface-data.o \
+            build/surface-manager.o \
+            build/keyboard-bindings.o \
+            build/keyboard-mode.o \
+            build/keyboard-argmand.o \
+            build/exhibitor.o \
+            build/exhibitor-display.o \
+            build/exhibitor-compositor.o \
+            build/exhibitor-strategist.o \
+            build/exhibitor-pointer.o \
+            build/renderer-mmap.o \
+            build/renderer-gl.o \
+            build/wayland.o \
+            build/wayland-state.o \
+            build/wayland-protocol-compositor.o \
+            build/wayland-protocol-surface.o \
+            build/wayland-protocol-region.o \
+            build/wayland-protocol-shell.o \
+            build/wayland-protocol-shell-surface.o \
+            build/wayland-protocol-xdg-shell.o \
+            build/xdg-shell-protocol.o \
+            build/wayland-protocol-output.o \
+            build/wayland-protocol-seat.o \
+            build/wayland-protocol-pointer.o \
+            build/wayland-protocol-keyboard.o \
+            build/bind-egl-wayland.o \
+            build/backend-gtk.o \
+            build/backend-gtk-app.o \
+            build/backend-gtk-win.o \
+            build/backend-gtk-res.o
+	@mkdir -p build
+	@echo "  LD   aura"
+	@gcc -rdynamic -ldl -lrt -lpthread -lm -o build/aura \
+	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk.o build/backend-gtk-app.o build/backend-gtk-win.o build/backend-gtk-res.o \
+	       -ldbus-1 -lEGL -lgbm -lGL -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -ldrm -ludev -lwayland-server -lxkbcommon 
 
-$(builddir)/aura: Makefile \
-                  $(builddir)/aura.o \
-                  $(builddir)/config.o \
-                  $(builddir)/global-functions.o \
-                  $(builddir)/utils-chain.o \
-                  $(builddir)/utils-store.o \
-                  $(builddir)/utils-dbus.o \
-                  $(builddir)/utils-keymap.o \
-                  $(builddir)/utils-log.o \
-                  $(builddir)/utils-environment.o \
-                  $(builddir)/event-dispatcher.o \
-                  $(builddir)/event-timer.o \
-                  $(builddir)/event-signals.o \
-                  $(builddir)/event-loop.o \
-                  $(builddir)/event-task.o \
-                  $(builddir)/event-factory.o \
-                  $(builddir)/device-common.o \
-                  $(builddir)/device-fb.o \
-                  $(builddir)/device-drm.o \
-                  $(builddir)/device-evdev.o \
-                  $(builddir)/device-udev.o \
-                  $(builddir)/output.o \
-                  $(builddir)/output-collector.o \
-                  $(builddir)/surface-data.o \
-                  $(builddir)/surface-manager.o \
-                  $(builddir)/keyboard-bindings.o \
-                  $(builddir)/keyboard-mode.o \
-                  $(builddir)/keyboard-argmand.o \
-                  $(builddir)/exhibitor.o \
-                  $(builddir)/exhibitor-display.o \
-                  $(builddir)/exhibitor-compositor.o \
-                  $(builddir)/exhibitor-strategist.o \
-                  $(builddir)/exhibitor-pointer.o \
-                  $(builddir)/renderer-mmap.o \
-                  $(builddir)/renderer-gl.o \
-                  $(builddir)/wayland.o \
-                  $(builddir)/wayland-state.o \
-                  $(builddir)/wayland-protocol-compositor.o \
-                  $(builddir)/wayland-protocol-surface.o \
-                  $(builddir)/wayland-protocol-region.o \
-                  $(builddir)/wayland-protocol-shell.o \
-                  $(builddir)/wayland-protocol-shell-surface.o \
-                  $(builddir)/wayland-protocol-xdg-shell.o \
-                  $(builddir)/xdg-shell-protocol.o \
-                  $(builddir)/wayland-protocol-output.o \
-                  $(builddir)/wayland-protocol-seat.o \
-                  $(builddir)/wayland-protocol-pointer.o \
-                  $(builddir)/wayland-protocol-keyboard.o \
-                  $(builddir)/bind-egl-wayland.o \
-                  $(builddir)/backend-gtk.o \
-                  $(builddir)/backend-gtk-app.o \
-                  $(builddir)/backend-gtk-win.o \
-                  $(builddir)/backend-gtk-res.o
-	@mkdir -p $(builddir)
-	@echo "  LD  aura"
-	@$(CC) $(LFLAGS) -o $(builddir)/aura \
-	       $(builddir)/aura.o $(builddir)/config.o $(builddir)/global-functions.o $(builddir)/utils-chain.o $(builddir)/utils-store.o $(builddir)/utils-dbus.o $(builddir)/utils-keymap.o $(builddir)/utils-log.o $(builddir)/utils-environment.o $(builddir)/event-dispatcher.o $(builddir)/event-timer.o $(builddir)/event-signals.o $(builddir)/event-loop.o $(builddir)/event-task.o $(builddir)/event-factory.o $(builddir)/device-common.o $(builddir)/device-fb.o $(builddir)/device-drm.o $(builddir)/device-evdev.o $(builddir)/device-udev.o $(builddir)/output.o $(builddir)/output-collector.o $(builddir)/surface-data.o $(builddir)/surface-manager.o $(builddir)/keyboard-bindings.o $(builddir)/keyboard-mode.o $(builddir)/keyboard-argmand.o $(builddir)/exhibitor.o $(builddir)/exhibitor-display.o $(builddir)/exhibitor-compositor.o $(builddir)/exhibitor-strategist.o $(builddir)/exhibitor-pointer.o $(builddir)/renderer-mmap.o $(builddir)/renderer-gl.o $(builddir)/wayland.o $(builddir)/wayland-state.o $(builddir)/wayland-protocol-compositor.o $(builddir)/wayland-protocol-surface.o $(builddir)/wayland-protocol-region.o $(builddir)/wayland-protocol-shell.o $(builddir)/wayland-protocol-shell-surface.o $(builddir)/wayland-protocol-xdg-shell.o $(builddir)/xdg-shell-protocol.o $(builddir)/wayland-protocol-output.o $(builddir)/wayland-protocol-seat.o $(builddir)/wayland-protocol-pointer.o $(builddir)/wayland-protocol-keyboard.o $(builddir)/bind-egl-wayland.o $(builddir)/backend-gtk.o $(builddir)/backend-gtk-app.o $(builddir)/backend-gtk-win.o $(builddir)/backend-gtk-res.o \
-	       `pkg-config --libs dbus-1 egl gbm gl gtk+-3.0 libdrm libudev wayland-server xkbcommon`
+gen/xdg-shell-server-protocol.h: Makefile \
+                                 res/xdg-shell.xml
+	@mkdir -p gen
+	@echo "  GEN  xdg-shell-server-protocol.h"
+	@wayland-scanner server-header  < "res/xdg-shell.xml" > "gen/xdg-shell-server-protocol.h"
 
-$(gendir)/xdg-shell-server-protocol.h: Makefile \
-                                       $(resdir)/xdg-shell.xml
-	@mkdir -p $(gendir)
-	@echo "  GEN xdg-shell-server-protocol.h"
-	@$(WSSHG)  < "$(resdir)/xdg-shell.xml" > "$(gendir)/xdg-shell-server-protocol.h"
+gen/xdg-shell-protocol.c: Makefile \
+                          res/xdg-shell.xml
+	@mkdir -p gen
+	@echo "  GEN  xdg-shell-protocol.c"
+	@wayland-scanner code  < "res/xdg-shell.xml" > "gen/xdg-shell-protocol.c"
 
-$(gendir)/xdg-shell-protocol.c: Makefile \
-                                $(resdir)/xdg-shell.xml
-	@mkdir -p $(gendir)
-	@echo "  GEN xdg-shell-protocol.c"
-	@$(WSCG)  < "$(resdir)/xdg-shell.xml" > "$(gendir)/xdg-shell-protocol.c"
+gen/backend-gtk-res.c: Makefile \
+                       res/aura.gresource.xml \
+                       res/backend-gtk-main.ui \
+                       res/backend-gtk-menu.ui \
+                       res/backend-gtk-area.ui
+	@mkdir -p gen
+	@echo "  GEN  backend-gtk-res.c"
+	@glib-compile-resources res/aura.gresource.xml --target=gen/backend-gtk-res.c --generate-source
 
-$(gendir)/backend-gtk-res.c: Makefile \
-                             $(resdir)/aura.gresource.xml \
-                             $(resdir)/backend-gtk-main.ui \
-                             $(resdir)/backend-gtk-menu.ui \
-                             $(resdir)/backend-gtk-area.ui
-	@mkdir -p $(gendir)
-	@echo "  GEN backend-gtk-res.c"
-	@$(GLCR) $(resdir)/aura.gresource.xml --target=$(gendir)/backend-gtk-res.c --generate-source
+build/aura.o: Makefile \
+              src/aura.c \
+              src/utils-log.h \
+              src/global-constants.h \
+              src/global-types.h \
+              src/utils-chain.h \
+              src/utils-dbus.h \
+              src/utils-environment.h \
+              src/event-dispatcher.h \
+              src/event-loop.h \
+              src/event-task.h \
+              src/event-factory.h \
+              src/config.h \
+              src/utils-keymap.h
+	@mkdir -p build
+	@echo "  CC   aura.o"
+	@gcc -Wall -o build/aura.o -Isrc -Igen \
+	       -c src/aura.c
 
-$(builddir)/aura.o: Makefile \
-                    $(srcdir)/aura.c
-	@mkdir -p $(builddir)
-	@echo "  CC  aura.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/aura.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/aura.c
+build/config.o: Makefile \
+                src/config.c \
+                src/config.h \
+                src/utils-keymap.h \
+                src/global-constants.h \
+                src/global-types.h \
+                src/utils-chain.h \
+                src/configuration.h \
+                src/global-functions.h \
+                src/keyboard-argmand.h \
+                src/keyboard-bindings.h \
+                src/utils-log.h
+	@mkdir -p build
+	@echo "  CC   config.o"
+	@gcc -Wall -o build/config.o -Isrc -Igen \
+	       -c src/config.c
 
-$(builddir)/config.o: Makefile \
-                      $(srcdir)/config.c \
-                      $(srcdir)/config.h
-	@mkdir -p $(builddir)
-	@echo "  CC  config.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/config.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/config.c
+build/global-functions.o: Makefile \
+                          src/global-functions.c \
+                          src/global-functions.h \
+                          src/utils-log.h \
+                          src/global-constants.h \
+                          src/global-types.h \
+                          src/utils-chain.h \
+                          src/event-signals.h \
+                          src/event-task.h \
+                          src/exhibitor.h \
+                          src/exhibitor-display.h \
+                          src/exhibitor-compositor.h \
+                          src/output.h \
+                          src/event-loop.h
+	@mkdir -p build
+	@echo "  CC   global-functions.o"
+	@gcc -Wall -o build/global-functions.o -Isrc -Igen \
+	       -c src/global-functions.c
 
-$(builddir)/global-functions.o: Makefile \
-                                $(srcdir)/global-functions.c \
-                                $(srcdir)/global-functions.h
-	@mkdir -p $(builddir)
-	@echo "  CC  global-functions.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/global-functions.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/global-functions.c
+build/utils-chain.o: Makefile \
+                     src/utils-chain.c \
+                     src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   utils-chain.o"
+	@gcc -Wall -o build/utils-chain.o -Isrc -Igen \
+	       -c src/utils-chain.c
 
-$(builddir)/utils-chain.o: Makefile \
-                           $(srcdir)/utils-chain.c \
-                           $(srcdir)/utils-chain.h
-	@mkdir -p $(builddir)
-	@echo "  CC  utils-chain.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/utils-chain.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/utils-chain.c
+build/utils-store.o: Makefile \
+                     src/utils-store.c \
+                     src/utils-store.h
+	@mkdir -p build
+	@echo "  CC   utils-store.o"
+	@gcc -Wall -o build/utils-store.o -Isrc -Igen \
+	       -c src/utils-store.c
 
-$(builddir)/utils-store.o: Makefile \
-                           $(srcdir)/utils-store.c \
-                           $(srcdir)/utils-store.h
-	@mkdir -p $(builddir)
-	@echo "  CC  utils-store.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/utils-store.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/utils-store.c
+build/utils-dbus.o: Makefile \
+                    src/utils-dbus.c \
+                    src/utils-dbus.h \
+                    src/utils-log.h \
+                    src/global-constants.h \
+                    src/global-types.h \
+                    src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   utils-dbus.o"
+	@gcc -Wall -o build/utils-dbus.o -Isrc -Igen \
+	       -c src/utils-dbus.c \
+	       -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include 
 
-$(builddir)/utils-dbus.o: Makefile \
-                          $(srcdir)/utils-dbus.c \
-                          $(srcdir)/utils-dbus.h
-	@mkdir -p $(builddir)
-	@echo "  CC  utils-dbus.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/utils-dbus.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/utils-dbus.c \
-	       `pkg-config --cflags dbus-1`
+build/utils-keymap.o: Makefile \
+                      src/utils-keymap.c \
+                      src/utils-keymap.h \
+                      src/utils-log.h \
+                      src/global-constants.h \
+                      src/global-types.h \
+                      src/utils-chain.h \
+                      src/utils-environment.h
+	@mkdir -p build
+	@echo "  CC   utils-keymap.o"
+	@gcc -Wall -o build/utils-keymap.o -Isrc -Igen \
+	       -c src/utils-keymap.c
 
-$(builddir)/utils-keymap.o: Makefile \
-                            $(srcdir)/utils-keymap.c \
-                            $(srcdir)/utils-keymap.h
-	@mkdir -p $(builddir)
-	@echo "  CC  utils-keymap.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/utils-keymap.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/utils-keymap.c \
-	       `pkg-config --cflags xkbcommon`
+build/utils-log.o: Makefile \
+                   src/utils-log.c \
+                   src/config.h \
+                   src/utils-keymap.h \
+                   src/global-constants.h \
+                   src/global-types.h \
+                   src/utils-chain.h \
+                   src/utils-log.h \
+                   src/utils-environment.h
+	@mkdir -p build
+	@echo "  CC   utils-log.o"
+	@gcc -Wall -o build/utils-log.o -Isrc -Igen \
+	       -c src/utils-log.c
 
-$(builddir)/utils-log.o: Makefile \
-                         $(srcdir)/utils-log.c \
-                         $(srcdir)/utils-log.h
-	@mkdir -p $(builddir)
-	@echo "  CC  utils-log.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/utils-log.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/utils-log.c
+build/utils-environment.o: Makefile \
+                           src/utils-environment.c \
+                           src/utils-environment.h \
+                           src/global-constants.h \
+                           src/global-types.h \
+                           src/utils-chain.h \
+                           src/utils-log.h
+	@mkdir -p build
+	@echo "  CC   utils-environment.o"
+	@gcc -Wall -o build/utils-environment.o -Isrc -Igen \
+	       -c src/utils-environment.c
 
-$(builddir)/utils-environment.o: Makefile \
-                                 $(srcdir)/utils-environment.c \
-                                 $(srcdir)/utils-environment.h
-	@mkdir -p $(builddir)
-	@echo "  CC  utils-environment.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/utils-environment.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/utils-environment.c
+build/event-dispatcher.o: Makefile \
+                          src/event-dispatcher.c \
+                          src/event-dispatcher.h \
+                          src/utils-log.h \
+                          src/global-constants.h \
+                          src/global-types.h \
+                          src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   event-dispatcher.o"
+	@gcc -Wall -o build/event-dispatcher.o -Isrc -Igen \
+	       -c src/event-dispatcher.c
 
-$(builddir)/event-dispatcher.o: Makefile \
-                                $(srcdir)/event-dispatcher.c \
-                                $(srcdir)/event-dispatcher.h
-	@mkdir -p $(builddir)
-	@echo "  CC  event-dispatcher.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/event-dispatcher.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/event-dispatcher.c
+build/event-timer.o: Makefile \
+                     src/event-timer.c \
+                     src/event-timer.h \
+                     src/utils-log.h \
+                     src/global-constants.h \
+                     src/global-types.h \
+                     src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   event-timer.o"
+	@gcc -Wall -o build/event-timer.o -Isrc -Igen \
+	       -c src/event-timer.c
 
-$(builddir)/event-timer.o: Makefile \
-                           $(srcdir)/event-timer.c \
-                           $(srcdir)/event-timer.h
-	@mkdir -p $(builddir)
-	@echo "  CC  event-timer.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/event-timer.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/event-timer.c
+build/event-signals.o: Makefile \
+                       src/event-signals.c \
+                       src/event-signals.h \
+                       src/event-task.h \
+                       src/event-loop.h \
+                       src/utils-log.h \
+                       src/global-constants.h \
+                       src/global-types.h \
+                       src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   event-signals.o"
+	@gcc -Wall -o build/event-signals.o -Isrc -Igen \
+	       -c src/event-signals.c
 
-$(builddir)/event-signals.o: Makefile \
-                             $(srcdir)/event-signals.c \
-                             $(srcdir)/event-signals.h
-	@mkdir -p $(builddir)
-	@echo "  CC  event-signals.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/event-signals.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/event-signals.c
+build/event-loop.o: Makefile \
+                    src/event-loop.c \
+                    src/event-loop.h \
+                    src/event-task.h \
+                    src/utils-log.h \
+                    src/global-constants.h \
+                    src/global-types.h \
+                    src/utils-chain.h \
+                    src/utils-environment.h
+	@mkdir -p build
+	@echo "  CC   event-loop.o"
+	@gcc -Wall -o build/event-loop.o -Isrc -Igen \
+	       -c src/event-loop.c
 
-$(builddir)/event-loop.o: Makefile \
-                          $(srcdir)/event-loop.c \
-                          $(srcdir)/event-loop.h
-	@mkdir -p $(builddir)
-	@echo "  CC  event-loop.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/event-loop.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/event-loop.c
+build/event-task.o: Makefile \
+                    src/event-task.c \
+                    src/event-task.h \
+                    src/utils-log.h \
+                    src/global-constants.h \
+                    src/global-types.h \
+                    src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   event-task.o"
+	@gcc -Wall -o build/event-task.o -Isrc -Igen \
+	       -c src/event-task.c
 
-$(builddir)/event-task.o: Makefile \
-                          $(srcdir)/event-task.c \
-                          $(srcdir)/event-task.h
-	@mkdir -p $(builddir)
-	@echo "  CC  event-task.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/event-task.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/event-task.c
+build/event-factory.o: Makefile \
+                       src/event-factory.c \
+                       src/event-factory.h \
+                       src/event-task.h \
+                       src/event-dispatcher.h \
+                       src/device-evdev.h \
+                       src/device-udev.h \
+                       src/backend-gtk.h \
+                       src/event-loop.h \
+                       src/output.h \
+                       src/global-types.h \
+                       src/utils-chain.h \
+                       src/output-collector.h \
+                       src/exhibitor.h \
+                       src/exhibitor-display.h \
+                       src/exhibitor-compositor.h \
+                       src/wayland.h \
+                       src/utils-environment.h \
+                       src/global-constants.h
+	@mkdir -p build
+	@echo "  CC   event-factory.o"
+	@gcc -Wall -o build/event-factory.o -Isrc -Igen \
+	       -c src/event-factory.c
 
-$(builddir)/event-factory.o: Makefile \
-                             $(srcdir)/event-factory.c \
-                             $(srcdir)/event-factory.h
-	@mkdir -p $(builddir)
-	@echo "  CC  event-factory.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/event-factory.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/event-factory.c
+build/device-common.o: Makefile \
+                       src/device-common.c \
+                       src/device-common.h \
+                       src/utils-dbus.h \
+                       src/utils-log.h \
+                       src/global-constants.h \
+                       src/global-types.h \
+                       src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   device-common.o"
+	@gcc -Wall -o build/device-common.o -Isrc -Igen \
+	       -c src/device-common.c
 
-$(builddir)/device-common.o: Makefile \
-                             $(srcdir)/device-common.c \
-                             $(srcdir)/device-common.h
-	@mkdir -p $(builddir)
-	@echo "  CC  device-common.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/device-common.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/device-common.c
+build/device-fb.o: Makefile \
+                   src/device-fb.c \
+                   src/device-fb.h \
+                   src/output.h \
+                   src/global-types.h \
+                   src/utils-chain.h \
+                   src/device-common.h \
+                   src/renderer-mmap.h \
+                   src/utils-log.h \
+                   src/global-constants.h
+	@mkdir -p build
+	@echo "  CC   device-fb.o"
+	@gcc -Wall -o build/device-fb.o -Isrc -Igen \
+	       -c src/device-fb.c
 
-$(builddir)/device-fb.o: Makefile \
-                         $(srcdir)/device-fb.c \
-                         $(srcdir)/device-fb.h
-	@mkdir -p $(builddir)
-	@echo "  CC  device-fb.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/device-fb.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/device-fb.c
+build/device-drm.o: Makefile \
+                    src/device-drm.c \
+                    src/device-drm.h \
+                    src/output.h \
+                    src/global-types.h \
+                    src/utils-chain.h \
+                    src/utils-log.h \
+                    src/global-constants.h \
+                    src/renderer-mmap.h \
+                    src/renderer-gl.h \
+                    src/utils-dbus.h
+	@mkdir -p build
+	@echo "  CC   device-drm.o"
+	@gcc -Wall -o build/device-drm.o -Isrc -Igen \
+	       -c src/device-drm.c \
+	       -I/usr/include/libdrm 
 
-$(builddir)/device-drm.o: Makefile \
-                          $(srcdir)/device-drm.c \
-                          $(srcdir)/device-drm.h
-	@mkdir -p $(builddir)
-	@echo "  CC  device-drm.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/device-drm.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/device-drm.c \
-	       `pkg-config --cflags egl gbm libdrm`
+build/device-evdev.o: Makefile \
+                      src/device-evdev.c \
+                      src/device-evdev.h \
+                      src/event-dispatcher.h \
+                      src/device-common.h \
+                      src/utils-dbus.h \
+                      src/utils-log.h \
+                      src/global-constants.h \
+                      src/global-types.h \
+                      src/utils-chain.h \
+                      src/event-signals.h \
+                      src/event-task.h \
+                      src/keyboard-bindings.h \
+                      src/keyboard-argmand.h
+	@mkdir -p build
+	@echo "  CC   device-evdev.o"
+	@gcc -Wall -o build/device-evdev.o -Isrc -Igen \
+	       -c src/device-evdev.c
 
-$(builddir)/device-evdev.o: Makefile \
-                            $(srcdir)/device-evdev.c \
-                            $(srcdir)/device-evdev.h
-	@mkdir -p $(builddir)
-	@echo "  CC  device-evdev.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/device-evdev.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/device-evdev.c \
-	       `pkg-config --cflags libudev`
+build/device-udev.o: Makefile \
+                     src/device-udev.c \
+                     src/device-udev.h \
+                     src/event-dispatcher.h \
+                     src/utils-log.h \
+                     src/global-constants.h \
+                     src/global-types.h \
+                     src/utils-chain.h \
+                     src/event-signals.h \
+                     src/event-task.h
+	@mkdir -p build
+	@echo "  CC   device-udev.o"
+	@gcc -Wall -o build/device-udev.o -Isrc -Igen \
+	       -c src/device-udev.c
 
-$(builddir)/device-udev.o: Makefile \
-                           $(srcdir)/device-udev.c \
-                           $(srcdir)/device-udev.h
-	@mkdir -p $(builddir)
-	@echo "  CC  device-udev.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/device-udev.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/device-udev.c \
-	       `pkg-config --cflags libudev`
+build/output.o: Makefile \
+                src/output.c \
+                src/output.h \
+                src/global-types.h \
+                src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   output.o"
+	@gcc -Wall -o build/output.o -Isrc -Igen \
+	       -c src/output.c
 
-$(builddir)/output.o: Makefile \
-                      $(srcdir)/output.c \
-                      $(srcdir)/output.h
-	@mkdir -p $(builddir)
-	@echo "  CC  output.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/output.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/output.c
+build/output-collector.o: Makefile \
+                          src/output-collector.c \
+                          src/output-collector.h \
+                          src/event-loop.h \
+                          src/event-task.h \
+                          src/global-types.h \
+                          src/utils-chain.h \
+                          src/event-signals.h \
+                          src/utils-log.h \
+                          src/global-constants.h \
+                          src/device-drm.h \
+                          src/output.h \
+                          src/device-fb.h \
+                          src/backend-gtk.h \
+                          src/config.h \
+                          src/utils-keymap.h
+	@mkdir -p build
+	@echo "  CC   output-collector.o"
+	@gcc -Wall -o build/output-collector.o -Isrc -Igen \
+	       -c src/output-collector.c
 
-$(builddir)/output-collector.o: Makefile \
-                                $(srcdir)/output-collector.c \
-                                $(srcdir)/output-collector.h
-	@mkdir -p $(builddir)
-	@echo "  CC  output-collector.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/output-collector.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/output-collector.c
+build/surface-data.o: Makefile \
+                      src/surface-data.c \
+                      src/surface-data.h \
+                      src/global-types.h \
+                      src/utils-chain.h \
+                      src/utils-store.h \
+                      src/exhibitor-compositor.h \
+                      src/utils-log.h \
+                      src/global-constants.h
+	@mkdir -p build
+	@echo "  CC   surface-data.o"
+	@gcc -Wall -o build/surface-data.o -Isrc -Igen \
+	       -c src/surface-data.c
 
-$(builddir)/surface-data.o: Makefile \
-                            $(srcdir)/surface-data.c \
-                            $(srcdir)/surface-data.h
-	@mkdir -p $(builddir)
-	@echo "  CC  surface-data.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/surface-data.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/surface-data.c
+build/surface-manager.o: Makefile \
+                         src/surface-manager.c \
+                         src/surface-manager.h \
+                         src/global-types.h \
+                         src/utils-chain.h \
+                         src/event-loop.h \
+                         src/event-task.h \
+                         src/surface-data.h \
+                         src/utils-store.h \
+                         src/exhibitor-compositor.h \
+                         src/utils-log.h \
+                         src/global-constants.h \
+                         src/event-timer.h \
+                         src/event-signals.h
+	@mkdir -p build
+	@echo "  CC   surface-manager.o"
+	@gcc -Wall -o build/surface-manager.o -Isrc -Igen \
+	       -c src/surface-manager.c
 
-$(builddir)/surface-manager.o: Makefile \
-                               $(srcdir)/surface-manager.c \
-                               $(srcdir)/surface-manager.h
-	@mkdir -p $(builddir)
-	@echo "  CC  surface-manager.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/surface-manager.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/surface-manager.c
+build/keyboard-bindings.o: Makefile \
+                           src/keyboard-bindings.c \
+                           src/keyboard-bindings.h \
+                           src/keyboard-argmand.h \
+                           src/utils-chain.h \
+                           src/global-constants.h \
+                           src/global-types.h \
+                           src/keyboard-mode.h \
+                           src/utils-log.h
+	@mkdir -p build
+	@echo "  CC   keyboard-bindings.o"
+	@gcc -Wall -o build/keyboard-bindings.o -Isrc -Igen \
+	       -c src/keyboard-bindings.c
 
-$(builddir)/keyboard-bindings.o: Makefile \
-                                 $(srcdir)/keyboard-bindings.c \
-                                 $(srcdir)/keyboard-bindings.h
-	@mkdir -p $(builddir)
-	@echo "  CC  keyboard-bindings.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/keyboard-bindings.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/keyboard-bindings.c
+build/keyboard-mode.o: Makefile \
+                       src/keyboard-mode.c \
+                       src/keyboard-mode.h \
+                       src/keyboard-argmand.h \
+                       src/utils-chain.h \
+                       src/global-constants.h \
+                       src/global-types.h \
+                       src/utils-log.h
+	@mkdir -p build
+	@echo "  CC   keyboard-mode.o"
+	@gcc -Wall -o build/keyboard-mode.o -Isrc -Igen \
+	       -c src/keyboard-mode.c
 
-$(builddir)/keyboard-mode.o: Makefile \
-                             $(srcdir)/keyboard-mode.c \
-                             $(srcdir)/keyboard-mode.h
-	@mkdir -p $(builddir)
-	@echo "  CC  keyboard-mode.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/keyboard-mode.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/keyboard-mode.c
+build/keyboard-argmand.o: Makefile \
+                          src/keyboard-argmand.c \
+                          src/keyboard-argmand.h \
+                          src/utils-chain.h \
+                          src/utils-log.h \
+                          src/global-constants.h \
+                          src/global-types.h
+	@mkdir -p build
+	@echo "  CC   keyboard-argmand.o"
+	@gcc -Wall -o build/keyboard-argmand.o -Isrc -Igen \
+	       -c src/keyboard-argmand.c
 
-$(builddir)/keyboard-argmand.o: Makefile \
-                                $(srcdir)/keyboard-argmand.c \
-                                $(srcdir)/keyboard-argmand.h
-	@mkdir -p $(builddir)
-	@echo "  CC  keyboard-argmand.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/keyboard-argmand.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/keyboard-argmand.c
+build/exhibitor.o: Makefile \
+                   src/exhibitor.c \
+                   src/exhibitor.h \
+                   src/exhibitor-display.h \
+                   src/exhibitor-compositor.h \
+                   src/utils-chain.h \
+                   src/global-types.h \
+                   src/output.h \
+                   src/event-loop.h \
+                   src/event-task.h \
+                   src/exhibitor-strategist.h \
+                   src/exhibitor-pointer.h \
+                   src/utils-log.h \
+                   src/global-constants.h \
+                   src/event-signals.h \
+                   src/surface-manager.h \
+                   src/surface-data.h \
+                   src/utils-store.h
+	@mkdir -p build
+	@echo "  CC   exhibitor.o"
+	@gcc -Wall -o build/exhibitor.o -Isrc -Igen \
+	       -c src/exhibitor.c
 
-$(builddir)/exhibitor.o: Makefile \
-                         $(srcdir)/exhibitor.c \
-                         $(srcdir)/exhibitor.h
-	@mkdir -p $(builddir)
-	@echo "  CC  exhibitor.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/exhibitor.c
+build/exhibitor-display.o: Makefile \
+                           src/exhibitor-display.c \
+                           src/exhibitor-display.h \
+                           src/exhibitor-compositor.h \
+                           src/utils-chain.h \
+                           src/global-types.h \
+                           src/output.h \
+                           src/exhibitor-pointer.h \
+                           src/event-loop.h \
+                           src/event-task.h \
+                           src/utils-log.h \
+                           src/global-constants.h \
+                           src/event-timer.h \
+                           src/event-signals.h
+	@mkdir -p build
+	@echo "  CC   exhibitor-display.o"
+	@gcc -Wall -o build/exhibitor-display.o -Isrc -Igen \
+	       -c src/exhibitor-display.c
 
-$(builddir)/exhibitor-display.o: Makefile \
-                                 $(srcdir)/exhibitor-display.c \
-                                 $(srcdir)/exhibitor-display.h
-	@mkdir -p $(builddir)
-	@echo "  CC  exhibitor-display.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor-display.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/exhibitor-display.c
+build/exhibitor-compositor.o: Makefile \
+                              src/exhibitor-compositor.c \
+                              src/exhibitor-compositor.h \
+                              src/utils-chain.h \
+                              src/global-types.h \
+                              src/surface-manager.h \
+                              src/event-loop.h \
+                              src/event-task.h \
+                              src/surface-data.h \
+                              src/utils-store.h \
+                              src/utils-log.h \
+                              src/global-constants.h
+	@mkdir -p build
+	@echo "  CC   exhibitor-compositor.o"
+	@gcc -Wall -o build/exhibitor-compositor.o -Isrc -Igen \
+	       -c src/exhibitor-compositor.c
 
-$(builddir)/exhibitor-compositor.o: Makefile \
-                                    $(srcdir)/exhibitor-compositor.c \
-                                    $(srcdir)/exhibitor-compositor.h
-	@mkdir -p $(builddir)
-	@echo "  CC  exhibitor-compositor.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor-compositor.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/exhibitor-compositor.c
+build/exhibitor-strategist.o: Makefile \
+                              src/exhibitor-strategist.c \
+                              src/exhibitor-strategist.h \
+                              src/exhibitor.h \
+                              src/exhibitor-display.h \
+                              src/exhibitor-compositor.h \
+                              src/utils-chain.h \
+                              src/global-types.h \
+                              src/output.h \
+                              src/event-loop.h \
+                              src/event-task.h \
+                              src/utils-log.h \
+                              src/global-constants.h \
+                              src/event-signals.h
+	@mkdir -p build
+	@echo "  CC   exhibitor-strategist.o"
+	@gcc -Wall -o build/exhibitor-strategist.o -Isrc -Igen \
+	       -c src/exhibitor-strategist.c
 
-$(builddir)/exhibitor-strategist.o: Makefile \
-                                    $(srcdir)/exhibitor-strategist.c \
-                                    $(srcdir)/exhibitor-strategist.h
-	@mkdir -p $(builddir)
-	@echo "  CC  exhibitor-strategist.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor-strategist.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/exhibitor-strategist.c
+build/exhibitor-pointer.o: Makefile \
+                           src/exhibitor-pointer.c \
+                           src/exhibitor-pointer.h \
+                           src/event-loop.h \
+                           src/event-task.h \
+                           src/exhibitor.h \
+                           src/exhibitor-display.h \
+                           src/exhibitor-compositor.h \
+                           src/utils-chain.h \
+                           src/global-types.h \
+                           src/output.h \
+                           src/utils-log.h \
+                           src/global-constants.h \
+                           src/event-signals.h
+	@mkdir -p build
+	@echo "  CC   exhibitor-pointer.o"
+	@gcc -Wall -o build/exhibitor-pointer.o -Isrc -Igen \
+	       -c src/exhibitor-pointer.c
 
-$(builddir)/exhibitor-pointer.o: Makefile \
-                                 $(srcdir)/exhibitor-pointer.c \
-                                 $(srcdir)/exhibitor-pointer.h
-	@mkdir -p $(builddir)
-	@echo "  CC  exhibitor-pointer.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/exhibitor-pointer.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/exhibitor-pointer.c
+build/renderer-mmap.o: Makefile \
+                       src/renderer-mmap.c \
+                       src/renderer-mmap.h \
+                       src/output.h \
+                       src/global-types.h \
+                       src/utils-chain.h \
+                       src/surface-manager.h \
+                       src/event-loop.h \
+                       src/event-task.h \
+                       src/surface-data.h \
+                       src/utils-store.h \
+                       src/exhibitor-compositor.h \
+                       src/utils-log.h \
+                       src/global-constants.h
+	@mkdir -p build
+	@echo "  CC   renderer-mmap.o"
+	@gcc -Wall -o build/renderer-mmap.o -Isrc -Igen \
+	       -c src/renderer-mmap.c
 
-$(builddir)/renderer-mmap.o: Makefile \
-                             $(srcdir)/renderer-mmap.c \
-                             $(srcdir)/renderer-mmap.h
-	@mkdir -p $(builddir)
-	@echo "  CC  renderer-mmap.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/renderer-mmap.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/renderer-mmap.c
+build/renderer-gl.o: Makefile \
+                     src/renderer-gl.c \
+                     src/renderer-gl.h \
+                     src/global-types.h \
+                     src/utils-chain.h \
+                     src/surface-manager.h \
+                     src/event-loop.h \
+                     src/event-task.h \
+                     src/surface-data.h \
+                     src/utils-store.h \
+                     src/exhibitor-compositor.h \
+                     src/utils-log.h \
+                     src/global-constants.h \
+                     src/bind-egl-wayland.h
+	@mkdir -p build
+	@echo "  CC   renderer-gl.o"
+	@gcc -Wall -o build/renderer-gl.o -Isrc -Igen \
+	       -c src/renderer-gl.c \
+	       -I/usr/include/libdrm 
 
-$(builddir)/renderer-gl.o: Makefile \
-                           $(srcdir)/renderer-gl.c \
-                           $(srcdir)/renderer-gl.h
-	@mkdir -p $(builddir)
-	@echo "  CC  renderer-gl.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/renderer-gl.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/renderer-gl.c \
-	       `pkg-config --cflags gl`
+build/wayland.o: Makefile \
+                 src/wayland.c \
+                 gen/xdg-shell-server-protocol.h \
+                 src/wayland.h \
+                 src/event-loop.h \
+                 src/event-task.h \
+                 src/wayland-protocol-compositor.h \
+                 src/wayland-protocol-shell.h \
+                 src/wayland-protocol-seat.h \
+                 src/wayland-protocol-xdg-shell.h \
+                 src/wayland-protocol-output.h \
+                 src/wayland-state.h \
+                 src/utils-store.h \
+                 src/utils-log.h \
+                 src/global-constants.h \
+                 src/global-types.h \
+                 src/utils-chain.h \
+                 src/utils-environment.h \
+                 src/event-signals.h \
+                 gen/xdg-shell-server-protocol.h
+	@mkdir -p build
+	@echo "  CC   wayland.o"
+	@gcc -Wall -o build/wayland.o -Isrc -Igen \
+	       -c src/wayland.c
 
-$(builddir)/wayland.o: Makefile \
-                       $(srcdir)/wayland.c \
-                       $(srcdir)/wayland.h \
-                       $(gendir)/xdg-shell-server-protocol.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland.c \
-	       `pkg-config --cflags wayland-server`
+build/wayland-state.o: Makefile \
+                       src/wayland-state.c \
+                       src/wayland-state.h \
+                       src/utils-store.h \
+                       src/utils-chain.h \
+                       src/utils-log.h \
+                       src/global-constants.h \
+                       src/global-types.h
+	@mkdir -p build
+	@echo "  CC   wayland-state.o"
+	@gcc -Wall -o build/wayland-state.o -Isrc -Igen \
+	       -c src/wayland-state.c
 
-$(builddir)/wayland-state.o: Makefile \
-                             $(srcdir)/wayland-state.c \
-                             $(srcdir)/wayland-state.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-state.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-state.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-state.c
+build/wayland-protocol-compositor.o: Makefile \
+                                     src/wayland-protocol-compositor.c \
+                                     src/wayland-protocol-compositor.h \
+                                     src/wayland-protocol-surface.h \
+                                     src/wayland-protocol-region.h \
+                                     src/wayland-state.h \
+                                     src/utils-store.h \
+                                     src/surface-manager.h \
+                                     src/global-types.h \
+                                     src/utils-chain.h \
+                                     src/event-loop.h \
+                                     src/event-task.h \
+                                     src/surface-data.h \
+                                     src/exhibitor-compositor.h \
+                                     src/utils-log.h \
+                                     src/global-constants.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-compositor.o"
+	@gcc -Wall -o build/wayland-protocol-compositor.o -Isrc -Igen \
+	       -c src/wayland-protocol-compositor.c
 
-$(builddir)/wayland-protocol-compositor.o: Makefile \
-                                           $(srcdir)/wayland-protocol-compositor.c \
-                                           $(srcdir)/wayland-protocol-compositor.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-compositor.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-compositor.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-compositor.c
+build/wayland-protocol-surface.o: Makefile \
+                                  src/wayland-protocol-surface.c \
+                                  src/wayland-protocol-surface.h \
+                                  src/wayland-state.h \
+                                  src/utils-store.h \
+                                  src/surface-manager.h \
+                                  src/global-types.h \
+                                  src/utils-chain.h \
+                                  src/event-loop.h \
+                                  src/event-task.h \
+                                  src/surface-data.h \
+                                  src/exhibitor-compositor.h \
+                                  src/utils-log.h \
+                                  src/global-constants.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-surface.o"
+	@gcc -Wall -o build/wayland-protocol-surface.o -Isrc -Igen \
+	       -c src/wayland-protocol-surface.c
 
-$(builddir)/wayland-protocol-surface.o: Makefile \
-                                        $(srcdir)/wayland-protocol-surface.c \
-                                        $(srcdir)/wayland-protocol-surface.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-surface.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-surface.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-surface.c
+build/wayland-protocol-region.o: Makefile \
+                                 src/wayland-protocol-region.c \
+                                 src/wayland-protocol-region.h \
+                                 src/utils-log.h \
+                                 src/global-constants.h \
+                                 src/global-types.h \
+                                 src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-region.o"
+	@gcc -Wall -o build/wayland-protocol-region.o -Isrc -Igen \
+	       -c src/wayland-protocol-region.c
 
-$(builddir)/wayland-protocol-region.o: Makefile \
-                                       $(srcdir)/wayland-protocol-region.c \
-                                       $(srcdir)/wayland-protocol-region.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-region.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-region.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-region.c
+build/wayland-protocol-shell.o: Makefile \
+                                src/wayland-protocol-shell.c \
+                                gen/xdg-shell-server-protocol.h \
+                                src/wayland-protocol-shell.h \
+                                src/utils-log.h \
+                                src/global-constants.h \
+                                src/global-types.h \
+                                src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-shell.o"
+	@gcc -Wall -o build/wayland-protocol-shell.o -Isrc -Igen \
+	       -c src/wayland-protocol-shell.c
 
-$(builddir)/wayland-protocol-shell.o: Makefile \
-                                      $(srcdir)/wayland-protocol-shell.c \
-                                      $(srcdir)/wayland-protocol-shell.h \
-                                      $(gendir)/xdg-shell-server-protocol.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-shell.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-shell.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-shell.c
+build/wayland-protocol-shell-surface.o: Makefile \
+                                        src/wayland-protocol-shell-surface.c \
+                                        src/wayland-protocol-shell-surface.c \
+                                        src/wayland-protocol-shell-surface.h \
+                                        src/utils-log.h \
+                                        src/global-constants.h \
+                                        src/global-types.h \
+                                        src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-shell-surface.o"
+	@gcc -Wall -o build/wayland-protocol-shell-surface.o -Isrc -Igen \
+	       -c src/wayland-protocol-shell-surface.c
 
-$(builddir)/wayland-protocol-shell-surface.o: Makefile \
-                                              $(srcdir)/wayland-protocol-shell-surface.c \
-                                              $(srcdir)/wayland-protocol-shell-surface.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-shell-surface.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-shell-surface.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-shell-surface.c
+build/wayland-protocol-xdg-shell.o: Makefile \
+                                    src/wayland-protocol-xdg-shell.c \
+                                    src/wayland-protocol-xdg-shell.h \
+                                    src/wayland-protocol-shell-surface.h \
+                                    src/utils-log.h \
+                                    src/global-constants.h \
+                                    src/global-types.h \
+                                    src/utils-chain.h \
+                                    gen/xdg-shell-server-protocol.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-xdg-shell.o"
+	@gcc -Wall -o build/wayland-protocol-xdg-shell.o -Isrc -Igen \
+	       -c src/wayland-protocol-xdg-shell.c
 
-$(builddir)/wayland-protocol-xdg-shell.o: Makefile \
-                                          $(srcdir)/wayland-protocol-xdg-shell.c \
-                                          $(srcdir)/wayland-protocol-xdg-shell.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-xdg-shell.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-xdg-shell.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-xdg-shell.c
+build/xdg-shell-protocol.o: Makefile \
+                            gen/xdg-shell-protocol.c
+	@mkdir -p build
+	@echo "  CC   xdg-shell-protocol.o"
+	@gcc -Wall -o build/xdg-shell-protocol.o -Isrc -Igen \
+	       -c gen/xdg-shell-protocol.c
 
-$(builddir)/xdg-shell-protocol.o: Makefile \
-                                  $(gendir)/xdg-shell-protocol.c
-	@mkdir -p $(builddir)
-	@echo "  CC  xdg-shell-protocol.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/xdg-shell-protocol.o -I$(srcdir) -I$(gendir) \
-	       -c $(gendir)/xdg-shell-protocol.c
+build/wayland-protocol-output.o: Makefile \
+                                 src/wayland-protocol-output.c \
+                                 src/wayland-protocol-output.h \
+                                 src/utils-log.h \
+                                 src/global-constants.h \
+                                 src/global-types.h \
+                                 src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-output.o"
+	@gcc -Wall -o build/wayland-protocol-output.o -Isrc -Igen \
+	       -c src/wayland-protocol-output.c
 
-$(builddir)/wayland-protocol-output.o: Makefile \
-                                       $(srcdir)/wayland-protocol-output.c \
-                                       $(srcdir)/wayland-protocol-output.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-output.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-output.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-output.c
+build/wayland-protocol-seat.o: Makefile \
+                               src/wayland-protocol-seat.c \
+                               src/wayland-protocol-seat.h \
+                               src/wayland-protocol-pointer.h \
+                               src/wayland-protocol-keyboard.h \
+                               src/wayland-state.h \
+                               src/utils-store.h \
+                               src/utils-log.h \
+                               src/global-constants.h \
+                               src/global-types.h \
+                               src/utils-chain.h \
+                               src/config.h \
+                               src/utils-keymap.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-seat.o"
+	@gcc -Wall -o build/wayland-protocol-seat.o -Isrc -Igen \
+	       -c src/wayland-protocol-seat.c
 
-$(builddir)/wayland-protocol-seat.o: Makefile \
-                                     $(srcdir)/wayland-protocol-seat.c \
-                                     $(srcdir)/wayland-protocol-seat.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-seat.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-seat.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-seat.c
+build/wayland-protocol-pointer.o: Makefile \
+                                  src/wayland-protocol-pointer.c \
+                                  src/wayland-protocol-keyboard.h \
+                                  src/utils-log.h \
+                                  src/global-constants.h \
+                                  src/global-types.h \
+                                  src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-pointer.o"
+	@gcc -Wall -o build/wayland-protocol-pointer.o -Isrc -Igen \
+	       -c src/wayland-protocol-pointer.c
 
-$(builddir)/wayland-protocol-pointer.o: Makefile \
-                                        $(srcdir)/wayland-protocol-pointer.c \
-                                        $(srcdir)/wayland-protocol-pointer.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-pointer.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-pointer.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-pointer.c
+build/wayland-protocol-keyboard.o: Makefile \
+                                   src/wayland-protocol-keyboard.c \
+                                   src/wayland-protocol-keyboard.h \
+                                   src/utils-log.h \
+                                   src/global-constants.h \
+                                   src/global-types.h \
+                                   src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-keyboard.o"
+	@gcc -Wall -o build/wayland-protocol-keyboard.o -Isrc -Igen \
+	       -c src/wayland-protocol-keyboard.c
 
-$(builddir)/wayland-protocol-keyboard.o: Makefile \
-                                         $(srcdir)/wayland-protocol-keyboard.c \
-                                         $(srcdir)/wayland-protocol-keyboard.h
-	@mkdir -p $(builddir)
-	@echo "  CC  wayland-protocol-keyboard.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/wayland-protocol-keyboard.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/wayland-protocol-keyboard.c
+build/bind-egl-wayland.o: Makefile \
+                          src/bind-egl-wayland.c \
+                          src/renderer-gl.h \
+                          src/global-types.h \
+                          src/utils-chain.h \
+                          src/wayland.h \
+                          src/event-loop.h \
+                          src/event-task.h \
+                          src/utils-log.h \
+                          src/global-constants.h
+	@mkdir -p build
+	@echo "  CC   bind-egl-wayland.o"
+	@gcc -Wall -o build/bind-egl-wayland.o -Isrc -Igen \
+	       -c src/bind-egl-wayland.c
 
-$(builddir)/bind-egl-wayland.o: Makefile \
-                                $(srcdir)/bind-egl-wayland.c \
-                                $(srcdir)/bind-egl-wayland.h
-	@mkdir -p $(builddir)
-	@echo "  CC  bind-egl-wayland.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/bind-egl-wayland.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/bind-egl-wayland.c
+build/backend-gtk.o: Makefile \
+                     src/backend-gtk.c \
+                     src/backend-gtk.h \
+                     src/event-loop.h \
+                     src/event-task.h \
+                     src/output.h \
+                     src/global-types.h \
+                     src/utils-chain.h \
+                     src/backend-gtk-app.h \
+                     src/utils-log.h \
+                     src/global-constants.h \
+                     src/utils-environment.h \
+                     src/global-functions.h \
+                     src/renderer-mmap.h
+	@mkdir -p build
+	@echo "  CC   backend-gtk.o"
+	@gcc -Wall -o build/backend-gtk.o -Isrc -Igen \
+	       -c src/backend-gtk.c \
+	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
-$(builddir)/backend-gtk.o: Makefile \
-                           $(srcdir)/backend-gtk.c \
-                           $(srcdir)/backend-gtk.h
-	@mkdir -p $(builddir)
-	@echo "  CC  backend-gtk.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/backend-gtk.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/backend-gtk.c \
-	       `pkg-config --cflags gtk+-3.0`
+build/backend-gtk-app.o: Makefile \
+                         src/backend-gtk-app.c \
+                         src/backend-gtk-app.h \
+                         src/backend-gtk-win.h \
+                         src/utils-log.h \
+                         src/global-constants.h \
+                         src/global-types.h \
+                         src/utils-chain.h \
+                         src/event-signals.h \
+                         src/event-task.h
+	@mkdir -p build
+	@echo "  CC   backend-gtk-app.o"
+	@gcc -Wall -o build/backend-gtk-app.o -Isrc -Igen \
+	       -c src/backend-gtk-app.c \
+	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
-$(builddir)/backend-gtk-app.o: Makefile \
-                               $(srcdir)/backend-gtk-app.c \
-                               $(srcdir)/backend-gtk-app.h
-	@mkdir -p $(builddir)
-	@echo "  CC  backend-gtk-app.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/backend-gtk-app.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/backend-gtk-app.c \
-	       `pkg-config --cflags gtk+-3.0`
+build/backend-gtk-win.o: Makefile \
+                         src/backend-gtk-win.c \
+                         src/backend-gtk-app.h \
+                         src/backend-gtk-win.h \
+                         src/utils-log.h \
+                         src/global-constants.h \
+                         src/global-types.h \
+                         src/utils-chain.h \
+                         src/event-signals.h \
+                         src/event-task.h
+	@mkdir -p build
+	@echo "  CC   backend-gtk-win.o"
+	@gcc -Wall -o build/backend-gtk-win.o -Isrc -Igen \
+	       -c src/backend-gtk-win.c \
+	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
-$(builddir)/backend-gtk-win.o: Makefile \
-                               $(srcdir)/backend-gtk-win.c \
-                               $(srcdir)/backend-gtk-win.h
-	@mkdir -p $(builddir)
-	@echo "  CC  backend-gtk-win.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/backend-gtk-win.o -I$(srcdir) -I$(gendir) \
-	       -c $(srcdir)/backend-gtk-win.c \
-	       `pkg-config --cflags gtk+-3.0`
-
-$(builddir)/backend-gtk-res.o: Makefile \
-                               $(gendir)/backend-gtk-res.c
-	@mkdir -p $(builddir)
-	@echo "  CC  backend-gtk-res.o"
-	@$(CC) $(WFLAGS) -o $(builddir)/backend-gtk-res.o -I$(srcdir) -I$(gendir) \
-	       -c $(gendir)/backend-gtk-res.c \
-	       `pkg-config --cflags gtk+-3.0`
+build/backend-gtk-res.o: Makefile \
+                         gen/backend-gtk-res.c
+	@mkdir -p build
+	@echo "  CC   backend-gtk-res.o"
+	@gcc -Wall -o build/backend-gtk-res.o -Isrc -Igen \
+	       -c gen/backend-gtk-res.c \
+	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
