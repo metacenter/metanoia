@@ -6,18 +6,18 @@
 
 #include "exhibitor-compositor.h"
 #include "utils-chain.h"
-#include "global-types.h"
+#include "output.h"
 
 #include <time.h>
 
 typedef struct {
-    AuraRenderer* renderer;
+    AuraOutput* output;
     Chain* compositors;
     AuraCompositor* compositor;
     timer_t timerid;
 } AuraDisplay;
 
-AuraDisplay* aura_display_new(AuraRenderer* renderer);
+AuraDisplay* aura_display_new(AuraOutput* output);
 
 void aura_display_start(AuraDisplay* self);
 void aura_display_stop(AuraDisplay* self);

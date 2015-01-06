@@ -107,11 +107,31 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
                 int p = s * y + 4 * x;
                 float a = d[p+3]/255.0;
                 float A = (255-d[p+3])/255.0;
-                D[P + 0] = (int) (a*d[p+0] + A*D[P+0]);
-                D[P + 1] = (int) (a*d[p+1] + A*D[P+1]);
-                D[P + 2] = (int) (a*d[p+2] + A*D[P+2]);
-                D[P + 3] = 255;
+                D[P+0] = (int) (a*d[p+0] + A*D[P+0]);
+                D[P+1] = (int) (a*d[p+1] + A*D[P+1]);
+                D[P+2] = (int) (a*d[p+2] + A*D[P+2]);
+                D[P+3] = 255;
             }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_renderer_mmap_draw_pointer(AuraRendererMMap* mine, int X, int Y)
+{
+    int x, y, w = 15, h = 15;
+    int current_buffer = mine->front ^ 1;
+    int S = mine->buffer[current_buffer].stride;
+    uint8_t* D = mine->buffer[current_buffer].data;
+    float a = 0.8, A = (1.0-a);
+    for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+            int P = S * (Y + y) + 4 * (X + x);
+            D[P+0] = (int) (a*255.0 + A*D[P+0]);
+            D[P+1] = (int) (a*255.0 + A*D[P+1]);
+            D[P+2] = (int) (a*255.0 + A*D[P+2]);
+            D[P+3] = 255;
         }
     }
 }
@@ -142,7 +162,7 @@ void aura_renderer_mmap_swap_buffers(AuraRendererMMap* mine)
 //------------------------------------------------------------------------------
 
 void aura_renderer_mmap_draw(struct AuraRenderer* self,
-                             Chain* surfaces)
+                             Chain* surfaces, int X, int Y)
 {
     AuraRendererMMap* mine = (AuraRendererMMap*) self;
     if (!mine) {
@@ -152,6 +172,7 @@ void aura_renderer_mmap_draw(struct AuraRenderer* self,
 
     aura_renderer_mmap_draw_bg_image(mine);
     aura_renderer_mmap_draw_surfaces(mine, surfaces);
+    aura_renderer_mmap_draw_pointer(mine, X, Y);
     aura_renderer_mmap_swap_buffers(mine);
 }
 

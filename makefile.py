@@ -322,6 +322,13 @@ t = m.add_compile_target(
     )
 aura.add_input(t)
 
+t = m.add_compile_target(
+        output='exhibitor-pointer.o',
+        inputs=['exhibitor-pointer.c'],
+        includes=['exhibitor-pointer.h']
+    )
+aura.add_input(t)
+
 #-------------------------------------------------------------------------------
 # RENDERERS
 

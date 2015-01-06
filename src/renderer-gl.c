@@ -315,7 +315,7 @@ void aura_renderer_gl_finalize(struct AuraRenderer* self)
 //------------------------------------------------------------------------------
 
 void aura_renderer_gl_draw(struct AuraRenderer* self,
-                           Chain* surfaces)
+                           Chain* surfaces, int x, int y)
 {
     int r;
     AuraRendererGL* mine;

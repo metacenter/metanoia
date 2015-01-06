@@ -3,6 +3,7 @@
 
 #include "exhibitor-display.h"
 #include "exhibitor-compositor.h"
+#include "exhibitor-pointer.h"
 #include "utils-log.h"
 #include "event-timer.h"
 #include "event-signals.h"
@@ -24,12 +25,17 @@ int aura_display_is_valid(AuraDisplay* self)
         return 0;
     }
 
-    if (!self->renderer) {
+    if (!self->output) {
+        LOG_ERROR("Invalid output!");
+        return 0;
+    }
+
+    if (!self->output->renderer) {
         LOG_ERROR("Invalid renderer!");
         return 0;
     }
 
-    if (!self->renderer->draw) {
+    if (!self->output->renderer->draw) {
         LOG_ERROR("Wrong renderer implementation!");
         return 0;
     }
@@ -48,8 +54,10 @@ void aura_display_redraw_all(AuraDisplay* self)
     Chain* visible_surfaces =
                          aura_compositor_get_visible_surfaces(self->compositor);
 
-    self->renderer->draw((struct AuraRenderer*) self->renderer,
-                         visible_surfaces);
+    AuraPosition pos = aura_exhibitor_get_pointer_position();
+
+    self->output->renderer->draw((struct AuraRenderer*) self->output->renderer,
+                                 visible_surfaces, pos.x, pos.y);
 
     // TODO: pass as list
     if (visible_surfaces) {
@@ -66,7 +74,7 @@ void aura_display_redraw_all(AuraDisplay* self)
 //------------------------------------------------------------------------------
 // PUBLIC
 
-AuraDisplay* aura_display_new(AuraRenderer* renderer)
+AuraDisplay* aura_display_new(AuraOutput* output)
 {
     AuraDisplay* self = malloc(sizeof(AuraDisplay));
     if (!self) {
@@ -74,7 +82,7 @@ AuraDisplay* aura_display_new(AuraRenderer* renderer)
         return self;
     }
 
-    self->renderer = renderer;
+    self->output = output;
     self->compositor = aura_compositor_new();
     self->compositors = chain_new(0);
     chain_append(self->compositors, self->compositor);

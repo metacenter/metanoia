@@ -3,6 +3,7 @@
 
 #include "exhibitor.h"
 #include "exhibitor-strategist.h"
+#include "exhibitor-pointer.h"
 
 #include "utils-log.h"
 #include "event-signals.h"
@@ -41,10 +42,10 @@ AuraExhibitor* aura_exhibitor_get_instance()
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_create_new_display(AuraRenderer* renderer)
+void aura_exhibitor_create_new_display(AuraOutput* output)
 {
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
-    AuraDisplay* display = aura_display_new(renderer);
+    AuraDisplay* display = aura_display_new(output);
 
     chain_append(exhibitor->displays, display);
     aura_display_start(display);
@@ -58,24 +59,28 @@ void aura_exhibitor_create_new_display(AuraRenderer* renderer)
 
 void aura_exhibitor_on_display_found(void* data)
 {
-    AuraRenderer* renderer = (AuraRenderer*) data;
-    if (!renderer) {
-        LOG_ERROR("Invalid renderer");
+    AuraOutput* output = (AuraOutput*) data;
+    if (!output) {
+        LOG_ERROR("Invalid output!");
+        return;
+    }
+    if (!output->renderer) {
+        LOG_ERROR("Invalid renderer!");
         return;
     }
 
     LOG_INFO1("Adding new renderer!");
-    renderer->initialize((struct AuraRenderer*) renderer);
-    aura_exhibitor_create_new_display(renderer);
+    output->renderer->initialize((struct AuraRenderer*) output->renderer);
+    aura_exhibitor_create_new_display(output);
 }
 
 //------------------------------------------------------------------------------
 
 void aura_exhibitor_on_display_lost(void* data)
 {
-    AuraRenderer* renderer = (AuraRenderer*) data;
-    if (!renderer) {
-        LOG_ERROR("Invalid renderer");
+    AuraOutput* output = (AuraOutput*) data;
+    if (!output) {
+        LOG_ERROR("Invalid output");
         return;
     }
 
@@ -85,7 +90,7 @@ void aura_exhibitor_on_display_lost(void* data)
     Link* link;
     for (link = exhibitor->displays->first; link; link = link->next) {
         AuraDisplay* display = (AuraDisplay*) link->data;
-        if (display && display->renderer == renderer) {
+        if (display && display->output == output) {
             aura_display_stop(display);
             // TODO: Remove display
             break;
@@ -184,6 +189,8 @@ void aura_exhibitor_initialize(AuraLoop* this_loop)
 
     aura_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,
          aura_task_create(aura_exhibitor_on_surface_destroyed, this_loop));
+
+    aura_exhibitor_pointer_initialize(this_loop);
 }
 
 //------------------------------------------------------------------------------

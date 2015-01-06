@@ -29,9 +29,8 @@ typedef struct {
     int (*initialize) (struct AuraRenderer*);
     void (*finalize) (struct AuraRenderer*);
     void (*attach) (struct AuraRenderer*, SurfaceId, void*);
-    void (*draw) (struct AuraRenderer*, Chain*);
+    void (*draw) (struct AuraRenderer*, Chain*, int x, int y);
     void (*free) (struct AuraRenderer*);
-    void* data;
 } AuraRenderer;
 
 // Key event data

@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------------
 
 static const char scIdInputMouse[]       = "ID_INPUT_MOUSE";
+static const char scIdInputTouchpad[]    = "ID_INPUT_TOUCHPAD";
 static const char scIdInputTablet[]      = "ID_INPUT_TABLET";
 static const char scIdInputTouchscreen[] = "ID_INPUT_TOUCHSCREEN";
 static const char scIdInputJoystic[]     = "ID_INPUT_JOYSTICK";
@@ -26,11 +27,12 @@ static const char scIdInputKey[]         = "ID_INPUT_KEY";
 static const char scIdInputKeyboard[]    = "ID_INPUT_KEYBOARD";
 
 static const uint32_t scIdInputMouseFlag       = 0x0001;
-static const uint32_t scIdInputTabletFlag      = 0x0002;
-static const uint32_t scIdInputTouchscreenFlag = 0x0004;
-static const uint32_t scIdInputJoysticFlag     = 0x0008;
-static const uint32_t scIdInputKeyFlag         = 0x0010;
-static const uint32_t scIdInputKeyboardFlag    = 0x0020;
+static const uint32_t scIdInputTouchpadFlag    = 0x0002;
+static const uint32_t scIdInputTabletFlag      = 0x0004;
+static const uint32_t scIdInputTouchscreenFlag = 0x0008;
+static const uint32_t scIdInputJoysticFlag     = 0x0010;
+static const uint32_t scIdInputKeyFlag         = 0x0020;
+static const uint32_t scIdInputKeyboardFlag    = 0x0040;
 
 //------------------------------------------------------------------------------
 
@@ -48,6 +50,18 @@ static void handle_key(struct input_event* ev)
             aura_event_signal_emit(SIGNAL_KEYBOARD_EVENT, data);
         }
     }
+}
+
+//------------------------------------------------------------------------------
+
+static void handle_touch(struct input_event* ev)
+{
+    if (ev->code == ABS_MT_TRACKING_ID)
+        aura_event_signal_emit(SIGNAL_POINTER_MOTION_RESET, NULL);
+    else if (ev->code == ABS_MT_POSITION_X)
+        aura_event_signal_emit(SIGNAL_POINTER_MOTION_X, (void*) ev->value);
+    else if (ev->code == ABS_MT_POSITION_Y)
+        aura_event_signal_emit(SIGNAL_POINTER_MOTION_Y, (void*) ev->value);
 }
 
 //------------------------------------------------------------------------------
@@ -76,9 +90,10 @@ static void handle_event(AuraEventData* data, struct epoll_event* epev)
               (uint32_t) ev.type, (uint32_t) ev.code, (uint32_t) ev.value);
     LOG_EVNT4("Event data: {flag: %o}", flags);
 
-    if (flags & scIdInputKeyboardFlag) {
+    if (flags & scIdInputKeyboardFlag)
         handle_key(&ev);
-    }
+    else if (flags & scIdInputTouchpadFlag)
+        handle_touch(&ev);
 }
 
 //------------------------------------------------------------------------------
@@ -139,6 +154,8 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
 
             if (strcmp(propname, scIdInputMouse) == 0)
                 flags |= scIdInputMouseFlag;
+            else if (strcmp(propname, scIdInputTouchpad) == 0)
+                flags |= scIdInputTouchpadFlag;
             else if (strcmp(propname, scIdInputTablet) == 0)
                 flags |= scIdInputTabletFlag;
             else if (strcmp(propname, scIdInputTouchscreen) == 0)
