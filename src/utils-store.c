@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct AuraStore {
+struct AuraStorePriv {
     void* root;
 };
 

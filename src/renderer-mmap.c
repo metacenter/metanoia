@@ -26,14 +26,14 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-int aura_renderer_mmap_initialize(struct AuraRenderer* self)
+int aura_renderer_mmap_initialize(AuraRenderer* self)
 {
     return 1;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_finalize(struct AuraRenderer* self)
+void aura_renderer_mmap_finalize(AuraRenderer* self)
 {
     return;
 }
@@ -161,7 +161,7 @@ void aura_renderer_mmap_swap_buffers(AuraRendererMMap* mine)
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_draw(struct AuraRenderer* self,
+void aura_renderer_mmap_draw(AuraRenderer* self,
                              Chain* surfaces, int X, int Y)
 {
     AuraRendererMMap* mine = (AuraRendererMMap*) self;
@@ -178,7 +178,7 @@ void aura_renderer_mmap_draw(struct AuraRenderer* self,
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_free(struct AuraRenderer* self)
+void aura_renderer_mmap_free(AuraRenderer* self)
 {
     if (self) {
         free(self);

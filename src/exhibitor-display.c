@@ -56,7 +56,7 @@ void aura_display_redraw_all(AuraDisplay* self)
 
     AuraPosition pos = aura_exhibitor_get_pointer_position();
 
-    self->output->renderer->draw((struct AuraRenderer*) self->output->renderer,
+    self->output->renderer->draw(self->output->renderer,
                                  visible_surfaces, pos.x, pos.y);
 
     // TODO: pass as list

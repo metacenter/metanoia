@@ -11,60 +11,57 @@
 #include <unistd.h>
 #include <sys/signalfd.h>
 
-typedef struct {
+struct AuraEventDispatcherPriv {
     int run;
     int epfd;
-} AuraEventDispatcherPriv;
+};
 
 //------------------------------------------------------------------------------
 
 AuraEventDispatcher* aura_event_dispatcher_new()
 {
-    AuraEventDispatcherPriv* mine = malloc(sizeof(AuraEventDispatcherPriv));
-    if (!mine) {
+    AuraEventDispatcher* self = malloc(sizeof(AuraEventDispatcher));
+    if (!self) {
         return NULL;
     }
 
-    mine->run = 0;
-    return (AuraEventDispatcher*) mine;
+    self->run = 0;
+    return self;
 }
 
 //------------------------------------------------------------------------------
 
 void aura_event_dispatcher_free(AuraEventDispatcher* self)
 {
-    AuraEventDispatcherPriv* mine = (AuraEventDispatcherPriv*) self;
-    if (!mine) {
+    if (!self) {
         return;
     }
 
-    free(mine);
+    free(self);
 }
 
 //------------------------------------------------------------------------------
 
 int aura_event_dispatcher_is_running(AuraEventDispatcher* self)
 {
-    AuraEventDispatcherPriv* mine = (AuraEventDispatcherPriv*) self;
-    if (!mine) {
+    if (!self) {
         return 0;
     }
 
-    return mine->run;
+    return self->run;
 }
 
 //------------------------------------------------------------------------------
 
 int aura_event_dispatcher_initialize(AuraEventDispatcher* self)
 {
-    AuraEventDispatcherPriv* mine = (AuraEventDispatcherPriv*) self;
-    if (!mine) {
+    if (!self) {
         return -1;
     }
 
     // Create epoll
-    mine->epfd = epoll_create1(0);
-    if (mine->epfd == -1) {
+    self->epfd = epoll_create1(0);
+    if (self->epfd == -1) {
         LOG_ERROR("Failed to create epoll FD!");
         return -1;
     }
@@ -77,8 +74,7 @@ int aura_event_dispatcher_initialize(AuraEventDispatcher* self)
 int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
                                            AuraEventData* data)
 {
-    AuraEventDispatcherPriv* mine = (AuraEventDispatcherPriv*) self;
-    if (!mine || !data) {
+    if (!self || !data) {
         return -ENOMEM;
     }
 
@@ -88,7 +84,7 @@ int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
     event.data.ptr = data;
     event.events = EPOLLIN;
 
-    return epoll_ctl(mine->epfd, EPOLL_CTL_ADD, data->fd, &event);
+    return epoll_ctl(self->epfd, EPOLL_CTL_ADD, data->fd, &event);
 }
 
 //------------------------------------------------------------------------------
@@ -98,17 +94,16 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
     int r;
     struct epoll_event event;
 
-    AuraEventDispatcherPriv* mine = (AuraEventDispatcherPriv*) self;
-    if (!mine) {
+    if (!self) {
         return;
     }
 
     LOG_INFO1("Event Dispatcher: Started");
 
-    mine->run = 1;
-    while (mine->run) {
+    self->run = 1;
+    while (self->run) {
         LOG_EVNT4("Waiting for events...");
-        r = epoll_wait(mine->epfd, &event, 1, -1);
+        r = epoll_wait(self->epfd, &event, 1, -1);
         if (r > 0) {
             AuraEventData* data = event.data.ptr;
             if (data) {
@@ -119,7 +114,7 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
             }
         } else if (r < 0) {
             LOG_ERROR("Epoll Error! (%d, %m)", r);
-            mine->run = 0;
+            self->run = 0;
         } else {
             LOG_WARN1("Ut infinitum et ultra!");
         }
@@ -132,13 +127,12 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
 
 void aura_event_dispatcher_stop(AuraEventDispatcher* self)
 {
-    AuraEventDispatcherPriv* mine = (AuraEventDispatcherPriv*) self;
-    if (!mine) {
+    if (!self) {
         return;
     }
 
     LOG_INFO1("Event Dispatcher: Stoping...");
-    mine->run = 0;
+    self->run = 0;
 }
 
 //------------------------------------------------------------------------------

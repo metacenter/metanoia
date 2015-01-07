@@ -5,17 +5,16 @@
 #define __AURA_EVENT_TASK_H__
 
 typedef struct AuraLoopPriv AuraLoop;
-typedef struct AuraTask AuraTask;
 
 typedef void (*AuraTaskProcessor) (void*);
 typedef void (*AuraTaskFreeFunc) (void*);
 
-struct AuraTask {
+typedef struct {
     AuraTaskProcessor process;
     AuraTaskFreeFunc freefunc;
     AuraLoop* loop;
     void* data;
-};
+} AuraTask;
 
 AuraTask* aura_task_new(AuraTaskProcessor process,
                         AuraTaskFreeFunc freefunc,

@@ -70,7 +70,7 @@ void aura_exhibitor_on_display_found(void* data)
     }
 
     LOG_INFO1("Adding new renderer!");
-    output->renderer->initialize((struct AuraRenderer*) output->renderer);
+    output->renderer->initialize(output->renderer);
     aura_exhibitor_create_new_display(output);
 }
 

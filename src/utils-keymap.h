@@ -6,7 +6,7 @@
 
 typedef struct AuraKeymapPriv AuraKeymapPriv;
 
-typedef struct AuraKeymap {
+typedef struct {
     AuraKeymapPriv* priv;
     unsigned format;
     int keymap_fd;

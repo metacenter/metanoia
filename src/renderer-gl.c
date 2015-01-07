@@ -131,7 +131,7 @@ GLuint create_shader(const char* filename, GLenum type)
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_attach(struct AuraRenderer* self,
+void aura_renderer_gl_attach(AuraRenderer* self,
                              SurfaceId surfaceId,
                              void* resource)
 {
@@ -179,7 +179,7 @@ void aura_renderer_gl_attach(struct AuraRenderer* self,
 
 //------------------------------------------------------------------------------
 
-int aura_renderer_gl_initialize(struct AuraRenderer* self)
+int aura_renderer_gl_initialize(AuraRenderer* self)
 {
     int r, result = 0;
     AuraRendererGL* mine;
@@ -307,14 +307,14 @@ clear_context:
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_finalize(struct AuraRenderer* self)
+void aura_renderer_gl_finalize(AuraRenderer* self)
 {
     return;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_draw(struct AuraRenderer* self,
+void aura_renderer_gl_draw(AuraRenderer* self,
                            Chain* surfaces, int x, int y)
 {
     int r;
@@ -455,7 +455,7 @@ release_context:
 }
 
 //------------------------------------------------------------------------------
-void aura_renderer_gl_free(struct AuraRenderer* self)
+void aura_renderer_gl_free(AuraRenderer* self)
 {
     // TODO
     if (self) {

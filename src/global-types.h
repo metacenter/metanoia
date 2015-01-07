@@ -24,14 +24,14 @@ typedef struct {
 
 // Renderer strategy interface // TODO: move to separate file
 // TODO: move 'attach' elsewhere
-struct AuraRenderer;
-typedef struct {
-    int (*initialize) (struct AuraRenderer*);
-    void (*finalize) (struct AuraRenderer*);
-    void (*attach) (struct AuraRenderer*, SurfaceId, void*);
-    void (*draw) (struct AuraRenderer*, Chain*, int x, int y);
-    void (*free) (struct AuraRenderer*);
-} AuraRenderer;
+typedef struct AuraRenderer AuraRenderer;
+struct AuraRenderer {
+    int (*initialize) (AuraRenderer*);
+    void (*finalize) (AuraRenderer*);
+    void (*attach) (AuraRenderer*, SurfaceId, void*);
+    void (*draw) (AuraRenderer*, Chain*, int x, int y);
+    void (*free) (AuraRenderer*);
+};
 
 // Key event data
 typedef struct {

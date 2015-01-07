@@ -6,7 +6,6 @@
 
 #include "global-types.h"
 
-struct AuraOutput;
 typedef struct AuraOutput AuraOutput;
 
 typedef AuraRenderer* (*AuraOutputInitRendererFunc) (AuraOutput*, int, int);

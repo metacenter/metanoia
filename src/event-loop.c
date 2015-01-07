@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-typedef struct {
+struct AuraLoopPriv {
     char* name;
     pthread_t thread;
     pthread_mutex_t schedule_mutex;
@@ -20,62 +20,60 @@ typedef struct {
     pthread_cond_t condition;
     bool run;
     Chain* task_chain;
-} AuraLoopPriv;
+};
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 AuraLoop* aura_loop_new(const char* name)
 {
-    AuraLoopPriv* mine = malloc(sizeof(AuraLoopPriv));
-    if (!mine) {
+    AuraLoop* self = malloc(sizeof(AuraLoop));
+    if (!self) {
         return NULL;
     }
 
-    mine->name = strdup(name);
-    pthread_mutex_init(&mine->schedule_mutex, NULL);
-    pthread_mutex_init(&mine->process_mutex, NULL);
-    pthread_cond_init(&mine->condition, NULL);
-    mine->run = 0;
-    mine->task_chain = chain_new(NULL);
-
-    return (AuraLoop*) mine;
+    self->name = strdup(name);
+    pthread_mutex_init(&self->schedule_mutex, NULL);
+    pthread_mutex_init(&self->process_mutex, NULL);
+    pthread_cond_init(&self->condition, NULL);
+    self->run = 0;
+    self->task_chain = chain_new(NULL);
+    return self;
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_loop_free(AuraLoop* self)
 {
-    AuraLoopPriv* mine = (AuraLoopPriv*) self;
-    if (!mine) {
+    if (!self) {
         return;
     }
 
-    if (mine->name) {
-        free(mine->name);
+    if (self->name) {
+        free(self->name);
     }
-    chain_free(mine->task_chain);
-    free(mine);
+    chain_free(self->task_chain);
+    free(self);
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static void* loop(void* data)
+static void* aura_loop_thread_loop(void* data)
 {
-    AuraLoopPriv* mine = (AuraLoopPriv*) data;
-    if (!mine) {
+    AuraLoop* self = (AuraLoop*) data;
+    if (!self) {
         return NULL;
     }
 
-    LOG_INFO1("Threads: starting loop '%s'", mine->name);
+    LOG_INFO1("Threads: starting loop '%s'", self->name);
     aura_environment_block_system_signals();
 
-    mine->run = 1;
-    pthread_mutex_lock(&mine->process_mutex);
-    while (mine->run) {
-        while (chain_len(mine->task_chain) > 0) {
-            pthread_mutex_lock(&mine->schedule_mutex);
-            AuraTask* task = chain_pop(mine->task_chain);
-            pthread_mutex_unlock(&mine->schedule_mutex);
+    self->run = 1;
+    pthread_mutex_lock(&self->process_mutex);
+    while (self->run) {
+        while (chain_len(self->task_chain) > 0) {
+            pthread_mutex_lock(&self->schedule_mutex);
+            AuraTask* task = chain_pop(self->task_chain);
+            pthread_mutex_unlock(&self->schedule_mutex);
             if (task) {
                 if (task->process) {
                     LOG_EVNT4("Loop: processing task");
@@ -91,68 +89,64 @@ static void* loop(void* data)
             }
         }
 
-        pthread_cond_wait(&mine->condition, &mine->process_mutex);
+        pthread_cond_wait(&self->condition, &self->process_mutex);
     }
 
-    LOG_INFO1("Threads: stopped loop '%s'", mine->name);
+    LOG_INFO1("Threads: stopped loop '%s'", self->name);
     return NULL;
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 int aura_loop_run(AuraLoop* self)
 {
-    AuraLoopPriv* mine = (AuraLoopPriv*) self;
-    if (!mine) {
+    if (!self) {
         return -ENOMEM;
     }
 
-    return pthread_create(&mine->thread, NULL, loop, mine);
+    return pthread_create(&self->thread, NULL, aura_loop_thread_loop, self);
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_loop_stop(AuraLoop* self)
 {
-    AuraLoopPriv* mine = (AuraLoopPriv*) self;
-    if (!mine) {
+    if (!self) {
         return;
     }
 
-    LOG_INFO1("Threads: stopping loop '%s'", mine->name);
-    pthread_mutex_lock(&mine->process_mutex);
-    mine->run = 0;
-    pthread_mutex_unlock(&mine->process_mutex);
-    pthread_cond_signal(&mine->condition);
+    LOG_INFO1("Threads: stopping loop '%s'", self->name);
+    pthread_mutex_lock(&self->process_mutex);
+    self->run = 0;
+    pthread_mutex_unlock(&self->process_mutex);
+    pthread_cond_signal(&self->condition);
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_loop_join(AuraLoop* self)
 {
-    AuraLoopPriv* mine = (AuraLoopPriv*) self;
-    if (!mine) {
+    if (!self) {
         return;
     }
-    pthread_join(mine->thread, NULL);
+    pthread_join(self->thread, NULL);
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
 {
-    AuraLoopPriv* mine = (AuraLoopPriv*) self;
-    if (!mine || !task) {
+    if (!self || !task) {
         LOG_ERROR("Invalid Loop or Task!");
         return -ENOMEM;
     }
 
-    pthread_mutex_lock(&mine->schedule_mutex);
-    chain_append(mine->task_chain, task);
-    pthread_mutex_unlock(&mine->schedule_mutex);
-    pthread_cond_signal(&mine->condition);
+    pthread_mutex_lock(&self->schedule_mutex);
+    chain_append(self->task_chain, task);
+    pthread_mutex_unlock(&self->schedule_mutex);
+    pthread_cond_signal(&self->condition);
     return 1;
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 

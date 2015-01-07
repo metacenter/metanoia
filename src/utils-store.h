@@ -8,11 +8,11 @@
 
 typedef uint32_t AuraItemId;
 
-typedef struct AuraItem {
+typedef struct {
     AuraItemId id;
 } AuraItem;
 
-typedef struct AuraStore AuraStore;
+typedef struct AuraStorePriv AuraStore;
 
 
 static const AuraItemId scInvalidItemId = 0x0000;

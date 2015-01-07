@@ -9,7 +9,7 @@
 #include <wayland-server.h>
 #include <stdbool.h>
 
-typedef struct AuraSurfaceWaylandData {
+typedef struct {
     AuraItem base;
     struct wl_resource* resource;
     struct wl_resource* buffer_resource;

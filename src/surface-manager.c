@@ -64,7 +64,7 @@ void aura_surface_attach_egl(SurfaceId sid,
     // TODO: log at init if renderer supports egl
     // TODO: move 'attach' out from renderer
     //if (renderer && renderer->attach) {
-    //    renderer->attach((struct AuraRenderer*) renderer, sid, resource);
+    //    renderer->attach((renderer, sid, resource);
     //}
 }
 

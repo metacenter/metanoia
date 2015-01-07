@@ -7,8 +7,6 @@
 #include <sys/signal.h>
 #include <time.h>
 
-typedef struct AuraEventDispatcherPriv AuraEventDispatcher;
-
 typedef void (*AuraTimerHandler) (union sigval data);
 
 timer_t aura_event_timer_run(int miliseconds,
