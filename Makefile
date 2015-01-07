@@ -8,6 +8,7 @@ build/aura: Makefile \
             build/config.o \
             build/global-functions.o \
             build/utils-chain.o \
+            build/utils-branch.o \
             build/utils-store.o \
             build/utils-dbus.o \
             build/utils-keymap.o \
@@ -34,6 +35,7 @@ build/aura: Makefile \
             build/exhibitor.o \
             build/exhibitor-display.o \
             build/exhibitor-compositor.o \
+            build/exhibitor-frame.o \
             build/exhibitor-strategist.o \
             build/exhibitor-pointer.o \
             build/renderer-mmap.o \
@@ -59,7 +61,7 @@ build/aura: Makefile \
 	@mkdir -p build
 	@echo "  LD   aura"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -o build/aura \
-	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk.o build/backend-gtk-app.o build/backend-gtk-win.o build/backend-gtk-res.o \
+	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk.o build/backend-gtk-app.o build/backend-gtk-win.o build/backend-gtk-res.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -ldrm -ludev -lwayland-server -lxkbcommon 
 
 gen/xdg-shell-server-protocol.h: Makefile \
@@ -131,6 +133,8 @@ build/global-functions.o: Makefile \
                           src/exhibitor.h \
                           src/exhibitor-display.h \
                           src/exhibitor-compositor.h \
+                          src/exhibitor-frame.h \
+                          src/utils-branch.h \
                           src/output.h \
                           src/event-loop.h
 	@mkdir -p build
@@ -145,6 +149,18 @@ build/utils-chain.o: Makefile \
 	@echo "  CC   utils-chain.o"
 	@gcc -Wall -o build/utils-chain.o -Isrc -Igen \
 	       -c src/utils-chain.c
+
+build/utils-branch.o: Makefile \
+                      src/utils-branch.c \
+                      src/utils-branch.h \
+                      src/utils-chain.h \
+                      src/utils-log.h \
+                      src/global-constants.h \
+                      src/global-types.h
+	@mkdir -p build
+	@echo "  CC   utils-branch.o"
+	@gcc -Wall -o build/utils-branch.o -Isrc -Igen \
+	       -c src/utils-branch.c
 
 build/utils-store.o: Makefile \
                      src/utils-store.c \
@@ -286,6 +302,8 @@ build/event-factory.o: Makefile \
                        src/exhibitor.h \
                        src/exhibitor-display.h \
                        src/exhibitor-compositor.h \
+                       src/exhibitor-frame.h \
+                       src/utils-branch.h \
                        src/wayland.h \
                        src/utils-environment.h \
                        src/global-constants.h
@@ -411,6 +429,8 @@ build/surface-data.o: Makefile \
                       src/utils-chain.h \
                       src/utils-store.h \
                       src/exhibitor-compositor.h \
+                      src/exhibitor-frame.h \
+                      src/utils-branch.h \
                       src/utils-log.h \
                       src/global-constants.h
 	@mkdir -p build
@@ -428,6 +448,8 @@ build/surface-manager.o: Makefile \
                          src/surface-data.h \
                          src/utils-store.h \
                          src/exhibitor-compositor.h \
+                         src/exhibitor-frame.h \
+                         src/utils-branch.h \
                          src/utils-log.h \
                          src/global-constants.h \
                          src/event-timer.h \
@@ -482,6 +504,8 @@ build/exhibitor.o: Makefile \
                    src/exhibitor-display.h \
                    src/exhibitor-compositor.h \
                    src/utils-chain.h \
+                   src/exhibitor-frame.h \
+                   src/utils-branch.h \
                    src/global-types.h \
                    src/output.h \
                    src/event-loop.h \
@@ -504,6 +528,8 @@ build/exhibitor-display.o: Makefile \
                            src/exhibitor-display.h \
                            src/exhibitor-compositor.h \
                            src/utils-chain.h \
+                           src/exhibitor-frame.h \
+                           src/utils-branch.h \
                            src/global-types.h \
                            src/output.h \
                            src/exhibitor-pointer.h \
@@ -522,6 +548,8 @@ build/exhibitor-compositor.o: Makefile \
                               src/exhibitor-compositor.c \
                               src/exhibitor-compositor.h \
                               src/utils-chain.h \
+                              src/exhibitor-frame.h \
+                              src/utils-branch.h \
                               src/global-types.h \
                               src/surface-manager.h \
                               src/event-loop.h \
@@ -535,6 +563,19 @@ build/exhibitor-compositor.o: Makefile \
 	@gcc -Wall -o build/exhibitor-compositor.o -Isrc -Igen \
 	       -c src/exhibitor-compositor.c
 
+build/exhibitor-frame.o: Makefile \
+                         src/exhibitor-frame.c \
+                         src/exhibitor-frame.h \
+                         src/utils-branch.h \
+                         src/utils-chain.h \
+                         src/utils-log.h \
+                         src/global-constants.h \
+                         src/global-types.h
+	@mkdir -p build
+	@echo "  CC   exhibitor-frame.o"
+	@gcc -Wall -o build/exhibitor-frame.o -Isrc -Igen \
+	       -c src/exhibitor-frame.c
+
 build/exhibitor-strategist.o: Makefile \
                               src/exhibitor-strategist.c \
                               src/exhibitor-strategist.h \
@@ -542,6 +583,8 @@ build/exhibitor-strategist.o: Makefile \
                               src/exhibitor-display.h \
                               src/exhibitor-compositor.h \
                               src/utils-chain.h \
+                              src/exhibitor-frame.h \
+                              src/utils-branch.h \
                               src/global-types.h \
                               src/output.h \
                               src/event-loop.h \
@@ -563,6 +606,8 @@ build/exhibitor-pointer.o: Makefile \
                            src/exhibitor-display.h \
                            src/exhibitor-compositor.h \
                            src/utils-chain.h \
+                           src/exhibitor-frame.h \
+                           src/utils-branch.h \
                            src/global-types.h \
                            src/output.h \
                            src/utils-log.h \
@@ -585,6 +630,8 @@ build/renderer-mmap.o: Makefile \
                        src/surface-data.h \
                        src/utils-store.h \
                        src/exhibitor-compositor.h \
+                       src/exhibitor-frame.h \
+                       src/utils-branch.h \
                        src/utils-log.h \
                        src/global-constants.h
 	@mkdir -p build
@@ -603,6 +650,8 @@ build/renderer-gl.o: Makefile \
                      src/surface-data.h \
                      src/utils-store.h \
                      src/exhibitor-compositor.h \
+                     src/exhibitor-frame.h \
+                     src/utils-branch.h \
                      src/utils-log.h \
                      src/global-constants.h \
                      src/bind-egl-wayland.h
@@ -664,6 +713,8 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/event-task.h \
                                      src/surface-data.h \
                                      src/exhibitor-compositor.h \
+                                     src/exhibitor-frame.h \
+                                     src/utils-branch.h \
                                      src/utils-log.h \
                                      src/global-constants.h
 	@mkdir -p build
@@ -683,6 +734,8 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/event-task.h \
                                   src/surface-data.h \
                                   src/exhibitor-compositor.h \
+                                  src/exhibitor-frame.h \
+                                  src/utils-branch.h \
                                   src/utils-log.h \
                                   src/global-constants.h
 	@mkdir -p build

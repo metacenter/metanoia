@@ -5,11 +5,12 @@
 #define __AURA_EXHIBITOR_COMPOSITOR_H__
 
 #include "utils-chain.h"
+#include "exhibitor-frame.h"
 #include "global-types.h"
 
 typedef struct {
-    Chain* visible_surfaces; // XXX: tmp
     Chain* groups;
+    AuraFrame* frame;
 } AuraCompositor;
 
 AuraCompositor* aura_compositor_new();

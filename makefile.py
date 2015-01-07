@@ -105,6 +105,12 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='utils-branch.o',
+        inputs=['utils-branch.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='utils-store.o',
         inputs=['utils-store.c'],
     )
@@ -280,6 +286,12 @@ aura.add_input(t)
 t = m.add_compile_target(
         output='exhibitor-compositor.o',
         inputs=['exhibitor-compositor.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='exhibitor-frame.o',
+        inputs=['exhibitor-frame.c'],
     )
 aura.add_input(t)
 

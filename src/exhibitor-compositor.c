@@ -18,8 +18,8 @@ AuraCompositor* aura_compositor_new()
         return self;
     }
 
-    self->visible_surfaces = chain_new(0);
     self->groups = chain_new(0);
+    self->frame = aura_frame_new();
     return self;
 }
 
@@ -27,7 +27,7 @@ AuraCompositor* aura_compositor_new()
 
 Chain* aura_compositor_get_visible_surfaces(AuraCompositor* self)
 {
-    return self->visible_surfaces;
+    return self->frame->subbranches;
 }
 
 //------------------------------------------------------------------------------
@@ -40,16 +40,16 @@ void aura_compositor_manage_surface(AuraCompositor* self, SurfaceId sid)
     }
 
     surface->group.compositor = self;
-    chain_append(self->visible_surfaces, (void*) sid);
+    chain_append(self->frame->subbranches, (void*) sid);
 }
 
 //------------------------------------------------------------------------------
 
 void aura_compositor_pop_surface(AuraCompositor* self, SurfaceId sid)
 {
-    chain_remove(self->visible_surfaces, (void*) sid,
+    chain_remove(self->frame->subbranches, (void*) sid,
                  (AuraCompareFunc) aura_surface_compare);
-    chain_append(self->visible_surfaces, (void*) sid);
+    chain_append(self->frame->subbranches, (void*) sid);
 }
 
 //------------------------------------------------------------------------------
