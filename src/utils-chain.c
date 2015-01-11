@@ -56,12 +56,7 @@ void chain_free(Chain* self)
         return;
     }
 
-    Link *next, *iter = self->first;
-    while (iter) {
-        next = iter->next;
-        link_free(iter, self->freefunc);
-        iter = next;
-    }
+    chain_clean(self);
 }
 
 //------------------------------------------------------------------------------
@@ -185,6 +180,18 @@ int chain_remove(Chain* self, void* data, AuraCompareFunc compare)
     self->len -= 1;
     link_free(link, self->freefunc);
     return 1;
+}
+
+//------------------------------------------------------------------------------
+
+void chain_clean(Chain* self)
+{
+    Link* iter = self->first;
+    while (iter) {
+        Link* next = iter->next;
+        link_free(iter, self->freefunc);
+        iter = next;
+    }
 }
 
 //------------------------------------------------------------------------------

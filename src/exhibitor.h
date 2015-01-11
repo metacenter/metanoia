@@ -6,7 +6,6 @@
 
 #include "exhibitor-display.h"
 
-#include "utils-chain.h"
 #include "event-loop.h"
 
 typedef struct AuraExhibitorPriv AuraExhibitorPriv;
@@ -22,6 +21,11 @@ void aura_exhibitor_initialize(AuraLoop* this_loop);
 
 AuraExhibitor* aura_exhibitor_get_instance();
 
-void aura_exhibitor_pop_history_surface();
+void aura_exhibitor_pop_history_surface(int position);
+
+void aura_exhibitor_command_position(AuraArgmandType type,
+                                     AuraArgmandType direction,
+                                     int position);
 
 #endif // __AURA_EXHIBITOR_H__
+

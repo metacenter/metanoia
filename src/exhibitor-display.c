@@ -2,7 +2,6 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "exhibitor-display.h"
-#include "exhibitor-compositor.h"
 #include "exhibitor-pointer.h"
 #include "utils-log.h"
 #include "event-timer.h"
@@ -91,7 +90,7 @@ AuraDisplay* aura_display_new(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
-void aura_display_start(AuraDisplay* self)
+inline void aura_display_start(AuraDisplay* self)
 {
     self->timerid = aura_event_timer_run(100, // TODO: use displays frame rate
                               (AuraTimerHandler) aura_display_redraw_all, self);
@@ -99,9 +98,20 @@ void aura_display_start(AuraDisplay* self)
 
 //------------------------------------------------------------------------------
 
-void aura_display_stop(AuraDisplay* self)
+inline void aura_display_stop(AuraDisplay* self)
 {
     aura_event_timer_delete(self->timerid);
+}
+
+//------------------------------------------------------------------------------
+
+inline void aura_display_command_position(AuraDisplay* self,
+                                          AuraArgmandType type,
+                                          AuraArgmandType direction,
+                                          int position)
+{
+    aura_compositor_command_position(self->compositor,
+                                     type, direction, position);
 }
 
 //------------------------------------------------------------------------------

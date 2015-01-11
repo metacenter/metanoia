@@ -34,7 +34,9 @@ int chain_len(Chain* chain);
 void chain_prepend(Chain* chain, void* data);
 void chain_append(Chain* chain, void* data);
 void* chain_pop(Chain* chain);
-int chain_remove(Chain* self, void* data, AuraCompareFunc compare);
+
+int chain_remove(Chain* chain, void* data, AuraCompareFunc compare);
+void chain_clean(Chain* chain);
 
 Chain* chain_subtract(Chain* minuend,
                       Chain* subtrahent,

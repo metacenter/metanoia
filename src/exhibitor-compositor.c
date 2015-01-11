@@ -54,3 +54,13 @@ void aura_compositor_pop_surface(AuraCompositor* self, SurfaceId sid)
 
 //------------------------------------------------------------------------------
 
+void aura_compositor_command_position(AuraCompositor* self,
+                                      AuraArgmandType type,
+                                      AuraArgmandType direction,
+                                      int position)
+{
+    // TODO
+}
+
+//------------------------------------------------------------------------------
+

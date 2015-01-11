@@ -28,6 +28,10 @@ void aura_keyboard_add_argmand(AuraModeEnum modeid, const AuraArgmand* argmand)
         return;
     }
 
+    if (!stack) {
+        stack = chain_new(0);
+    }
+
     if (!modes) {
         modes = chain_new(0);
     }

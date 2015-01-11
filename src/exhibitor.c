@@ -171,6 +171,17 @@ void aura_exhibitor_pop_history_surface(int position)
 
 //------------------------------------------------------------------------------
 
+void aura_exhibitor_command_position(AuraArgmandType type,
+                                     AuraArgmandType direction,
+                                     int position)
+{
+    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    aura_display_command_position(exhibitor->display,
+                                  type, direction, position);
+}
+
+//------------------------------------------------------------------------------
+
 void aura_exhibitor_initialize(AuraLoop* this_loop)
 {
     if (this_loop == 0) {

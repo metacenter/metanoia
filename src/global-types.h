@@ -40,5 +40,21 @@ typedef struct {
     bool value;
 } AuraKeyData;
 
+/// Argmand types
+typedef enum {
+    AURA_ARGMAND_NONE,
+    // actions
+    AURA_ARGMAND_FOCUS,
+    AURA_ARGMAND_MOVE,
+    AURA_ARGMAND_RESIZE,
+    // directions
+    AURA_ARGMAND_N, ///< North
+    AURA_ARGMAND_E, ///< East
+    AURA_ARGMAND_S, ///< South
+    AURA_ARGMAND_W, ///< West
+    AURA_ARGMAND_BACK,
+    AURA_ARGMAND_FORWARD,
+} AuraArgmandType;
+
 #endif // __AURA_GLOBAL_TYPES_H__
 

@@ -124,10 +124,10 @@ build/config.o: Makefile \
 build/global-functions.o: Makefile \
                           src/global-functions.c \
                           src/global-functions.h \
+                          src/utils-chain.h \
                           src/utils-log.h \
                           src/global-constants.h \
                           src/global-types.h \
-                          src/utils-chain.h \
                           src/event-signals.h \
                           src/event-task.h \
                           src/exhibitor.h \
@@ -503,9 +503,9 @@ build/exhibitor.o: Makefile \
                    src/exhibitor.h \
                    src/exhibitor-display.h \
                    src/exhibitor-compositor.h \
-                   src/utils-chain.h \
                    src/exhibitor-frame.h \
                    src/utils-branch.h \
+                   src/utils-chain.h \
                    src/global-types.h \
                    src/output.h \
                    src/event-loop.h \
@@ -527,9 +527,9 @@ build/exhibitor-display.o: Makefile \
                            src/exhibitor-display.c \
                            src/exhibitor-display.h \
                            src/exhibitor-compositor.h \
-                           src/utils-chain.h \
                            src/exhibitor-frame.h \
                            src/utils-branch.h \
+                           src/utils-chain.h \
                            src/global-types.h \
                            src/output.h \
                            src/exhibitor-pointer.h \
@@ -547,9 +547,9 @@ build/exhibitor-display.o: Makefile \
 build/exhibitor-compositor.o: Makefile \
                               src/exhibitor-compositor.c \
                               src/exhibitor-compositor.h \
-                              src/utils-chain.h \
                               src/exhibitor-frame.h \
                               src/utils-branch.h \
+                              src/utils-chain.h \
                               src/global-types.h \
                               src/surface-manager.h \
                               src/event-loop.h \
@@ -582,9 +582,9 @@ build/exhibitor-strategist.o: Makefile \
                               src/exhibitor.h \
                               src/exhibitor-display.h \
                               src/exhibitor-compositor.h \
-                              src/utils-chain.h \
                               src/exhibitor-frame.h \
                               src/utils-branch.h \
+                              src/utils-chain.h \
                               src/global-types.h \
                               src/output.h \
                               src/event-loop.h \
@@ -605,9 +605,9 @@ build/exhibitor-pointer.o: Makefile \
                            src/exhibitor.h \
                            src/exhibitor-display.h \
                            src/exhibitor-compositor.h \
-                           src/utils-chain.h \
                            src/exhibitor-frame.h \
                            src/utils-branch.h \
+                           src/utils-chain.h \
                            src/global-types.h \
                            src/output.h \
                            src/utils-log.h \
