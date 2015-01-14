@@ -6,13 +6,21 @@
 
 #include "utils-chain.h"
 
-typedef struct {
+typedef struct AuraBranch AuraBranch;
+
+struct AuraBranch {
     void* data;
-    Chain* subbranches;
-} AuraBranch;
+    AuraBranch* trunk;
+    Chain* twigs;
+};
 
 AuraBranch* aura_branch_new();
 void aura_branch_free();
+
+void aura_branch_prepend(AuraBranch* self, AuraBranch* other);
+void aura_branch_append(AuraBranch* self, AuraBranch* other);
+
+void aura_branch_set_data(AuraBranch* self, void* data);
 
 #endif // __AURA_UTILS_BRANCH_H__
 

@@ -568,9 +568,9 @@ build/exhibitor-frame.o: Makefile \
                          src/exhibitor-frame.h \
                          src/utils-branch.h \
                          src/utils-chain.h \
+                         src/global-types.h \
                          src/utils-log.h \
-                         src/global-constants.h \
-                         src/global-types.h
+                         src/global-constants.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-frame.o"
 	@gcc -Wall -o build/exhibitor-frame.o -Isrc -Igen \

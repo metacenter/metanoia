@@ -25,7 +25,7 @@ void aura_exhibitor_pop_history_surface(int position);
 
 void aura_exhibitor_command_position(AuraArgmandType type,
                                      AuraArgmandType direction,
-                                     int position);
+                                     int magnitude);
 
 #endif // __AURA_EXHIBITOR_H__
 

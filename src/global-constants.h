@@ -23,6 +23,6 @@ typedef enum {
 } AuraModeEnum;
 
 // TBR
-static const SurfaceId scInvalidSurfaceId = 0xFFFF;
+static const SurfaceId scInvalidSurfaceId = 0x0000;
 
 #endif // __AURA_CONSTANTS_H__

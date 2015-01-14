@@ -10,6 +10,7 @@
 typedef struct {
     Chain* groups;
     AuraFrame* frame;
+    AuraFrame* selection;
 } AuraCompositor;
 
 AuraCompositor* aura_compositor_new();
@@ -23,7 +24,7 @@ void aura_compositor_pop_surface(AuraCompositor* self, SurfaceId sid);
 void aura_compositor_command_position(AuraCompositor* self,
                                       AuraArgmandType type,
                                       AuraArgmandType direction,
-                                      int position);
+                                      int magnitude);
 
 #endif // __AURA_EXHIBITOR_COMPOSITOR_H__
 
