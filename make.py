@@ -99,7 +99,8 @@ class Make:
     #---------------------------------------------------------------------------
 
     cc = 'gcc'
-    wflags = list()
+    cflags = list()
+    cflags = list()
     lflags = list()
 
     srcdir = 'src'
@@ -127,7 +128,7 @@ class Make:
                 wr('\n\t@mkdir -p {0}'.format(self.builddir))
                 wr('\t@echo "  CC   {0}"'.format(t.output))
                 wr('\t@{0} {1} -o {2} -I{3} -I{4} \\'
-                    .format(self.cc, ' '.join(self.wflags), output_path,
+                    .format(self.cc, ' '.join(self.cflags), output_path,
                             self.srcdir, self.gendir))
                 wr('\t       -c {0}'.format(' '.join(input_paths)), end='')
                 if len(t.pkgs):
@@ -359,9 +360,9 @@ class Make:
         else:
             print('Compiler anme must be passed as string!')
 
-    def set_wflags(self, flags):
+    def set_cflags(self, flags):
         if isinstance(flags, list) or isinstance(flags, tuple):
-            self.wflags = flags
+            self.cflags = flags
         else:
             print('WFLAGS must be passed as list of strings!')
 

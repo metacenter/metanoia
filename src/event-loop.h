@@ -6,8 +6,6 @@
 
 #include "event-task.h"
 
-typedef struct AuraLoopPriv AuraLoop;
-
 AuraLoop* aura_loop_new(const char* name);
 void aura_loop_free(AuraLoop* loop);
 

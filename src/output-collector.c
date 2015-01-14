@@ -18,7 +18,7 @@ Chain* aura_outputs_fetch_actual_outputs()
     int num = 0;
     Chain* actual_outputs = chain_new(0);
 
-    if (!aura_settings().run_in_test_window) {
+    if (!aura_settings()->run_in_test_window) {
         num = aura_drm_update_devices(actual_outputs);
         if (num < 1) {
             num = aura_devfb_setup_framebuffer(actual_outputs);

@@ -126,7 +126,7 @@ static void* aura_backend_gtk_main(void* data)
     aura_environment_block_system_signals();
 
     int argc = 1;
-    char* args[] = {"aura", '\0'};
+    char* args[] = {"aura", NULL};
     char** argv = args;
 
     g_application_run(G_APPLICATION(aura_app_new()), argc, argv);

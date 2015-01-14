@@ -285,7 +285,7 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
                            g_variant_get_type(action_variant), action_variant));
     group[i].resolution_action = G_SIMPLE_ACTION(action);
 
-    int j;
+    unsigned int j;
     for (j = 0; j < sizeof(resolution)/sizeof(AuraResolution); ++j)
     {
         gchar* label = g_strdup_printf("%4d x %4d", resolution[j].width,
@@ -345,7 +345,7 @@ struct _AuraWinPrivate
     GtkWidget* box_inner;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE(AuraWin, aura_win, GTK_TYPE_APPLICATION_WINDOW);
+G_DEFINE_TYPE_WITH_PRIVATE(AuraWin, aura_win, GTK_TYPE_APPLICATION_WINDOW)
 
 //------------------------------------------------------------------------------
 

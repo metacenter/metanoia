@@ -10,6 +10,7 @@
 #include <linux/input.h>
 
 static const AuraConfig scConfig = {
+        .dummy = 0,
     };
 
 static const AuraArgmand scArgmands[] = {
@@ -23,7 +24,6 @@ static const AuraArgmand scArgmands[] = {
         {KEY_LEFT,  0,                              aura_left},
         {KEY_UP,    0,                              aura_up},
         {KEY_DOWN,  0,                              aura_down},
-        {0}
     };
 
 #endif // __AURA_CONFIGURATION_H__

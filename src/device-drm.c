@@ -564,8 +564,8 @@ int aura_drm_update_devices(Chain* outputs)
 {
     pthread_mutex_lock(&drm_mutex);
 
-    int i;
-    int num = -1;
+    unsigned int i;
+    int j, num = -1;
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
     Chain* drm_outputs = chain_new(NULL);
@@ -612,8 +612,8 @@ int aura_drm_update_devices(Chain* outputs)
 
     num = 0;
     // Find a connected connectors
-    for (i = 0; i < resources->count_connectors; ++i) {
-        connector = drmModeGetConnector(fd, resources->connectors[i]);
+    for (j = 0; j < resources->count_connectors; ++j) {
+        connector = drmModeGetConnector(fd, resources->connectors[j]);
         if (!connector) {
             continue;
         }

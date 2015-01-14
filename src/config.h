@@ -8,14 +8,15 @@
 #include "global-constants.h"
 
 typedef struct {
+    int dummy;
 } AuraConfig;
 
 typedef struct {
     bool run_in_test_window;
 } AuraSettings;
 
-const AuraConfig aura_config();
-const AuraSettings aura_settings();
+const AuraConfig* aura_config();
+const AuraSettings* aura_settings();
 
 void aura_config_apply();
 

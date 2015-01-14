@@ -6,6 +6,8 @@
 
 #include "global-types.h"
 
+#define AURA_UNUSED __attribute__((unused))
+
 typedef enum {
     AURA_KEY_RELEASED,
     AURA_KEY_PRESSED,

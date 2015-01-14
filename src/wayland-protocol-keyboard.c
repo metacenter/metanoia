@@ -7,8 +7,8 @@
 
 //------------------------------------------------------------------------------
 
-static void keyboard_release(struct wl_client *client,
-                             struct wl_resource *resource)
+void keyboard_release(struct wl_client *client,
+                      struct wl_resource *resource)
 {
     LOG_WAYL2("Wayland: keyboard release");
     wl_resource_destroy(resource);
@@ -16,7 +16,7 @@ static void keyboard_release(struct wl_client *client,
 
 //------------------------------------------------------------------------------
 
-static const struct wl_keyboard_interface keyboard_implementation = {
+const struct wl_keyboard_interface keyboard_implementation = {
         keyboard_release
     };
 

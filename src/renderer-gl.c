@@ -199,7 +199,7 @@ int aura_renderer_gl_initialize(AuraRenderer* self)
     if (!extensions) {
         LOG_WARN1("Retrieving EGL extension string failed!");
     } else if (strstr(extensions, "EGL_WL_bind_wayland_display")) {
-        mine->bind_display =
+        /*mine->bind_display =
                     (void*) eglGetProcAddress("eglBindWaylandDisplayWL");
         mine->unbind_display =
                     (void*) eglGetProcAddress("eglUnbindWaylandDisplayWL");
@@ -208,7 +208,7 @@ int aura_renderer_gl_initialize(AuraRenderer* self)
         mine->destroy_image =
                     (void*) eglGetProcAddress("eglDestroyImageKHR");
         mine->query_buffer =
-                    (void*) eglGetProcAddress("eglQueryWaylandBufferWL");
+                    (void*) eglGetProcAddress("eglQueryWaylandBufferWL");*/
         mine->has_wayland_support = 1;
     }
 
@@ -397,8 +397,8 @@ void aura_renderer_gl_draw(AuraRenderer* self,
             LOG_WARN1("Could not create KHR image!");
         }
 
-        PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d =
-            (void*) eglGetProcAddress("glEGLImageTargetTexture2DOES");
+        //PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d =
+        //    (void*) eglGetProcAddress("glEGLImageTargetTexture2DOES");
 
         GLuint tid;
         glGenTextures(1, &tid);
@@ -409,7 +409,7 @@ void aura_renderer_gl_draw(AuraRenderer* self,
         //glUniform1i(uniform_texture, 0);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        image_target_texture_2d(GL_TEXTURE_2D, surface->buffer.image);
+        //image_target_texture_2d(GL_TEXTURE_2D, surface->buffer.image);
         LOG_DEBUG("*** Z 0x%x 0x%x", glGetError(), eglGetError());
     }
 

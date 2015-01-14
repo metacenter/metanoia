@@ -6,7 +6,7 @@
 
 #include <wayland-server.h>
 
-static const struct wl_pointer_interface pointer_implementation;
+const struct wl_pointer_interface pointer_implementation;
 
 #endif // __AURA_WAYLAND_PROTOCOL_POINTER_H__
 

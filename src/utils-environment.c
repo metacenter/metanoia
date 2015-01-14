@@ -61,7 +61,7 @@ static void aura_environment_async_signal_handler(int sig,
 static void aura_environment_signal_handler_set_up(void)
 {
     struct sigaction sa;
-    memset(&sa, 0, sizeof(sigaction));
+    memset(&sa, 0, sizeof(struct sigaction));
     sigemptyset(&sa.sa_mask);
 
     sa.sa_sigaction = aura_environment_async_signal_handler;

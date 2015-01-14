@@ -56,7 +56,7 @@ struct _AuraAppClass
     GtkApplicationClass parent_class;
 };
 
-G_DEFINE_TYPE(AuraApp, aura_app, GTK_TYPE_APPLICATION);
+G_DEFINE_TYPE(AuraApp, aura_app, GTK_TYPE_APPLICATION)
 
 //------------------------------------------------------------------------------
 

@@ -162,8 +162,8 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
                 flags |= scIdInputTouchscreenFlag;
             else if (strcmp(propname, scIdInputJoystic) == 0)
                 flags |= scIdInputJoysticFlag;
-            //else if (strcmp(propname, scIdInputKey) == 0) // TODO
-            //    flags |= scIdInputKeyFlag;
+            else if (strcmp(propname, scIdInputKey) == 0)
+                flags |= scIdInputKeyFlag;
             else if (strcmp(propname, scIdInputKeyboard) == 0)
                 flags |= scIdInputKeyboardFlag;
 

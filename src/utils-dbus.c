@@ -141,7 +141,7 @@ void aura_dbus_finalize(void)
 
 int aura_dbus_session_get_session_by_pid(int pid, const char** sid_out)
 {
-    static const char const* cMessageName = "GetSessionByPID";
+    static const char* const cMessageName = "GetSessionByPID";
 
     bool ok;
     int result;
@@ -191,7 +191,7 @@ int aura_dbus_session_get_session_by_pid(int pid, const char** sid_out)
 
 int aura_dbus_session_take_control()
 {
-    static const char const* cMessageName = "TakeControl";
+    static const char* const cMessageName = "TakeControl";
 
     bool ok;
     uint32_t force = 0;
@@ -233,7 +233,7 @@ int aura_dbus_session_take_control()
 
 int aura_dbus_session_release_control()
 {
-    static const char const* cMessageName = "ReleaseControl";
+    static const char* const cMessageName = "ReleaseControl";
 
     int result;
     DBusMessage *msg;
@@ -268,7 +268,7 @@ int aura_dbus_session_release_control()
 
 int aura_dbus_session_take_device(uint32_t major, uint32_t minor)
 {
-    static const char const* cMessageName = "TakeDevice";
+    static const char* const cMessageName = "TakeDevice";
 
     bool ok;
     int result, fd, paused;
