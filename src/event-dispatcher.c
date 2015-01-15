@@ -137,8 +137,9 @@ void aura_event_dispatcher_stop(AuraEventDispatcher* self)
 
 //------------------------------------------------------------------------------
 
-void aura_event_dispatcher_default_signal_handler(AuraEventData* data,
-                                                  struct epoll_event event)
+void aura_event_dispatcher_default_signal_handler
+                                          (AuraEventData* data,
+                                           AURA_UNUSED struct epoll_event event)
 {
     int size;
     struct signalfd_siginfo fdsi;

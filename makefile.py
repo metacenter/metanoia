@@ -13,8 +13,7 @@ m.set_resource_directory('res')
 m.set_gen_directory('gen')
 
 m.set_c_compiler('gcc')
-m.set_cflags(['-std=gnu11', '-Wall', '-W', '-Wextra', '-Wpedantic',
-              '-Wno-unused-parameter'])
+m.set_cflags(['-std=gnu11', '-Wall', '-W', '-Wextra', '-Wpedantic'])
 m.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
 
 #-------------------------------------------------------------------------------

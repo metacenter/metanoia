@@ -7,17 +7,18 @@
 
 //------------------------------------------------------------------------------
 
-static void shell_unbind(struct wl_resource *resource)
+void aura_wayland_shell_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind shell");
 }
 
 //------------------------------------------------------------------------------
 
-static void get_shell_surface(struct wl_client *client,
-                              struct wl_resource *resource,
-                              uint32_t id,
-                              struct wl_resource *surface_resource)
+void aura_wayland_get_shell_surface
+                              (AURA_UNUSED struct wl_client* client,
+                               AURA_UNUSED struct wl_resource* resource,
+                               uint32_t id,
+                               AURA_UNUSED struct wl_resource* surface_resource)
 {
     LOG_NYIMP("Getting Wayland shell surface (id: %d)", id);
 }
@@ -25,13 +26,15 @@ static void get_shell_surface(struct wl_client *client,
 //------------------------------------------------------------------------------
 
 static const struct wl_shell_interface shell_implementation = {
-        get_shell_surface
+        aura_wayland_get_shell_surface
     };
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_bind(struct wl_client *client,
-                             void *data, uint32_t version, uint32_t id)
+void aura_wayland_shell_bind(struct wl_client* client,
+                             AURA_UNUSED void* data,
+                             uint32_t version,
+                             uint32_t id)
 {
     struct wl_resource* rc;
 
@@ -44,7 +47,7 @@ void aura_wayland_shell_bind(struct wl_client *client,
     }
 
     wl_resource_set_implementation(rc, &shell_implementation,
-                                   NULL, shell_unbind);
+                                   NULL, aura_wayland_shell_unbind);
 }
 
 //------------------------------------------------------------------------------

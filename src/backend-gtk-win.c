@@ -137,8 +137,8 @@ static gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data)
 
 //------------------------------------------------------------------------------
 
-static gboolean on_configure_event(GtkWidget* widget,
-                                   GdkEventConfigure* event,
+static gboolean on_configure_event(AURA_UNUSED GtkWidget* widget,
+                                   AURA_UNUSED GdkEventConfigure* event,
                                    gpointer data)
 {
     int n = (int) data;
@@ -148,7 +148,7 @@ static gboolean on_configure_event(GtkWidget* widget,
 
 //------------------------------------------------------------------------------
 
-static gboolean on_timer(void* data)
+static gboolean on_timer(AURA_UNUSED void* data)
 {
     int i;
     for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
@@ -160,8 +160,8 @@ static gboolean on_timer(void* data)
 
 //------------------------------------------------------------------------------
 
-void on_display_activation(GSimpleAction* action,
-                           GParamSpec* pspec,
+void on_display_activation(AURA_UNUSED GSimpleAction* action,
+                           AURA_UNUSED GParamSpec* pspec,
                            gpointer data)
 {
     int n = (int) data;
@@ -173,7 +173,7 @@ void on_display_activation(GSimpleAction* action,
 //------------------------------------------------------------------------------
 
 void on_resolution_change(GSimpleAction* action,
-                          GParamSpec* pspec,
+                          AURA_UNUSED GParamSpec* pspec,
                           gpointer data)
 {
     int n = (int) data;
@@ -188,7 +188,7 @@ void on_resolution_change(GSimpleAction* action,
 //------------------------------------------------------------------------------
 // OUTPUT IMPLEMENTATION
 
-AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AuraWin* win,
+AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AURA_UNUSED AuraWin* win,
                                                        int n,
                                                        int width,
                                                        int height)
@@ -214,7 +214,7 @@ AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AuraWin* win,
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_win_swap_buffers(AuraWin* win, int n)
+void aura_backend_gtk_win_swap_buffers(AURA_UNUSED AuraWin* win, int n)
 {
     pthread_mutex_lock(&mutex_buffer);
     group[n].front ^= 1;
@@ -223,7 +223,8 @@ void aura_backend_gtk_win_swap_buffers(AuraWin* win, int n)
 
 //------------------------------------------------------------------------------
 
-AuraResolution aura_backend_gtk_win_get_resolution(AuraWin* win, int n)
+AuraResolution aura_backend_gtk_win_get_resolution(AURA_UNUSED AuraWin* win,
+                                                   int n)
 {
     if (n < 0 || NUM_VIEW_GROUPS <= n) {
         return (AuraResolution) {-1, -1};

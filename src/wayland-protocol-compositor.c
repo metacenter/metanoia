@@ -12,21 +12,21 @@
 
 //------------------------------------------------------------------------------
 
-static void compositor_unbind(struct wl_resource *resource)
+static void compositor_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind compositor");
 }
 
 //------------------------------------------------------------------------------
 
-static void region_unbind(struct wl_resource *resource)
+static void region_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind region");
 }
 
 //------------------------------------------------------------------------------
 
-static void surface_unbind(struct wl_resource *resource)
+static void surface_unbind(struct wl_resource* resource)
 {
     SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: unbind surface (sid: %d)", sid);
@@ -90,7 +90,9 @@ static const struct wl_compositor_interface compositor_implementation = {
 //------------------------------------------------------------------------------
 
 void aura_wayland_compositor_bind(struct wl_client* client,
-                                  void* data, uint32_t version, uint32_t id)
+                                  AURA_UNUSED void* data,
+                                  uint32_t version,
+                                  uint32_t id)
 {
     struct wl_resource* rc;
 

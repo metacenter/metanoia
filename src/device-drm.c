@@ -183,7 +183,7 @@ static AuraRenderer* create_dumb_buffers(AuraOutputDRM* output_drm)
 //------------------------------------------------------------------------------
 // EGL
 
-AuraRenderer* initialize_egl_with_gbm(AuraOutputDRM* output_drm)
+AuraRenderer* initialize_egl_with_gbm(AURA_UNUSED AuraOutputDRM* output_drm)
 {
     /*int r; // TODO EGLint ?
     uint32_t fb_id;
@@ -339,7 +339,8 @@ clear_fb:
 // OUTPUT
 
 AuraRenderer* aura_drm_output_initialize(AuraOutput* output,
-                                         int width, int height)
+                                         AURA_UNUSED int width,
+                                         AURA_UNUSED int height)
 {
     AuraRenderer* renderer = NULL;
 

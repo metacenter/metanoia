@@ -10,18 +10,18 @@
 
 //-----------------------------------------------------------------------------
 
-static void surface_destroy(struct wl_client* client,
-                            struct wl_resource* resource)
+void aura_wayland_surface_destroy(AURA_UNUSED struct wl_client* client,
+                                  AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: surface destroy");
 }
 
 //-----------------------------------------------------------------------------
 
-static void surface_attach(struct wl_client* client,
-                           struct wl_resource* resource,
-                           struct wl_resource* buffer_resource,
-                           int32_t sx, int32_t sy)
+void aura_wayland_surface_attach(AURA_UNUSED struct wl_client* client,
+                                 struct wl_resource* resource,
+                                 struct wl_resource* buffer_resource,
+                                 int32_t sx, int32_t sy)
 {
     int width = 0;
     int height = 0;
@@ -53,10 +53,10 @@ static void surface_attach(struct wl_client* client,
 
 //-----------------------------------------------------------------------------
 
-static void surface_damage(struct wl_client* client,
-                           struct wl_resource* resource,
-                           int32_t x, int32_t y,
-                           int32_t width, int32_t height)
+void aura_wayland_surface_damage(AURA_UNUSED struct wl_client* client,
+                                 AURA_UNUSED struct wl_resource* resource,
+                                 int32_t x, int32_t y,
+                                 int32_t width, int32_t height)
 {
     LOG_NYIMP("Wayland: surface damage (x: %d, y: %d, w: %d, h: %d)",
               x, y, width, height);
@@ -64,9 +64,9 @@ static void surface_damage(struct wl_client* client,
 
 //-----------------------------------------------------------------------------
 
-static void surface_frame(struct wl_client* client,
-                          struct wl_resource* resource,
-                          uint32_t callback)
+void aura_wayland_surface_frame(struct wl_client* client,
+                                struct wl_resource* resource,
+                                uint32_t callback)
 {
     // TODO: subscribe for destroy
 
@@ -91,26 +91,28 @@ static void surface_frame(struct wl_client* client,
 
 //-----------------------------------------------------------------------------
 
-static void surface_set_opaque_region(struct wl_client* client,
-                                      struct wl_resource* resource,
-                                      struct wl_resource* region_resource)
+void aura_wayland_surface_set_opaque_region
+                               (AURA_UNUSED struct wl_client* client,
+                                AURA_UNUSED struct wl_resource* resource,
+                                AURA_UNUSED struct wl_resource* region_resource)
 {
     LOG_NYIMP("Wayland: set opaque region");
 }
 
 //-----------------------------------------------------------------------------
 
-static void surface_set_input_region(struct wl_client* client,
-                                     struct wl_resource* resource,
-                                     struct wl_resource* region_resource)
+void aura_wayland_surface_set_input_region
+                               (AURA_UNUSED struct wl_client* client,
+                                AURA_UNUSED struct wl_resource* resource,
+                                AURA_UNUSED struct wl_resource* region_resource)
 {
     LOG_NYIMP("Wayland: set input region");
 }
 
 //-----------------------------------------------------------------------------
 
-static void surface_commit(struct wl_client* client,
-                           struct wl_resource* resource)
+void aura_wayland_surface_commit(AURA_UNUSED struct wl_client* client,
+                                 struct wl_resource* resource)
 {
     SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
 
@@ -121,34 +123,36 @@ static void surface_commit(struct wl_client* client,
 
 //-----------------------------------------------------------------------------
 
-static void surface_set_buffer_transform(struct wl_client* client,
-                                         struct wl_resource* resource,
-                                         int transform)
+void aura_wayland_surface_set_buffer_transform
+                                      (AURA_UNUSED struct wl_client* client,
+                                       AURA_UNUSED struct wl_resource* resource,
+                                       int32_t transform)
 {
-    LOG_NYIMP("Wayland: set buffer transform");
+    LOG_NYIMP("Wayland: set buffer transform (transform: %d)", transform);
 }
 
 //-----------------------------------------------------------------------------
 
-static void surface_set_buffer_scale(struct wl_client* client,
-                                     struct wl_resource* resource,
-                                     int32_t scale)
+void aura_wayland_surface_set_buffer_scale
+                                      (AURA_UNUSED struct wl_client* client,
+                                       AURA_UNUSED struct wl_resource* resource,
+                                       int32_t scale)
 {
-    LOG_NYIMP("Wayland: set buffer scale");
+    LOG_NYIMP("Wayland: set buffer scale (scale: %d)", scale);
 }
 
 //-----------------------------------------------------------------------------
 
 const struct wl_surface_interface surface_implementation = {
-        surface_destroy,
-        surface_attach,
-        surface_damage,
-        surface_frame,
-        surface_set_opaque_region,
-        surface_set_input_region,
-        surface_commit,
-        surface_set_buffer_transform,
-        surface_set_buffer_scale
+        aura_wayland_surface_destroy,
+        aura_wayland_surface_attach,
+        aura_wayland_surface_damage,
+        aura_wayland_surface_frame,
+        aura_wayland_surface_set_opaque_region,
+        aura_wayland_surface_set_input_region,
+        aura_wayland_surface_commit,
+        aura_wayland_surface_set_buffer_transform,
+        aura_wayland_surface_set_buffer_scale
     };
 
 //-----------------------------------------------------------------------------

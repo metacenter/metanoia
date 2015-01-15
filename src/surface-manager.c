@@ -53,7 +53,7 @@ AuraSurfaceData* aura_surface_get(SurfaceId sid)
 //------------------------------------------------------------------------------
 
 void aura_surface_attach_egl(SurfaceId sid,
-                             void* resource)
+                             AURA_UNUSED void* resource)
 {
     AuraSurfaceData* surface = aura_surface_get(sid);
     if (!surface) {

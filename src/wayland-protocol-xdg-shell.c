@@ -10,33 +10,35 @@
 
 //------------------------------------------------------------------------------
 
-static void xdg_surface_unbind(struct wl_resource *resource)
+void aura_wayland_xdg_surface_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind XDG shell surface");
 }
 
 //------------------------------------------------------------------------------
 
-static void xdg_shell_unbind(struct wl_resource *resource)
+void aura_wayland_xdg_shell_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind XDG shell");
 }
 
 //------------------------------------------------------------------------------
 
-static void xdg_use_unstable_version(struct wl_client *client,
-                                     struct wl_resource *resource,
-                                     int32_t version)
+void aura_wayland_xdg_use_unstable_version
+                                      (AURA_UNUSED struct wl_client* client,
+                                       AURA_UNUSED struct wl_resource* resource,
+                                       int32_t version)
 {
-    LOG_NYIMP("Wayland: use unstable version");
+    LOG_NYIMP("Wayland: use unstable version (version: %d)", version);
 }
 
 //------------------------------------------------------------------------------
 
-static void xdg_get_xdg_surface(struct wl_client *client,
-                                struct wl_resource *resource,
-                                uint32_t id,
-                                struct wl_resource *surface_resource)
+void aura_wayland_xdg_get_xdg_surface
+                              (AURA_UNUSED struct wl_client* client,
+                               AURA_UNUSED struct wl_resource* resource,
+                               uint32_t id,
+                               AURA_UNUSED struct wl_resource* surface_resource)
 {
     struct wl_resource* rc;
 
@@ -49,47 +51,52 @@ static void xdg_get_xdg_surface(struct wl_client *client,
     }
 
     wl_resource_set_implementation(rc, &shell_surface_implementation,
-                                   NULL, xdg_surface_unbind);
+                                   NULL, aura_wayland_xdg_surface_unbind);
 }
 
 //------------------------------------------------------------------------------
 
-static void xdg_get_xdg_popup(struct wl_client *client,
-                              struct wl_resource *resource,
-                              uint32_t id,
-                              struct wl_resource *surface_resource,
-                              struct wl_resource *parent_resource,
-                              struct wl_resource *seat_resource,
-                              uint32_t serial,
-                              int32_t x,
-                              int32_t y,
-                              uint32_t flags)
+void aura_wayland_xdg_get_xdg_popup
+                              (AURA_UNUSED struct wl_client* client,
+                               AURA_UNUSED struct wl_resource* resource,
+                               uint32_t id,
+                               AURA_UNUSED struct wl_resource* surface_resource,
+                               AURA_UNUSED struct wl_resource* parent_resource,
+                               AURA_UNUSED struct wl_resource* seat_resource,
+                               uint32_t serial,
+                               int32_t x,
+                               int32_t y,
+                               uint32_t flags)
 {
-    LOG_NYIMP("Wayland: XDG popup");
+    LOG_NYIMP("Wayland: XDG popup "
+              "(id: %d, serial: %d, x: %d, y: %d, flags: %d)",
+              id, serial, x, y, flags);
 }
 
 //------------------------------------------------------------------------------
 
-static void xdg_pong(struct wl_client *client,
-                     struct wl_resource *resource,
-                     uint32_t serial)
+void aura_wayland_xdg_pong(AURA_UNUSED struct wl_client* client,
+                           AURA_UNUSED struct wl_resource* resource,
+                           uint32_t serial)
 {
-    LOG_NYIMP("Wayland: XDG pong");
+    LOG_NYIMP("Wayland: XDG pong (serial: %d)", serial);
 }
 
 //------------------------------------------------------------------------------
 
 static const struct xdg_shell_interface xdg_shell_implementation = {
-        xdg_use_unstable_version,
-        xdg_get_xdg_surface,
-        xdg_get_xdg_popup,
-        xdg_pong
+        aura_wayland_xdg_use_unstable_version,
+        aura_wayland_xdg_get_xdg_surface,
+        aura_wayland_xdg_get_xdg_popup,
+        aura_wayland_xdg_pong
     };
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_xdg_shell_bind(struct wl_client *client,
-                                 void *data, uint32_t version, uint32_t id)
+void aura_wayland_xdg_shell_bind(struct wl_client* client,
+                                 AURA_UNUSED void* data,
+                                 uint32_t version,
+                                 uint32_t id)
 {
     struct wl_resource* rc;
 
@@ -100,7 +107,7 @@ void aura_wayland_xdg_shell_bind(struct wl_client *client,
     }
 
     wl_resource_set_implementation(rc, &xdg_shell_implementation,
-                                   NULL, xdg_shell_unbind);
+                                   NULL, aura_wayland_xdg_shell_unbind);
 }
 
 //------------------------------------------------------------------------------

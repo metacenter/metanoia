@@ -24,8 +24,8 @@ void aura_strategist_on_surface_created(AuraExhibitor* exhibitor,
 
 //------------------------------------------------------------------------------
 
-void aura_strategist_on_surface_destroyed(AuraExhibitor* exhibitor,
-                                          SurfaceId sid)
+void aura_strategist_on_surface_destroyed(AURA_UNUSED AuraExhibitor* exhibitor,
+                                          AURA_UNUSED SurfaceId sid)
 {
     // TODO: remove surface from workspace
     //aura_compositor_unmanage_surface(exhibitor->display->compositor, sid);

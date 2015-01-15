@@ -307,7 +307,7 @@ clear_context:
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_finalize(AuraRenderer* self)
+void aura_renderer_gl_finalize(AURA_UNUSED AuraRenderer* self)
 {
     return;
 }
@@ -315,7 +315,9 @@ void aura_renderer_gl_finalize(AuraRenderer* self)
 //------------------------------------------------------------------------------
 
 void aura_renderer_gl_draw(AuraRenderer* self,
-                           Chain* surfaces, int x, int y)
+                           Chain* surfaces,
+                           AURA_UNUSED int x,
+                           AURA_UNUSED int y)
 {
     int r;
     AuraRendererGL* mine;

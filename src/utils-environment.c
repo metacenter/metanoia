@@ -41,8 +41,8 @@ void aura_environment_unblock_system_signals(void)
 //------------------------------------------------------------------------------
 
 static void aura_environment_async_signal_handler(int sig,
-                                                  siginfo_t* si,
-                                                  void* arg)
+                                                  AURA_UNUSED siginfo_t* si,
+                                                  AURA_UNUSED void* arg)
 {
     switch (sig) {
         case SIGINT:

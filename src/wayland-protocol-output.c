@@ -7,12 +7,14 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_output_bind(struct wl_client *client,
-                              void *data, uint32_t version, uint32_t id)
+void aura_wayland_output_bind(struct wl_client* client,
+                              AURA_UNUSED void* data,
+                              uint32_t version,
+                              uint32_t id)
 {
     struct wl_resource* rc;
 
-    LOG_NYIMP("Binding Wayland output (id: %d)", id);
+    LOG_NYIMP("Binding Wayland output (version: %d, id: %d)", version, id);
 
     rc = wl_resource_create(client, &wl_output_interface, version, id);
     if (!rc) {

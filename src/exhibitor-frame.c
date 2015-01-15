@@ -62,18 +62,18 @@ inline bool aura_frame_is_workspace(AuraFrame* self)
 
 //------------------------------------------------------------------------------
 
-void aura_frame_resize_floating(AuraFrame* self,
-                                AuraArgmandType direction,
-                                int magnitude)
+void aura_frame_resize_floating(AURA_UNUSED AuraFrame* self,
+                                AURA_UNUSED AuraArgmandType direction,
+                                AURA_UNUSED int magnitude)
 {
     /// @todo Implement aura_frame_resize_floating
 }
 
 //------------------------------------------------------------------------------
 
-void aura_frame_resize_anchored(AuraFrame* self,
-                                AuraArgmandType direction,
-                                int magnitude)
+void aura_frame_resize_anchored(AURA_UNUSED AuraFrame* self,
+                                AURA_UNUSED AuraArgmandType direction,
+                                AURA_UNUSED int magnitude)
 {
     /// @todo Implement aura_frame_resize_anchored
 }

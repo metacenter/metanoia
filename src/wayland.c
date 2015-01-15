@@ -77,7 +77,7 @@ static void wayland_keyboard_event_handler(void* data)
 
 //------------------------------------------------------------------------------
 
-int aura_wayland_event_loop_feeder(void* data)
+int aura_wayland_event_loop_feeder(AURA_UNUSED void* data)
 {
     struct wl_event_loop* loop;
     static struct wl_event_source* src = NULL;

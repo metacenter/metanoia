@@ -121,7 +121,7 @@ int aura_backend_gtk_get_outputs(Chain* outputs)
 
 //------------------------------------------------------------------------------
 
-static void* aura_backend_gtk_main(void* data)
+static void* aura_backend_gtk_main(AURA_UNUSED void* data)
 {
     aura_environment_block_system_signals();
 
@@ -138,7 +138,7 @@ static void* aura_backend_gtk_main(void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_run(AuraLoop* this_loop)
+void aura_backend_gtk_run(AURA_UNUSED AuraLoop* this_loop)
 {
     LOG_INFO1("Initializing GTK backend...");
 

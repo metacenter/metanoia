@@ -26,14 +26,14 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-int aura_renderer_mmap_initialize(AuraRenderer* self)
+int aura_renderer_mmap_initialize(AURA_UNUSED AuraRenderer* self)
 {
     return 1;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_finalize(AuraRenderer* self)
+void aura_renderer_mmap_finalize(AURA_UNUSED AuraRenderer* self)
 {
     return;
 }

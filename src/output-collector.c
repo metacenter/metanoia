@@ -100,7 +100,7 @@ void aura_outputs_update()
 
 //------------------------------------------------------------------------------
 
-static void on_display_discovered(void* data)
+static void on_display_discovered(AURA_UNUSED void* data)
 {
     aura_outputs_update();
 }

@@ -60,7 +60,7 @@ G_DEFINE_TYPE(AuraApp, aura_app, GTK_TYPE_APPLICATION)
 
 //------------------------------------------------------------------------------
 
-static void aura_app_init(AuraApp* app)
+static void aura_app_init(AURA_UNUSED AuraApp* app)
 {
 }
 
@@ -86,8 +86,10 @@ static void aura_app_activate(GApplication* app)
 
 //------------------------------------------------------------------------------
 
-static void aura_app_open(GApplication* app, GFile** files,
-                          gint n_files, const gchar* hint)
+static void aura_app_open(AURA_UNUSED GApplication* app,
+                          AURA_UNUSED GFile** files,
+                          AURA_UNUSED gint n_files,
+                          AURA_UNUSED const gchar* hint)
 {
 }
 

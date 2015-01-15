@@ -11,30 +11,30 @@
 
 //------------------------------------------------------------------------------
 
-static void pointer_unbind(struct wl_resource *resource)
+void aura_wayland_pointer_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind pointer");
 }
 
 //------------------------------------------------------------------------------
 
-static void keyboard_unbind(struct wl_resource *resource)
+void aura_wayland_keyboard_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind keyboard");
 }
 
 //------------------------------------------------------------------------------
 
-static void seat_unbind(struct wl_resource *resource)
+void aura_wayland_seat_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind seat");
 }
 
 //------------------------------------------------------------------------------
 
-static void get_pointer(struct wl_client *client,
-                        struct wl_resource *resource,
-                        uint32_t id)
+void aura_wayland_get_pointer(struct wl_client* client,
+                              struct wl_resource* resource,
+                              uint32_t id)
 {
     struct wl_resource* rc;
 
@@ -48,14 +48,14 @@ static void get_pointer(struct wl_client *client,
     }
 
     wl_resource_set_implementation(rc, &pointer_implementation,
-                                   NULL, pointer_unbind);
+                                   NULL, aura_wayland_pointer_unbind);
 }
 
 //------------------------------------------------------------------------------
 
-static void get_keyboard(struct wl_client *client,
-                         struct wl_resource *resource,
-                         uint32_t id)
+void aura_wayland_get_keyboard(struct wl_client* client,
+                               struct wl_resource* resource,
+                               uint32_t id)
 {
     struct wl_resource* rc;
 
@@ -69,7 +69,7 @@ static void get_keyboard(struct wl_client *client,
     }
 
     wl_resource_set_implementation(rc, &keyboard_implementation,
-                                   NULL, keyboard_unbind);
+                                   NULL, aura_wayland_keyboard_unbind);
 
     // Store resource
     wayland_state_add_keyboard_resource(rc);
@@ -89,9 +89,9 @@ static void get_keyboard(struct wl_client *client,
 
 //------------------------------------------------------------------------------
 
-static void get_touch(struct wl_client *client,
-                      struct wl_resource *resource,
-                      uint32_t id)
+void aura_wayland_get_touch(AURA_UNUSED struct wl_client* client,
+                            AURA_UNUSED struct wl_resource* resource,
+                            uint32_t id)
 {
     LOG_NYIMP("Wayland: get touch (id: %d)", id);
 }
@@ -99,19 +99,21 @@ static void get_touch(struct wl_client *client,
 //------------------------------------------------------------------------------
 
 static const struct wl_seat_interface seat_implementation = {
-        get_pointer,
-        get_keyboard,
-        get_touch
+        aura_wayland_get_pointer,
+        aura_wayland_get_keyboard,
+        aura_wayland_get_touch
     };
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_seat_bind(struct wl_client *client,
-                            void *data, uint32_t version, uint32_t id)
+void aura_wayland_seat_bind(struct wl_client* client,
+                            AURA_UNUSED void* data,
+                            uint32_t version,
+                            uint32_t id)
 {
     struct wl_resource* rc;
 
-    LOG_NYIMP("Binding Wayland seat (id: %d)", id);
+    LOG_NYIMP("Binding Wayland seat (version: %d, id: %d)", version, id);
 
     rc = wl_resource_create(client, &wl_seat_interface, version, id);
     if (!rc) {
@@ -120,7 +122,7 @@ void aura_wayland_seat_bind(struct wl_client *client,
     }
 
     wl_resource_set_implementation(rc, &seat_implementation,
-                                   NULL, seat_unbind);
+                                   NULL, aura_wayland_seat_unbind);
 
     // TODO:
     wl_seat_send_capabilities(rc, WL_SEAT_CAPABILITY_POINTER
