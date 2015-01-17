@@ -42,7 +42,7 @@ AuraSurfaceWaylandData* wayland_surface_data_new()
 
 int wayland_state_initialize(struct wl_display* display)
 {
-    sState.surfaces = aura_store_new();
+    sState.surfaces = aura_store_new_for_id();
     if (!sState.surfaces) {
         return -1;
     }

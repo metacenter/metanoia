@@ -19,7 +19,7 @@ static AuraStore* sStore = NULL;
 SurfaceId aura_surface_create(void)
 {
     if (!sStore) {
-        sStore = aura_store_new();
+        sStore = aura_store_new_for_id();
     }
 
     // Create new surface
