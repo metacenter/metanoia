@@ -1,7 +1,13 @@
 all: build/aura
 
 clean:
-	rm -rf build gen
+	rm -rf build gen checks
+
+checks: checks/check-chain checks/check-store
+
+check: checks
+	@for c in checks/*; do $$c; done
+
 
 build/aura: Makefile \
             build/aura.o \
@@ -664,7 +670,6 @@ build/renderer-gl.o: Makefile \
 
 build/wayland.o: Makefile \
                  src/wayland.c \
-                 gen/xdg-shell-server-protocol.h \
                  src/wayland.h \
                  src/event-loop.h \
                  src/event-task.h \
@@ -777,7 +782,6 @@ build/wayland-protocol-region.o: Makefile \
 
 build/wayland-protocol-shell.o: Makefile \
                                 src/wayland-protocol-shell.c \
-                                gen/xdg-shell-server-protocol.h \
                                 src/wayland-protocol-shell.h \
                                 src/utils-log.h \
                                 src/global-constants.h \
@@ -952,4 +956,28 @@ build/backend-gtk-res.o: Makefile \
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -o build/backend-gtk-res.o -Isrc -Igen \
 	       -c gen/backend-gtk-res.c \
 	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
+
+checks/check-chain: Makefile \
+                    tests/test-chain.c \
+                    src/utils-chain.c \
+                    tests/../src/utils-chain.h \
+                    tests/tests-suit.h \
+                    src/utils-chain.h
+	@mkdir -p checks
+	@echo "  CC   check-chain"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -o checks/check-chain -Isrc -Igen \
+	      tests/test-chain.c src/utils-chain.c
+
+checks/check-store: Makefile \
+                    tests/test-store.c \
+                    src/utils-store.c \
+                    src/utils-chain.c \
+                    tests/../src/utils-store.h \
+                    tests/tests-suit.h \
+                    src/utils-store.h \
+                    src/utils-chain.h
+	@mkdir -p checks
+	@echo "  CC   check-store"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -o checks/check-store -Isrc -Igen \
+	      tests/test-store.c src/utils-store.c src/utils-chain.c
 

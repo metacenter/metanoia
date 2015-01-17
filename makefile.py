@@ -330,7 +330,6 @@ aura.add_input(t)
 t = m.add_compile_target(
         output='wayland.o',
         inputs=['wayland.c'],
-        deps=[target_xdg_shell_protocol],
         pkgs={'wayland-server'}
     )
 aura.add_input(t)
@@ -368,7 +367,6 @@ aura.add_input(t)
 t = m.add_compile_target(
         output='wayland-protocol-shell.o',
         inputs=['wayland-protocol-shell.c'],
-        deps=[target_xdg_shell_protocol]
     )
 aura.add_input(t)
 
@@ -386,8 +384,7 @@ aura.add_input(t)
 
 t = m.add_compile_target(
         output='xdg-shell-protocol.o',
-        inputs=['xdg-shell-protocol.c'],
-        input_dir=m.get_gen_directory()
+        deps=['xdg-shell-protocol.c'],
     )
 aura.add_input(t)
 
@@ -451,8 +448,7 @@ if with_gtk_support:
 
     t = m.add_compile_target(
             output='backend-gtk-res.o',
-            inputs=['backend-gtk-res.c'],
-            input_dir=m.get_gen_directory(),
+            deps=['backend-gtk-res.c'],
             pkgs={'gtk+-3.0'}
         )
     aura.add_input(t)
@@ -463,6 +459,17 @@ else:
             inputs=['backend-gtk-dummy.c'],
         )
     aura.add_input(t)
+
+#-------------------------------------------------------------------------------
+# TESTS
+
+m.add_test(output='check-chain',
+           inputs=['test-chain.c'],
+           deps=['utils-chain.c'])
+
+m.add_test(output='check-store',
+           inputs=['test-store.c'],
+           deps=['utils-store.c', 'utils-chain.c'])
 
 #-------------------------------------------------------------------------------
 

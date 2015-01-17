@@ -33,18 +33,13 @@ class Target:
     inputs = list()
     deps = list()
     pkgs = set()
-    input_dir = str()
-    output_dir = str()
 
-    def __init__(self, output, inputs,
-                 deps=list(), pkgs=set(),
-                 input_dir=str(), output_dir=str()):
+    def __init__(self, name, output, inputs, deps=list(), pkgs=set()):
+        self.name = name
         self.output = output
         self.inputs = inputs
         self.deps = deps
         self.pkgs = pkgs
-        self.input_dir = input_dir
-        self.output_dir = output_dir
 
     def __str__(self):
         return self.output
@@ -84,11 +79,13 @@ class LinkTarget(Target):
 
 class GeneratedTarget(Target):
     generator = None
-    def __init__(self, output, inputs, deps=list(), generator=None,
-                 input_dir=str(), output_dir=str()):
-        Target.__init__(self, output, inputs, deps=deps,
-                        input_dir=input_dir, output_dir=output_dir)
+    def __init__(self, name, output, inputs,
+                 deps=list(), generator=None):
+        Target.__init__(self, name, output, inputs, deps=deps)
         self.generator = generator
+
+class TestTarget(Target):
+    pass
 
 #-------------------------------------------------------------------------------
 
@@ -100,15 +97,17 @@ class Make:
 
     cc = 'gcc'
     cflags = list()
-    cflags = list()
     lflags = list()
 
     srcdir = 'src'
     builddir = 'build'
     resdir = 'res'
     gendir = 'gen'
+    testdir = 'tests'
+    checkdir = 'checks'
 
     all = list()
+    checks = list()
     targets = list()
     generators = list()
 
@@ -124,13 +123,16 @@ class Make:
             def wr(string='', end='\n'):
                 print(string, file=mf, end=end)
 
-            def wr_compile_command(t, output_path, input_paths):
+            def wr_compile_command(t):
+                inputs = list()
+                inputs.extend(t.inputs)
+                inputs.extend(t.deps)
                 wr('\n\t@mkdir -p {0}'.format(self.builddir))
-                wr('\t@echo "  CC   {0}"'.format(t.output))
+                wr('\t@echo "  CC   {0}"'.format(t.name))
                 wr('\t@{0} {1} -o {2} -I{3} -I{4} \\'
-                    .format(self.cc, ' '.join(self.cflags), output_path,
+                    .format(self.cc, ' '.join(self.cflags), t.output,
                             self.srcdir, self.gendir))
-                wr('\t       -c {0}'.format(' '.join(input_paths)), end='')
+                wr('\t       -c {0}'.format(' '.join(inputs)), end='')
                 if len(t.pkgs):
                     command = ['pkg-config', '--cflags']
                     command.extend(sorted(t.pkgs))
@@ -138,12 +140,12 @@ class Make:
                     if output:
                         wr(' \\\n\t       {0}'.format(output), end='')
 
-            def wr_link_command(t, output_path, input_paths):
+            def wr_link_command(t):
                 wr('\n\t@mkdir -p {0}'.format(self.builddir))
-                wr('\t@echo "  LD   {0}"'.format(t.output))
+                wr('\t@echo "  LD   {0}"'.format(t.name))
                 wr('\t@{0} {1} -o {2} \\' \
-                    .format(self.cc, ' '.join(self.lflags), output_path))
-                wr('\t       {0}'.format(' '.join(input_paths)), end='')
+                    .format(self.cc, ' '.join(self.lflags), t.output))
+                wr('\t       {0}'.format(' '.join(t.inputs)), end='')
                 if len(t.pkgs):
                     command = ['pkg-config', '--libs']
                     command.extend(sorted(t.pkgs))
@@ -151,63 +153,70 @@ class Make:
                     if output:
                         wr(' \\\n\t       {0}'.format(output), end='')
 
-            def wr_gen_command(t, output_path, input_paths):
+            def wr_gen_command(t):
                 wr('\n\t@mkdir -p {0}'.format(self.gendir))
-                wr('\t@echo "  GEN  {0}"'.format(t.output))
-                command = t.generator.get_command(output_path, input_paths)
+                wr('\t@echo "  GEN  {0}"'.format(t.name))
+                command = t.generator.get_command(t.output, t.inputs)
                 wr('\t@{0}'.format(command), end='')
 
-            def wr_gen_target(t, output_path, dep_paths):
-                padding = (len(output_path) + 2) * ' '
+            def wr_gen_target(t, additional_deps=list()):
+                padding = (len(t.output) + 2) * ' '
                 dependences = list()
-                dependences.extend(input_paths)
-                dependences.extend(dep_paths)
-                wr('{0}: Makefile'.format(output_path), end='')
+                dependences.extend(t.inputs)
+                dependences.extend(t.deps)
+                dependences.extend(additional_deps)
+                wr('{0}: Makefile'.format(t.output), end='')
                 for d in dependences:
                     wr(' \\\n{0}{1}'.format(padding, d), end='')
 
-            def wr_compile_target(t, output_path, input_paths, dep_paths):
-                command = ['gcc', '-MM', '-MT', output_path, '-Igen']
-                command.extend(input_paths)
-                dep_str = get_command_output(command)
-                dep_list = [s for s in dep_str.split(' ')[2:] if len(s) > 8]
-                dep_paths.extend(dep_list)
-                wr_gen_target(t, output_path, dep_paths)
+            def wr_compile_target(t):
+                bare_command = ['gcc', '-MM', '-MT', t.output, '-Igen', '-Isrc']
+                dep_result = list()
+                inputs = list()
+                inputs.extend(t.inputs)
+                inputs.extend(t.deps)
+                for inp in inputs:
+                    command = list(bare_command)
+                    command.append(inp)
+                    dep_str = get_command_output(command)
+                    dep_list = [s for s in dep_str.split(' ')[2:] if len(s) > 8]
+                    dep_result.extend(dep_list)
+                wr_gen_target(t, dep_result)
 
-
-            def make_path_list(objects, default_dir):
-                result = list()
-                for o in objects:
-                    directory = default_dir
-
-                    if isinstance(o, Target):
-                        directory = o.output_dir
-
-                    result.append(os.path.join(directory, str(o)))
-
-                return result
-
+            def wr_test_command(t):
+                inputs = list()
+                inputs.extend(t.inputs)
+                inputs.extend(t.deps)
+                wr('\n\t@mkdir -p {0}'.format(self.checkdir))
+                wr('\t@echo "  CC   {0}"'.format(t.name))
+                wr('\t@{0} {1} -o {2} -I{3} -I{4} \\'
+                    .format(self.cc, ' '.join(self.cflags), t.output,
+                            self.srcdir, self.gendir))
+                wr('\t      {0}'.format(' '.join(inputs)), end='')
 
             print('  >> Makefile')
 
             if len(self.all):
                 wr('all: {0}\n'.format(' '.join(self.all)))
-            wr('clean:\n\trm -rf {0} {1}\n'.format(self.builddir, self.gendir))
+            wr('clean:\n\trm -rf {0} {1} {2}\n'
+                             .format(self.builddir, self.gendir, self.checkdir))
+            if len(self.checks):
+                wr('checks: {0}\n'.format(' '.join(self.checks)))
+                wr('check: checks\n\t@for c in checks/*; do $$c; done\n\n')
 
             for t in self.targets:
-                output_path = os.path.join(t.output_dir, t.output)
-                input_paths = make_path_list(t.inputs, t.input_dir)
-                dep_paths   = make_path_list(t.deps, t.input_dir)
-
                 if isinstance(t, CompileTarget):
-                    wr_compile_target(t, output_path, input_paths, dep_paths)
-                    wr_compile_command(t, output_path, input_paths)
+                    wr_compile_target(t)
+                    wr_compile_command(t)
                 elif isinstance(t, LinkTarget):
-                    wr_gen_target(t, output_path, dep_paths)
-                    wr_link_command(t, output_path, input_paths)
+                    wr_gen_target(t)
+                    wr_link_command(t)
                 elif isinstance(t, GeneratedTarget):
-                    wr_gen_target(t, output_path, dep_paths)
-                    wr_gen_command(t, output_path, input_paths)
+                    wr_gen_target(t)
+                    wr_gen_command(t)
+                elif isinstance(t, TestTarget):
+                    wr_compile_target(t)
+                    wr_test_command(t)
                 else:
                     print("Unknown process type!")
                 wr('\n')
@@ -216,10 +225,21 @@ class Make:
     # METHODS
     #---------------------------------------------------------------------------
 
-    def validate_arguments(self, output, inputs, deps,
-                           pkgs, input_dir, output_dir):
+    def absolutize_path(self, objects, directory):
+        if isinstance(objects, str):
+            return os.path.join(directory, objects)
+        elif isinstance(objects, list):
+            return [os.path.join(directory, str(o)) for o in objects]
+        else:
+            print("Wrong object format! ({0})".format(type(objects)))
+
+    def validate_arguments(self, name, output, inputs, deps, pkgs):
         if output is None:
             raise Exception('No output path specified!')
+
+        if not isinstance(name, str) and name is not None:
+            raise Exception('Name must be passed as string! '
+                            'Got {0}'.format(type(name)));
 
         if not isinstance(output, str):
             raise Exception('Output path must be passed as string! '
@@ -239,89 +259,100 @@ class Make:
             raise Exception('Packages must be passed as set of strings! '
                             'Got {0}'.format(type(pkgs)))
 
-        if not isinstance(input_dir, str):
-            raise Exception('Input directory must be passed as string! '
-                            'Got {0}'.format(type(input_dir)))
-
-        if not isinstance(output_dir, str):
-            raise Exception('Output directory must be passed as string! '
-                            'Got {0}'.format(type(input_dir)))
-
     #---------------------------------------------------------------------------
 
     def add_compile_target(self,
+                           name=None,
                            output=None,
                            inputs=list(),
                            deps=list(),
-                           pkgs=set(),
-                           input_dir='',
-                           output_dir=''):
+                           pkgs=set()):
         try:
-            self.validate_arguments(output, inputs, deps,
-                                    pkgs, input_dir, output_dir)
+            self.validate_arguments(name, output, inputs, deps, pkgs)
         except Exception as e:
-            print(e.message)
+            print(e)
             return
 
-        input_dir  = input_dir  if input_dir  != '' else self.srcdir
-        output_dir = output_dir if output_dir != '' else self.builddir
+        if name is None: name = output
+        output = self.absolutize_path(output, self.builddir)
+        inputs = self.absolutize_path(inputs, self.srcdir)
+        deps   = self.absolutize_path(deps,   self.gendir)
 
-        target = CompileTarget(output, inputs, deps=deps, pkgs=pkgs,
-                               input_dir=input_dir, output_dir=output_dir)
+        target = CompileTarget(name, output, inputs, deps=deps, pkgs=pkgs)
         self.targets.append(target)
         return target
 
     #---------------------------------------------------------------------------
 
     def add_link_target(self,
+                        name=None,
                         output=None,
                         inputs=list(),
                         pkgs=set(),
-                        input_dir='',
-                        output_dir='',
                         include_in_all=False):
         try:
-            self.validate_arguments(output, inputs, list(),
-                                    pkgs, input_dir, output_dir)
+            self.validate_arguments(name, output, inputs, list(), pkgs)
         except Exception as e:
-            print(e.message)
+            print(e)
             return
 
-        input_dir  = input_dir  if input_dir  != '' else self.builddir
-        output_dir = output_dir if output_dir != '' else self.builddir
+        if name is None: name = output
+        output = self.absolutize_path(output, self.builddir)
+        inputs = self.absolutize_path(inputs, self.builddir)
 
-        target = LinkTarget(output, inputs, pkgs=pkgs,
-                            input_dir=input_dir, output_dir=output_dir)
+        target = LinkTarget(name, output, inputs, pkgs=pkgs)
         self.targets.append(target)
 
         if include_in_all:
-            self.all.append(os.path.join(self.builddir, output))
+            self.all.append(output)
 
         return target
 
     #---------------------------------------------------------------------------
 
     def add_generated_target(self,
+                             name=None,
                              generator=None,
                              output=None,
                              inputs=list(),
-                             deps=list(),
-                             input_dir='',
-                             output_dir=''):
+                             deps=list()):
         try:
-            self.validate_arguments(output, inputs, deps,
-                                    set(), input_dir, output_dir)
+            self.validate_arguments(name, output, inputs, deps, set())
         except Exception as e:
-            print(e.message)
+            print(e)
             return
 
-        input_dir  = input_dir  if input_dir  != '' else self.resdir
-        output_dir = output_dir if output_dir != '' else self.gendir
+        if name is None: name = output
+        output = self.absolutize_path(output, self.gendir)
+        inputs = self.absolutize_path(inputs, self.resdir)
+        deps   = self.absolutize_path(deps,   self.resdir)
 
-        target = GeneratedTarget(output, inputs,
-                                 deps=deps, generator=generator,
-                                 input_dir=input_dir, output_dir=output_dir)
+        target = GeneratedTarget(name, output, inputs,
+                                 deps=deps, generator=generator)
         self.targets.append(target)
+        return target
+
+    #---------------------------------------------------------------------------
+
+    def add_test(self,
+                 name=None,
+                 output=None,
+                 inputs=list(),
+                 deps=list()):
+        try:
+            self.validate_arguments(name, output, inputs, deps, set())
+        except Exception as e:
+            print(e)
+            return
+
+        if name is None: name = output
+        output = self.absolutize_path(output, self.checkdir)
+        inputs = self.absolutize_path(inputs, self.testdir)
+        deps   = self.absolutize_path(deps,   self.srcdir)
+
+        target = TestTarget(name, output, inputs, deps=deps)
+        self.targets.append(target)
+        self.checks.append(output)
         return target
 
     #---------------------------------------------------------------------------
