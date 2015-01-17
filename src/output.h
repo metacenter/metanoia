@@ -33,5 +33,5 @@ int aura_output_initialize(AuraOutput* self,
 
 int aura_output_compare(AuraOutput* first, AuraOutput* second);
 
-#endif // __AURA_GLOBAL_TYPES_H__
+#endif // __AURA_OUTPUT_H__
 

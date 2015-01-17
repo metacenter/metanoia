@@ -4,8 +4,6 @@
 #include "surface-manager.h"
 
 #include "utils-log.h"
-#include "utils-chain.h"
-#include "utils-store.h"
 #include "event-timer.h"
 #include "event-signals.h"
 

@@ -4,7 +4,6 @@
 #ifndef __AURA_SURFACE_MANAGER_H__
 #define __AURA_SURFACE_MANAGER_H__
 
-#include "global-types.h"
 #include "event-loop.h"
 #include "surface-data.h"
 

@@ -4,17 +4,32 @@
 #include "wayland-protocol-output.h"
 
 #include "utils-log.h"
+#include "output.h"
+
+//------------------------------------------------------------------------------
+
+void aura_wayland_output_unbind(AURA_UNUSED struct wl_resource* resource)
+{
+    /// @todo Unbind Wayland output
+}
 
 //------------------------------------------------------------------------------
 
 void aura_wayland_output_bind(struct wl_client* client,
-                              AURA_UNUSED void* data,
+                              void* data,
                               uint32_t version,
                               uint32_t id)
 {
     struct wl_resource* rc;
+    AuraOutput* output = (AuraOutput*) data;
 
     LOG_NYIMP("Binding Wayland output (version: %d, id: %d)", version, id);
+
+    if (!output) {
+        LOG_WARN1("Invalid output!");
+        wl_client_post_no_memory(client);
+        return;
+    }
 
     rc = wl_resource_create(client, &wl_output_interface, version, id);
     if (!rc) {
@@ -22,22 +37,25 @@ void aura_wayland_output_bind(struct wl_client* client,
         return;
     }
 
-    // TODO
-    wl_resource_set_implementation(rc, NULL, NULL, NULL);
+    wl_resource_set_implementation(rc, NULL, NULL, aura_wayland_output_unbind);
 
-    // TODO
-    wl_output_send_geometry(rc,
-                10, 10,
-                100, 100,
-                2,
-                "", "",
-                0);
+    /// @todo Pass more realistic data ot wl_output_send_geometry
+    wl_output_send_geometry(rc, 0, 0,
+                            output->width, output->height,
+                            0,
+                            output->unique_name, output->unique_name,
+                            0);
 
-    wl_output_send_scale(rc, 1);
+    if (version >= WL_OUTPUT_SCALE_SINCE_VERSION) {
+        wl_output_send_scale(rc, 1);
+    }
 
-    wl_output_send_mode(rc, 0, 100, 100, 60);
+    /// @todo Pass more realistic data ot wl_output_send_mode
+    wl_output_send_mode(rc, 0, output->width, output->height, 60);
 
-    wl_output_send_done(rc);
+    if (version >= WL_OUTPUT_DONE_SINCE_VERSION) {
+        wl_output_send_done(rc);
+    }
 }
 
 //------------------------------------------------------------------------------

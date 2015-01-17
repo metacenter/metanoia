@@ -41,6 +41,7 @@ build/aura: Makefile \
             build/renderer-mmap.o \
             build/renderer-gl.o \
             build/wayland.o \
+            build/wayland-output.o \
             build/wayland-state.o \
             build/wayland-protocol-compositor.o \
             build/wayland-protocol-surface.o \
@@ -61,7 +62,7 @@ build/aura: Makefile \
 	@mkdir -p build
 	@echo "  LD   aura"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -o build/aura \
-	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk.o build/backend-gtk-app.o build/backend-gtk-win.o build/backend-gtk-res.o \
+	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-output.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk.o build/backend-gtk-app.o build/backend-gtk-win.o build/backend-gtk-res.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -ldrm -ludev -lwayland-server -lxkbcommon 
 
 gen/xdg-shell-server-protocol.h: Makefile \
@@ -441,11 +442,11 @@ build/surface-data.o: Makefile \
 build/surface-manager.o: Makefile \
                          src/surface-manager.c \
                          src/surface-manager.h \
-                         src/global-types.h \
-                         src/utils-chain.h \
                          src/event-loop.h \
                          src/event-task.h \
                          src/surface-data.h \
+                         src/global-types.h \
+                         src/utils-chain.h \
                          src/utils-store.h \
                          src/exhibitor-compositor.h \
                          src/exhibitor-frame.h \
@@ -674,10 +675,11 @@ build/wayland.o: Makefile \
                  src/wayland-protocol-output.h \
                  src/wayland-state.h \
                  src/utils-store.h \
-                 src/utils-log.h \
-                 src/global-constants.h \
+                 src/output.h \
                  src/global-types.h \
                  src/utils-chain.h \
+                 src/utils-log.h \
+                 src/global-constants.h \
                  src/utils-environment.h \
                  src/event-signals.h \
                  gen/xdg-shell-server-protocol.h
@@ -686,14 +688,30 @@ build/wayland.o: Makefile \
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -o build/wayland.o -Isrc -Igen \
 	       -c src/wayland.c
 
+build/wayland-output.o: Makefile \
+                        src/wayland-output.c \
+                        src/wayland-output.h \
+                        src/utils-store.h \
+                        src/utils-log.h \
+                        src/global-constants.h \
+                        src/global-types.h \
+                        src/utils-chain.h
+	@mkdir -p build
+	@echo "  CC   wayland-output.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -o build/wayland-output.o -Isrc -Igen \
+	       -c src/wayland-output.c
+
 build/wayland-state.o: Makefile \
                        src/wayland-state.c \
                        src/wayland-state.h \
                        src/utils-store.h \
+                       src/output.h \
+                       src/global-types.h \
                        src/utils-chain.h \
+                       src/wayland-output.h \
+                       src/wayland-protocol-output.h \
                        src/utils-log.h \
-                       src/global-constants.h \
-                       src/global-types.h
+                       src/global-constants.h
 	@mkdir -p build
 	@echo "  CC   wayland-state.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -o build/wayland-state.o -Isrc -Igen \
@@ -706,9 +724,10 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/wayland-protocol-region.h \
                                      src/wayland-state.h \
                                      src/utils-store.h \
-                                     src/surface-manager.h \
+                                     src/output.h \
                                      src/global-types.h \
                                      src/utils-chain.h \
+                                     src/surface-manager.h \
                                      src/event-loop.h \
                                      src/event-task.h \
                                      src/surface-data.h \
@@ -727,9 +746,10 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/wayland-protocol-surface.h \
                                   src/wayland-state.h \
                                   src/utils-store.h \
-                                  src/surface-manager.h \
+                                  src/output.h \
                                   src/global-types.h \
                                   src/utils-chain.h \
+                                  src/surface-manager.h \
                                   src/event-loop.h \
                                   src/event-task.h \
                                   src/surface-data.h \
@@ -808,7 +828,8 @@ build/wayland-protocol-output.o: Makefile \
                                  src/utils-log.h \
                                  src/global-constants.h \
                                  src/global-types.h \
-                                 src/utils-chain.h
+                                 src/utils-chain.h \
+                                 src/output.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-output.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -o build/wayland-protocol-output.o -Isrc -Igen \
@@ -821,10 +842,11 @@ build/wayland-protocol-seat.o: Makefile \
                                src/wayland-protocol-keyboard.h \
                                src/wayland-state.h \
                                src/utils-store.h \
-                               src/utils-log.h \
-                               src/global-constants.h \
+                               src/output.h \
                                src/global-types.h \
                                src/utils-chain.h \
+                               src/utils-log.h \
+                               src/global-constants.h \
                                src/config.h \
                                src/utils-keymap.h
 	@mkdir -p build

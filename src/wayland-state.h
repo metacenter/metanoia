@@ -5,9 +5,9 @@
 #define __AURA_WAYLAND_STATE_H__
 
 #include "utils-store.h"
+#include "output.h"
 
 #include <wayland-server.h>
-#include <stdbool.h>
 
 typedef struct {
     AuraItem base;
@@ -30,8 +30,6 @@ void wayland_state_surface_attach(AuraItemId sid, struct wl_resource* rc);
 
 void wayland_state_subscribe_frame(AuraItemId sid, struct wl_resource* rc);
 
-//void wayland_state_notify_frame(AuraItemId sid);
-
 void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_rc);
 
 void wayland_state_keyboard_focus_update(AuraItemId sid);
@@ -39,6 +37,10 @@ void wayland_state_keyboard_focus_update(AuraItemId sid);
 void wayland_state_key(uint32_t time, uint32_t key, uint32_t state);
 
 void wayland_state_screen_refresh();
+
+void wayland_state_advertise_output(AuraOutput* output);
+
+void wayland_state_destroy_output(AuraOutput* output);
 
 #endif // __AURA_WAYLAND_STATE_H__
 

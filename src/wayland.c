@@ -16,13 +16,12 @@
 #include <errno.h>
 #include <string.h>
 #include <pthread.h>
-#include <wayland-server.h>
 
 #include "xdg-shell-server-protocol.h"
 
 //------------------------------------------------------------------------------
 
-static const int scVersion = 3;
+/// @todo Make Wayland socket configurable
 static const char* scSocketName = "wayland-0";
 
 static struct wl_display* wayland_display;
@@ -36,7 +35,7 @@ struct wl_display* get_wayland_display()
 
 //------------------------------------------------------------------------------
 
-static void* display_run(void* data)
+void* display_run(void* data)
 {
     aura_environment_block_system_signals();
     wl_display_run((struct wl_display*) data);
@@ -45,7 +44,7 @@ static void* display_run(void* data)
 
 //------------------------------------------------------------------------------
 
-static void wayland_screen_refresh_handler(void* data)
+void wayland_screen_refresh_handler(void* data)
 {
     SurfaceId sid = (SurfaceId) data;
     LOG_WAYL3("Wayland: handling screen refresh");
@@ -54,7 +53,7 @@ static void wayland_screen_refresh_handler(void* data)
 
 //------------------------------------------------------------------------------
 
-static void wayland_keyboard_focus_change_handler(void* data)
+void wayland_keyboard_focus_change_handler(void* data)
 {
     SurfaceId sid = (SurfaceId) data;
     LOG_WAYL2("Wayland: handling keyboard focus change (%d)", sid);
@@ -63,7 +62,7 @@ static void wayland_keyboard_focus_change_handler(void* data)
 
 //------------------------------------------------------------------------------
 
-static void wayland_keyboard_event_handler(void* data)
+void wayland_keyboard_event_handler(void* data)
 {
     LOG_WAYL4("Wayland: handling keyboard event");
 
@@ -73,6 +72,22 @@ static void wayland_keyboard_event_handler(void* data)
     }
 
     wayland_state_key(key_data->time, key_data->code, key_data->value);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_display_found_handler(void* data)
+{
+    AuraOutput* output = (AuraOutput*) data;
+    wayland_state_advertise_output(output);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_display_lost_handler(void* data)
+{
+    AuraOutput* output = (AuraOutput*) data;
+    wayland_state_destroy_output(output);
 }
 
 //------------------------------------------------------------------------------
@@ -105,21 +120,16 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     // Init Wayland
     wayland_display = wl_display_create();
     if (!wayland_display) {
-        LOG_ERROR("Could not initialize Wafyland!");
+        LOG_ERROR("Could not initialize Wayland!");
         return;
     }
 
     wayland_state_initialize(wayland_display);
 
-    // Create singleton objects // FIXME: not here
-    if (!wl_global_create(wayland_display, &wl_compositor_interface, scVersion,
+    // Create singleton objects
+    if (!wl_global_create(wayland_display, &wl_compositor_interface, 3,
                           NULL, aura_wayland_compositor_bind)) {
         LOG_ERROR("Could not create global display!");
-    }
-
-    if (!wl_global_create(wayland_display, &wl_output_interface, scVersion,
-                          NULL, aura_wayland_output_bind)) {
-        LOG_ERROR("Could not create global output!");
     }
 
     if (!wl_global_create(wayland_display, &wl_shell_interface, 1,
@@ -132,16 +142,16 @@ void aura_wayland_initialize(AuraLoop* this_loop)
         LOG_ERROR("Could not create global XDG shell!");
     }
 
-    if (!wl_global_create(wayland_display, &wl_seat_interface, scVersion,
+    if (!wl_global_create(wayland_display, &wl_seat_interface, 4,
                           NULL, aura_wayland_seat_bind)) {
         LOG_ERROR("Could not create global seat!");
     }
 
     wl_display_init_shm(wayland_display);
 
-    // WORKAROUND:
-    // Wayland main loop must be fed with some kind of epoll events,
-    // otherwise it blocks. Here Wayland timer is used.
+    /// @note WORKAROUND:
+    /// Wayland main loop must be fed with some kind of epoll events,
+    /// otherwise it blocks. Here Wayland timer is used.
     aura_wayland_event_loop_feeder(NULL);
 
     // Add socket
@@ -166,6 +176,12 @@ void aura_wayland_initialize(AuraLoop* this_loop)
 
     aura_event_signal_subscribe(SIGNAL_KEYBOARD_EVENT,
             aura_task_create(wayland_keyboard_event_handler, this_loop));
+
+    aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
+            aura_task_create(wayland_display_found_handler, this_loop));
+
+    aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
+            aura_task_create(wayland_display_lost_handler, this_loop));
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
 }

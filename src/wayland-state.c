@@ -2,13 +2,13 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-state.h"
-#include "utils-chain.h"
-#include "utils-store.h"
+#include "wayland-output.h"
+#include "wayland-protocol-output.h"
 #include "utils-log.h"
 
-#include "malloc.h"
-#include "memory.h"
-#include "pthread.h"
+#include <malloc.h>
+#include <memory.h>
+#include <pthread.h>
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -17,6 +17,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static struct {
     struct wl_display* display;
     AuraStore* surfaces;
+    AuraStore* outputs;
     Chain* keyboard_resources;
     AuraItemId keyboard_focused_sid;
 } sState;
@@ -44,6 +45,11 @@ int wayland_state_initialize(struct wl_display* display)
 {
     sState.surfaces = aura_store_new_for_id();
     if (!sState.surfaces) {
+        return -1;
+    }
+
+    sState.outputs = aura_store_new_for_str();
+    if (!sState.outputs) {
         return -1;
     }
 
@@ -295,6 +301,31 @@ void wayland_state_screen_refresh(AuraItemId sid)
     }
 
     pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_advertise_output(AuraOutput* output)
+{
+    struct wl_global* global = wl_global_create(sState.display,
+                     &wl_output_interface, 2, output, aura_wayland_output_bind);
+
+    if (!global) {
+        LOG_ERROR("Could not create global output!");
+    }
+
+    AuraWaylandOutput* wayland_output = aura_wayland_output_new(global);
+    aura_store_add(sState.outputs, output->unique_name, wayland_output);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_destroy_output(AuraOutput* output)
+{
+    AuraWaylandOutput* wayland_output =
+                         aura_store_delete(sState.outputs, output->unique_name);
+    wl_global_destroy(wayland_output->global_output);
+    aura_wayland_output_free(wayland_output);
 }
 
 //------------------------------------------------------------------------------

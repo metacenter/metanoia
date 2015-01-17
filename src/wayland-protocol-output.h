@@ -6,8 +6,8 @@
 
 #include <wayland-server.h>
 
-void aura_wayland_output_bind(struct wl_client *client,
-                              void *data, uint32_t version, uint32_t id);
+void aura_wayland_output_bind(struct wl_client* client,
+                              void* data, uint32_t version, uint32_t id);
 
 #endif // __AURA_WAYLAND_PROTOCOL_OUTPUT_H__
 
