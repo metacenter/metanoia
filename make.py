@@ -98,6 +98,7 @@ class Make:
     cc = 'gcc'
     cflags = list()
     lflags = list()
+    oflags = list()
 
     srcdir = 'src'
     builddir = 'build'
@@ -129,9 +130,9 @@ class Make:
                 inputs.extend(t.deps)
                 wr('\n\t@mkdir -p {0}'.format(self.builddir))
                 wr('\t@echo "  CC   {0}"'.format(t.name))
-                wr('\t@{0} {1} -o {2} -I{3} -I{4} \\'
-                    .format(self.cc, ' '.join(self.cflags), t.output,
-                            self.srcdir, self.gendir))
+                wr('\t@{0} {1} {2} -o {3} -I{4} -I{5} \\'
+                    .format(self.cc, ' '.join(self.cflags),
+                     ' '.join(self.oflags), t.output, self.srcdir, self.gendir))
                 wr('\t       -c {0}'.format(' '.join(inputs)), end='')
                 if len(t.pkgs):
                     command = ['pkg-config', '--cflags']
@@ -143,8 +144,9 @@ class Make:
             def wr_link_command(t):
                 wr('\n\t@mkdir -p {0}'.format(self.builddir))
                 wr('\t@echo "  LD   {0}"'.format(t.name))
-                wr('\t@{0} {1} -o {2} \\' \
-                    .format(self.cc, ' '.join(self.lflags), t.output))
+                wr('\t@{0} {1} {2} -o {3} \\' \
+                    .format(self.cc, ' '.join(self.lflags),
+                            ' '.join(self.oflags), t.output))
                 wr('\t       {0}'.format(' '.join(t.inputs)), end='')
                 if len(t.pkgs):
                     command = ['pkg-config', '--libs']
@@ -189,9 +191,9 @@ class Make:
                 inputs.extend(t.deps)
                 wr('\n\t@mkdir -p {0}'.format(self.checkdir))
                 wr('\t@echo "  CC   {0}"'.format(t.name))
-                wr('\t@{0} {1} -o {2} -I{3} -I{4} \\'
-                    .format(self.cc, ' '.join(self.cflags), t.output,
-                            self.srcdir, self.gendir))
+                wr('\t@{0} {1} {2} -o {3} -I{4} -I{5} \\'
+                    .format(self.cc, ' '.join(self.cflags),
+                     ' '.join(self.oflags), t.output, self.srcdir, self.gendir))
                 wr('\t      {0}'.format(' '.join(inputs)), end='')
 
             print('  >> Makefile')
@@ -402,6 +404,12 @@ class Make:
             self.lflags = flags
         else:
             print('LFLAGS must be passed as list of strings!')
+
+    def set_oflags(self, flags):
+        if isinstance(flags, list) or isinstance(flags, tuple):
+            self.oflags = flags
+        else:
+            print('OFLAGS must be passed as list of strings!')
 
     def set_source_directory(self, path):
         if isinstance(path, str):

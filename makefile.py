@@ -13,6 +13,8 @@ m.set_resource_directory('res')
 m.set_gen_directory('gen')
 
 m.set_c_compiler('gcc')
+m.set_oflags(['-O3'])
+m.set_oflags(['-DDEBUG', '-g', '-pg', '-O0'])
 m.set_cflags(['-std=gnu11', '-Wall', '-W', '-Wextra', '-Wpedantic'])
 m.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
 
