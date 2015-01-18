@@ -119,7 +119,10 @@ class Make:
     def run_makefile(self, args):
         with open('Makefile', 'w') as mf:
             def get_command_output(args):
-                return subprocess.check_output(args).decode("utf-8")[:-1]
+                try:
+                    return subprocess.check_output(args).decode("utf-8")[:-1]
+                except:
+                    return ''
 
             def wr(string='', end='\n'):
                 print(string, file=mf, end=end)
@@ -181,7 +184,7 @@ class Make:
                     command = list(bare_command)
                     command.append(inp)
                     dep_str = get_command_output(command)
-                    dep_list = [s for s in dep_str.split(' ')[2:] if len(s) > 8]
+                    dep_list = [s for s in dep_str.split(' ')[2:] if len(s) > 4]
                     dep_result.extend(dep_list)
                 wr_gen_target(t, dep_result)
 
@@ -200,11 +203,12 @@ class Make:
 
             if len(self.all):
                 wr('all: {0}\n'.format(' '.join(self.all)))
-            wr('clean:\n\trm -rf {0} {1} {2}\n'
+            wr('res/force:\n\nclean:\n\trm -rf {0} {1} {2}\n'
                              .format(self.builddir, self.gendir, self.checkdir))
             if len(self.checks):
-                wr('checks: {0}\n'.format(' '.join(self.checks)))
-                wr('check: checks\n\t@for c in checks/*; do $$c; done\n\n')
+                wr('checks: {0}\ncheck: checks\n'
+                   '\t@time (for c in checks/check*; do $$c; done)\n\n'
+                   .format(' '.join(self.checks)))
 
             for t in self.targets:
                 if isinstance(t, CompileTarget):
@@ -275,7 +279,7 @@ class Make:
             print(e)
             return
 
-        if name is None: name = output
+        name   = name or output
         output = self.absolutize_path(output, self.builddir)
         inputs = self.absolutize_path(inputs, self.srcdir)
         deps   = self.absolutize_path(deps,   self.gendir)
@@ -298,7 +302,7 @@ class Make:
             print(e)
             return
 
-        if name is None: name = output
+        name   = name or output
         output = self.absolutize_path(output, self.builddir)
         inputs = self.absolutize_path(inputs, self.builddir)
 
@@ -324,7 +328,7 @@ class Make:
             print(e)
             return
 
-        if name is None: name = output
+        name   = name or output
         output = self.absolutize_path(output, self.gendir)
         inputs = self.absolutize_path(inputs, self.resdir)
         deps   = self.absolutize_path(deps,   self.resdir)
@@ -347,7 +351,7 @@ class Make:
             print(e)
             return
 
-        if name is None: name = output
+        name   = name or output
         output = self.absolutize_path(output, self.checkdir)
         inputs = self.absolutize_path(inputs, self.testdir)
         deps   = self.absolutize_path(deps,   self.srcdir)

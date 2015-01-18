@@ -4,6 +4,7 @@
 #include "config.h"
 #include "utils-log.h"
 #include "utils-environment.h"
+#include "version.h"
 
 #include <execinfo.h>
 #include <fcntl.h>
@@ -55,6 +56,7 @@ void aura_log_initialize(void)
         write(sLogFD, scLogWelcomeText, sizeof scLogWelcomeText - 1);
     }
     fputs(scLogWelcomeText, stdout);
+    LOG_INFO1("Build: " __TIME__ " " __DATE__ "; Version: " AURA_VERSION);
 }
 
 //------------------------------------------------------------------------------

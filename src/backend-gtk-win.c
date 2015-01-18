@@ -5,6 +5,7 @@
 #include "backend-gtk-win.h"
 #include "utils-log.h"
 #include "event-signals.h"
+#include "version.h"
 
 #include <gtk/gtk.h>
 #include <malloc.h>
@@ -358,7 +359,7 @@ static void aura_win_init(AuraWin* win)
     gtk_widget_init_template(GTK_WIDGET(win));
 
     gtk_header_bar_set_subtitle(GTK_HEADER_BAR(priv->header_bar),
-                                "Build: " __TIME__ " " __DATE__);
+                    "Build: " __TIME__ " " __DATE__ "; Version: " AURA_VERSION);
     // Build UI
     gint i;
     for (i = 0; i < NUM_VIEW_GROUPS; ++i) {

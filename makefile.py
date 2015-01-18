@@ -26,7 +26,7 @@ with_gtk_support = True;
 
 aura = m.add_link_target(
         output='aura',
-        include_in_all=True
+        include_in_all=True,
     )
 
 #-------------------------------------------------------------------------------
@@ -50,6 +50,14 @@ glcr = make.Generator(
     )
 m.add_generator(glcr)
 
+vgen = make.Generator(
+        command_body='desc=`git describe --always`;',
+        command_args='if ! grep -q "$$desc" gen/version.h 2> /dev/null; '
+                     'then echo -e "#ifndef AURA_VERSION\\n'
+                     '#define AURA_VERSION \\"$$desc\\"\\n#endif\\n"'
+                     ' > gen/version.h; fi'
+    )
+
 #-------------------------------------------------------------------------------
 # RESOUCES
 
@@ -72,6 +80,12 @@ target_gtk_resources = m.add_generated_target(
         deps=['backend-gtk-main.ui',
               'backend-gtk-menu.ui',
               'backend-gtk-area.ui'],
+    )
+
+version_file = m.add_generated_target(
+        generator=vgen,
+        output='version.h',
+        deps=['force']
     )
 
 #-------------------------------------------------------------------------------

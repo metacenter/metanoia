@@ -1,12 +1,13 @@
 all: build/aura
 
+res/force:
+
 clean:
 	rm -rf build gen checks
 
 checks: checks/check-chain checks/check-store
-
 check: checks
-	@for c in checks/*; do $$c; done
+	@time (for c in checks/check*; do $$c; done)
 
 
 build/aura: Makefile \
@@ -91,6 +92,12 @@ gen/backend-gtk-res.c: Makefile \
 	@mkdir -p gen
 	@echo "  GEN  backend-gtk-res.c"
 	@glib-compile-resources res/aura.gresource.xml --target=gen/backend-gtk-res.c --generate-source
+
+gen/version.h: Makefile \
+               res/force
+	@mkdir -p gen
+	@echo "  GEN  version.h"
+	@desc=`git describe --always`; if ! grep -q "$$desc" gen/version.h 2> /dev/null; then echo -e "#ifndef AURA_VERSION\n#define AURA_VERSION \"$$desc\"\n#endif\n" > gen/version.h; fi
 
 build/aura.o: Makefile \
               src/aura.c \
@@ -211,7 +218,8 @@ build/utils-log.o: Makefile \
                    src/global-types.h \
                    src/utils-chain.h \
                    src/utils-log.h \
-                   src/utils-environment.h
+                   src/utils-environment.h \
+                   gen/version.h
 	@mkdir -p build
 	@echo "  CC   utils-log.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/utils-log.o -Isrc -Igen \
@@ -942,7 +950,8 @@ build/backend-gtk-win.o: Makefile \
                          src/global-types.h \
                          src/utils-chain.h \
                          src/event-signals.h \
-                         src/event-task.h
+                         src/event-task.h \
+                         gen/version.h
 	@mkdir -p build
 	@echo "  CC   backend-gtk-win.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/backend-gtk-win.o -Isrc -Igen \
