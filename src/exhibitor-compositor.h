@@ -5,7 +5,6 @@
 #define __AURA_EXHIBITOR_COMPOSITOR_H__
 
 #include "exhibitor-frame.h"
-#include "global-types.h"
 
 typedef struct {
     Chain* groups;

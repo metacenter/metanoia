@@ -5,9 +5,7 @@
 #define __AURA_EXHIBITOR_FRAME_H__
 
 #include "utils-branch.h"
-#include "global-types.h"
-
-#include <stdbool.h>
+#include "global-constants.h"
 
 typedef enum {
     AURA_FRAME_TYPE_NONE = 0,

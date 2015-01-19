@@ -5,10 +5,7 @@
 #define __AURA_EXHIBITOR_POINTER_H__
 
 #include "event-loop.h"
-
-typedef struct {
-    int x, y;
-} AuraPosition;
+#include "global-types.h"
 
 void aura_exhibitor_pointer_initialize(AuraLoop* this_loop);
 

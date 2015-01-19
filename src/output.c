@@ -7,33 +7,43 @@
 
 //------------------------------------------------------------------------------
 
-int aura_output_initialize(AuraOutput* self,
-                           int width,
-                           int height,
-                           char* unique_name,
-                           AuraOutputInitRendererFunc initialize,
-                           AuraOutputSwapFunc swap_buffers,
-                           AuraOutputFreeFunc free)
+/// Initialize AuraOutput.
+/// @param unique_name - a string that uniquely specifies an output
+/// @param initialize - renderer constructor (back-end specific)
+/// @param swap_buffers - buffer swapper (back-end specific)
+/// @param free - free method (back-end specific)
+AuraResult aura_output_initialize(AuraOutput* self,
+                                  int width,
+                                  int height,
+                                  char* unique_name,
+                                  AuraOutputInitRendererFunc initialize,
+                                  AuraOutputSwapFunc swap_buffers,
+                                  AuraOutputFreeFunc free)
 {
     if (!self) {
-        return -1;
+        return AURA_INCORECT_ARGUMENT;
     }
 
     self->width = width;
     self->height = height;
     self->unique_name = unique_name;
-    self->renderer = 0;
+    self->global_position.x = 0;
+    self->global_position.y = 0;
+    self->renderer = NULL;
     self->initialize = initialize;
     self->swap_buffers = swap_buffers;
     self->free = free;
-    return 0;
+    return AURA_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
+/// Compare two outputs.
+/// @return `0` if identical.
 int aura_output_compare(AuraOutput* first, AuraOutput* second)
 {
     return strcmp(first->unique_name, second->unique_name);
 }
 
 //------------------------------------------------------------------------------
+

@@ -4,7 +4,7 @@
 #ifndef __AURA_OUTPUT_H__
 #define __AURA_OUTPUT_H__
 
-#include "global-types.h"
+#include "global-constants.h"
 
 typedef struct AuraOutput AuraOutput;
 
@@ -17,19 +17,20 @@ struct AuraOutput {
     int width;
     int height;
     char* unique_name;
+    AuraPosition global_position;
     AuraRenderer* renderer;
     AuraOutputInitRendererFunc initialize;
     AuraOutputSwapFunc swap_buffers;
     AuraOutputFreeFunc free;
 };
 
-int aura_output_initialize(AuraOutput* self,
-                           int width,
-                           int height,
-                           char* unique_name,
-                           AuraOutputInitRendererFunc initialize,
-                           AuraOutputSwapFunc swap_buffers,
-                           AuraOutputFreeFunc free);
+AuraResult aura_output_initialize(AuraOutput* self,
+                                  int width,
+                                  int height,
+                                  char* unique_name,
+                                  AuraOutputInitRendererFunc initialize,
+                                  AuraOutputSwapFunc swap_buffers,
+                                  AuraOutputFreeFunc free);
 
 int aura_output_compare(AuraOutput* first, AuraOutput* second);
 

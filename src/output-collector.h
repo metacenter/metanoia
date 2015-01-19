@@ -9,7 +9,5 @@
 
 void aura_output_collector_initialize(AuraLoop* this_loop);
 
-void aura_outputs_update();
-
 #endif // __AURA_OUTPUT_COLLECTOR_H__
 

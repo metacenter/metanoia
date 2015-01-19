@@ -15,6 +15,12 @@ typedef uint32_t SurfaceId;
 typedef void (*AuraKeyCallback) (void);
 typedef int (*CompareFunc) (const void*, const void*);
 
+// Type defining position or point coordinates
+typedef struct {
+    int x;
+    int y;
+} AuraPosition;
+
 // Keyboard binding
 typedef struct {
     int code;
@@ -39,23 +45,6 @@ typedef struct {
     int code;
     bool value;
 } AuraKeyData;
-
-/// Argmand types
-typedef enum {
-    AURA_ARGMAND_NONE,    ///< Dummy; do/parametrize nothing
-    // actions
-    AURA_ARGMAND_FOCUS,   ///< Change focused surface
-    AURA_ARGMAND_MOVE,    ///< Change position
-    AURA_ARGMAND_JUMP,    ///< Change palcement in tree structure
-    AURA_ARGMAND_RESIZE,  ///< Change size
-    // directions
-    AURA_ARGMAND_N,       ///< North; up; above
-    AURA_ARGMAND_E,       ///< East; right
-    AURA_ARGMAND_S,       ///< South; down; below
-    AURA_ARGMAND_W,       ///< West; left
-    AURA_ARGMAND_BACK,    ///< Back in time; most recently used
-    AURA_ARGMAND_FORWARD, ///< Forward in time; the oldest used
-} AuraArgmandType;
 
 #endif // __AURA_GLOBAL_TYPES_H__
 
