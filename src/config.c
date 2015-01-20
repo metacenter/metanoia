@@ -25,7 +25,7 @@ void aura_config_apply()
     aura_utils_keymap_initialize(keymap);
 
     unsigned int i;
-    for (i=0; i < sizeof(scArgmands)/sizeof(AuraArgmand)-1; ++i) {
+    for (i=0; i < sizeof(scArgmands)/sizeof(AuraArgmand); ++i) {
         aura_keyboard_add_argmand(AURA_NORMAL_MODE, &scArgmands[i]);
     }
 

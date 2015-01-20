@@ -20,6 +20,7 @@ static const AuraArgmand scArgmands[] = {
         {KEY_TAB,   AURA_KEY_ALT  | AURA_KEY_SHIFT, aura_cicle_history_back},
         {KEY_ESC,   0,                              aura_clean_stack},
         {KEY_F,     0,                              aura_put_focus},
+        {KEY_M,     0,                              aura_put_move},
         {KEY_RIGHT, 0,                              aura_right},
         {KEY_LEFT,  0,                              aura_left},
         {KEY_UP,    0,                              aura_up},

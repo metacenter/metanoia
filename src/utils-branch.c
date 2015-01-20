@@ -41,7 +41,7 @@ void aura_branch_prepend(AuraBranch* self, AuraBranch* other)
         return;
     }
 
-    chain_prejoin(self->twigs, other);
+    chain_prejoin(self->twigs, (Link*) other);
     other->trunk = self;
 }
 
@@ -53,7 +53,7 @@ void aura_branch_append(AuraBranch* self, AuraBranch* other)
         return;
     }
 
-    chain_adjoin(self->twigs, other);
+    chain_adjoin(self->twigs, (Link*) other);
     other->trunk = self;
 }
 

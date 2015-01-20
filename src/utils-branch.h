@@ -6,6 +6,10 @@
 
 #include "utils-chain.h"
 
+#define FOR_EACH_TWIG(TRUNK,BRANCH) \
+    for (AuraBranch* BRANCH = (AuraBranch*) TRUNK->twigs->first; \
+    BRANCH; BRANCH = (AuraBranch*) BRANCH->link.next)
+
 typedef struct AuraBranch AuraBranch;
 
 struct AuraBranch {

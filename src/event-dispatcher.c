@@ -113,8 +113,10 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
                 }
             }
         } else if (r < 0) {
-            LOG_ERROR("Epoll Error! (%d, %m)", r);
-            self->run = 0;
+            if (errno != EINTR) {
+                LOG_ERROR("Epoll Error! (%d, %m)", errno);
+                self->run = 0;
+            }
         } else {
             LOG_WARN1("Ut infinitum et ultra!");
         }

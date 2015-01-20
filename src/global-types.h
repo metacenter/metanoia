@@ -15,7 +15,7 @@ typedef uint32_t SurfaceId;
 typedef void (*AuraKeyCallback) (void);
 typedef int (*CompareFunc) (const void*, const void*);
 
-// Type defining position or point coordinates
+// Type defining position, point coordinates or 2D vector
 typedef struct {
     int x;
     int y;

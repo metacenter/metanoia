@@ -22,7 +22,6 @@ void aura_quit()
 
 void aura_refresh_displays()
 {
-    LOG_DEBUG("REFRESH");
     aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
 }
 
@@ -30,7 +29,6 @@ void aura_refresh_displays()
 
 void aura_cicle_history_forward()
 {
-    LOG_DEBUG("CICLE HISTORY FORWARD");
     aura_exhibitor_pop_history_surface(1);
 }
 
@@ -38,7 +36,6 @@ void aura_cicle_history_forward()
 
 void aura_cicle_history_back()
 {
-    LOG_DEBUG("CICLE HISTORY BACK");
     aura_exhibitor_pop_history_surface(-1);
 }
 
@@ -46,7 +43,6 @@ void aura_cicle_history_back()
 
 void aura_clean_stack(Chain* stack)
 {
-    LOG_DEBUG("CLEAN");
     chain_clean(stack);
 }
 
@@ -54,7 +50,6 @@ void aura_clean_stack(Chain* stack)
 
 void aura_put_focus(Chain* stack)
 {
-    LOG_DEBUG("PUT FOCUS");
     chain_append(stack, (void*) AURA_ARGMAND_FOCUS);
 }
 
@@ -62,7 +57,6 @@ void aura_put_focus(Chain* stack)
 
 void aura_put_move(Chain* stack)
 {
-    LOG_DEBUG("PUT MOVE");
     chain_append(stack, (void*) AURA_ARGMAND_MOVE);
 }
 
