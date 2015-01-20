@@ -10,12 +10,7 @@
 Link* link_new(void* data)
 {
     Link* self = malloc(sizeof(Link));
-    if (!self) {
-        return NULL;
-    }
-    self->prev = NULL;
-    self->next = NULL;
-    self->data = data;
+    link_initialize(self, data);
     return self;
 }
 
@@ -30,6 +25,18 @@ void link_free(Link* self, AuraFreeFunc freefunc)
         freefunc(self->data);
     }
     free(self);
+}
+
+//------------------------------------------------------------------------------
+
+void link_initialize(Link* self, void* data)
+{
+    if (!self) {
+        return;
+    }
+    self->prev = NULL;
+    self->next = NULL;
+    self->data = data;
 }
 
 //------------------------------------------------------------------------------
@@ -72,13 +79,12 @@ int chain_len(Chain* self)
 
 //------------------------------------------------------------------------------
 
-void chain_add_first(Chain* self, void* data)
+void chain_add_first(Chain* self, Link* link)
 {
     if (!self) {
         return;
     }
 
-    Link* link = link_new(data);
     self->first = link;
     self->last = link;
     self->len = 1;
@@ -92,15 +98,7 @@ void chain_prepend(Chain* self, void* data)
         return;
     }
 
-    if (self->len == 0) {
-        chain_add_first(self, data);
-    } else {
-        Link* link = link_new(data);
-        link->next = self->first;
-        self->first->prev = link;
-        self->first = link;
-        self->len += 1;
-    }
+    chain_prejoin(self, link_new(data));
 }
 
 //------------------------------------------------------------------------------
@@ -111,10 +109,38 @@ void chain_append(Chain* self, void* data)
         return;
     }
 
+    chain_adjoin(self, link_new(data));
+}
+
+//------------------------------------------------------------------------------
+
+void chain_prejoin(Chain* self, Link* link)
+{
+    if (!self) {
+        return;
+    }
+
     if (self->len == 0) {
-        chain_add_first(self, data);
+        chain_add_first(self, link);
     } else {
-        Link* link = link_new(data);
+        link->next = self->first;
+        self->first->prev = link;
+        self->first = link;
+        self->len += 1;
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void chain_adjoin(Chain* self, Link* link)
+{
+    if (!self) {
+        return;
+    }
+
+    if (self->len == 0) {
+        chain_add_first(self, link);
+    } else {
         link->prev = self->last;
         self->last->next = link;
         self->last = link;

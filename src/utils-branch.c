@@ -16,7 +16,7 @@ AuraBranch* aura_branch_new()
         return NULL;
     }
 
-    self->data = NULL;
+    link_initialize(&self->link, NULL);
     self->trunk = NULL;
     self->twigs = chain_new(0);
     return self;
@@ -37,7 +37,11 @@ void aura_branch_free(AuraBranch* self)
 
 void aura_branch_prepend(AuraBranch* self, AuraBranch* other)
 {
-    chain_prepend(self->twigs, other);
+    if (!self) {
+        return;
+    }
+
+    chain_prejoin(self->twigs, other);
     other->trunk = self;
 }
 
@@ -45,7 +49,11 @@ void aura_branch_prepend(AuraBranch* self, AuraBranch* other)
 
 void aura_branch_append(AuraBranch* self, AuraBranch* other)
 {
-    chain_append(self->twigs, other);
+    if (!self) {
+        return;
+    }
+
+    chain_adjoin(self->twigs, other);
     other->trunk = self;
 }
 
@@ -53,7 +61,11 @@ void aura_branch_append(AuraBranch* self, AuraBranch* other)
 
 void aura_branch_set_data(AuraBranch* self, void* data)
 {
-    self->data = data;
+    if (!self) {
+        return;
+    }
+
+    self->link.data = data;
 }
 
 //------------------------------------------------------------------------------

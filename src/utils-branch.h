@@ -9,7 +9,7 @@
 typedef struct AuraBranch AuraBranch;
 
 struct AuraBranch {
-    void* data;
+    Link link;
     AuraBranch* trunk;
     Chain* twigs;
 };

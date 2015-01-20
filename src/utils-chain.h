@@ -19,6 +19,8 @@ struct Link {
 Link* link_new(void* data);
 void link_free(Link* link, AuraFreeFunc freefunc);
 
+void link_initialize(Link* link, void* data);
+
 typedef struct {
     Link* first;
     Link* last;
@@ -33,6 +35,10 @@ int chain_len(Chain* chain);
 
 void chain_prepend(Chain* chain, void* data);
 void chain_append(Chain* chain, void* data);
+
+void chain_prejoin(Chain* chain, Link* link);
+void chain_adjoin(Chain* chain, Link* link);
+
 void* chain_pop(Chain* chain);
 
 int chain_remove(Chain* chain, void* data, AuraCompareFunc compare);
