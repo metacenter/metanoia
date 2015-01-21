@@ -6,6 +6,8 @@
 #include "utils-chain.h"
 #include "utils-environment.h"
 
+#define __USE_GNU
+#define _GNU_SOURCE
 #include <errno.h>
 #include <malloc.h>
 #include <pthread.h>
@@ -65,6 +67,7 @@ static void* aura_loop_thread_loop(void* data)
     }
 
     LOG_INFO1("Threads: starting loop '%s'", self->name);
+    pthread_setname_np(self->thread, self->name);
     aura_environment_block_system_signals();
 
     self->run = 1;

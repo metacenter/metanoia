@@ -26,9 +26,9 @@ int main()
     aura_event_dispatcher_initialize(dispatcher);
 
     // Prepare loops and events
-    AuraLoop* loop_devices = aura_loop_new("devices");
-    AuraLoop* loop_surface_manager = aura_loop_new("surface_manager");
-    AuraLoop* loop_keyboard = aura_loop_new("keyboard");
+    AuraLoop* loop_devices = aura_loop_new("aura:devices");
+    AuraLoop* loop_surface_manager = aura_loop_new("aura:displays");
+    AuraLoop* loop_keyboard = aura_loop_new("aura:keyboard");
 
     // Continue initialization asynchronously
     task = factorize_setup_device_monitor_task(dispatcher);
