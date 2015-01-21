@@ -46,9 +46,10 @@ typedef enum {
 
 /// Function return values or error codes
 typedef enum {
-    AURA_SUCCESS = 0,       ///< Everything worked fine
-    AURA_ERROR,             ///< Unspecified error
-    AURA_INCORECT_ARGUMENT, ///< Incorrect or invalid argument passed
+    AURA_RESULT_SUCCESS = 0,       ///< Everything worked fine
+    AURA_RESULT_ERROR,             ///< Unspecified error
+    AURA_RESULT_INCORECT_ARGUMENT, ///< Incorrect or invalid argument passed
+    AURA_RESULT_NOT_FOUND,         ///< Required data not found
 } AuraResult;
 
 #endif // __AURA_CONSTANTS_H__

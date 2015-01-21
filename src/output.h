@@ -4,7 +4,7 @@
 #ifndef __AURA_OUTPUT_H__
 #define __AURA_OUTPUT_H__
 
-#include "global-constants.h"
+#include "renderer.h"
 
 typedef struct AuraOutput AuraOutput;
 

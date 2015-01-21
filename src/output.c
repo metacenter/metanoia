@@ -21,7 +21,7 @@ AuraResult aura_output_initialize(AuraOutput* self,
                                   AuraOutputFreeFunc free)
 {
     if (!self) {
-        return AURA_INCORECT_ARGUMENT;
+        return AURA_RESULT_INCORECT_ARGUMENT;
     }
 
     self->width = width;
@@ -33,7 +33,7 @@ AuraResult aura_output_initialize(AuraOutput* self,
     self->initialize = initialize;
     self->swap_buffers = swap_buffers;
     self->free = free;
-    return AURA_SUCCESS;
+    return AURA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------

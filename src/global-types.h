@@ -4,8 +4,6 @@
 #ifndef __AURA_GLOBAL_TYPES_H__
 #define __AURA_GLOBAL_TYPES_H__
 
-#include "utils-chain.h"
-
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -27,17 +25,6 @@ typedef struct {
     uint32_t modifiers;
     AuraKeyCallback callback;
 } Binding;
-
-// Renderer strategy interface // TODO: move to separate file
-// TODO: move 'attach' elsewhere
-typedef struct AuraRenderer AuraRenderer;
-struct AuraRenderer {
-    int (*initialize) (AuraRenderer*);
-    void (*finalize) (AuraRenderer*);
-    void (*attach) (AuraRenderer*, SurfaceId, void*);
-    void (*draw) (AuraRenderer*, Chain*, int x, int y);
-    void (*free) (AuraRenderer*);
-};
 
 // Key event data
 typedef struct {

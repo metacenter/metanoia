@@ -4,7 +4,7 @@
 #ifndef __AURA_RENDERER_GL_H__
 #define __AURA_RENDERER_GL_H__
 
-#include "global-types.h"
+#include "renderer.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
