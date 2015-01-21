@@ -74,6 +74,7 @@ void aura_compositor_pop_surface(AURA_UNUSED AuraCompositor* self,
 {
     AuraFrame* frame = aura_frame_find_with_sid(self->frame, sid);
     aura_frame_pop_recursively(self->frame, frame);
+    self->selection = frame;
 }
 
 //------------------------------------------------------------------------------

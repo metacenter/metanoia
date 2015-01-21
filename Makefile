@@ -104,7 +104,6 @@ build/aura.o: Makefile \
               src/utils-log.h \
               src/global-constants.h \
               src/global-types.h \
-              src/utils-chain.h \
               src/utils-dbus.h \
               src/utils-environment.h \
               src/event-dispatcher.h \
@@ -124,9 +123,9 @@ build/config.o: Makefile \
                 src/utils-keymap.h \
                 src/global-constants.h \
                 src/global-types.h \
-                src/utils-chain.h \
                 src/configuration.h \
                 src/global-functions.h \
+                src/utils-chain.h \
                 src/keyboard-argmand.h \
                 src/keyboard-bindings.h \
                 src/utils-log.h
@@ -139,9 +138,9 @@ build/global-functions.o: Makefile \
                           src/global-functions.c \
                           src/global-functions.h \
                           src/utils-chain.h \
-                          src/utils-log.h \
                           src/global-constants.h \
                           src/global-types.h \
+                          src/utils-log.h \
                           src/event-signals.h \
                           src/event-task.h \
                           src/exhibitor.h \
@@ -150,6 +149,7 @@ build/global-functions.o: Makefile \
                           src/exhibitor-frame.h \
                           src/utils-branch.h \
                           src/output.h \
+                          src/renderer.h \
                           src/event-loop.h
 	@mkdir -p build
 	@echo "  CC   global-functions.o"
@@ -158,7 +158,9 @@ build/global-functions.o: Makefile \
 
 build/utils-chain.o: Makefile \
                      src/utils-chain.c \
-                     src/utils-chain.h
+                     src/utils-chain.h \
+                     src/global-constants.h \
+                     src/global-types.h
 	@mkdir -p build
 	@echo "  CC   utils-chain.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/utils-chain.o -Isrc -Igen \
@@ -168,9 +170,9 @@ build/utils-branch.o: Makefile \
                       src/utils-branch.c \
                       src/utils-branch.h \
                       src/utils-chain.h \
-                      src/utils-log.h \
                       src/global-constants.h \
-                      src/global-types.h
+                      src/global-types.h \
+                      src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   utils-branch.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/utils-branch.o -Isrc -Igen \
@@ -189,8 +191,7 @@ build/utils-dbus.o: Makefile \
                     src/utils-dbus.h \
                     src/utils-log.h \
                     src/global-constants.h \
-                    src/global-types.h \
-                    src/utils-chain.h
+                    src/global-types.h
 	@mkdir -p build
 	@echo "  CC   utils-dbus.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/utils-dbus.o -Isrc -Igen \
@@ -203,7 +204,6 @@ build/utils-keymap.o: Makefile \
                       src/utils-log.h \
                       src/global-constants.h \
                       src/global-types.h \
-                      src/utils-chain.h \
                       src/utils-environment.h
 	@mkdir -p build
 	@echo "  CC   utils-keymap.o"
@@ -216,7 +216,6 @@ build/utils-log.o: Makefile \
                    src/utils-keymap.h \
                    src/global-constants.h \
                    src/global-types.h \
-                   src/utils-chain.h \
                    src/utils-log.h \
                    src/utils-environment.h \
                    gen/version.h
@@ -230,7 +229,6 @@ build/utils-environment.o: Makefile \
                            src/utils-environment.h \
                            src/global-constants.h \
                            src/global-types.h \
-                           src/utils-chain.h \
                            src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   utils-environment.o"
@@ -242,8 +240,7 @@ build/event-dispatcher.o: Makefile \
                           src/event-dispatcher.h \
                           src/utils-log.h \
                           src/global-constants.h \
-                          src/global-types.h \
-                          src/utils-chain.h
+                          src/global-types.h
 	@mkdir -p build
 	@echo "  CC   event-dispatcher.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/event-dispatcher.o -Isrc -Igen \
@@ -254,8 +251,7 @@ build/event-timer.o: Makefile \
                      src/event-timer.h \
                      src/utils-log.h \
                      src/global-constants.h \
-                     src/global-types.h \
-                     src/utils-chain.h
+                     src/global-types.h
 	@mkdir -p build
 	@echo "  CC   event-timer.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/event-timer.o -Isrc -Igen \
@@ -294,8 +290,7 @@ build/event-task.o: Makefile \
                     src/event-task.h \
                     src/utils-log.h \
                     src/global-constants.h \
-                    src/global-types.h \
-                    src/utils-chain.h
+                    src/global-types.h
 	@mkdir -p build
 	@echo "  CC   event-task.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/event-task.o -Isrc -Igen \
@@ -311,8 +306,10 @@ build/event-factory.o: Makefile \
                        src/backend-gtk.h \
                        src/event-loop.h \
                        src/output.h \
-                       src/global-types.h \
+                       src/renderer.h \
                        src/utils-chain.h \
+                       src/global-constants.h \
+                       src/global-types.h \
                        src/output-collector.h \
                        src/exhibitor.h \
                        src/exhibitor-display.h \
@@ -320,8 +317,7 @@ build/event-factory.o: Makefile \
                        src/exhibitor-frame.h \
                        src/utils-branch.h \
                        src/wayland.h \
-                       src/utils-environment.h \
-                       src/global-constants.h
+                       src/utils-environment.h
 	@mkdir -p build
 	@echo "  CC   event-factory.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/event-factory.o -Isrc -Igen \
@@ -333,8 +329,7 @@ build/device-common.o: Makefile \
                        src/utils-dbus.h \
                        src/utils-log.h \
                        src/global-constants.h \
-                       src/global-types.h \
-                       src/utils-chain.h
+                       src/global-types.h
 	@mkdir -p build
 	@echo "  CC   device-common.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/device-common.o -Isrc -Igen \
@@ -344,12 +339,13 @@ build/device-fb.o: Makefile \
                    src/device-fb.c \
                    src/device-fb.h \
                    src/output.h \
-                   src/global-types.h \
+                   src/renderer.h \
                    src/utils-chain.h \
+                   src/global-constants.h \
+                   src/global-types.h \
                    src/device-common.h \
                    src/renderer-mmap.h \
-                   src/utils-log.h \
-                   src/global-constants.h
+                   src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   device-fb.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/device-fb.o -Isrc -Igen \
@@ -359,10 +355,11 @@ build/device-drm.o: Makefile \
                     src/device-drm.c \
                     src/device-drm.h \
                     src/output.h \
-                    src/global-types.h \
+                    src/renderer.h \
                     src/utils-chain.h \
-                    src/utils-log.h \
                     src/global-constants.h \
+                    src/global-types.h \
+                    src/utils-log.h \
                     src/renderer-mmap.h \
                     src/renderer-gl.h \
                     src/utils-dbus.h
@@ -381,11 +378,11 @@ build/device-evdev.o: Makefile \
                       src/utils-log.h \
                       src/global-constants.h \
                       src/global-types.h \
-                      src/utils-chain.h \
                       src/event-signals.h \
                       src/event-task.h \
                       src/keyboard-bindings.h \
-                      src/keyboard-argmand.h
+                      src/keyboard-argmand.h \
+                      src/utils-chain.h
 	@mkdir -p build
 	@echo "  CC   device-evdev.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/device-evdev.o -Isrc -Igen \
@@ -398,7 +395,6 @@ build/device-udev.o: Makefile \
                      src/utils-log.h \
                      src/global-constants.h \
                      src/global-types.h \
-                     src/utils-chain.h \
                      src/event-signals.h \
                      src/event-task.h
 	@mkdir -p build
@@ -409,8 +405,10 @@ build/device-udev.o: Makefile \
 build/output.o: Makefile \
                 src/output.c \
                 src/output.h \
-                src/global-types.h \
-                src/utils-chain.h
+                src/renderer.h \
+                src/utils-chain.h \
+                src/global-constants.h \
+                src/global-types.h
 	@mkdir -p build
 	@echo "  CC   output.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/output.o -Isrc -Igen \
@@ -422,12 +420,13 @@ build/output-collector.o: Makefile \
                           src/event-loop.h \
                           src/event-task.h \
                           src/global-types.h \
-                          src/utils-chain.h \
                           src/event-signals.h \
                           src/utils-log.h \
                           src/global-constants.h \
                           src/device-drm.h \
                           src/output.h \
+                          src/renderer.h \
+                          src/utils-chain.h \
                           src/device-fb.h \
                           src/backend-gtk.h \
                           src/config.h \
@@ -441,13 +440,13 @@ build/surface-data.o: Makefile \
                       src/surface-data.c \
                       src/surface-data.h \
                       src/global-types.h \
-                      src/utils-chain.h \
                       src/utils-store.h \
                       src/exhibitor-compositor.h \
                       src/exhibitor-frame.h \
                       src/utils-branch.h \
-                      src/utils-log.h \
-                      src/global-constants.h
+                      src/utils-chain.h \
+                      src/global-constants.h \
+                      src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   surface-data.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/surface-data.o -Isrc -Igen \
@@ -460,13 +459,13 @@ build/surface-manager.o: Makefile \
                          src/event-task.h \
                          src/surface-data.h \
                          src/global-types.h \
-                         src/utils-chain.h \
                          src/utils-store.h \
                          src/exhibitor-compositor.h \
                          src/exhibitor-frame.h \
                          src/utils-branch.h \
-                         src/utils-log.h \
+                         src/utils-chain.h \
                          src/global-constants.h \
+                         src/utils-log.h \
                          src/event-timer.h \
                          src/event-signals.h
 	@mkdir -p build
@@ -505,9 +504,9 @@ build/keyboard-argmand.o: Makefile \
                           src/keyboard-argmand.c \
                           src/keyboard-argmand.h \
                           src/utils-chain.h \
-                          src/utils-log.h \
                           src/global-constants.h \
-                          src/global-types.h
+                          src/global-types.h \
+                          src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   keyboard-argmand.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/keyboard-argmand.o -Isrc -Igen \
@@ -521,14 +520,15 @@ build/exhibitor.o: Makefile \
                    src/exhibitor-frame.h \
                    src/utils-branch.h \
                    src/utils-chain.h \
+                   src/global-constants.h \
                    src/global-types.h \
                    src/output.h \
+                   src/renderer.h \
                    src/event-loop.h \
                    src/event-task.h \
                    src/exhibitor-strategist.h \
                    src/exhibitor-pointer.h \
                    src/utils-log.h \
-                   src/global-constants.h \
                    src/event-signals.h \
                    src/surface-manager.h \
                    src/surface-data.h \
@@ -545,13 +545,14 @@ build/exhibitor-display.o: Makefile \
                            src/exhibitor-frame.h \
                            src/utils-branch.h \
                            src/utils-chain.h \
+                           src/global-constants.h \
                            src/global-types.h \
                            src/output.h \
+                           src/renderer.h \
                            src/exhibitor-pointer.h \
                            src/event-loop.h \
                            src/event-task.h \
                            src/utils-log.h \
-                           src/global-constants.h \
                            src/event-timer.h \
                            src/event-signals.h
 	@mkdir -p build
@@ -565,14 +566,14 @@ build/exhibitor-compositor.o: Makefile \
                               src/exhibitor-frame.h \
                               src/utils-branch.h \
                               src/utils-chain.h \
+                              src/global-constants.h \
                               src/global-types.h \
                               src/surface-manager.h \
                               src/event-loop.h \
                               src/event-task.h \
                               src/surface-data.h \
                               src/utils-store.h \
-                              src/utils-log.h \
-                              src/global-constants.h
+                              src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-compositor.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/exhibitor-compositor.o -Isrc -Igen \
@@ -583,9 +584,15 @@ build/exhibitor-frame.o: Makefile \
                          src/exhibitor-frame.h \
                          src/utils-branch.h \
                          src/utils-chain.h \
+                         src/global-constants.h \
                          src/global-types.h \
                          src/utils-log.h \
-                         src/global-constants.h
+                         src/surface-manager.h \
+                         src/event-loop.h \
+                         src/event-task.h \
+                         src/surface-data.h \
+                         src/utils-store.h \
+                         src/exhibitor-compositor.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-frame.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/exhibitor-frame.o -Isrc -Igen \
@@ -600,12 +607,13 @@ build/exhibitor-strategist.o: Makefile \
                               src/exhibitor-frame.h \
                               src/utils-branch.h \
                               src/utils-chain.h \
+                              src/global-constants.h \
                               src/global-types.h \
                               src/output.h \
+                              src/renderer.h \
                               src/event-loop.h \
                               src/event-task.h \
                               src/utils-log.h \
-                              src/global-constants.h \
                               src/event-signals.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-strategist.o"
@@ -617,16 +625,17 @@ build/exhibitor-pointer.o: Makefile \
                            src/exhibitor-pointer.h \
                            src/event-loop.h \
                            src/event-task.h \
+                           src/global-types.h \
                            src/exhibitor.h \
                            src/exhibitor-display.h \
                            src/exhibitor-compositor.h \
                            src/exhibitor-frame.h \
                            src/utils-branch.h \
                            src/utils-chain.h \
-                           src/global-types.h \
-                           src/output.h \
-                           src/utils-log.h \
                            src/global-constants.h \
+                           src/output.h \
+                           src/renderer.h \
+                           src/utils-log.h \
                            src/event-signals.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-pointer.o"
@@ -637,8 +646,10 @@ build/renderer-mmap.o: Makefile \
                        src/renderer-mmap.c \
                        src/renderer-mmap.h \
                        src/output.h \
-                       src/global-types.h \
+                       src/renderer.h \
                        src/utils-chain.h \
+                       src/global-constants.h \
+                       src/global-types.h \
                        src/surface-manager.h \
                        src/event-loop.h \
                        src/event-task.h \
@@ -647,8 +658,7 @@ build/renderer-mmap.o: Makefile \
                        src/exhibitor-compositor.h \
                        src/exhibitor-frame.h \
                        src/utils-branch.h \
-                       src/utils-log.h \
-                       src/global-constants.h
+                       src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   renderer-mmap.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/renderer-mmap.o -Isrc -Igen \
@@ -657,8 +667,10 @@ build/renderer-mmap.o: Makefile \
 build/renderer-gl.o: Makefile \
                      src/renderer-gl.c \
                      src/renderer-gl.h \
-                     src/global-types.h \
+                     src/renderer.h \
                      src/utils-chain.h \
+                     src/global-constants.h \
+                     src/global-types.h \
                      src/surface-manager.h \
                      src/event-loop.h \
                      src/event-task.h \
@@ -668,7 +680,6 @@ build/renderer-gl.o: Makefile \
                      src/exhibitor-frame.h \
                      src/utils-branch.h \
                      src/utils-log.h \
-                     src/global-constants.h \
                      src/bind-egl-wayland.h
 	@mkdir -p build
 	@echo "  CC   renderer-gl.o"
@@ -689,10 +700,11 @@ build/wayland.o: Makefile \
                  src/wayland-state.h \
                  src/utils-store.h \
                  src/output.h \
-                 src/global-types.h \
+                 src/renderer.h \
                  src/utils-chain.h \
-                 src/utils-log.h \
                  src/global-constants.h \
+                 src/global-types.h \
+                 src/utils-log.h \
                  src/utils-environment.h \
                  src/event-signals.h \
                  gen/xdg-shell-server-protocol.h
@@ -707,8 +719,7 @@ build/wayland-output.o: Makefile \
                         src/utils-store.h \
                         src/utils-log.h \
                         src/global-constants.h \
-                        src/global-types.h \
-                        src/utils-chain.h
+                        src/global-types.h
 	@mkdir -p build
 	@echo "  CC   wayland-output.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-output.o -Isrc -Igen \
@@ -719,12 +730,13 @@ build/wayland-state.o: Makefile \
                        src/wayland-state.h \
                        src/utils-store.h \
                        src/output.h \
-                       src/global-types.h \
+                       src/renderer.h \
                        src/utils-chain.h \
+                       src/global-constants.h \
+                       src/global-types.h \
                        src/wayland-output.h \
                        src/wayland-protocol-output.h \
-                       src/utils-log.h \
-                       src/global-constants.h
+                       src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-state.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-state.o -Isrc -Igen \
@@ -738,8 +750,10 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/wayland-state.h \
                                      src/utils-store.h \
                                      src/output.h \
-                                     src/global-types.h \
+                                     src/renderer.h \
                                      src/utils-chain.h \
+                                     src/global-constants.h \
+                                     src/global-types.h \
                                      src/surface-manager.h \
                                      src/event-loop.h \
                                      src/event-task.h \
@@ -747,8 +761,7 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/exhibitor-compositor.h \
                                      src/exhibitor-frame.h \
                                      src/utils-branch.h \
-                                     src/utils-log.h \
-                                     src/global-constants.h
+                                     src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-compositor.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-compositor.o -Isrc -Igen \
@@ -760,8 +773,10 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/wayland-state.h \
                                   src/utils-store.h \
                                   src/output.h \
-                                  src/global-types.h \
+                                  src/renderer.h \
                                   src/utils-chain.h \
+                                  src/global-constants.h \
+                                  src/global-types.h \
                                   src/surface-manager.h \
                                   src/event-loop.h \
                                   src/event-task.h \
@@ -769,8 +784,7 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/exhibitor-compositor.h \
                                   src/exhibitor-frame.h \
                                   src/utils-branch.h \
-                                  src/utils-log.h \
-                                  src/global-constants.h
+                                  src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-surface.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-surface.o -Isrc -Igen \
@@ -781,8 +795,7 @@ build/wayland-protocol-region.o: Makefile \
                                  src/wayland-protocol-region.h \
                                  src/utils-log.h \
                                  src/global-constants.h \
-                                 src/global-types.h \
-                                 src/utils-chain.h
+                                 src/global-types.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-region.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-region.o -Isrc -Igen \
@@ -793,8 +806,7 @@ build/wayland-protocol-shell.o: Makefile \
                                 src/wayland-protocol-shell.h \
                                 src/utils-log.h \
                                 src/global-constants.h \
-                                src/global-types.h \
-                                src/utils-chain.h
+                                src/global-types.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-shell.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-shell.o -Isrc -Igen \
@@ -806,8 +818,7 @@ build/wayland-protocol-shell-surface.o: Makefile \
                                         src/wayland-protocol-shell-surface.h \
                                         src/utils-log.h \
                                         src/global-constants.h \
-                                        src/global-types.h \
-                                        src/utils-chain.h
+                                        src/global-types.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-shell-surface.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-shell-surface.o -Isrc -Igen \
@@ -820,7 +831,6 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/utils-log.h \
                                     src/global-constants.h \
                                     src/global-types.h \
-                                    src/utils-chain.h \
                                     gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-xdg-shell.o"
@@ -840,8 +850,9 @@ build/wayland-protocol-output.o: Makefile \
                                  src/utils-log.h \
                                  src/global-constants.h \
                                  src/global-types.h \
-                                 src/utils-chain.h \
-                                 src/output.h
+                                 src/output.h \
+                                 src/renderer.h \
+                                 src/utils-chain.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-output.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-output.o -Isrc -Igen \
@@ -855,10 +866,11 @@ build/wayland-protocol-seat.o: Makefile \
                                src/wayland-state.h \
                                src/utils-store.h \
                                src/output.h \
-                               src/global-types.h \
+                               src/renderer.h \
                                src/utils-chain.h \
-                               src/utils-log.h \
                                src/global-constants.h \
+                               src/global-types.h \
+                               src/utils-log.h \
                                src/config.h \
                                src/utils-keymap.h
 	@mkdir -p build
@@ -871,8 +883,7 @@ build/wayland-protocol-pointer.o: Makefile \
                                   src/wayland-protocol-keyboard.h \
                                   src/utils-log.h \
                                   src/global-constants.h \
-                                  src/global-types.h \
-                                  src/utils-chain.h
+                                  src/global-types.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-pointer.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-pointer.o -Isrc -Igen \
@@ -883,8 +894,7 @@ build/wayland-protocol-keyboard.o: Makefile \
                                    src/wayland-protocol-keyboard.h \
                                    src/utils-log.h \
                                    src/global-constants.h \
-                                   src/global-types.h \
-                                   src/utils-chain.h
+                                   src/global-types.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-keyboard.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-keyboard.o -Isrc -Igen \
@@ -893,13 +903,14 @@ build/wayland-protocol-keyboard.o: Makefile \
 build/bind-egl-wayland.o: Makefile \
                           src/bind-egl-wayland.c \
                           src/renderer-gl.h \
-                          src/global-types.h \
+                          src/renderer.h \
                           src/utils-chain.h \
+                          src/global-constants.h \
+                          src/global-types.h \
                           src/wayland.h \
                           src/event-loop.h \
                           src/event-task.h \
-                          src/utils-log.h \
-                          src/global-constants.h
+                          src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   bind-egl-wayland.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/bind-egl-wayland.o -Isrc -Igen \
@@ -911,11 +922,12 @@ build/backend-gtk.o: Makefile \
                      src/event-loop.h \
                      src/event-task.h \
                      src/output.h \
-                     src/global-types.h \
+                     src/renderer.h \
                      src/utils-chain.h \
+                     src/global-constants.h \
+                     src/global-types.h \
                      src/backend-gtk-app.h \
                      src/utils-log.h \
-                     src/global-constants.h \
                      src/utils-environment.h \
                      src/global-functions.h \
                      src/renderer-mmap.h
@@ -932,7 +944,6 @@ build/backend-gtk-app.o: Makefile \
                          src/utils-log.h \
                          src/global-constants.h \
                          src/global-types.h \
-                         src/utils-chain.h \
                          src/event-signals.h \
                          src/event-task.h
 	@mkdir -p build
@@ -948,7 +959,6 @@ build/backend-gtk-win.o: Makefile \
                          src/utils-log.h \
                          src/global-constants.h \
                          src/global-types.h \
-                         src/utils-chain.h \
                          src/event-signals.h \
                          src/event-task.h \
                          gen/version.h
@@ -970,8 +980,12 @@ checks/check-chain: Makefile \
                     tests/test-chain.c \
                     src/utils-chain.c \
                     tests/../src/utils-chain.h \
+                    tests/../src/global-constants.h \
+                    tests/../src/global-types.h \
                     tests/tests-suit.h \
-                    src/utils-chain.h
+                    src/utils-chain.h \
+                    src/global-constants.h \
+                    src/global-types.h
 	@mkdir -p checks
 	@echo "  CC   check-chain"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o checks/check-chain -Isrc -Igen \
@@ -984,7 +998,9 @@ checks/check-store: Makefile \
                     tests/../src/utils-store.h \
                     tests/tests-suit.h \
                     src/utils-store.h \
-                    src/utils-chain.h
+                    src/utils-chain.h \
+                    src/global-constants.h \
+                    src/global-types.h
 	@mkdir -p checks
 	@echo "  CC   check-store"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o checks/check-store -Isrc -Igen \
