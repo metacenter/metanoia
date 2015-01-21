@@ -79,6 +79,17 @@ int chain_len(Chain* self)
 
 //------------------------------------------------------------------------------
 
+int chain_recalculate_length(Chain* self)
+{
+    int len = 0;
+    for (Link* link = self->first; link; link = link->next) {
+        len += 1;
+    }
+    return len;
+}
+
+//------------------------------------------------------------------------------
+
 void chain_add_first(Chain* self, Link* link)
 {
     if (!self) {
@@ -173,10 +184,14 @@ void* chain_pop(Chain* self)
 
 //------------------------------------------------------------------------------
 
-int chain_remove(Chain* self, void* data, AuraCompareFunc compare)
+AuraResult chain_remove(Chain* self, void* data, AuraCompareFunc compare)
 {
+    if (!self) {
+        return AURA_RESULT_INCORECT_ARGUMENT;
+    }
+
     int found = 0;
-    Link* link;
+    Link* link = NULL;
     for (link = self->first; link; link = link->next) {
         found = !compare(data, link->data);
         if (found) {
@@ -185,7 +200,51 @@ int chain_remove(Chain* self, void* data, AuraCompareFunc compare)
     }
 
     if (!found) {
-        return -1;
+        return AURA_RESULT_NOT_FOUND;
+    }
+
+    AuraResult result = chain_disjoin(self, link);
+    if (result == AURA_RESULT_SUCCESS) {
+        link_free(link, self->freefunc);
+    }
+    return result;
+    link_free(link, self->freefunc);
+}
+
+//------------------------------------------------------------------------------
+
+AuraResult chain_unjoin(Chain* self, Link* unjoinee)
+{
+    if (!self || !unjoinee) {
+        return AURA_RESULT_INCORECT_ARGUMENT;
+    }
+
+    int found = false;
+    Link* link = NULL;
+    for (link = self->first; link; link = link->next) {
+        found = (link == unjoinee);
+        if (found) {
+            break;
+        }
+    }
+
+    if (!found) {
+        return AURA_RESULT_NOT_FOUND;
+    }
+
+    AuraResult result = chain_disjoin(self, link);
+    if (result == AURA_RESULT_SUCCESS) {
+        link_free(link, self->freefunc);
+    }
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+AuraResult chain_disjoin(Chain* self, Link* link)
+{
+    if (!self || !link) {
+        return AURA_RESULT_INCORECT_ARGUMENT;
     }
 
     Link* prev = link->prev;
@@ -203,9 +262,10 @@ int chain_remove(Chain* self, void* data, AuraCompareFunc compare)
         self->last = prev;
     }
 
-    self->len -= 1;
-    link_free(link, self->freefunc);
-    return 1;
+    link->prev = NULL;
+    link->next = NULL;
+    self->len = chain_recalculate_length(self);
+    return AURA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------

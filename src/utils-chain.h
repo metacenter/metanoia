@@ -4,6 +4,8 @@
 #ifndef __AURA_UTILS_CHAIN_H__
 #define __AURA_UTILS_CHAIN_H__
 
+#include "global-constants.h"
+
 // TODO: use 'aura' prefix
 // TODO: ref and unref instead of free
 typedef void (*AuraFreeFunc) (void*);
@@ -32,6 +34,7 @@ Chain* chain_new(AuraFreeFunc freefunc);
 void chain_free(Chain* chain);
 
 int chain_len(Chain* chain);
+int chain_recalculate_length(Chain* chain);
 
 void chain_prepend(Chain* chain, void* data);
 void chain_append(Chain* chain, void* data);
@@ -41,7 +44,11 @@ void chain_adjoin(Chain* chain, Link* link);
 
 void* chain_pop(Chain* chain);
 
-int chain_remove(Chain* chain, void* data, AuraCompareFunc compare);
+AuraResult chain_remove(Chain* chain, void* data, AuraCompareFunc compare);
+
+AuraResult chain_unjoin(Chain* chain, Link* link);
+AuraResult chain_disjoin(Chain* chain, Link* link);
+
 void chain_clean(Chain* chain);
 
 Chain* chain_subtract(Chain* minuend,
