@@ -20,7 +20,7 @@ AuraCompositor* aura_compositor_new()
 
     self->groups = chain_new(0);
     self->frame = aura_frame_new();
-    aura_frame_set_type(self->frame, AURA_FRAME_TYPE_WORKSPACE);
+    aura_frame_set_type(self->frame, AURA_FRAME_TYPE_STACKED);
     return self;
 }
 
@@ -60,14 +60,20 @@ void aura_compositor_manage_surface(AuraCompositor* self, SurfaceId sid)
 
 //------------------------------------------------------------------------------
 
+/// Pop up a surface if covered with others.
+///
+/// Here `aura_frame_find_with_sid` is used. Pointer to Frame could also be
+/// stored in SurfaceData for faster access, but this would require carrying
+/// about this pointer this other operation (e.g. jumps) which also would
+/// require additional computations. Pop is done very rarely and we do not have
+/// overwhelming number of surfaces, so searching is justified here.
+///
+/// @see aura_frame_find_with_sid
 void aura_compositor_pop_surface(AURA_UNUSED AuraCompositor* self,
                                  AURA_UNUSED SurfaceId sid)
 {
-    /// @todo Reimplement aura_compositor_pop_surface
-    //chain_remove(self->frame->twigs, (void*) sid,
-    //             (AuraCompareFunc) aura_surface_compare);
-    //chain_append(self->frame->twigs, (void*) sid);
-    //self->selection = (AuraFrame*) self->frame->twigs->first;
+    AuraFrame* frame = aura_frame_find_with_sid(self->frame, sid);
+    aura_frame_pop_recursively(self->frame, frame);
 }
 
 //------------------------------------------------------------------------------

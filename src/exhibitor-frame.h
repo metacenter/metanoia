@@ -5,16 +5,17 @@
 #define __AURA_EXHIBITOR_FRAME_H__
 
 #include "utils-branch.h"
-#include "global-constants.h"
 
 typedef enum {
-    AURA_FRAME_TYPE_NONE            = 0x0,
-    AURA_FRAME_TYPE_WORKSPACE       = 0x1,
-    AURA_FRAME_TYPE_HORIZONTAL_TREE = 0x2,
-    AURA_FRAME_TYPE_VERTICAL_TREE   = 0x4,
-    AURA_FRAME_TYPE_FLOATING        = 0x8,
+    AURA_FRAME_TYPE_NONE       = 0x00,
+    AURA_FRAME_TYPE_LEAF       = 0x01,
+    AURA_FRAME_TYPE_STACKED    = 0x02,
+    AURA_FRAME_TYPE_HORIZONTAL = 0x04,
+    AURA_FRAME_TYPE_VERTICAL   = 0x08,
+    AURA_FRAME_TYPE_FLOATING   = 0x10,
 } AuraFrameType;
 
+/// @todo Unit tests for AuraFrame
 typedef AuraBranch AuraFrame;
 
 typedef struct {
@@ -29,7 +30,6 @@ void aura_frame_free(AuraFrame* self);
 
 void aura_frame_set_surface(AuraFrame* self, SurfaceId sid);
 void aura_frame_set_type(AuraFrame* self, AuraFrameType type);
-bool aura_frame_is_workspace(AuraFrame* self);
 
 AuraFrameParams* aura_frame_get_params(AuraFrame* self);
 
@@ -44,6 +44,10 @@ void aura_frame_move(AuraFrame* self,
 void aura_frame_jump(AuraFrame* self,
                      AuraArgmandType direction,
                      int magnitude);
+
+void aura_frame_pop_recursively(AuraFrame* self, AuraFrame* pop);
+
+AuraFrame* aura_frame_find_with_sid(AuraFrame* self, SurfaceId sid);
 
 #endif // __AURA_EXHIBITOR_FRAME_H__
 

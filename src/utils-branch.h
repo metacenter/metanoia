@@ -10,8 +10,11 @@
     for (AuraBranch* BRANCH = (AuraBranch*) TRUNK->twigs->first; \
     BRANCH; BRANCH = (AuraBranch*) BRANCH->link.next)
 
+typedef int (*AuraBranchCompare) (void*, void*);
+
 typedef struct AuraBranch AuraBranch;
 
+/// @todo Unit tests for AuraBranch
 struct AuraBranch {
     Link link;
     AuraBranch* trunk;
@@ -24,7 +27,13 @@ void aura_branch_free();
 void aura_branch_prepend(AuraBranch* self, AuraBranch* other);
 void aura_branch_append(AuraBranch* self, AuraBranch* other);
 
+AuraResult aura_branch_remove(AuraBranch* self, AuraBranch* other);
+
 void aura_branch_set_data(AuraBranch* self, void* data);
+
+AuraBranch* aura_branch_find(AuraBranch* self,
+                             void* data,
+                             AuraBranchCompare compare);
 
 #endif // __AURA_UTILS_BRANCH_H__
 

@@ -10,6 +10,19 @@
 
 //------------------------------------------------------------------------------
 
+int aura_frame_compare_sid(AuraFrame* frame, SurfaceId sid)
+{
+    SurfaceId frame_sid = aura_frame_get_params(frame)->sid;
+    if (frame_sid < sid) {
+        return -1;
+    } else if (frame_sid > sid) {
+        return 1;
+    }
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+
 AuraFrame* aura_frame_new()
 {
     AuraFrame* self = aura_branch_new();
@@ -76,13 +89,6 @@ void aura_frame_set_surface(AuraFrame* self, SurfaceId sid)
 void aura_frame_set_type(AuraFrame* self, AuraFrameType type)
 {
     aura_frame_get_params(self)->type = type;
-}
-
-//------------------------------------------------------------------------------
-
-bool aura_frame_is_workspace(AuraFrame* self)
-{
-    return aura_frame_get_params(self)->type == AURA_FRAME_TYPE_WORKSPACE;
 }
 
 //------------------------------------------------------------------------------
@@ -201,9 +207,9 @@ void aura_frame_resize(AuraFrame* self,
     // Find adequate frame for resize
     AuraFrameType type = 0x0;
     if (direction == AURA_ARGMAND_N || direction == AURA_ARGMAND_S) {
-        type = AURA_FRAME_TYPE_VERTICAL_TREE;
+        type = AURA_FRAME_TYPE_VERTICAL;
     } else if (direction == AURA_ARGMAND_E || direction == AURA_ARGMAND_W) {
-        type = AURA_FRAME_TYPE_HORIZONTAL_TREE;
+        type = AURA_FRAME_TYPE_HORIZONTAL;
     }
     AuraFrame* resizee = aura_frame_resize_find_helper(self, type);
 
@@ -234,6 +240,31 @@ void aura_frame_jump(AuraFrame* self,
     }
 
     /// @todo Implement aura_frame_jump
+}
+
+//------------------------------------------------------------------------------
+
+void aura_frame_pop_recursively(AuraFrame* self, AuraFrame* pop)
+{
+    if (!self || !pop || !pop->trunk || self == pop) {
+        return;
+    }
+
+    if (aura_frame_get_params(pop->trunk)->type == AURA_FRAME_TYPE_STACKED) {
+        AuraBranch* trunk = pop->trunk;
+        aura_branch_remove(trunk, pop);
+        aura_branch_append(trunk, pop);
+    }
+
+    aura_frame_pop_recursively(self, pop->trunk);
+}
+
+//------------------------------------------------------------------------------
+
+AuraFrame* aura_frame_find_with_sid(AuraFrame* self, SurfaceId sid)
+{
+    return aura_branch_find(self, (void*) sid,
+                           (AuraBranchCompare) aura_frame_compare_sid);
 }
 
 //------------------------------------------------------------------------------

@@ -37,24 +37,36 @@ void aura_branch_free(AuraBranch* self)
 
 void aura_branch_prepend(AuraBranch* self, AuraBranch* other)
 {
-    if (!self) {
+    if (!self || !other) {
         return;
     }
 
-    chain_prejoin(self->twigs, (Link*) other);
     other->trunk = self;
+    chain_prejoin(self->twigs, (Link*) other);
 }
 
 //------------------------------------------------------------------------------
 
 void aura_branch_append(AuraBranch* self, AuraBranch* other)
 {
-    if (!self) {
+    if (!self || !other) {
         return;
     }
 
-    chain_adjoin(self->twigs, (Link*) other);
     other->trunk = self;
+    chain_adjoin(self->twigs, (Link*) other);
+}
+
+//------------------------------------------------------------------------------
+
+AuraResult aura_branch_remove(AuraBranch* self, AuraBranch* other)
+{
+    if (!self || !other) {
+        return AURA_RESULT_INCORECT_ARGUMENT;
+    }
+
+    other->trunk = NULL;
+    return chain_unjoin(self->twigs, (Link*) other);
 }
 
 //------------------------------------------------------------------------------
@@ -66,6 +78,30 @@ void aura_branch_set_data(AuraBranch* self, void* data)
     }
 
     self->link.data = data;
+}
+
+//------------------------------------------------------------------------------
+
+AuraBranch* aura_branch_find(AuraBranch* self,
+                             void* data,
+                             AuraBranchCompare compare)
+{
+    if (!self) {
+        return NULL;
+    }
+
+    if (compare(self, data) == 0) {
+        return self;
+    }
+
+    FOR_EACH_TWIG(self, twig) {
+        AuraBranch* branch = aura_branch_find(twig, data, compare);
+        if (branch) {
+            return branch;
+        }
+    }
+
+    return NULL;
 }
 
 //------------------------------------------------------------------------------
