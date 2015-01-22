@@ -87,6 +87,12 @@ void aura_surface_commit(SurfaceId sid,
     surface->buffer.stride = stride;
     surface->buffer.data   = data;
 
+    if (surface->desired_size.width  == 0
+    ||  surface->desired_size.height == 0) {
+        surface->desired_size.width  = width;
+        surface->desired_size.height = height;
+    }
+
     if (is_first_time_commited) {
         aura_event_signal_emit(SIGNAL_SURFACE_CREATED, (void*) sid);
     }

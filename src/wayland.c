@@ -92,6 +92,14 @@ void wayland_display_lost_handler(void* data)
 
 //------------------------------------------------------------------------------
 
+void wayland_surface_reconfigured_handler(void* data)
+{
+    SurfaceId sid = (SurfaceId) data;
+    wayland_state_surface_reconfigured(sid);
+}
+
+//------------------------------------------------------------------------------
+
 int aura_wayland_event_loop_feeder(AURA_UNUSED void* data)
 {
     struct wl_event_loop* loop;
@@ -182,6 +190,9 @@ void aura_wayland_initialize(AuraLoop* this_loop)
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
             aura_task_create(wayland_display_lost_handler, this_loop));
+
+    aura_event_signal_subscribe(SIGNAL_SURFACE_RECONFIGURED,
+            aura_task_create(wayland_surface_reconfigured_handler, this_loop));
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
 }

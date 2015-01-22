@@ -4,6 +4,7 @@
 #include "exhibitor-frame.h"
 #include "utils-log.h"
 #include "surface-manager.h"
+#include "event-signals.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -156,6 +157,20 @@ void aura_frame_reconfigure(AURA_UNUSED AuraFrame* self,
                             AURA_UNUSED int magnitude)
 {
     /// @todo Implement aura_frame_reconfigure
+    AuraFrameParams* params = aura_frame_get_params(self);
+    if (params->sid != scInvalidSurfaceId) {
+        AuraSurfaceData* surface_data = aura_surface_get(params->sid);
+        if (surface_data) {
+            if (direction == AURA_ARGMAND_N || direction == AURA_ARGMAND_S) {
+                surface_data->desired_size.height += magnitude;
+            }
+            if (direction == AURA_ARGMAND_E || direction == AURA_ARGMAND_W) {
+                surface_data->desired_size.width += magnitude;
+            }
+            aura_event_signal_emit(SIGNAL_SURFACE_RECONFIGURED,
+                                   (void*) params->sid);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------

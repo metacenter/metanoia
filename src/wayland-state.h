@@ -14,6 +14,8 @@ typedef struct {
     struct wl_resource* resource;
     struct wl_resource* buffer_resource;
     struct wl_resource* frame_resource;
+    struct wl_resource* shell_resource;
+    struct wl_resource* xdg_shell_resource;
 } AuraSurfaceWaylandData;
 
 AuraSurfaceWaylandData* wayland_surface_data_new(void);
@@ -30,6 +32,10 @@ void wayland_state_surface_attach(AuraItemId sid, struct wl_resource* rc);
 
 void wayland_state_subscribe_frame(AuraItemId sid, struct wl_resource* rc);
 
+void wayland_state_add_shell_surface(AuraItemId sid, struct wl_resource* rc);
+
+void wayland_state_add_xdg_shell_surface(AuraItemId sid, struct wl_resource* rc);
+
 void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_rc);
 
 void wayland_state_keyboard_focus_update(AuraItemId sid);
@@ -41,6 +47,8 @@ void wayland_state_screen_refresh();
 void wayland_state_advertise_output(AuraOutput* output);
 
 void wayland_state_destroy_output(AuraOutput* output);
+
+void wayland_state_surface_reconfigured(SurfaceId sid);
 
 #endif // __AURA_WAYLAND_STATE_H__
 

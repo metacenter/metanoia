@@ -15,6 +15,7 @@ typedef struct _AuraAppClass AuraAppClass;
 
 #define NUM_BUFFERS 2
 
+/// @todo use AuraSize
 typedef struct {
     int width;
     int height;

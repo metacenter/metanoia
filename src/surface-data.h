@@ -29,6 +29,7 @@ typedef struct {
 typedef struct {
     AuraItem base;
     int x, y;
+    AuraSize desired_size;
     AuraDrawBuffer buffer;
     AuraSurfaceGroup group;
 } AuraSurfaceData;

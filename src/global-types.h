@@ -19,6 +19,12 @@ typedef struct {
     int y;
 } AuraPosition;
 
+// Type defining 2D size, dimensions or resolution
+typedef struct {
+    int width;
+    int height;
+} AuraSize;
+
 // Keyboard binding
 typedef struct {
     int code;

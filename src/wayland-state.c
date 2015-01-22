@@ -4,7 +4,11 @@
 #include "wayland-state.h"
 #include "wayland-output.h"
 #include "wayland-protocol-output.h"
+
+#include "surface-manager.h"
 #include "utils-log.h"
+
+#include "xdg-shell-server-protocol.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -134,6 +138,44 @@ void wayland_state_subscribe_frame(AuraItemId sid, struct wl_resource* rc)
     }
 
     data->frame_resource = rc;
+
+    pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_add_shell_surface(AuraItemId sid, struct wl_resource* rc)
+{
+    pthread_mutex_lock(&mutex);
+
+    AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces, sid);
+    if (!data) {
+        // This is not a Wayland surface
+        LOG_INFO3("SID %d does not resolve to any surface", sid);
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    data->shell_resource = rc;
+
+    pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_add_xdg_shell_surface(AuraItemId sid, struct wl_resource* rc)
+{
+    pthread_mutex_lock(&mutex);
+
+    AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces, sid);
+    if (!data) {
+        // This is not a Wayland surface
+        LOG_INFO3("SID %d does not resolve to any surface", sid);
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    data->xdg_shell_resource = rc;
 
     pthread_mutex_unlock(&mutex);
 }
@@ -307,6 +349,8 @@ void wayland_state_screen_refresh(AuraItemId sid)
 
 void wayland_state_advertise_output(AuraOutput* output)
 {
+    pthread_mutex_lock(&mutex);
+
     struct wl_global* global = wl_global_create(sState.display,
                      &wl_output_interface, 2, output, aura_wayland_output_bind);
 
@@ -316,16 +360,58 @@ void wayland_state_advertise_output(AuraOutput* output)
 
     AuraWaylandOutput* wayland_output = aura_wayland_output_new(global);
     aura_store_add(sState.outputs, output->unique_name, wayland_output);
+
+    pthread_mutex_unlock(&mutex);
 }
 
 //------------------------------------------------------------------------------
 
 void wayland_state_destroy_output(AuraOutput* output)
 {
+    pthread_mutex_lock(&mutex);
+
     AuraWaylandOutput* wayland_output =
                          aura_store_delete(sState.outputs, output->unique_name);
     wl_global_destroy(wayland_output->global_output);
     aura_wayland_output_free(wayland_output);
+
+    pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_state_surface_reconfigured(SurfaceId sid)
+{
+    pthread_mutex_lock(&mutex);
+    LOG_DEBUG("Wayland: surface reconfiguration (sid: %d)", sid);
+
+    AuraSurfaceWaylandData* data = aura_store_get(sState.surfaces, sid);
+    if (!data) {
+        // This is not a Wayland surface
+        LOG_WAYL5("SID %d does not resolve to any surface", sid);
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    AuraSurfaceData* surface = aura_surface_get(sid);
+    if (!surface) {
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+
+    if (data->shell_resource) {
+        /// @todo Implement resizing for Wayland shell
+    } else if (data->xdg_shell_resource) {
+        struct wl_array states;
+        wl_array_init(&states);
+        int serial = wl_display_next_serial(sState.display);
+        xdg_surface_send_configure(data->xdg_shell_resource,
+                                   surface->desired_size.width,
+                                   surface->desired_size.height,
+                                   &states, serial);
+        wl_array_release(&states);
+    }
+    pthread_mutex_unlock(&mutex);
 }
 
 //------------------------------------------------------------------------------

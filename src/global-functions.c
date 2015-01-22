@@ -62,12 +62,20 @@ void aura_put_move(Chain* stack)
 
 //------------------------------------------------------------------------------
 
+void aura_put_resize(Chain* stack)
+{
+    chain_append(stack, (void*) AURA_ARGMAND_RESIZE);
+}
+
+//------------------------------------------------------------------------------
+
 static inline void aura_position_change(Chain* stack, AuraArgmandType direction)
 {
     while (chain_len(stack)) {
         AuraArgmandType type = (AuraArgmandType) chain_pop(stack);
         if (type == AURA_ARGMAND_FOCUS
-        ||  type == AURA_ARGMAND_MOVE) {
+        ||  type == AURA_ARGMAND_MOVE
+        ||  type == AURA_ARGMAND_RESIZE) {
             aura_exhibitor_command_position(type, direction, 1);
         }
     }

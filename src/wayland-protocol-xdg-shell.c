@@ -3,6 +3,7 @@
 
 #include "wayland-protocol-xdg-shell.h"
 #include "wayland-protocol-xdg-surface.h"
+#include "wayland-state.h"
 
 #include "utils-log.h"
 
@@ -41,14 +42,18 @@ void aura_wayland_xdg_get_xdg_surface
                                AURA_UNUSED struct wl_resource* surface_resource)
 {
     struct wl_resource* rc;
+    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(surface_resource);
 
-    LOG_NYIMP("Wayland: get XDG surface (id: %d)", id);
+    LOG_NYIMP("Wayland: get XDG surface (id: %d, sid: %d)", id, sid);
 
-    rc = wl_resource_create(client, &xdg_surface_interface, 1, id);
+    rc = wl_resource_create(client, &xdg_surface_interface,
+                            wl_resource_get_version(resource), id);
     if (!rc) {
         wl_client_post_no_memory(client);
         return;
     }
+
+    wayland_state_add_xdg_shell_surface(sid, rc);
 
     wl_resource_set_implementation(rc, &xdg_surface_implementation,
                                    NULL, aura_wayland_xdg_surface_unbind);
