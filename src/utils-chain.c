@@ -98,6 +98,8 @@ void chain_add_first(Chain* self, Link* link)
 
     self->first = link;
     self->last = link;
+    link->prev = NULL;
+    link->next = NULL;
     self->len = 1;
 }
 
@@ -135,6 +137,7 @@ void chain_prejoin(Chain* self, Link* link)
         chain_add_first(self, link);
     } else {
         link->next = self->first;
+        link->prev = NULL;
         self->first->prev = link;
         self->first = link;
         self->len += 1;
@@ -152,6 +155,7 @@ void chain_adjoin(Chain* self, Link* link)
     if (self->len == 0) {
         chain_add_first(self, link);
     } else {
+        link->next = NULL;
         link->prev = self->last;
         self->last->next = link;
         self->last = link;
@@ -208,7 +212,6 @@ AuraResult chain_remove(Chain* self, void* data, AuraCompareFunc compare)
         link_free(link, self->freefunc);
     }
     return result;
-    link_free(link, self->freefunc);
 }
 
 //------------------------------------------------------------------------------
