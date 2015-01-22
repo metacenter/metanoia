@@ -34,7 +34,7 @@ void aura_wayland_shell_surface_resize
                                   uint32_t serial,
                                   uint32_t edges)
 {
-    LOG_NYIMP("Wayland: resize (serial: %d, edges: %d)", serial, edges);
+    LOG_NYIMP("Wayland: resize (serial: %u, edges: 0x%x)", serial, edges);
 }
 
 //------------------------------------------------------------------------------

@@ -56,6 +56,7 @@ build/aura: Makefile \
             build/wayland-protocol-shell.o \
             build/wayland-protocol-shell-surface.o \
             build/wayland-protocol-xdg-shell.o \
+            build/wayland-protocol-xdg-surface.o \
             build/xdg-shell-protocol.o \
             build/wayland-protocol-output.o \
             build/wayland-protocol-seat.o \
@@ -69,7 +70,7 @@ build/aura: Makefile \
 	@mkdir -p build
 	@echo "  LD   aura"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -pg -O0 -o build/aura \
-	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-output.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk.o build/backend-gtk-app.o build/backend-gtk-win.o build/backend-gtk-res.o \
+	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-output.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk.o build/backend-gtk-app.o build/backend-gtk-win.o build/backend-gtk-res.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -ldrm -ludev -lwayland-server -lxkbcommon 
 
 gen/xdg-shell-server-protocol.h: Makefile \
@@ -592,7 +593,8 @@ build/exhibitor-frame.o: Makefile \
                          src/event-task.h \
                          src/surface-data.h \
                          src/utils-store.h \
-                         src/exhibitor-compositor.h
+                         src/exhibitor-compositor.h \
+                         src/event-signals.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-frame.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/exhibitor-frame.o -Isrc -Igen \
@@ -804,9 +806,15 @@ build/wayland-protocol-region.o: Makefile \
 build/wayland-protocol-shell.o: Makefile \
                                 src/wayland-protocol-shell.c \
                                 src/wayland-protocol-shell.h \
-                                src/utils-log.h \
+                                src/wayland-protocol-shell-surface.h \
+                                src/wayland-state.h \
+                                src/utils-store.h \
+                                src/output.h \
+                                src/renderer.h \
+                                src/utils-chain.h \
                                 src/global-constants.h \
-                                src/global-types.h
+                                src/global-types.h \
+                                src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-shell.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-shell.o -Isrc -Igen \
@@ -827,7 +835,7 @@ build/wayland-protocol-shell-surface.o: Makefile \
 build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/wayland-protocol-xdg-shell.c \
                                     src/wayland-protocol-xdg-shell.h \
-                                    src/wayland-protocol-shell-surface.h \
+                                    src/wayland-protocol-xdg-surface.h \
                                     src/utils-log.h \
                                     src/global-constants.h \
                                     src/global-types.h \
@@ -836,6 +844,14 @@ build/wayland-protocol-xdg-shell.o: Makefile \
 	@echo "  CC   wayland-protocol-xdg-shell.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-xdg-shell.o -Isrc -Igen \
 	       -c src/wayland-protocol-xdg-shell.c
+
+build/wayland-protocol-xdg-surface.o: Makefile \
+                                      src/wayland-protocol-xdg-surface.c \
+                                      src/wayland-protocol-xdg-surface.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-xdg-surface.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-xdg-surface.o -Isrc -Igen \
+	       -c src/wayland-protocol-xdg-surface.c
 
 build/xdg-shell-protocol.o: Makefile \
                             gen/xdg-shell-protocol.c

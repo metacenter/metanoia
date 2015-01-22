@@ -2,7 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-protocol-xdg-shell.h"
-#include "wayland-protocol-shell-surface.h"
+#include "wayland-protocol-xdg-surface.h"
 
 #include "utils-log.h"
 
@@ -50,7 +50,7 @@ void aura_wayland_xdg_get_xdg_surface
         return;
     }
 
-    wl_resource_set_implementation(rc, &shell_surface_implementation,
+    wl_resource_set_implementation(rc, &xdg_surface_implementation,
                                    NULL, aura_wayland_xdg_surface_unbind);
 }
 
@@ -99,6 +99,8 @@ void aura_wayland_xdg_shell_bind(struct wl_client* client,
                                  uint32_t id)
 {
     struct wl_resource* rc;
+
+    LOG_WAYL2("Binding XDG shell (version: %u, id: %u)", version, id);
 
     rc = wl_resource_create(client, &xdg_shell_interface, version, id);
     if (!rc) {

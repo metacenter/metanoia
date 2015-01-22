@@ -12,21 +12,21 @@
 
 //------------------------------------------------------------------------------
 
-static void compositor_unbind(AURA_UNUSED struct wl_resource* resource)
+void aura_wayland_compositor_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind compositor");
 }
 
 //------------------------------------------------------------------------------
 
-static void region_unbind(AURA_UNUSED struct wl_resource* resource)
+void aura_wayland_region_unbind(AURA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind region");
 }
 
 //------------------------------------------------------------------------------
 
-static void surface_unbind(struct wl_resource* resource)
+void aura_wayland_surface_unbind(struct wl_resource* resource)
 {
     SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: unbind surface (sid: %d)", sid);
@@ -36,9 +36,9 @@ static void surface_unbind(struct wl_resource* resource)
 
 //------------------------------------------------------------------------------
 
-static void create_surface(struct wl_client* client,
-                           struct wl_resource* resource,
-                           uint32_t id)
+void aura_wayland_create_surface(struct wl_client* client,
+                                 struct wl_resource* resource,
+                                 uint32_t id)
 {
     struct wl_resource* rc;
     SurfaceId new_sid;
@@ -56,14 +56,14 @@ static void create_surface(struct wl_client* client,
     wayland_state_add_surface(new_sid, rc);
 
     wl_resource_set_implementation(rc, &surface_implementation,
-                                   (void*) new_sid, surface_unbind);
+                                  (void*) new_sid, aura_wayland_surface_unbind);
 }
 
 //------------------------------------------------------------------------------
 
-static void create_region(struct wl_client* client,
-                          struct wl_resource* resource,
-                          uint32_t id)
+void aura_wayland_create_region(struct wl_client* client,
+                                struct wl_resource* resource,
+                                uint32_t id)
 {
     struct wl_resource* rc;
 
@@ -77,14 +77,14 @@ static void create_region(struct wl_client* client,
     }
 
     wl_resource_set_implementation(rc, &region_implementation,
-                                   NULL, region_unbind);
+                                   NULL, aura_wayland_region_unbind);
 }
 
 //------------------------------------------------------------------------------
 
-static const struct wl_compositor_interface compositor_implementation = {
-        create_surface,
-        create_region
+const struct wl_compositor_interface compositor_implementation = {
+        aura_wayland_create_surface,
+        aura_wayland_create_region
     };
 
 //------------------------------------------------------------------------------
@@ -96,6 +96,8 @@ void aura_wayland_compositor_bind(struct wl_client* client,
 {
     struct wl_resource* rc;
 
+    LOG_WAYL2("Binding Wayland compositor (version: %u, id: %u)", version, id);
+
     rc = wl_resource_create(client, &wl_compositor_interface, version, id);
     if (!rc) {
         wl_client_post_no_memory(client);
@@ -103,7 +105,7 @@ void aura_wayland_compositor_bind(struct wl_client* client,
     }
 
     wl_resource_set_implementation(rc, &compositor_implementation,
-                                   NULL, compositor_unbind);
+                                   NULL, aura_wayland_compositor_unbind);
 }
 
 //------------------------------------------------------------------------------

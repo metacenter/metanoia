@@ -399,6 +399,12 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='wayland-protocol-xdg-surface.o',
+        inputs=['wayland-protocol-xdg-surface.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='xdg-shell-protocol.o',
         deps=['xdg-shell-protocol.c'],
     )
