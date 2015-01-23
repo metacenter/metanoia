@@ -4,21 +4,15 @@
 #ifndef __AURA_KEYBOARD_ARGMAND_H__
 #define __AURA_KEYBOARD_ARGMAND_H__
 
-#include "utils-chain.h"
-
-#include <stdint.h>
-
-typedef void (*AuraArgmandExecuteFunc) (Chain*);
+#include "global-constants.h"
 
 typedef struct {
-    int code;
-    uint32_t modifiers;
-    AuraArgmandExecuteFunc execute;
+    AuraArgmandType type;
+    int value;
 } AuraArgmand;
 
+AuraArgmand* aura_argmand_new(AuraArgmandType type, int value);
 void aura_argmand_free(AuraArgmand* self);
-
-AuraArgmand* aura_argmand_copy(const AuraArgmand* self);
 
 #endif // __AURA_KEYBOARD_ARGMAND_H__
 

@@ -2,7 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "keyboard-mode.h"
-#include "keyboard-argmand.h"
+#include "keyboard-binding.h"
 
 #include "utils-log.h"
 
@@ -13,14 +13,14 @@
 
 static int compare(const void* data1, const void* data2)
 {
-    const AuraArgmand* argmand1 = (const AuraArgmand*) data1;
-    const AuraArgmand* argmand2 = (const AuraArgmand*) data2;
+    const AuraBinding* binding1 = (const AuraBinding*) data1;
+    const AuraBinding* binding2 = (const AuraBinding*) data2;
 
-    if (argmand1->modifiers < argmand2->modifiers) return -1;
-    if (argmand1->modifiers > argmand2->modifiers) return  1;
+    if (binding1->modifiers < binding2->modifiers) return -1;
+    if (binding1->modifiers > binding2->modifiers) return  1;
 
-    if (argmand1->code < argmand2->code) return -1;
-    if (argmand1->code > argmand2->code) return  1;
+    if (binding1->code < binding2->code) return -1;
+    if (binding1->code > binding2->code) return  1;
 
     return 0;
 }
@@ -36,51 +36,51 @@ AuraMode* aura_mode_new(AuraModeEnum modeid)
     }
 
     self->modeid = modeid;
-    self->argmands = NULL;
+    self->bindings = NULL;
     self->active = 0;
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_mode_add_argmand(AuraMode* self, const AuraArgmand* argmand)
+void aura_mode_add_binding(AuraMode* self, const AuraBinding* binding)
 {
     void* found;
 
     // Skip if already exists
-    found = tfind((void*) argmand, &self->argmands, compare);
+    found = tfind((void*) binding, &self->bindings, compare);
     if (found) {
         LOG_WARN2("Argmand already exists! (code: %d, modifiers: %d)",
-                  argmand->code, argmand->modifiers);
+                  binding->code, binding->modifiers);
         return;
     }
 
-    // Add argmand
-    AuraArgmand* copy = aura_argmand_copy(argmand);
+    // Add binding
+    AuraBinding* copy = aura_binding_copy(binding);
 
-    found = tsearch((void*) copy, &self->argmands, compare);
+    found = tsearch((void*) copy, &self->bindings, compare);
     if (!found) {
-        LOG_ERROR("Could not store argmand!");
-        aura_argmand_free(copy);
+        LOG_ERROR("Could not store binding!");
+        aura_binding_free(copy);
         return;
     }
 
-    LOG_INFO2("Created argmand (code: %d, modifiers: %d)",
-              argmand->code, argmand->modifiers);
+    LOG_INFO2("Created binding (code: %d, modifiers: %d)",
+              binding->code, binding->modifiers);
 }
 
 //------------------------------------------------------------------------------
 
-AuraArgmand* aura_mode_find_argmand(AuraMode* self,
+AuraBinding* aura_mode_find_binding(AuraMode* self,
                                     int code,
                                     uint32_t modifiers)
 {
-    AuraArgmand** found = NULL;
-    AuraArgmand searched;
+    AuraBinding** found = NULL;
+    AuraBinding searched;
     searched.code = code;
     searched.modifiers = modifiers;
 
-    found = tfind((void*) &searched, &self->argmands, compare);
+    found = tfind((void*) &searched, &self->bindings, compare);
     if (found) {
         return *found;
     }

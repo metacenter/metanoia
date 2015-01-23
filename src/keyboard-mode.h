@@ -4,20 +4,20 @@
 #ifndef __AURA_KEYBOARD_MODE_H__
 #define __AURA_KEYBOARD_MODE_H__
 
-#include "keyboard-argmand.h"
+#include "keyboard-binding.h"
 #include "global-constants.h"
 
 typedef struct {
     AuraModeEnum modeid;
-    void* argmands;
+    void* bindings;
     int active;
 } AuraMode;
 
 AuraMode* aura_mode_new(AuraModeEnum modeid);
 
-void aura_mode_add_argmand(AuraMode* self, const AuraArgmand* argmand);
+void aura_mode_add_binding(AuraMode* self, const AuraBinding* );
 
-AuraArgmand* aura_mode_find_argmand(AuraMode* self,
+AuraBinding* aura_mode_find_binding(AuraMode* self,
                                     int code,
                                     uint32_t Auramodifiers);
 

@@ -8,7 +8,7 @@
 
 //------------------------------------------------------------------------------
 
-AuraArgmand* aura_argmand_new()
+AuraArgmand* aura_argmand_new(AuraArgmandType type, int value)
 {
     AuraArgmand* self = malloc(sizeof(AuraArgmand));
     if (!self) {
@@ -16,9 +16,8 @@ AuraArgmand* aura_argmand_new()
         return self;
     }
 
-    self->code = 0;
-    self->modifiers = 0;
-    self->execute = NULL;
+    self->type = type;
+    self->value = value;
     return self;
 }
 
@@ -30,17 +29,6 @@ void aura_argmand_free(AuraArgmand* self)
         return;
     }
     free(self);
-}
-
-//------------------------------------------------------------------------------
-
-AuraArgmand* aura_argmand_copy(const AuraArgmand* self)
-{
-    AuraArgmand* copy = aura_argmand_new();
-    copy->code      = self->code;
-    copy->modifiers = self->modifiers;
-    copy->execute   = self->execute;
-    return copy;
 }
 
 //------------------------------------------------------------------------------

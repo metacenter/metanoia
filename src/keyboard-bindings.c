@@ -18,13 +18,13 @@ static uint32_t modifiers = 0;
 
 //------------------------------------------------------------------------------
 
-void aura_keyboard_add_argmand(AuraModeEnum modeid, const AuraArgmand* argmand)
+void aura_keyboard_add_binding(AuraModeEnum modeid, const AuraBinding* binding)
 {
     AuraMode* mode = NULL;
 
-    // Check argmand validity
-    if (argmand == 0 || argmand->execute == 0) {
-        LOG_WARN1("Invalid argmand!");
+    // Check binding validity
+    if (binding == 0 || binding->execute == 0) {
+        LOG_WARN1("Invalid binding!");
         return;
     }
 
@@ -56,17 +56,17 @@ void aura_keyboard_add_argmand(AuraModeEnum modeid, const AuraArgmand* argmand)
         }
     }
 
-    // Add argmand
-    aura_mode_add_argmand(mode, argmand);
+    // Add binding
+    aura_mode_add_binding(mode, binding);
 }
 
 //------------------------------------------------------------------------------
 
-AuraArgmand* aura_keyboard_find_argmand(Chain* modes,
+AuraBinding* aura_keyboard_find_binding(Chain* modes,
                                         int code,
                                         uint32_t modifiers)
 {
-    AuraArgmand* argmand = NULL;
+    AuraBinding* binding = NULL;
 
     Link* link;
     for (link = modes->first; link; link = link->next) {
@@ -75,13 +75,13 @@ AuraArgmand* aura_keyboard_find_argmand(Chain* modes,
             continue;
         }
 
-        argmand = aura_mode_find_argmand(mode, code, modifiers);
-        if (argmand) {
+        binding = aura_mode_find_binding(mode, code, modifiers);
+        if (binding) {
             break;
         }
     }
 
-    return argmand;
+    return binding;
 }
 
 //------------------------------------------------------------------------------
@@ -116,12 +116,12 @@ bool aura_keyboard_catch_key(int code, AuraKeyState state)
         return 0;
     }
 
-    AuraArgmand* argmand = aura_keyboard_find_argmand(modes, code, modifiers);
-    if (!argmand) {
+    AuraBinding* binding = aura_keyboard_find_binding(modes, code, modifiers);
+    if (!binding) {
         return 0;
     }
 
-    argmand->execute(stack);
+    binding->execute(stack, code, modifiers, state);
     return 1;
 }
 

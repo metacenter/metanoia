@@ -268,6 +268,23 @@ aura.add_input(t)
 # KEYBOARD
 
 t = m.add_compile_target(
+        output='keyboard-functions.o',
+        inputs=['keyboard-functions.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='keyboard-binding.o',
+        inputs=['keyboard-binding.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='keyboard-argmand.o',
+        inputs=['keyboard-argmand.c'],
+    )
+aura.add_input(t)
+t = m.add_compile_target(
         output='keyboard-bindings.o',
         inputs=['keyboard-bindings.c'],
     )
@@ -276,12 +293,6 @@ aura.add_input(t)
 t = m.add_compile_target(
         output='keyboard-mode.o',
         inputs=['keyboard-mode.c'],
-    )
-aura.add_input(t)
-
-t = m.add_compile_target(
-        output='keyboard-argmand.o',
-        inputs=['keyboard-argmand.c'],
     )
 aura.add_input(t)
 

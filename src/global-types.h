@@ -37,13 +37,6 @@ typedef struct {
     int height;
 } AuraSize;
 
-/// Keyboard binding
-typedef struct {
-    int code;
-    uint32_t modifiers;
-    AuraKeyCallback callback;
-} AuraBinding;
-
 /// Key event data
 typedef struct {
     unsigned time;
