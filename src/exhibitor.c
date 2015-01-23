@@ -102,7 +102,7 @@ void aura_exhibitor_on_display_lost(void* data)
 
 void aura_exhibitor_on_surface_created(void* data)
 {
-    SurfaceId sid = (SurfaceId) data;
+    AuraSurfaceId sid = (AuraSurfaceId) data;
     if (sid == scInvalidSurfaceId) {
         return;
     }
@@ -115,7 +115,7 @@ void aura_exhibitor_on_surface_created(void* data)
 
 void aura_exhibitor_on_surface_destroyed(void* data)
 {
-    SurfaceId sid = (SurfaceId) data;
+    AuraSurfaceId sid = (AuraSurfaceId) data;
     if (sid == scInvalidSurfaceId) {
         return;
     }
@@ -128,7 +128,7 @@ void aura_exhibitor_on_surface_destroyed(void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_pop_surface(SurfaceId sid)
+void aura_exhibitor_pop_surface(AuraSurfaceId sid)
 {
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
     chain_remove(exhibitor->surface_history,
@@ -148,7 +148,7 @@ void aura_exhibitor_pop_history_surface(int position)
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
 
     Link* link = NULL;
-    SurfaceId sid = scInvalidSurfaceId;
+    AuraSurfaceId sid = scInvalidSurfaceId;
     if (position < 0) {
         int i = 1;
         link = exhibitor->surface_history->first;
@@ -160,7 +160,7 @@ void aura_exhibitor_pop_history_surface(int position)
     }
 
     if (link) {
-        sid = (SurfaceId) link->data;
+        sid = (AuraSurfaceId) link->data;
     }
     if (sid == scInvalidSurfaceId) {
         return;

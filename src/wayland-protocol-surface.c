@@ -26,7 +26,7 @@ void aura_wayland_surface_attach(AURA_UNUSED struct wl_client* client,
     int height = 0;
     int stride = 0;
     uint8_t* data = NULL;
-    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
+    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
 
     LOG_WAYL3("Wayland: surface attach (sx: %d, sy: %d, sid: %d)", sx, sy, sid);
 
@@ -69,7 +69,7 @@ void aura_wayland_surface_frame(struct wl_client* client,
 {
     // TODO: subscribe for destroy
 
-    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
+    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
 
     LOG_NYIMP("Wayland: surface frame (cb: %d, sid: %d)", callback, sid);
 
@@ -113,7 +113,7 @@ void aura_wayland_surface_set_input_region
 void aura_wayland_surface_commit(AURA_UNUSED struct wl_client* client,
                                  struct wl_resource* resource)
 {
-    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
+    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
 
     LOG_WAYL3("Wayland: commit (sid: %d)", sid);
 

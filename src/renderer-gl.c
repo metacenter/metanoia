@@ -132,7 +132,7 @@ GLuint create_shader(const char* filename, GLenum type)
 //------------------------------------------------------------------------------
 
 void aura_renderer_gl_attach(AuraRenderer* self,
-                             SurfaceId surfaceId,
+                             AuraSurfaceId surfaceId,
                              void* resource)
 {
     xxxx_resource = resource;
@@ -354,7 +354,7 @@ void aura_renderer_gl_draw(AuraRenderer* self,
 
     Link* link = surfaces->first;
     //for (link = surfaces->first; link; link = link->next) {
-        AuraSurfaceData* surface = aura_surface_get((SurfaceId) link->data);
+        AuraSurfaceData* surface = aura_surface_get((AuraSurfaceId) link->data);
         uint8_t* data = surface->buffer.data;
         int width = surface->buffer.width;
         int height = surface->buffer.height;

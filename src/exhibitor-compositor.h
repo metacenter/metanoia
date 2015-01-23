@@ -16,9 +16,9 @@ AuraCompositor* aura_compositor_new();
 
 Chain* aura_compositor_get_visible_surfaces(AuraCompositor* self);
 
-void aura_compositor_manage_surface(AuraCompositor* self, SurfaceId sid);
+void aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid);
 
-void aura_compositor_pop_surface(AuraCompositor* self, SurfaceId sid);
+void aura_compositor_pop_surface(AuraCompositor* self, AuraSurfaceId sid);
 
 void aura_compositor_command_position(AuraCompositor* self,
                                       AuraArgmandType type,

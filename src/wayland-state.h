@@ -48,7 +48,7 @@ void wayland_state_advertise_output(AuraOutput* output);
 
 void wayland_state_destroy_output(AuraOutput* output);
 
-void wayland_state_surface_reconfigured(SurfaceId sid);
+void wayland_state_surface_reconfigured(AuraSurfaceId sid);
 
 #endif // __AURA_WAYLAND_STATE_H__
 

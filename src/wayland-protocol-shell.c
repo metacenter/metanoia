@@ -30,7 +30,8 @@ void aura_wayland_get_shell_surface
                                AURA_UNUSED struct wl_resource* surface_resource)
 {
     struct wl_resource* rc;
-    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(surface_resource);
+    AuraSurfaceId sid =
+                    (AuraSurfaceId) wl_resource_get_user_data(surface_resource);
 
     LOG_NYIMP("Getting Wayland shell surface (id: %32d, sid: %d)", id, sid);
 

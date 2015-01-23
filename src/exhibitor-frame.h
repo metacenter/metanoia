@@ -21,14 +21,14 @@ typedef AuraBranch AuraFrame;
 typedef struct {
     AuraFrameType type;
     char* title;
-    SurfaceId sid;
+    AuraSurfaceId sid;
     AuraPosition floating_position;
 } AuraFrameParams;
 
 AuraFrame* aura_frame_new();
 void aura_frame_free(AuraFrame* self);
 
-void aura_frame_set_surface(AuraFrame* self, SurfaceId sid);
+void aura_frame_set_surface(AuraFrame* self, AuraSurfaceId sid);
 void aura_frame_set_type(AuraFrame* self, AuraFrameType type);
 
 AuraFrameParams* aura_frame_get_params(AuraFrame* self);
@@ -47,7 +47,7 @@ void aura_frame_jump(AuraFrame* self,
 
 void aura_frame_pop_recursively(AuraFrame* self, AuraFrame* pop);
 
-AuraFrame* aura_frame_find_with_sid(AuraFrame* self, SurfaceId sid);
+AuraFrame* aura_frame_find_with_sid(AuraFrame* self, AuraSurfaceId sid);
 
 #endif // __AURA_EXHIBITOR_FRAME_H__
 

@@ -7,22 +7,22 @@
 #include "event-loop.h"
 #include "surface-data.h"
 
-SurfaceId aura_surface_create(void);
+AuraSurfaceId aura_surface_create(void);
 
-void aura_surface_destroy(SurfaceId sid);
+void aura_surface_destroy(AuraSurfaceId sid);
 
-AuraSurfaceData* aura_surface_get(SurfaceId sid);
+AuraSurfaceData* aura_surface_get(AuraSurfaceId sid);
 
-void aura_surface_attach_egl(SurfaceId sid,
+void aura_surface_attach_egl(AuraSurfaceId sid,
                              void* resource);
 
-void aura_surface_commit(SurfaceId sid,
+void aura_surface_commit(AuraSurfaceId sid,
                          int width,
                          int height,
                          int stride,
                          uint8_t* buffer);
 
-int aura_surface_compare(SurfaceId first, SurfaceId second);
+int aura_surface_compare(AuraSurfaceId first, AuraSurfaceId second);
 
 #endif // __AURA_SURFACE_MANAGER_H__
 

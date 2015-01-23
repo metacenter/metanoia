@@ -90,7 +90,7 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
 
     Link* link;
     for (link = surfaces->first; link; link = link->next) {
-        AuraSurfaceData* surface = aura_surface_get((SurfaceId) link->data);
+        AuraSurfaceData* surface = aura_surface_get((AuraSurfaceId) link->data);
         if (!surface) {
             continue;
         }

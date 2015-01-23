@@ -32,16 +32,16 @@ AuraTestResult should_correctly_store_data_for_id()
     aura_store_add(store, key1, &e1);
     aura_store_add(store, key2, &e2);
 
-    Elem* r1 = aura_store_get(store, key1);
+    Elem* r1 = aura_store_find(store, key1);
     AURA_ASSERT(r1, "r1 should be stored")
     AURA_ASSERT(r1->value == value1,
                 "r1 value should be %d (is %d)",
                 value1, r1->value)
 
-    Elem* r2 = aura_store_get(store, key3);
+    Elem* r2 = aura_store_find(store, key3);
     AURA_ASSERT(!r2, "r2 should not be stored")
 
-    Elem* r3 = aura_store_get(store, key2);
+    Elem* r3 = aura_store_find(store, key2);
     AURA_ASSERT(r3, "r3 should be stored")
     AURA_ASSERT(r3->value == value2,
                 "r3 value should be %d (is %d)",
@@ -77,13 +77,13 @@ AuraTestResult should_correctly_delete_data_for_id()
                 "rd value should be %d (is %d)",
                 value2, rd->value)
 
-    Elem* r1 = aura_store_get(store, key1);
+    Elem* r1 = aura_store_find(store, key1);
     AURA_ASSERT(r1, "r1 should be stored")
     AURA_ASSERT(r1->value == value1,
                 "r1 value should be %d (is %d)",
                 value1, r1->value)
 
-    Elem* r2 = aura_store_get(store, key2);
+    Elem* r2 = aura_store_find(store, key2);
     AURA_ASSERT(!r2, "r2 should not be stored")
 
     return AURA_TEST_SUCCESS;
@@ -112,16 +112,16 @@ AuraTestResult should_correctly_store_data_for_str()
     aura_store_add(store, key1, &e1);
     aura_store_add(store, key2, &e2);
 
-    Elem* r1 = aura_store_get(store, key1);
+    Elem* r1 = aura_store_find(store, key1);
     AURA_ASSERT(r1, "r1 should be stored")
     AURA_ASSERT(r1->value == value1,
                 "r1 value should be %d (is %d)",
                 value1, r1->value)
 
-    Elem* r2 = aura_store_get(store, key3);
+    Elem* r2 = aura_store_find(store, key3);
     AURA_ASSERT(!r2, "r2 should not be stored")
 
-    Elem* r3 = aura_store_get(store, key2);
+    Elem* r3 = aura_store_find(store, key2);
     AURA_ASSERT(r3, "r3 should be stored")
     AURA_ASSERT(r3->value == value2,
                 "r3 value should be %d (is %d)",
@@ -159,13 +159,13 @@ AuraTestResult should_correctly_delete_data_for_str()
                 "rd value should be %d (is %d)",
                 value2, rd->value)
 
-    Elem* r1 = aura_store_get(store, key1);
+    Elem* r1 = aura_store_find(store, key1);
     AURA_ASSERT(r1, "r1 should be stored")
     AURA_ASSERT(r1->value == value1,
                 "r1 value should be %d (is %d)",
                 value1, r1->value)
 
-    Elem* r2 = aura_store_get(store, key2);
+    Elem* r2 = aura_store_find(store, key2);
     AURA_ASSERT(!r2, "r2 should not be stored")
 
     return AURA_TEST_SUCCESS;

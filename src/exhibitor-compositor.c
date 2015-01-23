@@ -39,7 +39,7 @@ Chain* aura_compositor_get_visible_surfaces(AuraCompositor* self)
 
 //------------------------------------------------------------------------------
 
-void aura_compositor_manage_surface(AuraCompositor* self, SurfaceId sid)
+void aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid)
 {
     AuraSurfaceData* surface = aura_surface_get(sid);
     if (!surface) {
@@ -70,7 +70,7 @@ void aura_compositor_manage_surface(AuraCompositor* self, SurfaceId sid)
 ///
 /// @see aura_frame_find_with_sid
 void aura_compositor_pop_surface(AURA_UNUSED AuraCompositor* self,
-                                 AURA_UNUSED SurfaceId sid)
+                                 AURA_UNUSED AuraSurfaceId sid)
 {
     AuraFrame* frame = aura_frame_find_with_sid(self->frame, sid);
     aura_frame_pop_recursively(self->frame, frame);

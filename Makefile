@@ -181,7 +181,9 @@ build/utils-branch.o: Makefile \
 
 build/utils-store.o: Makefile \
                      src/utils-store.c \
-                     src/utils-store.h
+                     src/utils-store.h \
+                     src/global-constants.h \
+                     src/global-types.h
 	@mkdir -p build
 	@echo "  CC   utils-store.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/utils-store.o -Isrc -Igen \
@@ -442,11 +444,11 @@ build/surface-data.o: Makefile \
                       src/surface-data.h \
                       src/global-types.h \
                       src/utils-store.h \
+                      src/global-constants.h \
                       src/exhibitor-compositor.h \
                       src/exhibitor-frame.h \
                       src/utils-branch.h \
                       src/utils-chain.h \
-                      src/global-constants.h \
                       src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   surface-data.o"
@@ -461,11 +463,11 @@ build/surface-manager.o: Makefile \
                          src/surface-data.h \
                          src/global-types.h \
                          src/utils-store.h \
+                         src/global-constants.h \
                          src/exhibitor-compositor.h \
                          src/exhibitor-frame.h \
                          src/utils-branch.h \
                          src/utils-chain.h \
-                         src/global-constants.h \
                          src/utils-log.h \
                          src/event-timer.h \
                          src/event-signals.h
@@ -701,11 +703,11 @@ build/wayland.o: Makefile \
                  src/wayland-protocol-output.h \
                  src/wayland-state.h \
                  src/utils-store.h \
+                 src/global-constants.h \
+                 src/global-types.h \
                  src/output.h \
                  src/renderer.h \
                  src/utils-chain.h \
-                 src/global-constants.h \
-                 src/global-types.h \
                  src/utils-log.h \
                  src/utils-environment.h \
                  src/event-signals.h \
@@ -719,9 +721,9 @@ build/wayland-output.o: Makefile \
                         src/wayland-output.c \
                         src/wayland-output.h \
                         src/utils-store.h \
-                        src/utils-log.h \
                         src/global-constants.h \
-                        src/global-types.h
+                        src/global-types.h \
+                        src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-output.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-output.o -Isrc -Igen \
@@ -731,11 +733,11 @@ build/wayland-state.o: Makefile \
                        src/wayland-state.c \
                        src/wayland-state.h \
                        src/utils-store.h \
+                       src/global-constants.h \
+                       src/global-types.h \
                        src/output.h \
                        src/renderer.h \
                        src/utils-chain.h \
-                       src/global-constants.h \
-                       src/global-types.h \
                        src/wayland-output.h \
                        src/wayland-protocol-output.h \
                        src/surface-manager.h \
@@ -759,11 +761,11 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/wayland-protocol-region.h \
                                      src/wayland-state.h \
                                      src/utils-store.h \
+                                     src/global-constants.h \
+                                     src/global-types.h \
                                      src/output.h \
                                      src/renderer.h \
                                      src/utils-chain.h \
-                                     src/global-constants.h \
-                                     src/global-types.h \
                                      src/surface-manager.h \
                                      src/event-loop.h \
                                      src/event-task.h \
@@ -782,11 +784,11 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/wayland-protocol-surface.h \
                                   src/wayland-state.h \
                                   src/utils-store.h \
+                                  src/global-constants.h \
+                                  src/global-types.h \
                                   src/output.h \
                                   src/renderer.h \
                                   src/utils-chain.h \
-                                  src/global-constants.h \
-                                  src/global-types.h \
                                   src/surface-manager.h \
                                   src/event-loop.h \
                                   src/event-task.h \
@@ -817,11 +819,11 @@ build/wayland-protocol-shell.o: Makefile \
                                 src/wayland-protocol-shell-surface.h \
                                 src/wayland-state.h \
                                 src/utils-store.h \
+                                src/global-constants.h \
+                                src/global-types.h \
                                 src/output.h \
                                 src/renderer.h \
                                 src/utils-chain.h \
-                                src/global-constants.h \
-                                src/global-types.h \
                                 src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-shell.o"
@@ -846,11 +848,11 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/wayland-protocol-xdg-surface.h \
                                     src/wayland-state.h \
                                     src/utils-store.h \
+                                    src/global-constants.h \
+                                    src/global-types.h \
                                     src/output.h \
                                     src/renderer.h \
                                     src/utils-chain.h \
-                                    src/global-constants.h \
-                                    src/global-types.h \
                                     src/utils-log.h \
                                     gen/xdg-shell-server-protocol.h
 	@mkdir -p build
@@ -898,11 +900,11 @@ build/wayland-protocol-seat.o: Makefile \
                                src/wayland-protocol-keyboard.h \
                                src/wayland-state.h \
                                src/utils-store.h \
+                               src/global-constants.h \
+                               src/global-types.h \
                                src/output.h \
                                src/renderer.h \
                                src/utils-chain.h \
-                               src/global-constants.h \
-                               src/global-types.h \
                                src/utils-log.h \
                                src/config.h \
                                src/utils-keymap.h
@@ -1029,8 +1031,12 @@ checks/check-store: Makefile \
                     src/utils-store.c \
                     src/utils-chain.c \
                     tests/../src/utils-store.h \
+                    tests/../src/global-constants.h \
+                    tests/../src/global-types.h \
                     tests/tests-suit.h \
                     src/utils-store.h \
+                    src/global-constants.h \
+                    src/global-types.h \
                     src/utils-chain.h \
                     src/global-constants.h \
                     src/global-types.h

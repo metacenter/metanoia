@@ -62,7 +62,7 @@ void aura_branch_append(AuraBranch* self, AuraBranch* other)
 AuraResult aura_branch_remove(AuraBranch* self, AuraBranch* other)
 {
     if (!self || !other) {
-        return AURA_RESULT_INCORECT_ARGUMENT;
+        return AURA_RESULT_INCORRECT_ARGUMENT;
     }
 
     other->trunk = NULL;

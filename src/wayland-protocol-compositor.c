@@ -28,7 +28,7 @@ void aura_wayland_region_unbind(AURA_UNUSED struct wl_resource* resource)
 
 void aura_wayland_surface_unbind(struct wl_resource* resource)
 {
-    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(resource);
+    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: unbind surface (sid: %d)", sid);
     aura_surface_destroy(sid);
     wayland_state_remove_surface(sid);
@@ -41,7 +41,7 @@ void aura_wayland_create_surface(struct wl_client* client,
                                  uint32_t id)
 {
     struct wl_resource* rc;
-    SurfaceId new_sid;
+    AuraSurfaceId new_sid;
 
     LOG_WAYL2("Wayland: create surface (id: %d)", id);
 

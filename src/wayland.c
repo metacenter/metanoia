@@ -46,7 +46,7 @@ void* display_run(void* data)
 
 void wayland_screen_refresh_handler(void* data)
 {
-    SurfaceId sid = (SurfaceId) data;
+    AuraSurfaceId sid = (AuraSurfaceId) data;
     LOG_WAYL3("Wayland: handling screen refresh");
     wayland_state_screen_refresh(sid);
 }
@@ -55,7 +55,7 @@ void wayland_screen_refresh_handler(void* data)
 
 void wayland_keyboard_focus_change_handler(void* data)
 {
-    SurfaceId sid = (SurfaceId) data;
+    AuraSurfaceId sid = (AuraSurfaceId) data;
     LOG_WAYL2("Wayland: handling keyboard focus change (%d)", sid);
     wayland_state_keyboard_focus_update(sid);
 }
@@ -94,7 +94,7 @@ void wayland_display_lost_handler(void* data)
 
 void wayland_surface_reconfigured_handler(void* data)
 {
-    SurfaceId sid = (SurfaceId) data;
+    AuraSurfaceId sid = (AuraSurfaceId) data;
     wayland_state_surface_reconfigured(sid);
 }
 

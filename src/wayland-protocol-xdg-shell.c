@@ -42,7 +42,8 @@ void aura_wayland_xdg_get_xdg_surface
                                AURA_UNUSED struct wl_resource* surface_resource)
 {
     struct wl_resource* rc;
-    SurfaceId sid = (SurfaceId) wl_resource_get_user_data(surface_resource);
+    AuraSurfaceId sid =
+                    (AuraSurfaceId) wl_resource_get_user_data(surface_resource);
 
     LOG_NYIMP("Wayland: get XDG surface (id: %d, sid: %d)", id, sid);
 

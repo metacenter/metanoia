@@ -11,8 +11,11 @@
 
 //------------------------------------------------------------------------------
 
-static int compare(const AuraArgmand* argmand1, const AuraArgmand* argmand2)
+static int compare(const void* data1, const void* data2)
 {
+    const AuraArgmand* argmand1 = (const AuraArgmand*) data1;
+    const AuraArgmand* argmand2 = (const AuraArgmand*) data2;
+
     if (argmand1->modifiers < argmand2->modifiers) return -1;
     if (argmand1->modifiers > argmand2->modifiers) return  1;
 
@@ -45,7 +48,7 @@ void aura_mode_add_argmand(AuraMode* self, const AuraArgmand* argmand)
     void* found;
 
     // Skip if already exists
-    found = tfind((void *) argmand, &self->argmands, (CompareFunc) compare);
+    found = tfind((void*) argmand, &self->argmands, compare);
     if (found) {
         LOG_WARN2("Argmand already exists! (code: %d, modifiers: %d)",
                   argmand->code, argmand->modifiers);
@@ -55,7 +58,7 @@ void aura_mode_add_argmand(AuraMode* self, const AuraArgmand* argmand)
     // Add argmand
     AuraArgmand* copy = aura_argmand_copy(argmand);
 
-    found = tsearch((void *) copy, &self->argmands, (CompareFunc) compare);
+    found = tsearch((void*) copy, &self->argmands, compare);
     if (!found) {
         LOG_ERROR("Could not store argmand!");
         aura_argmand_free(copy);
@@ -77,7 +80,7 @@ AuraArgmand* aura_mode_find_argmand(AuraMode* self,
     searched.code = code;
     searched.modifiers = modifiers;
 
-    found = tfind((void*) &searched, &self->argmands, (CompareFunc) compare);
+    found = tfind((void*) &searched, &self->argmands, compare);
     if (found) {
         return *found;
     }

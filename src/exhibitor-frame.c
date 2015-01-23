@@ -11,9 +11,9 @@
 
 //------------------------------------------------------------------------------
 
-int aura_frame_compare_sid(AuraFrame* frame, SurfaceId sid)
+int aura_frame_compare_sid(AuraFrame* frame, AuraSurfaceId sid)
 {
-    SurfaceId frame_sid = aura_frame_get_params(frame)->sid;
+    AuraSurfaceId frame_sid = aura_frame_get_params(frame)->sid;
     if (frame_sid < sid) {
         return -1;
     } else if (frame_sid > sid) {
@@ -80,7 +80,7 @@ AuraFrame* aura_frame_resize_find_helper(AuraFrame* frame,
 
 //------------------------------------------------------------------------------
 
-void aura_frame_set_surface(AuraFrame* self, SurfaceId sid)
+void aura_frame_set_surface(AuraFrame* self, AuraSurfaceId sid)
 {
     aura_frame_get_params(self)->sid = sid;
 }
@@ -276,7 +276,7 @@ void aura_frame_pop_recursively(AuraFrame* self, AuraFrame* pop)
 
 //------------------------------------------------------------------------------
 
-AuraFrame* aura_frame_find_with_sid(AuraFrame* self, SurfaceId sid)
+AuraFrame* aura_frame_find_with_sid(AuraFrame* self, AuraSurfaceId sid)
 {
     return aura_branch_find(self, (void*) sid,
                            (AuraBranchCompare) aura_frame_compare_sid);

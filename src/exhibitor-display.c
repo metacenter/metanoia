@@ -62,7 +62,7 @@ void aura_display_redraw_all(AuraDisplay* self)
     if (visible_surfaces) {
         Link* link;
         for (link = visible_surfaces->first; link; link = link->next) {
-            SurfaceId sid = (SurfaceId) link->data;
+            AuraSurfaceId sid = (AuraSurfaceId) link->data;
             aura_event_signal_emit(SIGNAL_SCREEN_REFRESH, (void*) sid);
         }
     }

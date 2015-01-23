@@ -12,7 +12,7 @@ typedef struct AuraRenderer AuraRenderer;
 struct AuraRenderer {
     int (*initialize) (AuraRenderer*);
     void (*finalize) (AuraRenderer*);
-    void (*attach) (AuraRenderer*, SurfaceId, void*);
+    void (*attach) (AuraRenderer*, AuraSurfaceId, void*);
     void (*draw) (AuraRenderer*, Chain*, int x, int y);
     void (*free) (AuraRenderer*);
 };

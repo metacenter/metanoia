@@ -14,7 +14,7 @@ static AuraStore* sStore = NULL;
 
 //------------------------------------------------------------------------------
 
-SurfaceId aura_surface_create(void)
+AuraSurfaceId aura_surface_create(void)
 {
     if (!sStore) {
         sStore = aura_store_new_for_id();
@@ -35,7 +35,7 @@ SurfaceId aura_surface_create(void)
 
 //------------------------------------------------------------------------------
 
-void aura_surface_destroy(SurfaceId sid)
+void aura_surface_destroy(AuraSurfaceId sid)
 {
     aura_event_signal_emit(SIGNAL_SURFACE_DESTROYED, (void*) sid);
     aura_store_delete(sStore, sid);
@@ -43,14 +43,14 @@ void aura_surface_destroy(SurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-AuraSurfaceData* aura_surface_get(SurfaceId sid)
+AuraSurfaceData* aura_surface_get(AuraSurfaceId sid)
 {
-    return aura_store_get(sStore, sid);
+    return aura_store_find(sStore, sid);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_surface_attach_egl(SurfaceId sid,
+void aura_surface_attach_egl(AuraSurfaceId sid,
                              AURA_UNUSED void* resource)
 {
     AuraSurfaceData* surface = aura_surface_get(sid);
@@ -68,7 +68,7 @@ void aura_surface_attach_egl(SurfaceId sid,
 
 //------------------------------------------------------------------------------
 
-void aura_surface_commit(SurfaceId sid,
+void aura_surface_commit(AuraSurfaceId sid,
                          int width,
                          int height,
                          int stride,
@@ -100,7 +100,7 @@ void aura_surface_commit(SurfaceId sid,
 
 //------------------------------------------------------------------------------
 
-int aura_surface_compare(SurfaceId first, SurfaceId second)
+int aura_surface_compare(AuraSurfaceId first, AuraSurfaceId second)
 {
     if (first < second) return -1;
     if (first > second) return  1;

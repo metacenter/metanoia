@@ -191,7 +191,7 @@ void* chain_pop(Chain* self)
 AuraResult chain_remove(Chain* self, void* data, AuraCompareFunc compare)
 {
     if (!self) {
-        return AURA_RESULT_INCORECT_ARGUMENT;
+        return AURA_RESULT_INCORRECT_ARGUMENT;
     }
 
     int found = 0;
@@ -219,7 +219,7 @@ AuraResult chain_remove(Chain* self, void* data, AuraCompareFunc compare)
 AuraResult chain_unjoin(Chain* self, Link* unjoinee)
 {
     if (!self || !unjoinee) {
-        return AURA_RESULT_INCORECT_ARGUMENT;
+        return AURA_RESULT_INCORRECT_ARGUMENT;
     }
 
     int found = false;
@@ -247,7 +247,7 @@ AuraResult chain_unjoin(Chain* self, Link* unjoinee)
 AuraResult chain_disjoin(Chain* self, Link* link)
 {
     if (!self || !link) {
-        return AURA_RESULT_INCORECT_ARGUMENT;
+        return AURA_RESULT_INCORRECT_ARGUMENT;
     }
 
     Link* prev = link->prev;

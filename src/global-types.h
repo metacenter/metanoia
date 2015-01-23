@@ -7,32 +7,44 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// TBR
-typedef uint32_t SurfaceId;
+/// Id for AuraItem
+typedef int AuraItemId;
 
+/// Structure to be inherited by all types that want to be stored in AuraStore
+typedef struct {
+    union {
+        AuraItemId id;
+        char* str;
+        void* data;
+    };
+} AuraItem;
+
+/// Identifier of a surface
+typedef AuraItemId AuraSurfaceId;
+
+/// Callback used in AuraBinding structure
 typedef void (*AuraKeyCallback) (void);
-typedef int (*CompareFunc) (const void*, const void*);
 
-// Type defining position, point coordinates or 2D vector
+/// Type defining position, point coordinates or 2D vector
 typedef struct {
     int x;
     int y;
 } AuraPosition;
 
-// Type defining 2D size, dimensions or resolution
+/// Type defining 2D size, dimensions or resolution
 typedef struct {
     int width;
     int height;
 } AuraSize;
 
-// Keyboard binding
+/// Keyboard binding
 typedef struct {
     int code;
     uint32_t modifiers;
     AuraKeyCallback callback;
-} Binding;
+} AuraBinding;
 
-// Key event data
+/// Key event data
 typedef struct {
     unsigned time;
     int code;

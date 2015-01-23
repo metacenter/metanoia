@@ -8,32 +8,41 @@
 
 #define AURA_UNUSED __attribute__((unused))
 
+/// Invalid value for AuraItemId
+static const AuraItemId scInvalidItemId = 0;
+
+/// Invalid value for AuraSurfaceId
+static const AuraSurfaceId scInvalidSurfaceId = 0;
+
+/// Enumerate key states
 typedef enum {
     AURA_KEY_RELEASED,
     AURA_KEY_PRESSED,
 } AuraKeyState;
 
+/// Enumerate all used modifiers
 typedef enum {
     AURA_KEY_CTRL  = 0x0001,
     AURA_KEY_SHIFT = 0x0002,
     AURA_KEY_ALT   = 0x0004,
 } AuraKeyModifierFlag;
 
+/// Enumerate key binding modes.
+/// The mode is set of key bindings that can be active.
 typedef enum {
     AURA_NORMAL_MODE,
-    AURA_MODE_NUM,
+    AURA_MODE_NUM, ///< Guard
 } AuraModeEnum;
 
-// TBR
-static const SurfaceId scInvalidSurfaceId = 0x0000;
-
-/// Argmand types
+/// Argmand types.
+/// Argmand is a data type that can be a command or
+/// an argument (parameter) depending on context.
 typedef enum {
     AURA_ARGMAND_NONE,    ///< Dummy; do/parametrize nothing
     // actions
     AURA_ARGMAND_FOCUS,   ///< Change focused surface
     AURA_ARGMAND_MOVE,    ///< Change position
-    AURA_ARGMAND_JUMP,    ///< Change palcement in tree structure
+    AURA_ARGMAND_JUMP,    ///< Change placement in tree structure
     AURA_ARGMAND_RESIZE,  ///< Change size
     // directions
     AURA_ARGMAND_N,       ///< North; up; above
@@ -46,10 +55,10 @@ typedef enum {
 
 /// Function return values or error codes
 typedef enum {
-    AURA_RESULT_SUCCESS = 0,       ///< Everything worked fine
-    AURA_RESULT_ERROR,             ///< Unspecified error
-    AURA_RESULT_INCORECT_ARGUMENT, ///< Incorrect or invalid argument passed
-    AURA_RESULT_NOT_FOUND,         ///< Required data not found
+    AURA_RESULT_SUCCESS = 0,        ///< Everything worked fine
+    AURA_RESULT_ERROR,              ///< Unspecified error
+    AURA_RESULT_INCORRECT_ARGUMENT, ///< Incorrect or invalid argument passed
+    AURA_RESULT_NOT_FOUND,          ///< Required data not found
 } AuraResult;
 
 #endif // __AURA_CONSTANTS_H__
