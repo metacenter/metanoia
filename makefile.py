@@ -448,15 +448,8 @@ aura.add_input(t)
 
 if with_gtk_support:
     t = m.add_compile_target(
-            output='backend-gtk.o',
-            inputs=['backend-gtk.c'],
-            pkgs={'gtk+-3.0'}
-        )
-    aura.add_input(t)
-
-    t = m.add_compile_target(
-            output='backend-gtk-app.o',
-            inputs=['backend-gtk-app.c'],
+            output='backend-gtk-res.o',
+            deps=['backend-gtk-res.c'],
             pkgs={'gtk+-3.0'}
         )
     aura.add_input(t)
@@ -469,8 +462,15 @@ if with_gtk_support:
     aura.add_input(t)
 
     t = m.add_compile_target(
-            output='backend-gtk-res.o',
-            deps=['backend-gtk-res.c'],
+            output='backend-gtk-app.o',
+            inputs=['backend-gtk-app.c'],
+            pkgs={'gtk+-3.0'}
+        )
+    aura.add_input(t)
+
+    t = m.add_compile_target(
+            output='backend-gtk.o',
+            inputs=['backend-gtk.c'],
             pkgs={'gtk+-3.0'}
         )
     aura.add_input(t)

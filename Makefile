@@ -63,14 +63,14 @@ build/aura: Makefile \
             build/wayland-protocol-pointer.o \
             build/wayland-protocol-keyboard.o \
             build/bind-egl-wayland.o \
-            build/backend-gtk.o \
-            build/backend-gtk-app.o \
+            build/backend-gtk-res.o \
             build/backend-gtk-win.o \
-            build/backend-gtk-res.o
+            build/backend-gtk-app.o \
+            build/backend-gtk.o
 	@mkdir -p build
 	@echo "  LD   aura"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -pg -O0 -o build/aura \
-	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-output.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk.o build/backend-gtk-app.o build/backend-gtk-win.o build/backend-gtk-res.o \
+	       build/aura.o build/config.o build/global-functions.o build/utils-chain.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-bindings.o build/keyboard-mode.o build/keyboard-argmand.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/renderer-mmap.o build/renderer-gl.o build/wayland.o build/wayland-output.o build/wayland-state.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk-res.o build/backend-gtk-win.o build/backend-gtk-app.o build/backend-gtk.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -ldrm -ludev -lwayland-server -lxkbcommon 
 
 gen/xdg-shell-server-protocol.h: Makefile \
@@ -738,7 +738,15 @@ build/wayland-state.o: Makefile \
                        src/global-types.h \
                        src/wayland-output.h \
                        src/wayland-protocol-output.h \
-                       src/utils-log.h
+                       src/surface-manager.h \
+                       src/event-loop.h \
+                       src/event-task.h \
+                       src/surface-data.h \
+                       src/exhibitor-compositor.h \
+                       src/exhibitor-frame.h \
+                       src/utils-branch.h \
+                       src/utils-log.h \
+                       gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland-state.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-state.o -Isrc -Igen \
@@ -836,9 +844,14 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/wayland-protocol-xdg-shell.c \
                                     src/wayland-protocol-xdg-shell.h \
                                     src/wayland-protocol-xdg-surface.h \
-                                    src/utils-log.h \
+                                    src/wayland-state.h \
+                                    src/utils-store.h \
+                                    src/output.h \
+                                    src/renderer.h \
+                                    src/utils-chain.h \
                                     src/global-constants.h \
                                     src/global-types.h \
+                                    src/utils-log.h \
                                     gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-xdg-shell.o"
@@ -847,7 +860,11 @@ build/wayland-protocol-xdg-shell.o: Makefile \
 
 build/wayland-protocol-xdg-surface.o: Makefile \
                                       src/wayland-protocol-xdg-surface.c \
-                                      src/wayland-protocol-xdg-surface.h
+                                      src/wayland-protocol-xdg-surface.h \
+                                      src/utils-log.h \
+                                      src/global-constants.h \
+                                      src/global-types.h \
+                                      gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-xdg-surface.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/wayland-protocol-xdg-surface.o -Isrc -Igen \
@@ -932,6 +949,45 @@ build/bind-egl-wayland.o: Makefile \
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/bind-egl-wayland.o -Isrc -Igen \
 	       -c src/bind-egl-wayland.c
 
+build/backend-gtk-res.o: Makefile \
+                         gen/backend-gtk-res.c
+	@mkdir -p build
+	@echo "  CC   backend-gtk-res.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/backend-gtk-res.o -Isrc -Igen \
+	       -c gen/backend-gtk-res.c \
+	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
+
+build/backend-gtk-win.o: Makefile \
+                         src/backend-gtk-win.c \
+                         src/backend-gtk-app.h \
+                         src/global-types.h \
+                         src/backend-gtk-win.h \
+                         src/utils-log.h \
+                         src/global-constants.h \
+                         src/event-signals.h \
+                         src/event-task.h \
+                         gen/version.h
+	@mkdir -p build
+	@echo "  CC   backend-gtk-win.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/backend-gtk-win.o -Isrc -Igen \
+	       -c src/backend-gtk-win.c \
+	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
+
+build/backend-gtk-app.o: Makefile \
+                         src/backend-gtk-app.c \
+                         src/backend-gtk-app.h \
+                         src/global-types.h \
+                         src/backend-gtk-win.h \
+                         src/utils-log.h \
+                         src/global-constants.h \
+                         src/event-signals.h \
+                         src/event-task.h
+	@mkdir -p build
+	@echo "  CC   backend-gtk-app.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/backend-gtk-app.o -Isrc -Igen \
+	       -c src/backend-gtk-app.c \
+	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
+
 build/backend-gtk.o: Makefile \
                      src/backend-gtk.c \
                      src/backend-gtk.h \
@@ -951,45 +1007,6 @@ build/backend-gtk.o: Makefile \
 	@echo "  CC   backend-gtk.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/backend-gtk.o -Isrc -Igen \
 	       -c src/backend-gtk.c \
-	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
-
-build/backend-gtk-app.o: Makefile \
-                         src/backend-gtk-app.c \
-                         src/backend-gtk-app.h \
-                         src/backend-gtk-win.h \
-                         src/utils-log.h \
-                         src/global-constants.h \
-                         src/global-types.h \
-                         src/event-signals.h \
-                         src/event-task.h
-	@mkdir -p build
-	@echo "  CC   backend-gtk-app.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/backend-gtk-app.o -Isrc -Igen \
-	       -c src/backend-gtk-app.c \
-	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
-
-build/backend-gtk-win.o: Makefile \
-                         src/backend-gtk-win.c \
-                         src/backend-gtk-app.h \
-                         src/backend-gtk-win.h \
-                         src/utils-log.h \
-                         src/global-constants.h \
-                         src/global-types.h \
-                         src/event-signals.h \
-                         src/event-task.h \
-                         gen/version.h
-	@mkdir -p build
-	@echo "  CC   backend-gtk-win.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/backend-gtk-win.o -Isrc -Igen \
-	       -c src/backend-gtk-win.c \
-	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
-
-build/backend-gtk-res.o: Makefile \
-                         gen/backend-gtk-res.c
-	@mkdir -p build
-	@echo "  CC   backend-gtk-res.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -pg -O0 -o build/backend-gtk-res.o -Isrc -Igen \
-	       -c gen/backend-gtk-res.c \
 	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
 checks/check-chain: Makefile \

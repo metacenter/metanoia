@@ -4,6 +4,8 @@
 #ifndef __AURA_BACKEND_GTK_APP_H__
 #define __AURA_BACKEND_GTK_APP_H__
 
+#include "global-types.h"
+
 #include <gtk/gtk.h>
 #include <stdint.h>
 
@@ -15,12 +17,6 @@ typedef struct _AuraAppClass AuraAppClass;
 
 #define NUM_BUFFERS 2
 
-/// @todo use AuraSize
-typedef struct {
-    int width;
-    int height;
-} AuraResolution;
-
 typedef struct {
     int enabled;
     GtkWidget* da;
@@ -29,7 +25,7 @@ typedef struct {
     GSimpleAction* resolution_action;
     int stride;
     int front;
-    AuraResolution resolution;
+    AuraSize resolution;
     struct {
         uint8_t* data;
         cairo_surface_t* source;
@@ -43,6 +39,6 @@ AuraViewGroup* aura_backend_gtk_app_prepare_view_group(int n, int w, int h);
 
 void aura_backend_gtk_app_swap_buffers();
 
-AuraResolution aura_backend_gtk_app_get_resolution(int n);
+AuraSize aura_backend_gtk_app_get_resolution(int n);
 
 #endif // __AURA_BACKEND_GTK_APP_H__

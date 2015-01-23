@@ -108,8 +108,8 @@ void aura_frame_move_with_contents(AuraFrame* self,
     // Update surfaces position
     AuraSurfaceData* surface_data = aura_surface_get(params->sid);
     if (surface_data) {
-        surface_data->x += vector.x;
-        surface_data->y += vector.y;
+        surface_data->position.x += vector.x;
+        surface_data->position.y += vector.y;
     }
 
     // Move all subframes

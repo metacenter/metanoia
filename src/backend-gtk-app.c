@@ -34,10 +34,10 @@ void aura_backend_gtk_app_swap_buffers(int n)
 
 //------------------------------------------------------------------------------
 
-AuraResolution aura_backend_gtk_app_get_resolution(int n)
+AuraSize aura_backend_gtk_app_get_resolution(int n)
 {
     if (!win) {
-        return (AuraResolution) {-2, -2};
+        return (AuraSize) {-2, -2};
     }
 
     return aura_backend_gtk_win_get_resolution(win, n);

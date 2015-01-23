@@ -102,7 +102,7 @@ AuraOutputGTK* aura_backend_gtk_output_new(int width, int height, int num)
 
 int aura_backend_gtk_get_outputs(Chain* outputs)
 {
-    AuraResolution resolution;
+    AuraSize resolution;
     int i = 0, n = 0;
     do {
         resolution = aura_backend_gtk_app_get_resolution(i);

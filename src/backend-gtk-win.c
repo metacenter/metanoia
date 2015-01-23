@@ -24,7 +24,7 @@ pthread_mutex_t mutex_buffer = PTHREAD_MUTEX_INITIALIZER;
 
 AuraViewGroup group[NUM_VIEW_GROUPS];
 
-AuraResolution resolution[] = {
+AuraSize resolution[] = {
         { 600, 400},
         { 800, 600},
         {1000, 800},
@@ -33,7 +33,7 @@ AuraResolution resolution[] = {
 //------------------------------------------------------------------------------
 // HELPERS
 
-GVariant* aura_backend_gtk_pack_resolution_variant(AuraResolution resolution)
+GVariant* aura_backend_gtk_pack_resolution_variant(AuraSize resolution)
 {
     GVariant** tuple = g_new(GVariant*, 2);
     tuple[0] = g_variant_new_int32(resolution.width);
@@ -43,9 +43,9 @@ GVariant* aura_backend_gtk_pack_resolution_variant(AuraResolution resolution)
 
 //------------------------------------------------------------------------------
 
-AuraResolution aura_backend_gtk_unpack_resolution_variant(GVariant* variant)
+AuraSize aura_backend_gtk_unpack_resolution_variant(GVariant* variant)
 {
-    AuraResolution result = {0, 0};
+    AuraSize result = {0, 0};
     if (g_variant_n_children(variant) != 2) {
         return result;
     }
@@ -224,15 +224,15 @@ void aura_backend_gtk_win_swap_buffers(AURA_UNUSED AuraWin* win, int n)
 
 //------------------------------------------------------------------------------
 
-AuraResolution aura_backend_gtk_win_get_resolution(AURA_UNUSED AuraWin* win,
+AuraSize aura_backend_gtk_win_get_resolution(AURA_UNUSED AuraWin* win,
                                                    int n)
 {
     if (n < 0 || NUM_VIEW_GROUPS <= n) {
-        return (AuraResolution) {-1, -1};
+        return (AuraSize) {-1, -1};
     }
 
     if (!group[n].enabled) {
-        return (AuraResolution) {0, 0};
+        return (AuraSize) {0, 0};
     }
 
     return group[n].resolution;
@@ -288,7 +288,7 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
     group[i].resolution_action = G_SIMPLE_ACTION(action);
 
     unsigned int j;
-    for (j = 0; j < sizeof(resolution)/sizeof(AuraResolution); ++j)
+    for (j = 0; j < sizeof(resolution)/sizeof(AuraSize); ++j)
     {
         gchar* label = g_strdup_printf("%4d x %4d", resolution[j].width,
                                                     resolution[j].height);

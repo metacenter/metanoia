@@ -9,7 +9,7 @@
 
 //------------------------------------------------------------------------------
 
-int aura_backend_gtk_get_outputs(Chain* outputs)
+int aura_backend_gtk_get_outputs(AURA_UNUSED Chain* outputs)
 {
     LOG_WARN1(MSG);
     return 0;
@@ -17,7 +17,7 @@ int aura_backend_gtk_get_outputs(Chain* outputs)
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_run(AuraLoop* this_loop)
+void aura_backend_gtk_run(AURA_UNUSED AuraLoop* this_loop)
 {
     LOG_WARN1(MSG);
     aura_quit();

@@ -28,7 +28,7 @@ typedef struct {
 
 typedef struct {
     AuraItem base;
-    int x, y;
+    AuraPosition position;
     AuraSize desired_size;
     AuraDrawBuffer buffer;
     AuraSurfaceGroup group;
