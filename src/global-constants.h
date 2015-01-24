@@ -39,6 +39,9 @@ typedef enum {
 /// an argument (parameter) depending on context.
 typedef enum {
     AURA_ARGMAND_NONE,    ///< Dummy; do/parametrize nothing
+    // values
+    AURA_ARGMAND_NUMBER,  ///< Number; numeric value; integer
+    AURA_ARGMAND_STRING,  ///< String
     // actions
     AURA_ARGMAND_FOCUS,   ///< Change focused surface
     AURA_ARGMAND_MOVE,    ///< Change position
@@ -51,6 +54,8 @@ typedef enum {
     AURA_ARGMAND_W,       ///< West; left
     AURA_ARGMAND_BACK,    ///< Back in time; most recently used
     AURA_ARGMAND_FORWARD, ///< Forward in time; the oldest used
+    AURA_ARGMAND_BEGIN,   ///< Begin; start; head
+    AURA_ARGMAND_END,     ///< End; finnish; tail
 } AuraArgmandType;
 
 /// Function return values or error codes

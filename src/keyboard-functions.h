@@ -14,6 +14,9 @@ void aura_put_move(Chain* stack);
 
 void aura_put_resize(Chain* stack);
 
+void aura_put_number(Chain* stack, int code,
+                     uint32_t modifiers, AuraKeyState state);
+
 void aura_right(Chain* stack);
 
 void aura_left(Chain* stack);
