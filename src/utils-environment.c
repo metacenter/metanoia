@@ -40,9 +40,28 @@ void aura_environment_unblock_system_signals(void)
 
 //------------------------------------------------------------------------------
 
-static void aura_environment_async_signal_handler(int sig,
-                                                  AURA_UNUSED siginfo_t* si,
-                                                  AURA_UNUSED void* arg)
+void aura_environment_set_thread_name(pthread_t thread, char* name)
+{
+    pthread_setname_np(thread, name);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_environment_on_enter_new_thread(pthread_t thread, char* name)
+{
+    aura_environment_block_system_signals();
+
+    if (!thread) {
+        thread = pthread_self();
+    }
+    aura_environment_set_thread_name(thread, name);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_environment_async_signal_handler(int sig,
+                                           AURA_UNUSED siginfo_t* si,
+                                           AURA_UNUSED void* arg)
 {
     switch (sig) {
         case SIGINT:
@@ -58,7 +77,7 @@ static void aura_environment_async_signal_handler(int sig,
 
 //------------------------------------------------------------------------------
 
-static void aura_environment_signal_handler_set_up(void)
+void aura_environment_signal_handler_set_up(void)
 {
     struct sigaction sa;
     memset(&sa, 0, sizeof(struct sigaction));
@@ -74,7 +93,7 @@ static void aura_environment_signal_handler_set_up(void)
 
 //------------------------------------------------------------------------------
 
-static int aura_environment_data_path_setup(void)
+int aura_environment_data_path_setup(void)
 {
     char* data_path = getenv("XDG_DATA_HOME");
     if (!data_path) {
@@ -98,7 +117,7 @@ static int aura_environment_data_path_setup(void)
 
 //------------------------------------------------------------------------------
 
-static int aura_environment_runtime_path_setup(void)
+int aura_environment_runtime_path_setup(void)
 {
     int result = 0;
 

@@ -27,7 +27,7 @@ int main()
 
     // Prepare loops and events
     AuraLoop* loop_devices = aura_loop_new("aura:devices");
-    AuraLoop* loop_surface_manager = aura_loop_new("aura:displays");
+    AuraLoop* loop_displays = aura_loop_new("aura:displays");
     AuraLoop* loop_keyboard = aura_loop_new("aura:keyboard");
 
     // Continue initialization asynchronously
@@ -45,15 +45,15 @@ int main()
     task = factorize_initialize_output_collector_task(loop_devices);
     aura_loop_schedule_task(loop_devices, task);
 
-    task = factorize_initialize_exhibitor_task(loop_surface_manager);
-    aura_loop_schedule_task(loop_surface_manager, task);
+    task = factorize_initialize_exhibitor_task(loop_displays);
+    aura_loop_schedule_task(loop_displays, task);
 
-    task = factorize_initialize_wayland_task(loop_surface_manager);
-    aura_loop_schedule_task(loop_surface_manager, task);
+    task = factorize_initialize_wayland_task(loop_displays);
+    aura_loop_schedule_task(loop_displays, task);
 
     // Start threads
     aura_loop_run(loop_devices);
-    aura_loop_run(loop_surface_manager);
+    aura_loop_run(loop_displays);
     aura_loop_run(loop_keyboard);
 
     // Receive and dispatch events (main loop)
@@ -65,15 +65,15 @@ int main()
 
     // Stop and join threads
     aura_loop_stop(loop_keyboard);
-    aura_loop_stop(loop_surface_manager);
+    aura_loop_stop(loop_displays);
     aura_loop_stop(loop_devices);
     aura_loop_join(loop_keyboard);
-    aura_loop_join(loop_surface_manager);
+    aura_loop_join(loop_displays);
     aura_loop_join(loop_devices);
 
     // Finalize
     aura_loop_free(loop_keyboard);
-    aura_loop_free(loop_surface_manager);
+    aura_loop_free(loop_displays);
     aura_loop_free(loop_devices);
 
     aura_dbus_finalize();

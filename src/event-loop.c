@@ -6,11 +6,8 @@
 #include "utils-chain.h"
 #include "utils-environment.h"
 
-#define __USE_GNU
-#define _GNU_SOURCE
 #include <errno.h>
 #include <malloc.h>
-#include <pthread.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -67,8 +64,7 @@ static void* aura_loop_thread_loop(void* data)
     }
 
     LOG_INFO1("Threads: starting loop '%s'", self->name);
-    pthread_setname_np(self->thread, self->name);
-    aura_environment_block_system_signals();
+    aura_environment_on_enter_new_thread(self->thread, self->name);
 
     self->run = 1;
     pthread_mutex_lock(&self->process_mutex);

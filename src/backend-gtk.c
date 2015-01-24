@@ -123,7 +123,7 @@ int aura_backend_gtk_get_outputs(Chain* outputs)
 
 static void* aura_backend_gtk_main(AURA_UNUSED void* data)
 {
-    aura_environment_block_system_signals();
+    aura_environment_on_enter_new_thread(0, "aura:gtk");
 
     int argc = 1;
     char* args[] = {"aura", NULL};

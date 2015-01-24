@@ -23,17 +23,17 @@
 
 static const char scLogEnd[] = " | ";
 static const char scLogWelcomeText[] =
-"***************************************** AURA "
-"*****************************************\n";
+"******************************************** AURA "
+"*******************************************\n";
 static const char scLogGoodByeText[] =
-"***********************************************"
-"*****************************************\n";
+"**************************************************"
+"*******************************************\n";
 static const char scLogBackTraceBegin[] =
-"----------------+-------+------------+------+"
-" BACKTRACE --------+----------------------+\n";
+"----------------+-------+-----------------+--BACKTRACE"
+"----------+---------------------------+\n";
 static const char scLogBackTraceEnd[] =
-"----------------+-------+------------+------+"
-"-------------------+----------------------+\n";
+"----------------+-------+-----------------+------+----"
+"----------+---------------------------+\n";
 
 // Log file
 static const char* scConfLogFile = "logs/log";
@@ -81,6 +81,7 @@ void aura_log(const char* log_level,
 {
     int n;
     char buff[128];
+    char thread_name[16];
     struct timeval tv;
     struct tm* tm;
 
@@ -91,12 +92,14 @@ void aura_log(const char* log_level,
     // Lock Mutex
     pthread_mutex_lock(&mutex);
 
+    // Get thread name
+    pthread_getname_np(pthread_self(), thread_name, sizeof(thread_name));
+
     // Fill buffer
     n = snprintf(buff, sizeof buff,
-                "%02d:%02d:%02d.%06d | %-5s | %-10u | %4d | %-40s%s",
+                "%02d:%02d:%02d.%06d | %-5s | %-15s | %4d | %-40s%s",
                 tm->tm_hour, tm->tm_min, tm->tm_sec, (int) tv.tv_usec,
-                log_level, (unsigned) pthread_self(),
-                line, file, scLogEnd);
+                log_level, thread_name, line, file, scLogEnd);
 
     // Print text
     if (sLogFD != -1) {

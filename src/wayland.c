@@ -37,7 +37,7 @@ struct wl_display* get_wayland_display()
 
 void* display_run(void* data)
 {
-    aura_environment_block_system_signals();
+    aura_environment_on_enter_new_thread(0, "aura:wayland");
     wl_display_run((struct wl_display*) data);
     return NULL;
 }

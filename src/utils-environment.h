@@ -6,6 +6,10 @@
 
 #include "global-constants.h"
 
+#define __USE_GNU
+#define _GNU_SOURCE
+#include <pthread.h>
+
 typedef enum AuraFilePath {
     RUNTIME_PATH,
     DATA_PATH
@@ -14,6 +18,10 @@ typedef enum AuraFilePath {
 void aura_environment_block_system_signals(void);
 
 void aura_environment_unblock_system_signals(void);
+
+void aura_environment_set_thread_name(pthread_t, char*);
+
+void aura_environment_on_enter_new_thread(pthread_t, char*);
 
 int aura_environment_setup(void);
 
