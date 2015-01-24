@@ -3,7 +3,7 @@ all: build/aura
 res/force:
 
 clean:
-	rm -rf build gen checks
+	rm -rf doc build gen checks
 
 checks: checks/check-chain checks/check-store
 check: checks

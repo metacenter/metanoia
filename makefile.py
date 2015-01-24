@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -B
 # file: makefile.py
 # vim: tabstop=4 expandtab colorcolumn=81 list
 

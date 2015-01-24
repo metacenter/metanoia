@@ -1,0 +1,8 @@
+PROJECT_NAME          = Aura
+INPUT                 = src tests
+OUTPUT_DIRECTORY      = doc
+EXTRACT_ALL           = YES
+OPTIMIZE_OUTPUT_FOR_C = YES
+GENERATE_LATEX        = YES
+HAVE_DOT              = YES
+GENERATE_TREEVIEW     = YES
