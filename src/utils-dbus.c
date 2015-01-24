@@ -11,7 +11,6 @@
 
 //------------------------------------------------------------------------------
 
-//static const char* scDBusName = "org.aura-wm";
 static const char* scLogindDestination = "org.freedesktop.login1";
 static const char* scLoginObject = "/org/freedesktop/login1";
 static const char* scSessionObject = NULL;
@@ -24,26 +23,26 @@ static const char* scSessionObjectErrorMsg = "Not connected to session!";
 static DBusConnection* sDBusSystemConn = NULL;
 static bool sHaveSessionControl = FALSE;
 
-#define ASSERT(_ok_, _message_) \
+#define AURA_DBUS_ASSERT(_ok_, _message_) \
     if (!(_ok_)) { \
         LOG_ERROR(_message_); \
         return -ENODEV; \
     }
 
-#define ASSERT_MESSAGE(_ok_) \
+#define AURA_DBUS_ASSERT_MESSAGE(_ok_) \
     if (!(_ok_)) { \
         LOG_ERROR("Failed to initialize DBus message!"); \
         return -ENOMEM; \
     }
 
-#define ASSERT_ARGUMENTS(_ok_) \
+#define AURA_DBUS_ASSERT_ARGUMENTS(_ok_) \
     if (!(_ok_)) { \
         LOG_ERROR("Failed to store DBus message arguments!"); \
         result = -ENOMEM; \
         goto clear_msg; \
     }
 
-#define ASSERT_SEND(_ok_, _message_) \
+#define AURA_DBUS_ASSERT_SEND(_ok_, _message_) \
     if (dbus_error_is_set(&err)) { \
         LOG_WARN1("DBus: %s", err.message); \
         dbus_error_free(&err); \
@@ -54,7 +53,7 @@ static bool sHaveSessionControl = FALSE;
         goto clear_msg; \
     }
 
-#define ASSERT_REPLY(_ok_) \
+#define AURA_DBUS_ASSERT_REPLY(_ok_) \
     if (dbus_error_is_set(&err)) { \
         LOG_WARN1("DBus: %s", err.message); \
         dbus_error_free(&err); \
@@ -69,7 +68,6 @@ static bool sHaveSessionControl = FALSE;
 
 bool aura_dbus_initalize(void)
 {
-    //int ret; // TBR
     DBusError err;
 
     LOG_INFO1("Initializing DBus...");
@@ -87,17 +85,6 @@ bool aura_dbus_initalize(void)
         LOG_ERROR("DBus initialization failed!");
         return FALSE;
     }
-
-    // Request our name on the bus // TBR
-    /*ret = dbus_bus_request_name(sDBusSystemConn, scDBusName,
-                                DBUS_NAME_FLAG_REPLACE_EXISTING , &err);
-    if (dbus_error_is_set(&err)) {
-        LOG_WARN2(err.message);
-        dbus_error_free(&err);
-    }
-    if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret) {
-        LOG_WARN2("DBus name request failed!");
-    }*/
 
     // Get session ID
     if (aura_dbus_session_get_session_by_pid(getpid(), &scSessionObject)) {
@@ -131,7 +118,6 @@ void aura_dbus_finalize(void)
     }
 
     if (sDBusSystemConn) {
-        //dbus_connection_close(sDBusSystemConn); // TBR
         dbus_connection_unref(sDBusSystemConn);
     }
     LOG_INFO1("Finallizing DBus: SUCCESS");
@@ -150,7 +136,7 @@ int aura_dbus_session_get_session_by_pid(int pid, const char** sid_out)
     DBusMessage *reply;
     DBusError err;
 
-    ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
+    AURA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
     dbus_error_init(&err);
 
     // Create new method call
@@ -158,24 +144,24 @@ int aura_dbus_session_get_session_by_pid(int pid, const char** sid_out)
                                        scLoginObject,
                                        scManagerInterface,
                                        cMessageName);
-    ASSERT_MESSAGE(msg);
+    AURA_DBUS_ASSERT_MESSAGE(msg);
 
     // Append arguments
     ok = dbus_message_append_args(msg,
                                   DBUS_TYPE_UINT32, &pid,
                                   DBUS_TYPE_INVALID);
-    ASSERT_ARGUMENTS(ok);
+    AURA_DBUS_ASSERT_ARGUMENTS(ok);
 
     // Send message and block
     reply = dbus_connection_send_with_reply_and_block(sDBusSystemConn,
                                                       msg, -1, &err);
-    ASSERT_SEND(reply, cMessageName);
+    AURA_DBUS_ASSERT_SEND(reply, cMessageName);
 
     // Read result
     ok = dbus_message_get_args(reply, NULL,
                                DBUS_TYPE_OBJECT_PATH, &sid,
                                DBUS_TYPE_INVALID);
-    ASSERT_REPLY(ok);
+    AURA_DBUS_ASSERT_REPLY(ok);
 
     // Copy sid
     *sid_out = strdup(sid);
@@ -201,8 +187,8 @@ int aura_dbus_session_take_control()
     DBusError err;
 
     LOG_INFO2("Taking control over session...");
-    ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
-    ASSERT(scSessionObject, scSessionObjectErrorMsg);
+    AURA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
+    AURA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
     dbus_error_init(&err);
 
     // Create new method call
@@ -210,18 +196,18 @@ int aura_dbus_session_take_control()
                                        scSessionObject,
                                        scSessionInterface,
                                        cMessageName);
-    ASSERT_MESSAGE(msg);
+    AURA_DBUS_ASSERT_MESSAGE(msg);
 
     // Append arguments
     ok = dbus_message_append_args(msg,
                                   DBUS_TYPE_BOOLEAN, &force,
                                   DBUS_TYPE_INVALID);
-    ASSERT_ARGUMENTS(ok);
+    AURA_DBUS_ASSERT_ARGUMENTS(ok);
 
     // Send message and block
     reply = dbus_connection_send_with_reply_and_block(sDBusSystemConn,
                                                       msg, -1, &err);
-    ASSERT_SEND(reply, cMessageName);
+    AURA_DBUS_ASSERT_SEND(reply, cMessageName);
 
     // Clear and return
     result = TRUE;
@@ -241,8 +227,8 @@ int aura_dbus_session_release_control()
     DBusError err;
 
     LOG_INFO2("Releasing control over session...");
-    ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
-    ASSERT(scSessionObject, scSessionObjectErrorMsg);
+    AURA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
+    AURA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
     dbus_error_init(&err);
 
     // Create new method call
@@ -250,12 +236,12 @@ int aura_dbus_session_release_control()
                                        scSessionObject,
                                        scSessionInterface,
                                        cMessageName);
-    ASSERT_MESSAGE(msg);
+    AURA_DBUS_ASSERT_MESSAGE(msg);
 
     // Send message and block
     reply = dbus_connection_send_with_reply_and_block(sDBusSystemConn,
                                                       msg, -1, &err);
-    ASSERT_SEND(reply, cMessageName);
+    AURA_DBUS_ASSERT_SEND(reply, cMessageName);
 
     // Clear and return
     LOG_INFO2("Releasing control over session: SUCCESS");
@@ -276,8 +262,8 @@ int aura_dbus_session_take_device(uint32_t major, uint32_t minor)
     DBusMessage *reply;
     DBusError err;
 
-    ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
-    ASSERT(scSessionObject, scSessionObjectErrorMsg);
+    AURA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
+    AURA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
     dbus_error_init(&err);
 
     // Create new method call
@@ -285,26 +271,26 @@ int aura_dbus_session_take_device(uint32_t major, uint32_t minor)
                                        scSessionObject,
                                        scSessionInterface,
                                        cMessageName);
-    ASSERT_MESSAGE(msg);
+    AURA_DBUS_ASSERT_MESSAGE(msg);
 
     // Append arguments
     ok = dbus_message_append_args(msg,
                                   DBUS_TYPE_UINT32, &major,
                                   DBUS_TYPE_UINT32, &minor,
                                   DBUS_TYPE_INVALID);
-    ASSERT_ARGUMENTS(ok);
+    AURA_DBUS_ASSERT_ARGUMENTS(ok);
 
     // Send message and block
     reply = dbus_connection_send_with_reply_and_block(sDBusSystemConn,
                                                       msg, -1, &err);
-    ASSERT_SEND(reply, cMessageName);
+    AURA_DBUS_ASSERT_SEND(reply, cMessageName);
 
     // Read result
     ok = dbus_message_get_args(reply, &err,
                                DBUS_TYPE_UNIX_FD, &fd,
                                DBUS_TYPE_BOOLEAN, &paused,
                                DBUS_TYPE_INVALID);
-    ASSERT_REPLY(ok);
+    AURA_DBUS_ASSERT_REPLY(ok);
 
     // Clear and return
     result = fd;

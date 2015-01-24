@@ -20,7 +20,7 @@
 
 //------------------------------------------------------------------------------
 
-// FIXME: tmp
+/// @todo Move global variables to OutputGL struct
 GLuint program;
 GLint attribute_coord2d;
 GLint attribute_texcoord;

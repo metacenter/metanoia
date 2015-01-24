@@ -36,7 +36,8 @@ static const uint32_t scIdInputKeyboardFlag    = 0x0040;
 
 //------------------------------------------------------------------------------
 
-static void handle_key(struct input_event* ev)
+/// Handle epoll events from EventDispatcher comming from keyboard devices.
+void aura_evdev_handle_key(struct input_event* ev)
 {
     if (ev->type == EV_KEY) {
         bool catched = aura_keyboard_catch_key(ev->code,
@@ -54,19 +55,22 @@ static void handle_key(struct input_event* ev)
 
 //------------------------------------------------------------------------------
 
-static void handle_touch(struct input_event* ev)
+/// Handle epoll events from EventDispatcher comming from touch devices.
+void aura_evdev_handle_touch(struct input_event* ev)
 {
-    if (ev->code == ABS_MT_TRACKING_ID)
+    if (ev->code == ABS_MT_TRACKING_ID) {
         aura_event_signal_emit(SIGNAL_POINTER_MOTION_RESET, NULL);
-    else if (ev->code == ABS_MT_POSITION_X)
+    } else if (ev->code == ABS_MT_POSITION_X) {
         aura_event_signal_emit(SIGNAL_POINTER_MOTION_X, (void*) ev->value);
-    else if (ev->code == ABS_MT_POSITION_Y)
+    } else if (ev->code == ABS_MT_POSITION_Y) {
         aura_event_signal_emit(SIGNAL_POINTER_MOTION_Y, (void*) ev->value);
+    }
 }
 
 //------------------------------------------------------------------------------
 
-static void handle_event(AuraEventData* data, struct epoll_event* epev)
+/// Handle epoll events from EventDispatcher.
+void aura_evdev_handle_event(AuraEventData* data, struct epoll_event* epev)
 {
     if (!epev || !data) {
         return;
@@ -74,7 +78,7 @@ static void handle_event(AuraEventData* data, struct epoll_event* epev)
 
     struct input_event ev;
     int fd = data->fd;
-    uint32_t flags = data->data.flags;
+    uint32_t flags = data->flags;
 
     int size = read(fd, &ev, sizeof(struct input_event));
 
@@ -85,19 +89,21 @@ static void handle_event(AuraEventData* data, struct epoll_event* epev)
         return;
     }
 
-    LOG_EVNT4("Event: {time: %ld.%06ld, type: %i, code: %i, value: %i}",
+    LOG_EVNT4("Event (time: %ld.%06ld, type: %d, "
+              "code: %d, value: %d, flag: 0x%x)",
               ev.time.tv_sec, ev.time.tv_usec,
-              (uint32_t) ev.type, (uint32_t) ev.code, (uint32_t) ev.value);
-    LOG_EVNT4("Event data: {flag: 0x%x}", flags);
+              ev.type, ev.code, ev.value, flags);
 
-    if (flags & scIdInputKeyboardFlag)
-        handle_key(&ev);
-    else if (flags & scIdInputTouchpadFlag)
-        handle_touch(&ev);
+    if (flags & scIdInputKeyboardFlag) {
+        aura_evdev_handle_key(&ev);
+    } else if (flags & scIdInputTouchpadFlag) {
+        aura_evdev_handle_touch(&ev);
+    }
 }
 
 //------------------------------------------------------------------------------
 
+/// Find input devices using idev.
 void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
 {
     int fd;
@@ -186,10 +192,8 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
         ioctl(fd, EVIOCGNAME(sizeof(name)), name);
         LOG_INFO1("Found input device: '%s' (%s)", name, devnode);
 
-        AuraEventData* data = malloc(sizeof(AuraEventData));
-        data->fd = fd;
-        data->handler = (AuraEventHandler) handle_event;
-        data->data.flags = flags;
+        AuraEventData* data = aura_event_data_create(fd,
+                                          aura_evdev_handle_event, flags, NULL);
         aura_event_dispatcher_add_event_source(ed, data);
     }
 

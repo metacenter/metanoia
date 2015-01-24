@@ -20,14 +20,16 @@ static const char* scFrameBufferPath = "/dev/fb0";
 
 //------------------------------------------------------------------------------
 
+/// Specialization of Output for use with framebuffer.
 typedef struct {
     AuraOutput base;
     int fd;
-    // TODO: add path and extend logs
 } AuraOutputFB;
 
 //------------------------------------------------------------------------------
 
+/// Initialize render for draw to framebuffer.
+/// Frame buffer does not directly support double buffering.
 AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
                                            int width, int height)
 {
@@ -47,7 +49,7 @@ AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
     }
 
     // Map framebuffer
-    // TODO: set resolution first
+    /// @todo set framebuffer resolution
     buflen = height * fixed_info.line_length;
     buffer = mmap(NULL, buflen, PROT_READ | PROT_WRITE,
                   MAP_SHARED, output_fb->fd, 0);
@@ -65,6 +67,7 @@ AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
 
 //------------------------------------------------------------------------------
 
+/// Free framebuffer output object and its base.
 void aura_devfb_output_free(AuraOutput* output)
 {
     if (!output) {
@@ -79,6 +82,7 @@ void aura_devfb_output_free(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
+/// Allocate memory for framebuffer object.
 AuraOutputFB* aura_devfb_output_new(int width, int height, char* id, int fd)
 {
     AuraOutputFB* output_fb = malloc(sizeof(AuraOutputFB));
@@ -96,6 +100,7 @@ AuraOutputFB* aura_devfb_output_new(int width, int height, char* id, int fd)
 
 //------------------------------------------------------------------------------
 
+/// Get info about framebuffer and create Output for use with it.
 int aura_devfb_setup_framebuffer(Chain* outputs)
 {
     struct fb_var_screeninfo screen_info;

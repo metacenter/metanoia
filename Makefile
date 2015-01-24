@@ -485,6 +485,7 @@ build/keyboard-functions.o: Makefile \
                             src/utils-chain.h \
                             src/global-constants.h \
                             src/global-types.h \
+                            src/keyboard-argmand.h \
                             src/utils-log.h \
                             src/exhibitor.h \
                             src/exhibitor-display.h \

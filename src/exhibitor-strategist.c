@@ -17,8 +17,8 @@ void aura_strategist_on_surface_created(AuraExhibitor* exhibitor,
     // Put surface on current workspace on current display
     aura_compositor_manage_surface(exhibitor->display->compositor, sid);
 
-    // FIXME: move to compositor strategy
     chain_append(exhibitor->surface_history, (void*) sid);
+    /// @todo Focus changing should be done in compositor strategy.
     aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) sid);
 }
 

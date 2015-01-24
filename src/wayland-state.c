@@ -26,10 +26,6 @@ static struct {
     AuraSurfaceId keyboard_focused_sid;
 } sState;
 
-
-// FIXME: tmp
-uint32_t serial = 0;
-
 //------------------------------------------------------------------------------
 
 AuraSurfaceWaylandData* wayland_surface_data_new()
@@ -207,7 +203,7 @@ void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_rc)
     if (new_client == focused_client) {
         struct wl_array array;
         wl_array_init(&array);
-        serial = wl_display_next_serial(sState.display);
+        int serial = wl_display_next_serial(sState.display);
         wl_keyboard_send_enter(keyboard_rc, serial, data->resource, &array);
     }
 
@@ -298,7 +294,7 @@ void wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
         return;
     }
 
-    serial = wl_display_next_serial(sState.display);
+    int serial = wl_display_next_serial(sState.display);
     Link* link = sState.keyboard_resources->first;
     while (link) {
         struct wl_resource* rc = link->data;

@@ -6,9 +6,6 @@
 
 #include <wayland-server.h>
 
-// FIXME: tmp
-struct wl_resource* get_key_resource();
-
 void aura_wayland_seat_bind(struct wl_client *client,
                             void *data, uint32_t version, uint32_t id);
 

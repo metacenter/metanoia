@@ -76,12 +76,9 @@ AuraEventData* factorize_signal_event_data(AuraEventDispatcher* dispatcher)
         return NULL;
     }
 
-    AuraEventData* data = malloc(sizeof(AuraEventData));
-    data->handler = aura_event_dispatcher_default_signal_handler;
-    data->data.ptr = dispatcher;
-    data->fd = fd;
-
-    return data;
+    return aura_event_data_create(fd,
+                                  aura_event_dispatcher_default_signal_handler,
+                                  0x0, dispatcher);
 }
 
 //------------------------------------------------------------------------------

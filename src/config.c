@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <memory.h>
 
-// FIXME: tmp
 AuraKeymap* keymap;
 
 static AuraSettings sSettings;

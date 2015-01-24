@@ -9,16 +9,19 @@
 typedef struct AuraEventData AuraEventData;
 typedef struct AuraEventDispatcherPriv AuraEventDispatcher;
 
-typedef void (*AuraEventHandler) (AuraEventData* data, struct epoll_event);
+typedef void (*AuraEventHandler) (AuraEventData*, struct epoll_event*);
 
 struct AuraEventData {
-    AuraEventHandler handler;
     int fd;
-    union {
-        uint32_t flags;
-        void* ptr;
-    } data;
+    AuraEventHandler handler;
+    uint32_t flags;
+    void* data;
 };
+
+AuraEventData* aura_event_data_create(int fd,
+                                      AuraEventHandler handler,
+                                      uint32_t flags,
+                                      void* data);
 
 AuraEventDispatcher* aura_event_dispatcher_new(void);
 void aura_event_dispatcher_free(AuraEventDispatcher* self);
@@ -34,7 +37,7 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self);
 void aura_event_dispatcher_stop(AuraEventDispatcher* self);
 
 void aura_event_dispatcher_default_signal_handler(AuraEventData* data,
-                                                  struct epoll_event event);
+                                                  struct epoll_event* event);
 
 #endif // __AURA_EVENT_DISPATCHER_H__
 

@@ -153,8 +153,9 @@ static gboolean on_timer(AURA_UNUSED void* data)
 {
     int i;
     for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
-        // FIXME:draw only enabled displays
-        gtk_widget_queue_draw(group[i].da);
+        if (group[i].enabled) {
+            gtk_widget_queue_draw(group[i].da);
+        }
     }
     return TRUE;
 }

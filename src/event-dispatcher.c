@@ -18,6 +18,25 @@ struct AuraEventDispatcherPriv {
 
 //------------------------------------------------------------------------------
 
+AuraEventData* aura_event_data_create(int fd,
+                                      AuraEventHandler handler,
+                                      uint32_t flags,
+                                      void* data)
+{
+    AuraEventData* self = malloc(sizeof(AuraEventData));
+    if (!self) {
+        return NULL;
+    }
+
+    self->fd = fd;
+    self->handler = handler;
+    self->flags = flags;
+    self->data = data;
+    return self;
+}
+
+//------------------------------------------------------------------------------
+
 AuraEventDispatcher* aura_event_dispatcher_new()
 {
     AuraEventDispatcher* self = malloc(sizeof(AuraEventDispatcher));
@@ -109,7 +128,7 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
             if (data) {
                 LOG_EVNT4("New event from %d", data->fd);
                 if (data->handler) {
-                    data->handler(data, event);
+                    data->handler(data, &event);
                 }
             }
         } else if (r < 0) {
@@ -140,8 +159,8 @@ void aura_event_dispatcher_stop(AuraEventDispatcher* self)
 //------------------------------------------------------------------------------
 
 void aura_event_dispatcher_default_signal_handler
-                                          (AuraEventData* data,
-                                           AURA_UNUSED struct epoll_event event)
+                                         (AuraEventData* data,
+                                          AURA_UNUSED struct epoll_event* event)
 {
     int size;
     struct signalfd_siginfo fdsi;
@@ -157,7 +176,7 @@ void aura_event_dispatcher_default_signal_handler
     LOG_INFO1("Signal '%d' received", fdsi.ssi_signo);
 
     if (fdsi.ssi_signo == SIGINT || fdsi.ssi_signo == SIGTERM) {
-        AuraEventDispatcher* dispather = data->data.ptr;
+        AuraEventDispatcher* dispather = data->data;
         if (dispather && aura_event_dispatcher_is_running(dispather)) {
             aura_event_dispatcher_stop(dispather);
         } else {

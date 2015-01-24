@@ -11,19 +11,17 @@
 
 //------------------------------------------------------------------------------
 
-static struct udev_monitor* mon;
-
-//------------------------------------------------------------------------------
-
-void handle_device(AuraEventData* data, struct epoll_event* epev)
+/// Handle epoll event from Event Dispatcher about new device
+void aura_udev_handle_device(AuraEventData* data, struct epoll_event* epev)
 {
-    struct udev_device *dev;
+    struct udev_device* dev;
+    struct udev_monitor* mon;
 
-    if (!epev || !data) {
+    if (!epev || !data || data->data) {
         return;
     }
 
-    // TODO: pass mon with data?
+    mon = (struct udev_monitor*) data->data;
     dev = udev_monitor_receive_device(mon);
     if (!dev) {
         LOG_ERROR("udev returned null device!");
@@ -44,9 +42,12 @@ void handle_device(AuraEventData* data, struct epoll_event* epev)
 
 //------------------------------------------------------------------------------
 
+/// Set up device monitoring.
+/// Subscribe for dev types "input" and "drm".
 void aura_udev_setup_device_monitoring(AuraEventDispatcher* ed)
 {
     struct udev *udev;
+    struct udev_monitor* mon;
 
     LOG_INFO1("Setting up device monitoring");
 
@@ -63,9 +64,8 @@ void aura_udev_setup_device_monitoring(AuraEventDispatcher* ed)
     udev_monitor_enable_receiving(mon);
 
     // Prepare event handler
-    AuraEventData* data = malloc(sizeof(AuraEventData));
-    data->fd = udev_monitor_get_fd(mon);
-    data->handler = (AuraEventHandler) handle_device;
+    AuraEventData* data = aura_event_data_create(udev_monitor_get_fd(mon),
+                                             aura_udev_handle_device, 0x0, mon);
     aura_event_dispatcher_add_event_source(ed, data);
 }
 
