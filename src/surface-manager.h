@@ -22,6 +22,9 @@ void aura_surface_commit(AuraSurfaceId sid,
                          int stride,
                          uint8_t* buffer);
 
+void aura_surface_set_requested_size(AuraSurfaceId sid,
+                                     AuraSize size);
+
 int aura_surface_compare(AuraSurfaceId first, AuraSurfaceId second);
 
 #endif // __AURA_SURFACE_MANAGER_H__

@@ -14,6 +14,12 @@ static AuraStore* sStore = NULL;
 
 //------------------------------------------------------------------------------
 
+#define AURA_GET_AND_ASSERT_SURFACE(NAME, SID) \
+    AuraSurfaceData* NAME = aura_surface_get(SID); \
+    if (!NAME) {LOG_WARN2("Could not find surface (sid: %d)", SID); return;}
+
+//------------------------------------------------------------------------------
+
 AuraSurfaceId aura_surface_create(void)
 {
     if (!sStore) {
@@ -53,11 +59,7 @@ AuraSurfaceData* aura_surface_get(AuraSurfaceId sid)
 void aura_surface_attach_egl(AuraSurfaceId sid,
                              AURA_UNUSED void* resource)
 {
-    AuraSurfaceData* surface = aura_surface_get(sid);
-    if (!surface) {
-        LOG_WARN2("Could not find surface (sid: %d)", sid);
-        return;
-    }
+    AURA_GET_AND_ASSERT_SURFACE(surface, sid);
 
     // TODO: log at init if renderer supports egl
     // TODO: move 'attach' out from renderer
@@ -74,11 +76,7 @@ void aura_surface_commit(AuraSurfaceId sid,
                          int stride,
                          uint8_t* data)
 {
-    AuraSurfaceData* surface = aura_surface_get(sid);
-    if (!surface) {
-        LOG_WARN2("Could not find surface (sid: %d)", sid);
-        return;
-    }
+    AURA_GET_AND_ASSERT_SURFACE(surface, sid);
 
     int is_first_time_commited = !surface->buffer.data;
 
@@ -87,15 +85,23 @@ void aura_surface_commit(AuraSurfaceId sid,
     surface->buffer.stride = stride;
     surface->buffer.data   = data;
 
-    if (surface->desired_size.width  == 0
-    ||  surface->desired_size.height == 0) {
-        surface->desired_size.width  = width;
-        surface->desired_size.height = height;
-    }
-
     if (is_first_time_commited) {
+        if (surface->requested_size.width  == 0
+        ||  surface->requested_size.height == 0) {
+            surface->requested_size.width  = width;
+            surface->requested_size.height = height;
+        }
         aura_event_signal_emit(SIGNAL_SURFACE_CREATED, (void*) sid);
     }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_set_requested_size(AuraSurfaceId sid,
+                                     AuraSize size)
+{
+    AURA_GET_AND_ASSERT_SURFACE(surface, sid);
+    surface->requested_size = size;
 }
 
 //------------------------------------------------------------------------------

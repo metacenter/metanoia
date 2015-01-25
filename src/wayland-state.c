@@ -380,7 +380,6 @@ void wayland_state_destroy_output(AuraOutput* output)
 void wayland_state_surface_reconfigured(AuraSurfaceId sid)
 {
     pthread_mutex_lock(&mutex);
-    LOG_DEBUG("Wayland: surface reconfiguration (sid: %d)", sid);
 
     AuraSurfaceWaylandData* data = aura_store_find(sState.surfaces, sid);
     if (!data) {
@@ -395,6 +394,10 @@ void wayland_state_surface_reconfigured(AuraSurfaceId sid)
         pthread_mutex_unlock(&mutex);
         return;
     }
+
+    LOG_DEBUG("Wayland: surface reconfiguration "
+              "(sid: %d, width: %d, height: %d)",
+               sid, surface->desired_size.width, surface->desired_size.height);
 
     if (data->shell_resource) {
         /// @todo Implement resizing for Wayland shell

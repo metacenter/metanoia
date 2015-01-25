@@ -83,6 +83,18 @@ AuraFrame* aura_frame_resize_find_helper(AuraFrame* frame,
 void aura_frame_set_surface(AuraFrame* self, AuraSurfaceId sid)
 {
     aura_frame_get_params(self)->sid = sid;
+    AuraSurfaceData* surface = aura_surface_get(sid);
+    if (!surface) {
+        return;
+    }
+
+    // Reconfiguration
+    if (surface->requested_size.width  != surface->desired_size.width
+    ||  surface->requested_size.height != surface->desired_size.height) {
+        surface->desired_size.width  = surface->requested_size.width;
+        surface->desired_size.height = surface->requested_size.height;
+        aura_event_signal_emit(SIGNAL_SURFACE_RECONFIGURED, (void*) sid);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -106,10 +118,10 @@ void aura_frame_move_with_contents(AuraFrame* self,
     }
 
     // Update surfaces position
-    AuraSurfaceData* surface_data = aura_surface_get(params->sid);
-    if (surface_data) {
-        surface_data->position.x += vector.x;
-        surface_data->position.y += vector.y;
+    AuraSurfaceData* surface = aura_surface_get(params->sid);
+    if (surface) {
+        surface->position.x += vector.x;
+        surface->position.y += vector.y;
     }
 
     // Move all subframes
@@ -156,21 +168,30 @@ void aura_frame_reconfigure(AURA_UNUSED AuraFrame* self,
                             AURA_UNUSED AuraArgmandType direction,
                             AURA_UNUSED int magnitude)
 {
-    /// @todo Implement aura_frame_reconfigure
     AuraFrameParams* params = aura_frame_get_params(self);
     if (params->sid != scInvalidSurfaceId) {
-        AuraSurfaceData* surface_data = aura_surface_get(params->sid);
-        if (surface_data) {
+        AuraSurfaceData* surface = aura_surface_get(params->sid);
+        if (surface) {
             if (direction == AURA_ARGMAND_N || direction == AURA_ARGMAND_S) {
-                surface_data->desired_size.height += magnitude;
+                if (surface->desired_size.height == 0) {
+                    surface->desired_size.height =
+                                                 surface->requested_size.height;
+                }
+                surface->desired_size.height += magnitude;
             }
             if (direction == AURA_ARGMAND_E || direction == AURA_ARGMAND_W) {
-                surface_data->desired_size.width += magnitude;
+                if (surface->desired_size.width == 0) {
+                    surface->desired_size.width = surface->requested_size.width;
+                }
+                surface->desired_size.width += magnitude;
             }
             aura_event_signal_emit(SIGNAL_SURFACE_RECONFIGURED,
                                    (void*) params->sid);
         }
     }
+
+
+    /// @todo Implement aura_frame_reconfigure for twigs.
 }
 
 //------------------------------------------------------------------------------

@@ -56,8 +56,8 @@ void aura_wayland_xdg_get_xdg_surface
 
     wayland_state_add_xdg_shell_surface(sid, rc);
 
-    wl_resource_set_implementation(rc, &xdg_surface_implementation,
-                                   NULL, aura_wayland_xdg_surface_unbind);
+    wl_resource_set_implementation(rc, &xdg_surface_implementation, (void*) sid,
+                                   aura_wayland_xdg_surface_unbind);
 }
 
 //------------------------------------------------------------------------------
