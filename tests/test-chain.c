@@ -44,6 +44,7 @@ AuraTestResult should_append_values()
     chain_append(ch, (void*) 3);
 
     ASSERT_CHAIN(ch, a);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -59,6 +60,7 @@ AuraTestResult should_prepend_values()
     chain_prepend(ch, (void*) 3);
 
     ASSERT_CHAIN(ch, a);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -83,6 +85,7 @@ AuraTestResult should_recalculate_length()
                 "Calculated length should be %d, (is %d)",
                 len, calculated_len);
 
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -99,6 +102,7 @@ AuraTestResult should_adjoin_and_prejoin_links()
     chain_prejoin(ch, link_new((void*) 4));
 
     ASSERT_CHAIN(ch, a);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -116,6 +120,7 @@ AuraTestResult should_remove_from_begining()
     chain_remove(ch, (void*) 1, (AuraCompareFunc) compare);
 
     ASSERT_CHAIN(ch, a);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -133,6 +138,7 @@ AuraTestResult should_remove_from_end()
     chain_remove(ch, (void*) 3, (AuraCompareFunc) compare);
 
     ASSERT_CHAIN(ch, a);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -150,6 +156,7 @@ AuraTestResult should_remove_from_inside()
     chain_remove(ch, (void*) 2, (AuraCompareFunc) compare);
 
     ASSERT_CHAIN(ch, a);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -164,9 +171,12 @@ AuraTestResult should_unjoin_from_begining()
     chain_append(ch, (void*) 2);
     chain_append(ch, (void*) 3);
 
-    chain_unjoin(ch, ch->first);
+    Link* link = ch->first;
+    chain_unjoin(ch, link);
 
     ASSERT_CHAIN(ch, a);
+    link_free(link, NULL);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -181,9 +191,12 @@ AuraTestResult should_unjoin_from_end()
     chain_append(ch, (void*) 2);
     chain_append(ch, (void*) 3);
 
-    chain_unjoin(ch, ch->last);
+    Link* link = ch->last;
+    chain_unjoin(ch, link);
 
     ASSERT_CHAIN(ch, a);
+    link_free(link, NULL);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -198,9 +211,12 @@ AuraTestResult should_unjoin_from_inside()
     chain_append(ch, (void*) 2);
     chain_append(ch, (void*) 3);
 
+    Link* link = ch->first->next;
     chain_unjoin(ch, ch->first->next);
 
     ASSERT_CHAIN(ch, a);
+    link_free(link, NULL);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
@@ -219,6 +235,7 @@ AuraTestResult should_rejoin_without_cicles()
     chain_adjoin(ch, link);
 
     ASSERT_CHAIN(ch, a);
+    chain_free(ch);
     return AURA_TEST_SUCCESS;
 }
 
