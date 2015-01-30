@@ -4,13 +4,17 @@
 #include "utils-store.h"
 
 #include <malloc.h>
-#include <search.h>
 #include <stdlib.h>
 #include <string.h>
 
+#define __USE_GNU
+#define _GNU_SOURCE
+#include <search.h>
+
 struct AuraStorePriv {
     void* root;
-    AuraStoreCompareFunc compare;
+    AuraStoreValueCompareFunc compare_value;
+    AuraStoreKeyFreeFunc free_key;
 };
 
 //------------------------------------------------------------------------------
@@ -38,8 +42,27 @@ int aura_store_str_compare(const void* data1, const void* data2)
 
 //------------------------------------------------------------------------------
 
+/// Tree destroy action used to free duplicated id-keys when freeing store.
+void aura_store_destroy_id_key(AURA_UNUSED void* data)
+{
+}
+
+//------------------------------------------------------------------------------
+
+/// Tree destroy action used to free duplicated string-keys when freeing store.
+void aura_store_destroy_string_key(void* data)
+{
+    AuraItem* item = (AuraItem*) data;
+    if (item && item->str) {
+        free(item->str);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 /// Allocate memory for new AuraStore with arbitrary compare function.
-AuraStore* aura_store_new(AuraStoreCompareFunc compare)
+AuraStore* aura_store_new(AuraStoreValueCompareFunc value_compare_func,
+                          AuraStoreKeyFreeFunc key_free_func)
 {
     AuraStore* self = malloc(sizeof(AuraStore));
     if (!self) {
@@ -47,7 +70,8 @@ AuraStore* aura_store_new(AuraStoreCompareFunc compare)
     }
 
     self->root = NULL;
-    self->compare = compare;
+    self->compare_value = value_compare_func;
+    self->free_key = key_free_func;
     return self;
 }
 
@@ -56,7 +80,7 @@ AuraStore* aura_store_new(AuraStoreCompareFunc compare)
 /// Allocate memory for new AuraStore that uses IDs to distinguish items.
 AuraStore* aura_store_new_for_id()
 {
-    return aura_store_new(aura_store_id_compare);
+    return aura_store_new(aura_store_id_compare, aura_store_destroy_id_key);
 }
 
 //------------------------------------------------------------------------------
@@ -64,7 +88,8 @@ AuraStore* aura_store_new_for_id()
 /// Allocate memory for new AuraStore that uses strings to distinguish items.
 AuraStore* aura_store_new_for_str()
 {
-    return aura_store_new(aura_store_str_compare);
+    return aura_store_new(aura_store_str_compare,
+                          aura_store_destroy_string_key);
 }
 
 //------------------------------------------------------------------------------
@@ -76,6 +101,10 @@ void aura_store_free(AuraStore* self)
         return;
     }
 
+    if (self->free_key) {
+        tdestroy(self->root, self->free_key);
+    }
+    memset(self, 0, sizeof(AuraStore));
     free(self);
 }
 
@@ -92,7 +121,7 @@ AuraItemId aura_store_generate_new_id(AuraStore* self)
     do {
         item.id = (AuraItemId) rand();
     } while (item.id == scInvalidItemId
-          || tfind((void *) &item, &self->root, self->compare) != NULL);
+          || tfind((void *) &item, &self->root, self->compare_value) != NULL);
 
     return item.id;
 }
@@ -110,7 +139,7 @@ AuraResult aura_store_add_with_id(AuraStore* self, AuraItemId key, void* data)
 
     AuraItem* item = (AuraItem*) data;
     item->id = key;
-    if (tsearch(item, &self->root, self->compare) == NULL) {
+    if (tsearch(item, &self->root, self->compare_value) == NULL) {
         return AURA_RESULT_NOT_FOUND;
     }
     return AURA_RESULT_SUCCESS;
@@ -130,7 +159,7 @@ AuraResult aura_store_add_with_str(AuraStore* self, char* key, void* data)
 
     AuraItem* item = (AuraItem*) data;
     item->str = strdup(key);
-    if (tsearch(item, &self->root, self->compare) == NULL) {
+    if (tsearch(item, &self->root, self->compare_value) == NULL) {
         return AURA_RESULT_NOT_FOUND;
     }
     return AURA_RESULT_SUCCESS;
@@ -141,7 +170,7 @@ AuraResult aura_store_add_with_str(AuraStore* self, char* key, void* data)
 #define aura_store_find_template(KEYTYPE) \
     if (!self) { return NULL; } \
     AuraItem item; item.KEYTYPE = key; \
-    void** result = tfind((void*) &item, &self->root, self->compare); \
+    void** result = tfind((void*) &item, &self->root, self->compare_value); \
     if (result) { return *result; } \
     return NULL;
 
@@ -177,7 +206,7 @@ void* aura_store_delete_with_id(AuraStore* self, AuraItemId key)
     }
 
     AuraItem* item = aura_store_find(self, key);
-    if (tdelete(item, &self->root, self->compare) == NULL) {
+    if (tdelete(item, &self->root, self->compare_value) == NULL) {
         return NULL;
     }
     return item;
@@ -195,11 +224,12 @@ void* aura_store_delete_with_str(AuraStore* self, char* key)
     }
 
     AuraItem* item = aura_store_find(self, key);
-    if (tdelete(item, &self->root, self->compare) == NULL) {
+    if (tdelete(item, &self->root, self->compare_value) == NULL) {
         return NULL;
     }
 
     free(item->str);
+    item->str = NULL;
     return item;
 }
 

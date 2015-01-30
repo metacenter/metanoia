@@ -47,6 +47,7 @@ AuraTestResult should_correctly_store_data_for_id()
                 "r3 value should be %d (is %d)",
                 value2, r3->value)
 
+    aura_store_free(store);
     return AURA_TEST_SUCCESS;
 }
 
@@ -86,8 +87,8 @@ AuraTestResult should_correctly_delete_data_for_id()
     Elem* r2 = aura_store_find(store, key2);
     AURA_ASSERT(!r2, "r2 should not be stored")
 
+    aura_store_free(store);
     return AURA_TEST_SUCCESS;
-
 }
 
 //------------------------------------------------------------------------------
@@ -101,11 +102,11 @@ AuraTestResult should_correctly_store_data_for_str()
     int value2 = 8;
 
     Elem e1;
-    e1.base.data = key1;
+    e1.base.str = key1;
     e1.value = value1;
 
     Elem e2;
-    e2.base.data = key3;
+    e2.base.str = key3;
     e2.value = value2;
 
     AuraStore* store = aura_store_new_for_str();
@@ -127,6 +128,7 @@ AuraTestResult should_correctly_store_data_for_str()
                 "r3 value should be %d (is %d)",
                 value2, r3->value)
 
+    aura_store_free(store);
     return AURA_TEST_SUCCESS;
 }
 
@@ -168,6 +170,7 @@ AuraTestResult should_correctly_delete_data_for_str()
     Elem* r2 = aura_store_find(store, key2);
     AURA_ASSERT(!r2, "r2 should not be stored")
 
+    aura_store_free(store);
     return AURA_TEST_SUCCESS;
 }
 

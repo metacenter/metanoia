@@ -6,11 +6,13 @@
 
 #include "global-constants.h"
 
-typedef int (*AuraStoreCompareFunc) (const void*, const void*);
+typedef int (*AuraStoreValueCompareFunc) (const void*, const void*);
+typedef void (*AuraStoreKeyFreeFunc) (void*);
 
 typedef struct AuraStorePriv AuraStore;
 
-AuraStore* aura_store_new(AuraStoreCompareFunc compare);
+AuraStore* aura_store_new(AuraStoreValueCompareFunc value_compare_func,
+                          AuraStoreKeyFreeFunc key_free_func);
 AuraStore* aura_store_new_for_id();
 AuraStore* aura_store_new_for_str();
 

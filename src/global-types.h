@@ -15,7 +15,6 @@ typedef struct {
     union {
         AuraItemId id;
         char* str;
-        void* data;
     };
 } AuraItem;
 
