@@ -122,7 +122,7 @@ static gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data)
 {
     pthread_mutex_lock(&mutex_buffer);
 
-    int n = (int) data;
+    intptr_t n = (intptr_t) data;
     cairo_surface_t* source = group[n].buffer[group[n].front].source;
 
     if (source) {
@@ -142,7 +142,7 @@ static gboolean on_configure_event(AURA_UNUSED GtkWidget* widget,
                                    AURA_UNUSED GdkEventConfigure* event,
                                    gpointer data)
 {
-    int n = (int) data;
+    intptr_t n = (intptr_t) data;
     clear_surface(n);
     return TRUE;
 }
@@ -166,7 +166,7 @@ void on_display_activation(AURA_UNUSED GSimpleAction* action,
                            AURA_UNUSED GParamSpec* pspec,
                            gpointer data)
 {
-    int n = (int) data;
+    intptr_t n = (intptr_t) data;
     LOG_INFO1("GTK backend: display '%d' toogled", n);
     aura_backend_gtk_group_toggle_enabled(n);
     aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
@@ -178,7 +178,7 @@ void on_resolution_change(GSimpleAction* action,
                           AURA_UNUSED GParamSpec* pspec,
                           gpointer data)
 {
-    int n = (int) data;
+    intptr_t n = (intptr_t) data;
     GVariant* variant;
     g_object_get(action, "state", &variant, NULL);
     group[n].resolution = aura_backend_gtk_unpack_resolution_variant(variant);
@@ -252,6 +252,7 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
     GMenuItem* item;
     GAction* action;
 
+    intptr_t l = i;
     GtkBuilder* builder = gtk_builder_new_from_resource(scMenuGuiResPath);
     GtkWidget* button = GTK_WIDGET(gtk_builder_get_object(builder, "button"));
     GMenu* menu = G_MENU(gtk_builder_get_object(builder, "menu"));
@@ -271,7 +272,7 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
                            g_variant_get_type(action_variant), action_variant));
     g_action_map_add_action(action_map, action);
     g_signal_connect(action, "activate",
-                     G_CALLBACK(on_display_activation), (gpointer) i);
+                     G_CALLBACK(on_display_activation), (gpointer) l);
 
     // Add 'resolution' section
     GMenu* resolution_section = g_menu_new();
@@ -304,7 +305,7 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
 
     g_action_map_add_action(action_map, action);
     g_signal_connect(action, "notify::state",
-                     G_CALLBACK(on_resolution_change), (gpointer) i);
+                     G_CALLBACK(on_resolution_change), (gpointer) l);
 
     //action_variant =
     //         g_variant_new_string(g_strdup_printf("res%d", DEFAULT_RESOLUTION));
@@ -317,13 +318,15 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
 
 GtkWidget* aura_backend_gtk_build_display_area(int i)
 {
+    intptr_t l = i;
     GtkBuilder* builder = gtk_builder_new_from_resource(scAreaGuiResPath);
     group[i].area = GTK_WIDGET(gtk_builder_get_object(builder, "area"));
     group[i].da = GTK_WIDGET(gtk_builder_get_object(builder, "drawing_area"));
 
-    g_signal_connect(group[i].da, "draw", G_CALLBACK(on_draw), (gpointer) i);
+    g_signal_connect(group[i].da, "draw",
+                     G_CALLBACK(on_draw), (gpointer) l);
     g_signal_connect(group[i].da, "configure-event",
-                               G_CALLBACK(on_configure_event), (gpointer) i);
+                     G_CALLBACK(on_configure_event), (gpointer) l);
     return group[i].area;
 }
 

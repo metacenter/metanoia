@@ -8,7 +8,7 @@
 #include <stdbool.h>
 
 /// Id for AuraItem
-typedef int AuraItemId;
+typedef uintptr_t AuraItemId;
 
 /// Structure to be inherited by all types that want to be stored in AuraStore
 typedef struct {
