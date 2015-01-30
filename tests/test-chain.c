@@ -4,6 +4,8 @@
 #include "../src/utils-chain.h"
 #include "tests-suit.h"
 
+#include <inttypes.h>
+
 #define ARRAY_LEN(a,t) (sizeof(a)/sizeof(t))
 
 int compare(int i1, int i2) {
@@ -24,10 +26,10 @@ int compare(int i1, int i2) {
                 "Calculated chain length should be %d (is %d)", \
                 len, chain_recalculate_length(CHAIN)); \
     for (Link* link = CHAIN->first; link; link = link->next, ++i) { \
-        int chain_data = (int) link->data; \
+        intptr_t chain_data = (intptr_t) link->data; \
         int array_data = ARRAY[i]; \
         AURA_ASSERT(chain_data == array_data, \
-                    "Chain data should be %d (is %d)", \
+                    "Chain data should be %d (is %" PRIdPTR ")", \
                     array_data, chain_data); }
 
 //------------------------------------------------------------------------------

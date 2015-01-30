@@ -4,6 +4,7 @@
 #include "utils-chain.h"
 
 #include <malloc.h>
+#include <memory.h>
 
 //------------------------------------------------------------------------------
 
@@ -24,6 +25,7 @@ void link_free(Link* self, AuraFreeFunc freefunc)
     if (freefunc) {
         freefunc(self->data);
     }
+    memset(self, 0, sizeof(Link));
     free(self);
 }
 
@@ -236,9 +238,6 @@ AuraResult chain_unjoin(Chain* self, Link* unjoinee)
     }
 
     AuraResult result = chain_disjoin(self, link);
-    if (result == AURA_RESULT_SUCCESS) {
-        link_free(link, self->freefunc);
-    }
     return result;
 }
 
