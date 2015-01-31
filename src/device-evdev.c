@@ -145,10 +145,12 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
 
         // Is it input device?
         if (strncmp("event", sysname, 5) != 0) {
+            udev_device_unref(dev);
             continue;
         }
 
         if (stat(devnode, &st) < 0 || !S_ISCHR(st.st_mode)) {
+            udev_device_unref(dev);
             continue;
         }
 
@@ -178,6 +180,7 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
 
         if (flags == 0) {
             // Did not find interesting input device
+            udev_device_unref(dev);
             continue;
         }
 
@@ -185,6 +188,7 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
         fd = aura_open(devnode, O_RDONLY);
         if (fd < 0) {
             LOG_INFO1("Failed to open device '%s'", devnode);
+            udev_device_unref(dev);
             continue;
         }
 
@@ -196,6 +200,7 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
                                                      aura_evdev_handle_event,
                                                      NULL, flags, NULL);
         aura_event_dispatcher_add_event_source(ed, data);
+        udev_device_unref(dev);
     }
 
     // Free memory
