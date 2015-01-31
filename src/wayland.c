@@ -24,13 +24,20 @@
 /// @todo Make Wayland socket configurable
 static const char* scSocketName = "wayland-0";
 
-static struct wl_display* wayland_display;
+/// @todo Do not use globals
+struct {
+    struct wl_display* display;
+    struct wl_global* compositor;
+    struct wl_global* shell;
+    struct wl_global* xdg_shell;
+    struct wl_global* seat;
+} sWaylandGlobals;
 
 //------------------------------------------------------------------------------
 
 struct wl_display* get_wayland_display()
 {
-    return wayland_display;
+    return sWaylandGlobals.display;
 }
 
 //------------------------------------------------------------------------------
@@ -106,7 +113,7 @@ int aura_wayland_event_loop_feeder(AURA_UNUSED void* data)
     static struct wl_event_source* src = NULL;
 
     LOG_WAYL4("--- Wayland loop feeder ---");
-    loop = wl_display_get_event_loop(wayland_display);
+    loop = wl_display_get_event_loop(sWaylandGlobals.display);
     if (!src) {
         src = wl_event_loop_add_timer(loop,
                 aura_wayland_event_loop_feeder, NULL);
@@ -118,44 +125,57 @@ int aura_wayland_event_loop_feeder(AURA_UNUSED void* data)
 
 //------------------------------------------------------------------------------
 
+void aura_wayland_finalize(AURA_UNUSED void* data)
+{
+    wl_global_destroy(sWaylandGlobals.compositor);
+    wl_global_destroy(sWaylandGlobals.shell);
+    wl_global_destroy(sWaylandGlobals.xdg_shell);
+    wl_global_destroy(sWaylandGlobals.seat);
+}
+
+//------------------------------------------------------------------------------
+
 void aura_wayland_initialize(AuraLoop* this_loop)
 {
-    int result;
     pthread_t thread;
 
     LOG_INFO1("Initializing Wayland...");
 
     // Init Wayland
-    wayland_display = wl_display_create();
-    if (!wayland_display) {
+    sWaylandGlobals.display = wl_display_create();
+    if (!sWaylandGlobals.display) {
         LOG_ERROR("Could not initialize Wayland!");
         return;
     }
 
-    wayland_state_initialize(wayland_display);
+    wayland_state_initialize(sWaylandGlobals.display);
 
     // Create singleton objects
-    if (!wl_global_create(wayland_display, &wl_compositor_interface, 3,
-                          NULL, aura_wayland_compositor_bind)) {
+    sWaylandGlobals.compositor = wl_global_create(sWaylandGlobals.display,
+               &wl_compositor_interface, 3, NULL, aura_wayland_compositor_bind);
+    if (!sWaylandGlobals.compositor) {
         LOG_ERROR("Could not create global display!");
     }
 
-    if (!wl_global_create(wayland_display, &wl_shell_interface, 1,
-                          NULL, aura_wayland_shell_bind)) {
+    sWaylandGlobals.shell = wl_global_create(sWaylandGlobals.display,
+                         &wl_shell_interface, 1, NULL, aura_wayland_shell_bind);
+    if (!sWaylandGlobals.shell) {
         LOG_ERROR("Could not create global shell!");
     }
 
-    if (!wl_global_create(wayland_display, &xdg_shell_interface, 1,
-                          NULL, aura_wayland_xdg_shell_bind)) {
+    sWaylandGlobals.xdg_shell = wl_global_create(sWaylandGlobals.display,
+                    &xdg_shell_interface, 1, NULL, aura_wayland_xdg_shell_bind);
+    if (!sWaylandGlobals.xdg_shell) {
         LOG_ERROR("Could not create global XDG shell!");
     }
 
-    if (!wl_global_create(wayland_display, &wl_seat_interface, 4,
-                          NULL, aura_wayland_seat_bind)) {
+    sWaylandGlobals.seat = wl_global_create(sWaylandGlobals.display,
+                           &wl_seat_interface, 4, NULL, aura_wayland_seat_bind);
+    if (!sWaylandGlobals.seat) {
         LOG_ERROR("Could not create global seat!");
     }
 
-    wl_display_init_shm(wayland_display);
+    wl_display_init_shm(sWaylandGlobals.display);
 
     /// @note WORKAROUND:
     /// Wayland main loop must be fed with some kind of epoll events,
@@ -163,14 +183,13 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     aura_wayland_event_loop_feeder(NULL);
 
     // Add socket
-    if (wl_display_add_socket(wayland_display, scSocketName)) {
+    if (wl_display_add_socket(sWaylandGlobals.display, scSocketName)) {
         LOG_ERROR("Failed to add Wayland socket: %s", strerror(errno));
         return;
     }
 
     // Run wayland display in separate thread
-    result = pthread_create(&thread, NULL, display_run, wayland_display);
-    if (result != 0) {
+    if (pthread_create(&thread, NULL, display_run, sWaylandGlobals.display)) {
         LOG_ERROR("Could not run Wayland display!");
         return;
     }
@@ -193,6 +212,8 @@ void aura_wayland_initialize(AuraLoop* this_loop)
 
     aura_event_signal_subscribe(SIGNAL_SURFACE_RECONFIGURED,
             aura_task_create(wayland_surface_reconfigured_handler, this_loop));
+
+    aura_loop_set_finalizer(this_loop, aura_wayland_finalize);
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
 }
