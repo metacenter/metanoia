@@ -183,6 +183,11 @@ void aura_environment_cleanup(void)
         aura_runtime_path = NULL;
     }
 
+    if (aura_data_path) {
+        free(aura_data_path);
+        aura_data_path = NULL;
+    }
+
     aura_log_finalize();
 }
 
