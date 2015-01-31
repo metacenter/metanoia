@@ -12,6 +12,7 @@ typedef struct AuraEventDispatcherPriv AuraEventDispatcher;
 typedef void (*AuraEventHandler) (AuraEventData*, struct epoll_event*);
 typedef void (*AuraEventExitHandler) (AuraEventData*);
 
+/// @todo Mode AuraEventData to separate file and change name.
 struct AuraEventData {
     int fd;
     AuraEventHandler handler;
@@ -25,6 +26,9 @@ AuraEventData* aura_event_data_create(int fd,
                                       AuraEventExitHandler exit,
                                       uint32_t flags,
                                       void* data);
+
+/// Does not free stored data!
+void aura_event_data_destroy(AuraEventData* event_data);
 
 AuraEventDispatcher* aura_event_dispatcher_new(void);
 void aura_event_dispatcher_free(AuraEventDispatcher* self);

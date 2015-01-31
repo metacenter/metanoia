@@ -42,6 +42,18 @@ AuraEventData* aura_event_data_create(int fd,
 
 //------------------------------------------------------------------------------
 
+void aura_event_data_destroy(AuraEventData* event_data)
+{
+    if (!event_data) {
+        return;
+    }
+
+    memset(event_data, 0, sizeof(AuraEventData));
+    free(event_data);
+}
+
+//------------------------------------------------------------------------------
+
 AuraEventDispatcher* aura_event_dispatcher_new()
 {
     AuraEventDispatcher* self = malloc(sizeof(AuraEventDispatcher));
@@ -50,7 +62,7 @@ AuraEventDispatcher* aura_event_dispatcher_new()
     }
 
     self->run = 0;
-    self->sources = chain_new(NULL);
+    self->sources = chain_new((AuraFreeFunc) aura_event_data_destroy);
     return self;
 }
 
