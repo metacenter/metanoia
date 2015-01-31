@@ -3,10 +3,12 @@
 
 #include "event-dispatcher.h"
 #include "utils-log.h"
+#include "utils-chain.h"
 
 #include <errno.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include <memory.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/signalfd.h>
@@ -14,12 +16,14 @@
 struct AuraEventDispatcherPriv {
     int run;
     int epfd;
+    Chain* sources;
 };
 
 //------------------------------------------------------------------------------
 
 AuraEventData* aura_event_data_create(int fd,
                                       AuraEventHandler handler,
+                                      AuraEventExitHandler exit,
                                       uint32_t flags,
                                       void* data)
 {
@@ -30,6 +34,7 @@ AuraEventData* aura_event_data_create(int fd,
 
     self->fd = fd;
     self->handler = handler;
+    self->exit = exit;
     self->flags = flags;
     self->data = data;
     return self;
@@ -45,6 +50,7 @@ AuraEventDispatcher* aura_event_dispatcher_new()
     }
 
     self->run = 0;
+    self->sources = chain_new(NULL);
     return self;
 }
 
@@ -56,6 +62,8 @@ void aura_event_dispatcher_free(AuraEventDispatcher* self)
         return;
     }
 
+    chain_free(self->sources);
+    memset(self, 0, sizeof(AuraEventDispatcher));
     free(self);
 }
 
@@ -99,6 +107,8 @@ int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
 
     LOG_INFO2("Adding event source (fd: '%d')", data->fd);
 
+    chain_append(self->sources, data);
+
     struct epoll_event event;
     event.data.ptr = data;
     event.events = EPOLLIN;
@@ -138,6 +148,13 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
             }
         } else {
             LOG_WARN1("Ut infinitum et ultra!");
+        }
+    }
+
+    for (Link* link = self->sources->first; link; link = link->next) {
+        AuraEventData* data = link->data;
+        if (data && data->exit) {
+            data->exit(data);
         }
     }
 

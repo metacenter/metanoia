@@ -78,7 +78,7 @@ AuraEventData* factorize_signal_event_data(AuraEventDispatcher* dispatcher)
 
     return aura_event_data_create(fd,
                                   aura_event_dispatcher_default_signal_handler,
-                                  0x0, dispatcher);
+                                  NULL, 0x0, dispatcher);
 }
 
 //------------------------------------------------------------------------------

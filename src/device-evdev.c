@@ -193,7 +193,8 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
         LOG_INFO1("Found input device: '%s' (%s)", name, devnode);
 
         AuraEventData* data = aura_event_data_create(fd,
-                                          aura_evdev_handle_event, flags, NULL);
+                                                     aura_evdev_handle_event,
+                                                     NULL, flags, NULL);
         aura_event_dispatcher_add_event_source(ed, data);
     }
 

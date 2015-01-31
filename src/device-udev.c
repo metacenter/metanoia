@@ -42,11 +42,24 @@ void aura_udev_handle_device(AuraEventData* data, struct epoll_event* epev)
 
 //------------------------------------------------------------------------------
 
+/// Handle exit of event dispatcher
+void aura_udev_handle_exit(AuraEventData* data)
+{
+    if (!data || !data->data) {
+        return;
+    }
+
+    struct udev_monitor* mon = (struct udev_monitor*) data->data;
+    udev_monitor_unref(mon);
+}
+
+//------------------------------------------------------------------------------
+
 /// Set up device monitoring.
 /// Subscribe for dev types "input" and "drm".
 void aura_udev_setup_device_monitoring(AuraEventDispatcher* ed)
 {
-    struct udev *udev;
+    struct udev* udev;
     struct udev_monitor* mon;
 
     LOG_INFO1("Setting up device monitoring");
@@ -65,8 +78,12 @@ void aura_udev_setup_device_monitoring(AuraEventDispatcher* ed)
 
     // Prepare event handler
     AuraEventData* data = aura_event_data_create(udev_monitor_get_fd(mon),
-                                             aura_udev_handle_device, 0x0, mon);
+                                                 aura_udev_handle_device,
+                                                 aura_udev_handle_exit,
+                                                 0x0, mon);
     aura_event_dispatcher_add_event_source(ed, data);
+
+    udev_unref(udev);
 }
 
 //------------------------------------------------------------------------------

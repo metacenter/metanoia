@@ -10,16 +10,19 @@ typedef struct AuraEventData AuraEventData;
 typedef struct AuraEventDispatcherPriv AuraEventDispatcher;
 
 typedef void (*AuraEventHandler) (AuraEventData*, struct epoll_event*);
+typedef void (*AuraEventExitHandler) (AuraEventData*);
 
 struct AuraEventData {
     int fd;
     AuraEventHandler handler;
+    AuraEventExitHandler exit;
     uint32_t flags;
     void* data;
 };
 
 AuraEventData* aura_event_data_create(int fd,
                                       AuraEventHandler handler,
+                                      AuraEventExitHandler exit,
                                       uint32_t flags,
                                       void* data);
 
