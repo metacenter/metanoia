@@ -26,5 +26,7 @@ int aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task);
 
 int aura_event_signal_emit(AuraSignalNum sig_num, void* data);
 
+void aura_event_signal_clear_all_substriptions();
+
 #endif // __AURA_EVENT_SIGNAL_H__
 

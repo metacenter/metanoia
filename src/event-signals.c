@@ -109,3 +109,20 @@ int aura_event_signal_emit(AuraSignalNum sig_num, void* data) {
 
 //------------------------------------------------------------------------------
 
+void aura_event_signal_clear_all_substriptions()
+{
+    SignalSubscriber* ss = get_signal_subscriber();
+    if (ss == NULL) {
+        LOG_ERROR("Invalid Signal Subscriber!");
+        return;
+    }
+
+    for (int s = 0; s < SIGNAL_NUM; ++s) {
+        if (ss->tab[s]) {
+            chain_free(ss->tab[s]);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+

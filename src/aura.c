@@ -6,6 +6,7 @@
 #include "utils-environment.h"
 #include "event-dispatcher.h"
 #include "event-loop.h"
+#include "event-signals.h"
 #include "event-factory.h"
 #include "config.h"
 
@@ -63,6 +64,9 @@ int main()
     aura_environment_block_system_signals();
     aura_event_dispatcher_start(dispatcher);
     aura_environment_unblock_system_signals();
+
+    // Clear all subscriptions
+    aura_event_signal_clear_all_substriptions();
 
     // Stop and join threads
     aura_loop_stop(loop_keyboard);
