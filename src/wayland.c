@@ -24,6 +24,7 @@
 /// @todo Make Wayland socket configurable
 static const char* scSocketName = "wayland-0";
 
+static pthread_t wayland_thread;
 static struct wl_display* wayland_display;
 
 //------------------------------------------------------------------------------
@@ -120,6 +121,9 @@ int aura_wayland_event_loop_feeder(AURA_UNUSED void* data)
 
 void aura_wayland_finalize(AURA_UNUSED void* data)
 {
+    wl_display_terminate(wayland_display);
+    LOG_INFO1("Wayland: waiting for thread to exit");
+    pthread_join(wayland_thread, NULL);
     wl_display_destroy(wayland_display);
 }
 
@@ -127,8 +131,6 @@ void aura_wayland_finalize(AURA_UNUSED void* data)
 
 void aura_wayland_initialize(AuraLoop* this_loop)
 {
-    pthread_t thread;
-
     LOG_INFO1("Initializing Wayland...");
 
     // Init Wayland
@@ -175,7 +177,7 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     }
 
     // Run wayland display in separate thread
-    if (pthread_create(&thread, NULL, display_run, wayland_display)) {
+    if (pthread_create(&wayland_thread, NULL, display_run, wayland_display)) {
         LOG_ERROR("Could not run Wayland display!");
         return;
     }
