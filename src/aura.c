@@ -76,8 +76,10 @@ int main()
     aura_loop_free(loop_keyboard);
     aura_loop_free(loop_displays);
     aura_loop_free(loop_devices);
+    aura_event_dispatcher_free(dispatcher);
 
     aura_dbus_finalize();
+    aura_config_finalize();
     aura_environment_cleanup();
     return 0;
 }

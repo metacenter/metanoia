@@ -62,9 +62,9 @@ int aura_utils_keymap_initialize(AuraKeymap* self)
 
     // Set keymap from names
     struct xkb_rule_names names;
-    names.rules = strdup("evdev");
-    names.model = strdup("evdev");
-    names.layout = strdup("us");
+    names.rules = "evdev";
+    names.model = "evdev";
+    names.layout = "us";
     names.variant = NULL;
     names.options = NULL;
 

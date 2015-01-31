@@ -34,6 +34,13 @@ void aura_config_apply()
 
 //------------------------------------------------------------------------------
 
+void aura_config_finalize()
+{
+    aura_utils_keymap_finalize(keymap);
+}
+
+//------------------------------------------------------------------------------
+
 AuraKeymap* aura_config_get_keymap()
 {
     return keymap;

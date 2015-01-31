@@ -215,13 +215,15 @@ int aura_environment_open_file(const char *file_name,
     fd = open(file_path, O_RDWR|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
     if (fd < 0) {
         LOG_ERROR("Creating file '%s' failed! (%m)", file_path);
-        return fd;
+        goto cleanup;
     }
 
     if (size > 0) {
         posix_fallocate(fd, 0, size);
     }
 
+cleanup:
+    free(file_path);
     return fd;
 }
 

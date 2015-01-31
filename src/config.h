@@ -19,6 +19,7 @@ const AuraConfig* aura_config();
 const AuraSettings* aura_settings();
 
 void aura_config_apply();
+void aura_config_finalize();
 
 AuraKeymap* aura_config_get_keymap();
 
