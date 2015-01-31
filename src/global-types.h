@@ -10,6 +10,12 @@
 /// Id for AuraItem
 typedef uintptr_t AuraItemId;
 
+/// Free function definition
+typedef void (*AuraFreeFunc) (void*);
+
+/// Compare function definition
+typedef int (*AuraCompareFunc) (void*, void*);
+
 /// Structure to be inherited by all types that want to be stored in AuraStore
 typedef struct {
     union {

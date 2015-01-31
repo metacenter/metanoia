@@ -11,5 +11,7 @@ void aura_keyboard_add_binding(AuraModeEnum modeid, const AuraBinding* binding);
 
 bool aura_keyboard_catch_key(int code, AuraKeyState state);
 
+void aura_keyboard_free_all();
+
 #endif // __AURA_KEYBOARD_BINDINGS_H__
 

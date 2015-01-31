@@ -15,7 +15,9 @@ typedef struct {
 
 AuraMode* aura_mode_new(AuraModeEnum modeid);
 
-void aura_mode_add_binding(AuraMode* self, const AuraBinding* );
+void aura_mode_free(AuraMode* self);
+
+void aura_mode_add_binding(AuraMode* self, const AuraBinding* binding);
 
 AuraBinding* aura_mode_find_binding(AuraMode* self,
                                     int code,

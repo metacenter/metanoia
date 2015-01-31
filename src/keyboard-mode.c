@@ -7,6 +7,10 @@
 #include "utils-log.h"
 
 #include <malloc.h>
+#include <memory.h>
+
+#define __USE_GNU
+#define _GNU_SOURCE
 #include <search.h>
 
 //------------------------------------------------------------------------------
@@ -39,6 +43,19 @@ AuraMode* aura_mode_new(AuraModeEnum modeid)
     self->bindings = NULL;
     self->active = 0;
     return self;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_mode_free(AuraMode* self)
+{
+    if (!self) {
+        return;
+    }
+
+    tdestroy(self->bindings, (AuraFreeFunc) aura_binding_free);
+    memset(self, 0, sizeof(AuraMode));
+    free(self);
 }
 
 //------------------------------------------------------------------------------

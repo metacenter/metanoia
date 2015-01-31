@@ -29,16 +29,15 @@ void aura_keyboard_add_binding(AuraModeEnum modeid, const AuraBinding* binding)
     }
 
     if (!stack) {
-        stack = chain_new(0);
+        stack = chain_new(NULL);
     }
 
     if (!modes) {
-        modes = chain_new(0);
+        modes = chain_new((AuraFreeFunc) aura_mode_free);
     }
 
     // Try to find mode
-    Link* link;
-    for (link = modes->first; link; link = link->next) {
+    for (Link* link = modes->first; link; link = link->next) {
         mode = (AuraMode*) link->data;
         if (mode->modeid != modeid) {
             mode = NULL;
@@ -58,6 +57,14 @@ void aura_keyboard_add_binding(AuraModeEnum modeid, const AuraBinding* binding)
 
     // Add binding
     aura_mode_add_binding(mode, binding);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_keyboard_free_all()
+{
+    chain_free(modes);
+    chain_free(stack);
 }
 
 //------------------------------------------------------------------------------

@@ -8,8 +8,6 @@
 
 // TODO: use 'aura' prefix
 // TODO: ref and unref instead of free
-typedef void (*AuraFreeFunc) (void*);
-typedef int (*AuraCompareFunc) (void*, void*);
 
 typedef struct Link Link;
 struct Link {

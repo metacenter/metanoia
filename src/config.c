@@ -37,6 +37,9 @@ void aura_config_apply()
 void aura_config_finalize()
 {
     aura_utils_keymap_finalize(keymap);
+    aura_utils_keymap_free(keymap);
+
+    aura_keyboard_free_all();
 }
 
 //------------------------------------------------------------------------------
