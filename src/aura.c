@@ -15,6 +15,7 @@ int main()
     AuraEventData* event_data;
 
     // Initialization
+    aura_environment_set_thread_name(0, "aura:main");
     aura_environment_setup();
     aura_config_apply();
     if (!aura_settings()->run_in_test_window) {

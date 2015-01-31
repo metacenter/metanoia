@@ -29,7 +29,7 @@ SignalSubscriber* get_signal_subscriber()
         return NULL;
     }
 
-    ss->tab = malloc(SIGNAL_NUM * sizeof(void*));
+    ss->tab = calloc(SIGNAL_NUM, sizeof(Chain*));
 
     return ss;
 }

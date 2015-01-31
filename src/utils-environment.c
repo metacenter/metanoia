@@ -42,6 +42,9 @@ void aura_environment_unblock_system_signals(void)
 
 void aura_environment_set_thread_name(pthread_t thread, char* name)
 {
+    if (!thread) {
+        thread = pthread_self();
+    }
     pthread_setname_np(thread, name);
 }
 
@@ -50,10 +53,6 @@ void aura_environment_set_thread_name(pthread_t thread, char* name)
 void aura_environment_on_enter_new_thread(pthread_t thread, char* name)
 {
     aura_environment_block_system_signals();
-
-    if (!thread) {
-        thread = pthread_self();
-    }
     aura_environment_set_thread_name(thread, name);
 }
 
@@ -201,7 +200,7 @@ int aura_environment_open_file(const char *file_name,
         case DATA_PATH:    base_path = aura_data_path;    break;
     }
 
-    char* file_path = malloc(strlen(base_path) + strlen(file_name) + 1);
+    char* file_path = malloc(strlen(base_path) + strlen(file_name) + 2);
     if (!file_path) {
         return -1;
     }
