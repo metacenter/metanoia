@@ -19,6 +19,7 @@ struct AuraLoopPriv {
     pthread_cond_t condition;
     bool run;
     Chain* task_chain;
+    AuraTaskProcessor finalize;
 };
 
 //------------------------------------------------------------------------------
@@ -36,6 +37,7 @@ AuraLoop* aura_loop_new(const char* name)
     pthread_cond_init(&self->condition, NULL);
     self->run = 0;
     self->task_chain = chain_new(NULL);
+    self->finalize = NULL;
     return self;
 }
 
@@ -89,6 +91,10 @@ static void* aura_loop_thread_loop(void* data)
         }
 
         pthread_cond_wait(&self->condition, &self->process_mutex);
+    }
+
+    if (self->finalize) {
+        self->finalize(self);
     }
 
     LOG_INFO1("Threads: stopped loop '%s'", self->name);
@@ -145,6 +151,13 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
     pthread_mutex_unlock(&self->schedule_mutex);
     pthread_cond_signal(&self->condition);
     return 1;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_loop_set_finalizer(AuraLoop* self, AuraTaskProcessor finalizer)
+{
+    self->finalize = finalizer;
 }
 
 //------------------------------------------------------------------------------
