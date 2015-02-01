@@ -18,9 +18,11 @@ typedef struct {
     struct wl_resource* xdg_shell_resource;
 } AuraSurfaceWaylandData;
 
+/// @todo Add prefixes to functions in wayland-state
+
 AuraSurfaceWaylandData* wayland_surface_data_new(void);
 
-int wayland_state_initialize(struct wl_display* display);
+AuraResult wayland_state_initialize(struct wl_display* display);
 
 void wayland_state_finalize();
 

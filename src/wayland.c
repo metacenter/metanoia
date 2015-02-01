@@ -121,6 +121,8 @@ int aura_wayland_event_loop_feeder(AURA_UNUSED void* data)
 
 void aura_wayland_finalize(AURA_UNUSED void* data)
 {
+    wayland_state_finalize();
+
     wl_display_terminate(wayland_display);
     LOG_INFO1("Wayland: waiting for thread to exit");
     pthread_join(wayland_thread, NULL);

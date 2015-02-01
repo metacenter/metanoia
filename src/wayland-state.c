@@ -41,34 +41,49 @@ AuraSurfaceWaylandData* wayland_surface_data_new()
 
 //------------------------------------------------------------------------------
 
-int wayland_state_initialize(struct wl_display* display)
+AuraResult wayland_state_initialize(struct wl_display* display)
 {
     sState.surfaces = aura_store_new_for_id();
     if (!sState.surfaces) {
-        return -1;
+        return AURA_RESULT_ERROR;
     }
 
     sState.outputs = aura_store_new_for_str();
     if (!sState.outputs) {
-        return -1;
+        return AURA_RESULT_ERROR;
     }
 
     sState.keyboard_resources = chain_new(NULL);
     if (!sState.keyboard_resources) {
-        return -1;
+        return AURA_RESULT_ERROR;
     }
 
     sState.display = display;
     sState.keyboard_focused_sid = scInvalidItemId;
 
-    return 0;
+    return AURA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
 void wayland_state_finalize()
 {
-    // TODO
+    sState.display = NULL;
+
+    if (sState.keyboard_resources) {
+        chain_free(sState.keyboard_resources);
+        sState.keyboard_resources = NULL;
+    }
+
+    if (sState.outputs) {
+        aura_store_free(sState.outputs);
+        sState.outputs = NULL;
+    }
+
+    if (sState.surfaces) {
+        aura_store_free(sState.surfaces);
+        sState.surfaces = NULL;
+    }
 }
 
 //------------------------------------------------------------------------------
