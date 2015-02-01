@@ -18,20 +18,13 @@ typedef struct SignalSubscriber {
 
 SignalSubscriber* get_signal_subscriber()
 {
-    static SignalSubscriber* ss = NULL;
-    if (ss != NULL) {
-        return ss;
+    static SignalSubscriber ss = {NULL};
+    if (ss.tab != NULL) {
+        return &ss;
     }
 
-    ss = malloc(sizeof(SignalSubscriber));
-    if (ss == NULL) {
-        LOG_ERROR("Could not malloc SignalSubscriber!");
-        return NULL;
-    }
-
-    ss->tab = calloc(SIGNAL_NUM, sizeof(Chain*));
-
-    return ss;
+    ss.tab = calloc(SIGNAL_NUM, sizeof(Chain*));
+    return &ss;
 }
 
 //------------------------------------------------------------------------------
@@ -55,7 +48,7 @@ int aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
 
     Chain* chain = ss->tab[sig_num];
     if (chain == NULL) {
-        chain = chain_new(NULL);
+        chain = chain_new((AuraFreeFunc) aura_task_free);
         ss->tab[sig_num] = chain;
     }
 
@@ -122,6 +115,8 @@ void aura_event_signal_clear_all_substriptions()
             chain_free(ss->tab[s]);
         }
     }
+    free(ss->tab);
+    ss->tab = NULL;
 }
 
 //------------------------------------------------------------------------------
