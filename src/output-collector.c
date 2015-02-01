@@ -155,6 +155,13 @@ void aura_outputs_on_display_discovered(AURA_UNUSED void* data)
 
 //------------------------------------------------------------------------------
 
+void aura_output_collector_finalize(AURA_UNUSED void* data)
+{
+    chain_free(outputs);
+}
+
+//------------------------------------------------------------------------------
+
 /// Initialize Output Collector
 void aura_output_collector_initialize(AuraLoop* this_loop)
 {
@@ -169,7 +176,9 @@ void aura_output_collector_initialize(AuraLoop* this_loop)
 
     // subscribe for signals
     aura_event_signal_subscribe(SIGNAL_DISPLAY_DISCOVERED,
-         aura_task_create(aura_outputs_on_display_discovered, this_loop));
+               aura_task_create(aura_outputs_on_display_discovered, this_loop));
+
+    aura_loop_set_finalizer(this_loop, aura_output_collector_finalize);
 }
 
 //------------------------------------------------------------------------------
