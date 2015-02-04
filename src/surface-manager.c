@@ -43,7 +43,7 @@ AuraSurfaceId aura_surface_create(void)
 
 void aura_surface_destroy(AuraSurfaceId sid)
 {
-    aura_event_signal_emit(SIGNAL_SURFACE_DESTROYED, (void*) sid);
+    aura_event_signal_emit_int(SIGNAL_SURFACE_DESTROYED, sid);
     aura_store_delete(sStore, sid);
 }
 
@@ -91,7 +91,7 @@ void aura_surface_commit(AuraSurfaceId sid,
             surface->requested_size.width  = width;
             surface->requested_size.height = height;
         }
-        aura_event_signal_emit(SIGNAL_SURFACE_CREATED, (void*) sid);
+        aura_event_signal_emit_int(SIGNAL_SURFACE_CREATED, sid);
     }
 }
 

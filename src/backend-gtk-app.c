@@ -60,20 +60,20 @@ G_DEFINE_TYPE(AuraApp, aura_app, GTK_TYPE_APPLICATION)
 
 //------------------------------------------------------------------------------
 
-static void aura_app_init(AURA_UNUSED AuraApp* app)
+void aura_app_init(AURA_UNUSED AuraApp* app)
 {
 }
 
 //------------------------------------------------------------------------------
 
-static void aura_app_startup(GApplication* app)
+void aura_app_startup(GApplication* app)
 {
     G_APPLICATION_CLASS(aura_app_parent_class)->startup(app);
 }
 
 //------------------------------------------------------------------------------
 
-static void aura_app_activate(GApplication* app)
+void aura_app_activate(GApplication* app)
 {
     win = aura_win_new(AURA_APP(app));
     gtk_window_present(GTK_WINDOW(win));
@@ -86,16 +86,16 @@ static void aura_app_activate(GApplication* app)
 
 //------------------------------------------------------------------------------
 
-static void aura_app_open(AURA_UNUSED GApplication* app,
-                          AURA_UNUSED GFile** files,
-                          AURA_UNUSED gint n_files,
-                          AURA_UNUSED const gchar* hint)
+void aura_app_open(AURA_UNUSED GApplication* app,
+                   AURA_UNUSED GFile** files,
+                   AURA_UNUSED gint n_files,
+                   AURA_UNUSED const gchar* hint)
 {
 }
 
 //------------------------------------------------------------------------------
 
-static void aura_app_class_init(AuraAppClass* class)
+void aura_app_class_init(AuraAppClass* class)
 {
     G_APPLICATION_CLASS(class)->startup = aura_app_startup;
     G_APPLICATION_CLASS(class)->activate = aura_app_activate;

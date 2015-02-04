@@ -5,6 +5,7 @@
 #include "device-common.h"
 #include "utils-dbus.h"
 #include "utils-log.h"
+#include "global-objects.h"
 #include "event-signals.h"
 #include "keyboard-bindings.h"
 
@@ -43,12 +44,10 @@ void aura_evdev_handle_key(struct input_event* ev)
         bool catched = aura_keyboard_catch_key(ev->code,
                               ev->value ? AURA_KEY_PRESSED : AURA_KEY_RELEASED);
         if (!catched) {
-            // TODO: add contructor
-            AuraKeyData* data = malloc(sizeof(AuraKeyData));
-            data->time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
-            data->code = ev->code;
-            data->value = ev->value;
-            aura_event_signal_emit(SIGNAL_KEYBOARD_EVENT, data);
+            unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
+            AuraKeyObject* key = aura_key_create(time, ev->code, ev->value);
+            aura_event_signal_emit(SIGNAL_KEYBOARD_EVENT, (AuraObject*) key);
+            aura_object_unref((AuraObject*) key);
         }
     }
 }
@@ -61,9 +60,9 @@ void aura_evdev_handle_touch(struct input_event* ev)
     if (ev->code == ABS_MT_TRACKING_ID) {
         aura_event_signal_emit(SIGNAL_POINTER_MOTION_RESET, NULL);
     } else if (ev->code == ABS_MT_POSITION_X) {
-        aura_event_signal_emit(SIGNAL_POINTER_MOTION_X, (void*) ev->value);
+        aura_event_signal_emit_int(SIGNAL_POINTER_MOTION_X, ev->value);
     } else if (ev->code == ABS_MT_POSITION_Y) {
-        aura_event_signal_emit(SIGNAL_POINTER_MOTION_Y, (void*) ev->value);
+        aura_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y, ev->value);
     }
 }
 

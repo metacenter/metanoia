@@ -11,6 +11,7 @@
 
 #include "utils-log.h"
 #include "utils-environment.h"
+#include "global-objects.h"
 #include "event-signals.h"
 
 #include <errno.h>
@@ -47,7 +48,7 @@ void* display_run(void* data)
 
 void wayland_screen_refresh_handler(void* data)
 {
-    AuraSurfaceId sid = (AuraSurfaceId) data;
+    AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
     LOG_WAYL3("Wayland: handling screen refresh");
     wayland_state_screen_refresh(sid);
 }
@@ -56,7 +57,7 @@ void wayland_screen_refresh_handler(void* data)
 
 void wayland_keyboard_focus_change_handler(void* data)
 {
-    AuraSurfaceId sid = (AuraSurfaceId) data;
+    AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
     LOG_WAYL2("Wayland: handling keyboard focus change (%d)", sid);
     wayland_state_keyboard_focus_update(sid);
 }
@@ -67,12 +68,15 @@ void wayland_keyboard_event_handler(void* data)
 {
     LOG_WAYL4("Wayland: handling keyboard event");
 
-    AuraKeyData* key_data = data;
-    if (!key_data) {
+    AuraKeyObject* object = (AuraKeyObject*) data;
+    if (!object) {
         return;
     }
 
-    wayland_state_key(key_data->time, key_data->code, key_data->value);
+    wayland_state_key(object->keydata.time,
+                      object->keydata.code,
+                      object->keydata.value);
+    aura_object_unref((AuraObject*) object);
 }
 
 //------------------------------------------------------------------------------
@@ -95,7 +99,7 @@ void wayland_display_lost_handler(void* data)
 
 void wayland_surface_reconfigured_handler(void* data)
 {
-    AuraSurfaceId sid = (AuraSurfaceId) data;
+    AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
     wayland_state_surface_reconfigured(sid);
 }
 

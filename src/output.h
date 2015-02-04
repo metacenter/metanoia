@@ -5,6 +5,7 @@
 #define __AURA_OUTPUT_H__
 
 #include "renderer.h"
+#include "utils-object.h"
 
 typedef struct AuraOutput AuraOutput;
 
@@ -14,6 +15,7 @@ typedef void (*AuraOutputFreeFunc) (AuraOutput*);
 
 struct AuraOutput {
     // TODO: keep list of available modes instead of just width and height
+    AuraObject base;
     int width;
     int height;
     char* unique_name;
@@ -21,7 +23,6 @@ struct AuraOutput {
     AuraRenderer* renderer;
     AuraOutputInitRendererFunc initialize;
     AuraOutputSwapFunc swap_buffers;
-    AuraOutputFreeFunc free;
 };
 
 AuraResult aura_output_initialize(AuraOutput* self,

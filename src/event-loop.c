@@ -58,7 +58,7 @@ void aura_loop_free(AuraLoop* self)
 
 //------------------------------------------------------------------------------
 
-static void* aura_loop_thread_loop(void* data)
+void* aura_loop_thread_loop(void* data)
 {
     AuraLoop* self = (AuraLoop*) data;
     if (!self) {
@@ -82,9 +82,7 @@ static void* aura_loop_thread_loop(void* data)
                 } else {
                     LOG_ERROR("Invalid task processor!");
                 }
-                if (task->freefunc) {
-                    task->freefunc(task);
-                }
+                aura_object_unref((AuraObject*) task);
             } else {
                 LOG_ERROR("Invalid task!");
             }

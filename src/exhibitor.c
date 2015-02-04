@@ -7,6 +7,7 @@
 
 #include "utils-log.h"
 #include "event-signals.h"
+#include "global-objects.h"
 #include "surface-manager.h"
 
 #include <malloc.h>
@@ -102,7 +103,7 @@ void aura_exhibitor_on_display_lost(void* data)
 
 void aura_exhibitor_on_surface_created(void* data)
 {
-    AuraSurfaceId sid = (AuraSurfaceId) data;
+    AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
     if (sid == scInvalidSurfaceId) {
         return;
     }
@@ -115,7 +116,7 @@ void aura_exhibitor_on_surface_created(void* data)
 
 void aura_exhibitor_on_surface_destroyed(void* data)
 {
-    AuraSurfaceId sid = (AuraSurfaceId) data;
+    AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
     if (sid == scInvalidSurfaceId) {
         return;
     }

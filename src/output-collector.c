@@ -93,7 +93,7 @@ void aura_output_collector_notify_outputs_found(Chain* found_outputs)
 
         // notify about new output
         if (output->renderer) {
-            aura_event_signal_emit(SIGNAL_DISPLAY_FOUND, output);
+            aura_event_signal_emit(SIGNAL_DISPLAY_FOUND, (AuraObject*) output);
         } else {
             LOG_WARN1("Invalid renderer!");
         }
@@ -115,7 +115,7 @@ void aura_output_collector_notify_outputs_lost(Chain* lost_outputs)
 
         LOG_INFO1("Removing output '%s'", output->unique_name);
         chain_remove(outputs, output, (AuraCompareFunc) aura_output_compare);
-        aura_event_signal_emit(SIGNAL_DISPLAY_LOST, output);
+        aura_event_signal_emit(SIGNAL_DISPLAY_LOST, (AuraObject*) output);
     }
 }
 

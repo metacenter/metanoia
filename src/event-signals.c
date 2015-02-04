@@ -5,6 +5,7 @@
 #include "event-loop.h"
 #include "utils-log.h"
 #include "utils-chain.h"
+#include "global-objects.h"
 
 #include <stdlib.h>
 
@@ -29,21 +30,21 @@ SignalSubscriber* get_signal_subscriber()
 
 //------------------------------------------------------------------------------
 
-int aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
+AuraResult aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
     if (sig_num >= SIGNAL_NUM) {
         LOG_WARN1("Unknown Signal Number: %d", sig_num);
-        return -1;
+        return AURA_RESULT_INCORRECT_ARGUMENT;
     }
 
     if (!task || !task->process) {
         LOG_WARN1("Invalid task!");
-        return -1;
+        return AURA_RESULT_INCORRECT_ARGUMENT;
     }
 
     SignalSubscriber* ss = get_signal_subscriber();
     if (ss == NULL) {
         LOG_ERROR("Invalid Signal Subscriber!");
-        return -1;
+        return AURA_RESULT_ERROR;
     }
 
     Chain* chain = ss->tab[sig_num];
@@ -55,21 +56,21 @@ int aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
     LOG_EVNT2("Subscription for signal %d", sig_num);
     chain_append(chain, task);
 
-    return 0;
+    return AURA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-int aura_event_signal_emit(AuraSignalNum sig_num, void* data) {
+AuraResult aura_event_signal_emit(AuraSignalNum sig_num, AuraObject* object) {
     if (sig_num >= SIGNAL_NUM) {
         LOG_WARN1("Unknown Signal Number: %d", sig_num);
-        return -1;
+        return AURA_RESULT_INCORRECT_ARGUMENT;
     }
 
     SignalSubscriber* ss = get_signal_subscriber();
     if (ss == NULL) {
         LOG_ERROR("Invalid Signal Subscriber!");
-        return -1;
+        return AURA_RESULT_ERROR;
     }
 
     Chain* chain = ss->tab[sig_num];
@@ -83,7 +84,8 @@ int aura_event_signal_emit(AuraSignalNum sig_num, void* data) {
                 if (task->loop) {
                     LOG_EVNT4("Signal: emited (num: %d)", sig_num);
                     AuraTask* task_copy = aura_task_copy(task);
-                    task_copy->data = data;
+                    task_copy->data = object;
+                    aura_object_ref(object);
                     aura_loop_schedule_task(task->loop, task_copy);
                 } else {
                     LOG_WARN3("Invalid loop!");
@@ -97,7 +99,17 @@ int aura_event_signal_emit(AuraSignalNum sig_num, void* data) {
         LOG_EVNT3("Signal: emit (num: %d, no listeners)", sig_num);
     }
 
-    return 0;
+    return AURA_RESULT_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+AuraResult aura_event_signal_emit_int(AuraSignalNum sig_num, intptr_t value)
+{
+    AuraObject* object = (AuraObject*) aura_int_create(value);
+    AuraResult result = aura_event_signal_emit(sig_num, object);
+    aura_object_unref(object);
+    return result;
 }
 
 //------------------------------------------------------------------------------

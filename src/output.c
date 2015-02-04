@@ -24,6 +24,8 @@ AuraResult aura_output_initialize(AuraOutput* self,
         return AURA_RESULT_INCORRECT_ARGUMENT;
     }
 
+    aura_object_initialize(&self->base, (AuraFreeFunc) free);
+    aura_object_ref(&self->base);
     self->width = width;
     self->height = height;
     self->unique_name = unique_name;
@@ -32,7 +34,6 @@ AuraResult aura_output_initialize(AuraOutput* self,
     self->renderer = NULL;
     self->initialize = initialize;
     self->swap_buffers = swap_buffers;
-    self->free = free;
     return AURA_RESULT_SUCCESS;
 }
 

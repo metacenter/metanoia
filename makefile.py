@@ -13,14 +13,14 @@ m.set_resource_directory('res')
 m.set_gen_directory('gen')
 
 m.set_c_compiler('gcc')
-m.set_oflags(['-O3'])
-m.set_oflags(['-DDEBUG', '-g', '-pg', '-O0'])
+m.set_oflags(['-O3']) # release
+m.set_oflags(['-DDEBUG', '-g', '-O0']) # debug
 m.set_cflags(['-std=gnu11', '-Wall', '-W', '-Wextra', '-Wpedantic'])
 m.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
 
 #-------------------------------------------------------------------------------
 
-with_gtk_support = True;
+with_gtk_support = True
 
 #-------------------------------------------------------------------------------
 
@@ -89,20 +89,20 @@ version_file = m.add_generated_target(
     )
 
 #-------------------------------------------------------------------------------
-# MAIN
-
-t = m.add_compile_target(
-        output='aura.o',
-        inputs=['aura.c']
-    )
-aura.add_input(t)
-
-#-------------------------------------------------------------------------------
 # CONFIGURATION
 
 t = m.add_compile_target(
         output='config.o',
         inputs=['config.c'],
+    )
+aura.add_input(t)
+
+#-------------------------------------------------------------------------------
+# GLOBALS
+
+t = m.add_compile_target(
+        output='global-objects.o',
+        inputs=['global-objects.c'],
     )
 aura.add_input(t)
 
@@ -114,6 +114,12 @@ aura.add_input(t)
 
 #-------------------------------------------------------------------------------
 # UTILS
+
+t = m.add_compile_target(
+        output='utils-object.o',
+        inputs=['utils-object.c'],
+    )
+aura.add_input(t)
 
 t = m.add_compile_target(
         output='utils-chain.o',
@@ -492,6 +498,15 @@ else:
             inputs=['backend-gtk-dummy.c'],
         )
     aura.add_input(t)
+
+#-------------------------------------------------------------------------------
+# MAIN
+
+t = m.add_compile_target(
+        output='aura.o',
+        inputs=['aura.c']
+    )
+aura.add_input(t)
 
 #-------------------------------------------------------------------------------
 # TESTS

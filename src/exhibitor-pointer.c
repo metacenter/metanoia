@@ -5,6 +5,7 @@
 #include "exhibitor.h"
 
 #include "utils-log.h"
+#include "global-objects.h"
 #include "event-signals.h"
 
 #define INVALID_POINTER_VALUE -1
@@ -25,8 +26,7 @@ void aura_exhibitor_pointer_on_motion_reset()
 
 void aura_exhibitor_pointer_on_motion_x(void* data)
 {
-    int abs_value = (int) data;
-
+    int abs_value = aura_int_unref_get((AuraIntObject*) data);
     if (last_abs_value_x != INVALID_POINTER_VALUE) {
         position.x += abs_value - last_abs_value_x;
 
@@ -47,8 +47,7 @@ void aura_exhibitor_pointer_on_motion_x(void* data)
 
 void aura_exhibitor_pointer_on_motion_y(void* data)
 {
-    int abs_value = (int) data;
-
+    int abs_value = aura_int_unref_get((AuraIntObject*) data);
     if (last_abs_value_y != INVALID_POINTER_VALUE) {
         position.y += abs_value - last_abs_value_y;
 

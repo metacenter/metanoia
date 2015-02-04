@@ -93,7 +93,7 @@ void aura_frame_set_surface(AuraFrame* self, AuraSurfaceId sid)
     ||  surface->requested_size.height != surface->desired_size.height) {
         surface->desired_size.width  = surface->requested_size.width;
         surface->desired_size.height = surface->requested_size.height;
-        aura_event_signal_emit(SIGNAL_SURFACE_RECONFIGURED, (void*) sid);
+        aura_event_signal_emit_int(SIGNAL_SURFACE_RECONFIGURED, sid);
     }
 }
 
@@ -185,8 +185,7 @@ void aura_frame_reconfigure(AURA_UNUSED AuraFrame* self,
                 }
                 surface->desired_size.width += magnitude;
             }
-            aura_event_signal_emit(SIGNAL_SURFACE_RECONFIGURED,
-                                   (void*) params->sid);
+            aura_event_signal_emit_int(SIGNAL_SURFACE_RECONFIGURED,params->sid);
         }
     }
 

@@ -4,20 +4,22 @@
 #ifndef __AURA_EVENT_TASK_H__
 #define __AURA_EVENT_TASK_H__
 
+#include "utils-object.h"
+
 typedef struct AuraLoopPriv AuraLoop;
 
 typedef void (*AuraTaskProcessor) (void*);
 typedef void (*AuraTaskFreeFunc) (void*);
 
 typedef struct {
+    AuraObject base;
     AuraTaskProcessor process;
-    AuraTaskFreeFunc freefunc;
     AuraLoop* loop;
     void* data;
 } AuraTask;
 
 AuraTask* aura_task_new(AuraTaskProcessor process,
-                        AuraTaskFreeFunc freefunc,
+                        AuraTaskFreeFunc free,
                         AuraLoop* loop,
                         void* data);
 

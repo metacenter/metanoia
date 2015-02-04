@@ -5,26 +5,29 @@
 #include "utils-log.h"
 
 #include <malloc.h>
+#include <memory.h>
 
-static AuraTask sDummyTask = {0, NULL, NULL, NULL};
+static AuraTask sDummyTask = {{0, NULL}, NULL, NULL, NULL};
 
 //------------------------------------------------------------------------------
 
 AuraTask* aura_task_new(AuraTaskProcessor process,
-                        AuraTaskFreeFunc freefunc,
+                        AuraTaskFreeFunc free,
                         AuraLoop* loop,
                         void* data)
 {
-    AuraTask* task = malloc(sizeof(AuraTask));
-    if (!task) {
+    AuraTask* self = malloc(sizeof(AuraTask));
+    if (!self) {
         return &sDummyTask;
     }
 
-    task->process = process;
-    task->freefunc = freefunc;
-    task->loop = loop;
-    task->data = data;
-    return task;
+    aura_object_initialize(&self->base, free);
+    aura_object_ref(&self->base);
+
+    self->process = process;
+    self->loop = loop;
+    self->data = data;
+    return self;
 }
 
 //------------------------------------------------------------------------------
@@ -39,17 +42,19 @@ AuraTask* aura_task_create(AuraTaskProcessor process,
 
 AuraTask* aura_task_copy(AuraTask* task)
 {
-    return aura_task_new(task->process, task->freefunc, task->loop, task->data);
+    return aura_task_new(task->process, task->base.free,
+                         task->loop, task->data);
 }
 
 //------------------------------------------------------------------------------
 
+/// Free only task, keep data.
 void aura_task_free(AuraTask* self)
 {
     if (!self) {
         return;
     }
-    // Free only task, keep data
+    memset(self, 0, sizeof(AuraTask));
     free(self);
 }
 

@@ -22,9 +22,11 @@ typedef enum {
     SIGNAL_NUM,
 } AuraSignalNum;
 
-int aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task);
+AuraResult aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task);
 
-int aura_event_signal_emit(AuraSignalNum sig_num, void* data);
+AuraResult aura_event_signal_emit(AuraSignalNum sig_num, AuraObject* object);
+
+AuraResult aura_event_signal_emit_int(AuraSignalNum sig_num, intptr_t value);
 
 void aura_event_signal_clear_all_substriptions();
 

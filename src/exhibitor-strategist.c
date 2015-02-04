@@ -19,7 +19,7 @@ void aura_strategist_on_surface_created(AuraExhibitor* exhibitor,
 
     chain_append(exhibitor->surface_history, (void*) sid);
     /// @todo Focus changing should be done in compositor strategy.
-    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED, (void*) sid);
+    aura_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
 }
 
 //------------------------------------------------------------------------------
@@ -31,8 +31,8 @@ void aura_strategist_on_surface_destroyed(AURA_UNUSED AuraExhibitor* exhibitor,
     //aura_compositor_unmanage_surface(exhibitor->display->compositor, sid);
 
     // TODO: move to compositor strategy
-    aura_event_signal_emit(SIGNAL_KEYBOARD_FOCUS_CHANGED,
-                           (void*) scInvalidSurfaceId);
+    aura_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED,
+                               scInvalidSurfaceId);
 }
 
 //------------------------------------------------------------------------------
