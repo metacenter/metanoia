@@ -83,6 +83,8 @@ static inline void aura_position_change(Chain* stack, AuraArgmandType direction)
         } else if (argmand->type == AURA_ARGMAND_NUMBER) {
             magnitude = argmand->value;
         }
+
+        aura_argmand_free(argmand);
     }
 }
 

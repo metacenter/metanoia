@@ -14,6 +14,8 @@ typedef struct {
 
 AuraCompositor* aura_compositor_new();
 
+void aura_compositor_free(AuraCompositor* self);
+
 Chain* aura_compositor_get_visible_surfaces(AuraCompositor* self);
 
 void aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid);

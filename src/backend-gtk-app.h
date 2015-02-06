@@ -37,6 +37,8 @@ AuraApp* aura_app_new(void);
 
 AuraViewGroup* aura_backend_gtk_app_prepare_view_group(int n, int w, int h);
 
+void aura_backend_gtk_app_discard_view_group(int n);
+
 void aura_backend_gtk_app_swap_buffers();
 
 AuraSize aura_backend_gtk_app_get_resolution(int n);

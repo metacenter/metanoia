@@ -23,22 +23,18 @@ struct AuraExhibitorPriv {
 
 AuraExhibitor* aura_exhibitor_get_instance()
 {
-    static AuraExhibitor* exhibitor = 0;
-    if (exhibitor) {
-        return exhibitor;
+    static AuraExhibitor exhibitor;
+    if (exhibitor.priv) {
+        return &exhibitor;
     }
 
-    exhibitor = malloc(sizeof(AuraExhibitor));
-    memset(exhibitor, 0, sizeof(AuraExhibitor));
+    exhibitor.surface_history = chain_new(0);
+    exhibitor.displays = chain_new((AuraFreeFunc) aura_display_free);
 
-    exhibitor->priv = malloc(sizeof(AuraExhibitorPriv));
-    memset(exhibitor->priv, 0, sizeof(AuraExhibitorPriv));
+    exhibitor.priv = malloc(sizeof(AuraExhibitorPriv));
+    exhibitor.priv->strategist = aura_strategist_create();
 
-    exhibitor->surface_history = chain_new(0);
-    exhibitor->displays = chain_new(0);
-    exhibitor->priv->strategist = aura_strategist_create();
-
-    return exhibitor;
+    return &exhibitor;
 }
 
 //------------------------------------------------------------------------------
@@ -183,6 +179,26 @@ void aura_exhibitor_command_position(AuraArgmandType type,
 
 //------------------------------------------------------------------------------
 
+void aura_exhibitor_finalize(AURA_UNUSED void* data)
+{
+    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+
+    for (Link* link = exhibitor->displays->first; link; link = link->next) {
+        AuraDisplay* display = (AuraDisplay*) link->data;
+        aura_display_stop(display);
+    }
+
+    aura_strategist_destroy(exhibitor->priv->strategist);
+    memset(exhibitor->priv, 0, sizeof(AuraExhibitorPriv));
+    free(exhibitor->priv);
+
+    chain_free(exhibitor->displays);
+    chain_free(exhibitor->surface_history);
+    memset(exhibitor, 0, sizeof(AuraExhibitor));
+}
+
+//------------------------------------------------------------------------------
+
 void aura_exhibitor_initialize(AuraLoop* this_loop)
 {
     if (this_loop == 0) {
@@ -201,6 +217,8 @@ void aura_exhibitor_initialize(AuraLoop* this_loop)
 
     aura_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,
          aura_task_create(aura_exhibitor_on_surface_destroyed, this_loop));
+
+    aura_loop_add_finalizer(this_loop, aura_exhibitor_finalize);
 
     aura_exhibitor_pointer_initialize(this_loop);
 }

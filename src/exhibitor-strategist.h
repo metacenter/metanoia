@@ -18,5 +18,6 @@ typedef struct {
 } AuraStrategist;
 
 AuraStrategist* aura_strategist_create();
+void aura_strategist_destroy(AuraStrategist* self);
 
 #endif // __AURA_EXHIBITOR_STRATEGIST_H__

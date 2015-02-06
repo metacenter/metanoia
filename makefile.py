@@ -368,6 +368,12 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='wayland-surface.o',
+        inputs=['wayland-surface.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='wayland-output.o',
         inputs=['wayland-output.c'],
     )

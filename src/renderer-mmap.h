@@ -15,5 +15,7 @@ void aura_renderer_mmap_set_buffer(AuraRenderer* self,
                                    uint8_t* data,
                                    int stride);
 
+void aura_renderer_mmap_free(AuraRenderer* self);
+
 #endif // __AURA_RENDERER_MMAP_H__
 

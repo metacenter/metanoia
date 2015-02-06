@@ -56,6 +56,13 @@ AuraSurfaceData* aura_surface_get(AuraSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
+void aura_surface_clear_all()
+{
+    aura_store_free_with_items(sStore, (AuraFreeFunc) aura_surface_data_free);
+}
+
+//------------------------------------------------------------------------------
+
 void aura_surface_attach_egl(AuraSurfaceId sid,
                              AURA_UNUSED void* resource)
 {

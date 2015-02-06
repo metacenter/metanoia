@@ -3,6 +3,7 @@
 
 #include "keyboard-bindings.h"
 #include "keyboard-mode.h"
+#include "keyboard-argmand.h"
 
 #include "utils-log.h"
 
@@ -29,7 +30,7 @@ void aura_keyboard_add_binding(AuraModeEnum modeid, const AuraBinding* binding)
     }
 
     if (!stack) {
-        stack = chain_new(NULL);
+        stack = chain_new((AuraFreeFunc) aura_argmand_free);
     }
 
     if (!modes) {

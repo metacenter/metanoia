@@ -14,6 +14,11 @@
 void aura_strategist_on_surface_created(AuraExhibitor* exhibitor,
                                         AuraSurfaceId sid)
 {
+    if (!exhibitor || !exhibitor->display || !exhibitor->display->compositor) {
+        LOG_ERROR("Invalid Exhibitor!");
+        return;
+    }
+
     // Put surface on current workspace on current display
     aura_compositor_manage_surface(exhibitor->display->compositor, sid);
 
@@ -50,6 +55,18 @@ AuraStrategist* aura_strategist_create()
     self->on_surface_created   = aura_strategist_on_surface_created;
     self->on_surface_destroyed = aura_strategist_on_surface_destroyed;
     return self;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_strategist_destroy(AuraStrategist* self)
+{
+    if (!self) {
+        return;
+    }
+
+    memset(self, 0, sizeof(AuraStrategist));
+    free(self);
 }
 
 //------------------------------------------------------------------------------

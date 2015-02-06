@@ -70,10 +70,15 @@ int aura_backend_gtk_output_swap_buffers(AuraOutput* output)
 
 void aura_backend_gtk_output_free(AuraOutput* output)
 {
+    AuraOutputGTK* output_gtk = (AuraOutputGTK*) output;
     if (!output) {
         return;
     }
 
+    aura_backend_gtk_app_discard_view_group(output_gtk->num);
+    if (output->renderer) {
+        aura_renderer_mmap_free(output->renderer);
+    }
     if (output->unique_name) {
         free(output->unique_name);
     }
@@ -121,7 +126,7 @@ int aura_backend_gtk_get_outputs(Chain* outputs)
 
 //------------------------------------------------------------------------------
 
-static void* aura_backend_gtk_main(AURA_UNUSED void* data)
+void* aura_backend_gtk_main(AURA_UNUSED void* data)
 {
     aura_environment_on_enter_new_thread(0, "aura:gtk");
 
@@ -138,7 +143,13 @@ static void* aura_backend_gtk_main(AURA_UNUSED void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_run(AURA_UNUSED AuraLoop* this_loop)
+void aura_backend_gtk_quit(AURA_UNUSED void* data)
+{
+}
+
+//------------------------------------------------------------------------------
+
+void aura_backend_gtk_run(AuraLoop* this_loop)
 {
     LOG_INFO1("Initializing GTK backend...");
 
@@ -150,6 +161,8 @@ void aura_backend_gtk_run(AURA_UNUSED AuraLoop* this_loop)
         LOG_ERROR("Could not run GTK thread!");
         return;
     }
+
+    aura_loop_add_finalizer(this_loop, aura_backend_gtk_quit);
 
     LOG_INFO1("Initializing GTK backend: SUCCESS");
 }

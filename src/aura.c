@@ -8,6 +8,7 @@
 #include "event-loop.h"
 #include "event-signals.h"
 #include "event-factory.h"
+#include "surface-manager.h"
 #include "config.h"
 
 int main()
@@ -65,9 +66,6 @@ int main()
     aura_event_dispatcher_start(dispatcher);
     aura_environment_unblock_system_signals();
 
-    // Clear all subscriptions
-    aura_event_signal_clear_all_substriptions();
-
     // Stop and join threads
     aura_loop_stop(loop_keyboard);
     aura_loop_stop(loop_displays);
@@ -81,6 +79,8 @@ int main()
     aura_loop_free(loop_displays);
     aura_loop_free(loop_devices);
     aura_event_dispatcher_free(dispatcher);
+    aura_event_signal_clear_all_substriptions();
+    aura_surface_clear_all();
 
     aura_dbus_finalize();
     aura_config_finalize();

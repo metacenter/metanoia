@@ -23,6 +23,17 @@ AuraViewGroup* aura_backend_gtk_app_prepare_view_group(int n, int w, int h)
 
 //------------------------------------------------------------------------------
 
+void aura_backend_gtk_app_discard_view_group(int n)
+{
+    if (!win) {
+        return;
+    }
+
+    aura_backend_gtk_win_discard_view_group(win, n);
+}
+
+//------------------------------------------------------------------------------
+
 void aura_backend_gtk_app_swap_buffers(int n)
 {
     if (!win) {

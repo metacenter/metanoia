@@ -28,19 +28,6 @@ static struct {
 
 //------------------------------------------------------------------------------
 
-AuraSurfaceWaylandData* wayland_surface_data_new()
-{
-    AuraSurfaceWaylandData* data = malloc(sizeof(AuraSurfaceWaylandData));
-    if (!data) {
-        return 0;
-    }
-
-    memset(data, 0, sizeof(AuraSurfaceWaylandData));
-    return data;
-}
-
-//------------------------------------------------------------------------------
-
 AuraResult wayland_state_initialize(struct wl_display* display)
 {
     sState.surfaces = aura_store_new_for_id();
@@ -76,12 +63,14 @@ void wayland_state_finalize()
     }
 
     if (sState.outputs) {
-        aura_store_free(sState.outputs);
+        aura_store_free_with_items(sState.outputs,
+                                  (AuraFreeFunc) aura_wayland_output_destroy);
         sState.outputs = NULL;
     }
 
     if (sState.surfaces) {
-        aura_store_free(sState.surfaces);
+        aura_store_free_with_items(sState.surfaces,
+                                  (AuraFreeFunc) aura_wayland_surface_free);
         sState.surfaces = NULL;
     }
 }
@@ -93,7 +82,7 @@ void wayland_state_add_surface(AuraSurfaceId sid, struct wl_resource* rc)
     pthread_mutex_lock(&mutex);
 
     LOG_INFO2("Wayland: adding surface (sid: %d)", sid);
-    AuraSurfaceWaylandData* surface_data = wayland_surface_data_new();
+    AuraWaylandSurface* surface_data = aura_wayland_surface_new();
     surface_data->base.id = sid;
     surface_data->resource = rc;
 
@@ -121,7 +110,7 @@ void wayland_state_surface_attach(AuraSurfaceId sid, struct wl_resource* rc)
 {
     pthread_mutex_lock(&mutex);
 
-    AuraSurfaceWaylandData* data = aura_store_find(sState.surfaces, sid);
+    AuraWaylandSurface* data = aura_store_find(sState.surfaces, sid);
     if (!data) {
         // This is not a Wayland surface
         LOG_INFO3("SID %d does not resolve to any surface", sid);
@@ -140,7 +129,7 @@ void wayland_state_subscribe_frame(AuraSurfaceId sid, struct wl_resource* rc)
 {
     pthread_mutex_lock(&mutex);
 
-    AuraSurfaceWaylandData* data = aura_store_find(sState.surfaces, sid);
+    AuraWaylandSurface* data = aura_store_find(sState.surfaces, sid);
     if (!data) {
         // This is not a Wayland surface
         LOG_INFO3("SID %d does not resolve to any surface", sid);
@@ -159,7 +148,7 @@ void wayland_state_add_shell_surface(AuraSurfaceId sid, struct wl_resource* rc)
 {
     pthread_mutex_lock(&mutex);
 
-    AuraSurfaceWaylandData* data = aura_store_find(sState.surfaces, sid);
+    AuraWaylandSurface* data = aura_store_find(sState.surfaces, sid);
     if (!data) {
         // This is not a Wayland surface
         LOG_INFO3("SID %d does not resolve to any surface", sid);
@@ -179,7 +168,7 @@ void wayland_state_add_xdg_shell_surface(AuraSurfaceId sid,
 {
     pthread_mutex_lock(&mutex);
 
-    AuraSurfaceWaylandData* data = aura_store_find(sState.surfaces, sid);
+    AuraWaylandSurface* data = aura_store_find(sState.surfaces, sid);
     if (!data) {
         // This is not a Wayland surface
         LOG_INFO3("SID %d does not resolve to any surface", sid);
@@ -204,7 +193,7 @@ void wayland_state_add_keyboard_resource(struct wl_resource* keyboard_rc)
     chain_append(sState.keyboard_resources, keyboard_rc);
 
     // TODO: If client is focused, sent enter event
-    AuraSurfaceWaylandData* data =
+    AuraWaylandSurface* data =
                   aura_store_find(sState.surfaces, sState.keyboard_focused_sid);
     if (!data) {
         // This is not a Wayland surface
@@ -235,7 +224,7 @@ void wayland_state_keyboard_focus_update(AuraSurfaceId new_sid)
     LOG_WAYL2("Wayland: keyboard focus update (oldsid: %u, newsid: %u)",
               old_sid, new_sid);
 
-    AuraSurfaceWaylandData* new_data = aura_store_find(sState.surfaces,new_sid);
+    AuraWaylandSurface* new_data = aura_store_find(sState.surfaces,new_sid);
     if (!new_data) {
         // This is not a Wayland surface
         LOG_WAYL5("New SID does not resolve to any surface");
@@ -245,7 +234,7 @@ void wayland_state_keyboard_focus_update(AuraSurfaceId new_sid)
     }
     struct wl_client* new_client = wl_resource_get_client(new_data->resource);
 
-    AuraSurfaceWaylandData* old_data = NULL;
+    AuraWaylandSurface* old_data = NULL;
     struct wl_client* old_client = NULL;
     if (old_sid != scInvalidItemId) {
         old_data = aura_store_find(sState.surfaces, old_sid);
@@ -300,7 +289,7 @@ void wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
     LOG_WAYL4("Wayland: key (sid: %u, time: %u, key: %u, state: %u)",
               sState.keyboard_focused_sid, time, key, state);
 
-    AuraSurfaceWaylandData* data = aura_store_find(sState.surfaces,
+    AuraWaylandSurface* data = aura_store_find(sState.surfaces,
                                                    sState.keyboard_focused_sid);
     if (!data) {
         // This is not a Wayland surface
@@ -328,7 +317,7 @@ void wayland_state_screen_refresh(AuraSurfaceId sid)
 
     LOG_WAYL3("Wayland: screen refresh (sid: %u)", sid);
 
-    AuraSurfaceWaylandData* data = aura_store_find(sState.surfaces, sid);
+    AuraWaylandSurface* data = aura_store_find(sState.surfaces, sid);
     if (!data) {
         // This is not a Wayland surface
         LOG_WAYL5("SID %d does not resolve to any surface", sid);
@@ -370,7 +359,8 @@ void wayland_state_advertise_output(AuraOutput* output)
         LOG_ERROR("Could not create global output!");
     }
 
-    AuraWaylandOutput* wayland_output = aura_wayland_output_new(global);
+    AuraWaylandOutput* wayland_output =
+                                     aura_wayland_output_create(global, output);
     aura_store_add(sState.outputs, output->unique_name, wayland_output);
 
     pthread_mutex_unlock(&mutex);
@@ -385,7 +375,7 @@ void wayland_state_destroy_output(AuraOutput* output)
     AuraWaylandOutput* wayland_output =
                          aura_store_delete(sState.outputs, output->unique_name);
     wl_global_destroy(wayland_output->global_output);
-    aura_wayland_output_free(wayland_output);
+    aura_wayland_output_destroy(wayland_output);
 
     pthread_mutex_unlock(&mutex);
 }
@@ -396,7 +386,7 @@ void wayland_state_surface_reconfigured(AuraSurfaceId sid)
 {
     pthread_mutex_lock(&mutex);
 
-    AuraSurfaceWaylandData* data = aura_store_find(sState.surfaces, sid);
+    AuraWaylandSurface* data = aura_store_find(sState.surfaces, sid);
     if (!data) {
         // This is not a Wayland surface
         LOG_WAYL5("SID %d does not resolve to any surface", sid);

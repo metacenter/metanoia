@@ -7,6 +7,7 @@
 #include "utils-log.h"
 
 #include <malloc.h>
+#include <memory.h>
 
 //------------------------------------------------------------------------------
 
@@ -22,6 +23,21 @@ AuraCompositor* aura_compositor_new()
     self->frame = aura_frame_new();
     aura_frame_set_type(self->frame, AURA_FRAME_TYPE_STACKED);
     return self;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_compositor_free(AuraCompositor* self)
+{
+    if (!self) {
+        return;
+    }
+
+    aura_frame_free(self->frame);
+    chain_free(self->groups);
+
+    memset(self, 0, sizeof(AuraCompositor));
+    free(self);
 }
 
 //------------------------------------------------------------------------------

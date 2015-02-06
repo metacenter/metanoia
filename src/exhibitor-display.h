@@ -9,15 +9,18 @@
 
 #include <time.h>
 #include <sys/types.h>
+#include <pthread.h>
 
 typedef struct {
     AuraOutput* output;
     Chain* compositors;
     AuraCompositor* compositor;
     __timer_t timerid;
+    pthread_mutex_t mutex;
 } AuraDisplay;
 
 AuraDisplay* aura_display_new(AuraOutput* output);
+void aura_display_free(AuraDisplay* self);
 
 void aura_display_start(AuraDisplay* self);
 void aura_display_stop(AuraDisplay* self);

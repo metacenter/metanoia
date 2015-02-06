@@ -7,6 +7,8 @@
 #include <malloc.h>
 #include <memory.h>
 
+//------------------------------------------------------------------------------
+
 AuraSurfaceData* aura_surface_data_new()
 {
     AuraSurfaceData* self = malloc(sizeof(AuraSurfaceData));
@@ -19,4 +21,18 @@ AuraSurfaceData* aura_surface_data_new()
 
     return self;
 }
+
+//------------------------------------------------------------------------------
+
+void aura_surface_data_free(AuraSurfaceData* self)
+{
+    if (!self) {
+        return;
+    }
+
+    memset(self, 0, sizeof(AuraSurfaceData));
+    free(self);
+}
+
+//------------------------------------------------------------------------------
 

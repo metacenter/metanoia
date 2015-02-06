@@ -21,6 +21,8 @@ AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AuraWin* win,
                                                        int width,
                                                        int height);
 
+void aura_backend_gtk_win_discard_view_group(AuraWin* win, int n);
+
 void aura_backend_gtk_win_swap_buffers(AuraWin* win, int n);
 
 AuraSize aura_backend_gtk_win_get_resolution(AuraWin* win, int n);

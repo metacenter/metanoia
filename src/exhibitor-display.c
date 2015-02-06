@@ -4,10 +4,12 @@
 #include "exhibitor-display.h"
 #include "exhibitor-pointer.h"
 #include "utils-log.h"
+#include "utils-environment.h"
 #include "event-timer.h"
 #include "event-signals.h"
 
 #include <malloc.h>
+#include <memory.h>
 
 //------------------------------------------------------------------------------
 // PRIVATE
@@ -46,9 +48,13 @@ int aura_display_is_valid(AuraDisplay* self)
 
 void aura_display_redraw_all(AuraDisplay* self)
 {
+    aura_environment_on_enter_new_thread(0, "aura:redraw");
+
     if (!aura_display_is_valid(self)) {
         return;
     }
+
+    pthread_mutex_lock(&self->mutex);
 
     Chain* visible_surfaces =
                          aura_compositor_get_visible_surfaces(self->compositor);
@@ -67,7 +73,8 @@ void aura_display_redraw_all(AuraDisplay* self)
         }
     }
 
-    // TODO: free visible surfaces
+    chain_free(visible_surfaces);
+    pthread_mutex_unlock(&self->mutex);
 }
 
 //------------------------------------------------------------------------------
@@ -83,9 +90,27 @@ AuraDisplay* aura_display_new(AuraOutput* output)
 
     self->output = output;
     self->compositor = aura_compositor_new();
-    self->compositors = chain_new(0);
+    self->compositors = chain_new((AuraFreeFunc) aura_compositor_free);
     chain_append(self->compositors, self->compositor);
+    pthread_mutex_init(&self->mutex, NULL);
     return self;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_display_free(AuraDisplay* self)
+{
+    if (!self) {
+        return;
+    }
+
+    pthread_mutex_lock(&self->mutex);
+    aura_object_unref((AuraObject*) self->output);
+    chain_free(self->compositors);
+    pthread_mutex_unlock(&self->mutex);
+
+    memset(self, 0, sizeof(AuraDisplay));
+    free(self);
 }
 
 //------------------------------------------------------------------------------

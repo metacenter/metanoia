@@ -19,7 +19,7 @@ struct AuraLoopPriv {
     pthread_cond_t condition;
     bool run;
     Chain* task_chain;
-    AuraTaskProcessor finalize;
+    Chain* finalizers;
 };
 
 //------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ AuraLoop* aura_loop_new(const char* name)
     pthread_cond_init(&self->condition, NULL);
     self->run = 0;
     self->task_chain = chain_new(NULL);
-    self->finalize = NULL;
+    self->finalizers = chain_new(NULL);
     return self;
 }
 
@@ -52,7 +52,9 @@ void aura_loop_free(AuraLoop* self)
     if (self->name) {
         free(self->name);
     }
+    chain_free(self->finalizers);
     chain_free(self->task_chain);
+    memset(self, 0, sizeof(AuraLoop));
     free(self);
 }
 
@@ -91,8 +93,11 @@ void* aura_loop_thread_loop(void* data)
         pthread_cond_wait(&self->condition, &self->process_mutex);
     }
 
-    if (self->finalize) {
-        self->finalize(self);
+    for (Link* link = self->finalizers->last; link; link = link->prev) {
+        AuraTaskProcessor finalize = (AuraTaskProcessor) link->data;
+        if (finalize) {
+            finalize(self);
+        }
     }
 
     LOG_INFO1("Threads: stopped loop '%s'", self->name);
@@ -153,9 +158,9 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
 
 //------------------------------------------------------------------------------
 
-void aura_loop_set_finalizer(AuraLoop* self, AuraTaskProcessor finalizer)
+void aura_loop_add_finalizer(AuraLoop* self, AuraTaskProcessor finalizer)
 {
-    self->finalize = finalizer;
+    chain_append(self->finalizers, (void*) finalizer);
 }
 
 //------------------------------------------------------------------------------

@@ -17,6 +17,7 @@ AuraStore* aura_store_new_for_id();
 AuraStore* aura_store_new_for_str();
 
 void aura_store_free(AuraStore* self);
+void aura_store_free_with_items(AuraStore* self, AuraFreeFunc free_func);
 
 AuraItemId aura_store_generate_new_id(AuraStore* self);
 

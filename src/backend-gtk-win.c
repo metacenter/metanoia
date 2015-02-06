@@ -198,8 +198,7 @@ AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AURA_UNUSED AuraWin* win,
     group[n].stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
 
     // Create data and surface
-    int i;
-    for (i = 0; i < NUM_BUFFERS; ++i) {
+    for (int i = 0; i < NUM_BUFFERS; ++i) {
         group[n].buffer[i].data = malloc(4 * group[n].stride * height);
         group[n].buffer[i].source =
                     cairo_image_surface_create_for_data(group[n].buffer[i].data,
@@ -212,6 +211,15 @@ AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AURA_UNUSED AuraWin* win,
     gtk_widget_queue_draw_area(group[n].da, 0, 0, width, height);
 
     return &group[n];
+}
+
+//------------------------------------------------------------------------------
+
+void aura_backend_gtk_win_discard_view_group(AURA_UNUSED AuraWin* win, int n)
+{
+    for (int i = 0; i < NUM_BUFFERS; ++i) {
+        free(group[n].buffer[i].data);
+    }
 }
 
 //------------------------------------------------------------------------------

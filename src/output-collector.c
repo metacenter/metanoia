@@ -178,7 +178,7 @@ void aura_output_collector_initialize(AuraLoop* this_loop)
     aura_event_signal_subscribe(SIGNAL_DISPLAY_DISCOVERED,
                aura_task_create(aura_outputs_on_display_discovered, this_loop));
 
-    aura_loop_set_finalizer(this_loop, aura_output_collector_finalize);
+    aura_loop_add_finalizer(this_loop, aura_output_collector_finalize);
 }
 
 //------------------------------------------------------------------------------

@@ -85,6 +85,7 @@ void wayland_display_found_handler(void* data)
 {
     AuraOutput* output = (AuraOutput*) data;
     wayland_state_advertise_output(output);
+    aura_object_unref((AuraObject*) output);
 }
 
 //------------------------------------------------------------------------------
@@ -207,7 +208,7 @@ void aura_wayland_initialize(AuraLoop* this_loop)
     aura_event_signal_subscribe(SIGNAL_SURFACE_RECONFIGURED,
             aura_task_create(wayland_surface_reconfigured_handler, this_loop));
 
-    aura_loop_set_finalizer(this_loop, aura_wayland_finalize);
+    aura_loop_add_finalizer(this_loop, aura_wayland_finalize);
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
 }

@@ -63,7 +63,7 @@ void aura_frame_free(AuraFrame* self)
         }
         free(params);
     }
-    free(self);
+    aura_branch_free(self);
 }
 
 //------------------------------------------------------------------------------

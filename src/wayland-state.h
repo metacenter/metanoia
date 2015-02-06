@@ -6,21 +6,11 @@
 
 #include "utils-store.h"
 #include "output.h"
+#include "wayland-surface.h"
 
 #include <wayland-server.h>
 
-typedef struct {
-    AuraItem base;
-    struct wl_resource* resource;
-    struct wl_resource* buffer_resource;
-    struct wl_resource* frame_resource;
-    struct wl_resource* shell_resource;
-    struct wl_resource* xdg_shell_resource;
-} AuraSurfaceWaylandData;
-
 /// @todo Add prefixes to functions in wayland-state
-
-AuraSurfaceWaylandData* wayland_surface_data_new(void);
 
 AuraResult wayland_state_initialize(struct wl_display* display);
 

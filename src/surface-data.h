@@ -37,5 +37,7 @@ typedef struct {
 
 AuraSurfaceData* aura_surface_data_new();
 
+void aura_surface_data_free(AuraSurfaceData* self);
+
 #endif // __AURA_SURFACE_DATA_H__
 

@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #define __USE_GNU
 #define _GNU_SOURCE
@@ -15,6 +16,7 @@ struct AuraStorePriv {
     void* root;
     AuraStoreValueCompareFunc compare_value;
     AuraStoreKeyFreeFunc free_key;
+    pthread_mutex_t mutex;
 };
 
 //------------------------------------------------------------------------------
@@ -72,6 +74,7 @@ AuraStore* aura_store_new(AuraStoreValueCompareFunc value_compare_func,
     self->root = NULL;
     self->compare_value = value_compare_func;
     self->free_key = key_free_func;
+    pthread_mutex_init(&self->mutex, NULL);
     return self;
 }
 
@@ -94,16 +97,36 @@ AuraStore* aura_store_new_for_str()
 
 //------------------------------------------------------------------------------
 
-/// Free store (do not free stored items).
+/// Free store without freeing stored items.
 void aura_store_free(AuraStore* self)
 {
     if (!self) {
         return;
     }
 
+    pthread_mutex_lock(&self->mutex);
     if (self->free_key) {
         tdestroy(self->root, self->free_key);
     }
+    pthread_mutex_unlock(&self->mutex);
+    memset(self, 0, sizeof(AuraStore));
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+/// Free store and stored items.
+void aura_store_free_with_items(AuraStore* self, AuraFreeFunc free_func)
+{
+    if (!self) {
+        return;
+    }
+
+    pthread_mutex_lock(&self->mutex);
+    if (self->free_key) {
+        tdestroy(self->root, free_func);
+    }
+    pthread_mutex_unlock(&self->mutex);
     memset(self, 0, sizeof(AuraStore));
     free(self);
 }
@@ -117,12 +140,14 @@ AuraItemId aura_store_generate_new_id(AuraStore* self)
         return scInvalidItemId;
     }
 
+    pthread_mutex_lock(&self->mutex);
     AuraItem item;
     do {
         item.id = (AuraItemId) rand();
     } while (item.id == scInvalidItemId
           || tfind((void *) &item, &self->root, self->compare_value) != NULL);
 
+    pthread_mutex_unlock(&self->mutex);
     return item.id;
 }
 
@@ -139,9 +164,12 @@ AuraResult aura_store_add_with_id(AuraStore* self, AuraItemId key, void* data)
 
     AuraItem* item = (AuraItem*) data;
     item->id = key;
+
+    pthread_mutex_lock(&self->mutex);
     if (tsearch(item, &self->root, self->compare_value) == NULL) {
         return AURA_RESULT_NOT_FOUND;
     }
+    pthread_mutex_unlock(&self->mutex);
     return AURA_RESULT_SUCCESS;
 }
 
@@ -159,9 +187,12 @@ AuraResult aura_store_add_with_str(AuraStore* self, char* key, void* data)
 
     AuraItem* item = (AuraItem*) data;
     item->str = strdup(key);
+
+    pthread_mutex_lock(&self->mutex);
     if (tsearch(item, &self->root, self->compare_value) == NULL) {
         return AURA_RESULT_NOT_FOUND;
     }
+    pthread_mutex_unlock(&self->mutex);
     return AURA_RESULT_SUCCESS;
 }
 
@@ -170,7 +201,9 @@ AuraResult aura_store_add_with_str(AuraStore* self, char* key, void* data)
 #define aura_store_find_template(KEYTYPE) \
     if (!self) { return NULL; } \
     AuraItem item; item.KEYTYPE = key; \
+    pthread_mutex_lock(&self->mutex); \
     void** result = tfind((void*) &item, &self->root, self->compare_value); \
+    pthread_mutex_unlock(&self->mutex); \
     if (result) { return *result; } \
     return NULL;
 
@@ -205,10 +238,12 @@ void* aura_store_delete_with_id(AuraStore* self, AuraItemId key)
         return NULL;
     }
 
+    pthread_mutex_lock(&self->mutex);
     AuraItem* item = aura_store_find(self, key);
     if (tdelete(item, &self->root, self->compare_value) == NULL) {
         return NULL;
     }
+    pthread_mutex_unlock(&self->mutex);
     return item;
 }
 
@@ -223,10 +258,12 @@ void* aura_store_delete_with_str(AuraStore* self, char* key)
         return NULL;
     }
 
+    pthread_mutex_lock(&self->mutex);
     AuraItem* item = aura_store_find(self, key);
     if (tdelete(item, &self->root, self->compare_value) == NULL) {
         return NULL;
     }
+    pthread_mutex_unlock(&self->mutex);
 
     free(item->str);
     item->str = NULL;
