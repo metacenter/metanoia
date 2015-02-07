@@ -9,8 +9,10 @@
 
 #include <malloc.h>
 #include <memory.h>
+#include <pthread.h>
 
 static AuraStore* sStore = NULL;
+pthread_mutex_t surface_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //------------------------------------------------------------------------------
 
@@ -44,7 +46,9 @@ AuraSurfaceId aura_surface_create(void)
 void aura_surface_destroy(AuraSurfaceId sid)
 {
     aura_event_signal_emit_int(SIGNAL_SURFACE_DESTROYED, sid);
+    aura_surface_lock();
     aura_store_delete(sStore, sid);
+    aura_surface_unlock();
 }
 
 //------------------------------------------------------------------------------
@@ -58,7 +62,9 @@ AuraSurfaceData* aura_surface_get(AuraSurfaceId sid)
 
 void aura_surface_clear_all()
 {
+    aura_surface_lock();
     aura_store_free_with_items(sStore, (AuraFreeFunc) aura_surface_data_free);
+    aura_surface_unlock();
 }
 
 //------------------------------------------------------------------------------
@@ -84,6 +90,7 @@ void aura_surface_commit(AuraSurfaceId sid,
                          uint8_t* data)
 {
     AURA_GET_AND_ASSERT_SURFACE(surface, sid);
+    aura_surface_lock();
 
     int is_first_time_commited = !surface->buffer.data;
 
@@ -100,6 +107,7 @@ void aura_surface_commit(AuraSurfaceId sid,
         }
         aura_event_signal_emit_int(SIGNAL_SURFACE_CREATED, sid);
     }
+    aura_surface_unlock();
 }
 
 //------------------------------------------------------------------------------
@@ -109,6 +117,20 @@ void aura_surface_set_requested_size(AuraSurfaceId sid,
 {
     AURA_GET_AND_ASSERT_SURFACE(surface, sid);
     surface->requested_size = size;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_lock()
+{
+    pthread_mutex_lock(&surface_mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_unlock()
+{
+    pthread_mutex_unlock(&surface_mutex);
 }
 
 //------------------------------------------------------------------------------

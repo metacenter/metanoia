@@ -64,3 +64,16 @@ void aura_event_timer_delete(timer_t timerid)
 
 //------------------------------------------------------------------------------
 
+void aura_event_timer_nanosleep(long nanoseconds)
+{
+    struct timespec req;
+    req.tv_sec = 0;
+    req.tv_nsec = nanoseconds;
+
+    if(nanosleep(&req, NULL)) {
+        LOG_ERROR("Sleep error: %m");
+    }
+}
+
+//------------------------------------------------------------------------------
+

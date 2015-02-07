@@ -15,5 +15,7 @@ timer_t aura_event_timer_run(int miliseconds,
 
 void aura_event_timer_delete(timer_t timerid);
 
+void aura_event_timer_nanosleep(long nonoseconds);
+
 #endif // __AURA_EVENT_TIMER_H__
 

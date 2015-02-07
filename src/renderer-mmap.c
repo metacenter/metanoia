@@ -88,8 +88,7 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
     int H = mine->height;
     int S = mine->buffer[current_buffer].stride;
 
-    Link* link;
-    for (link = surfaces->first; link; link = link->next) {
+    for (Link* link = surfaces->first; link; link = link->next) {
         AuraSurfaceData* surface = aura_surface_get((AuraSurfaceId) link->data);
         if (!surface) {
             continue;

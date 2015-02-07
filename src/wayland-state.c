@@ -69,8 +69,7 @@ void wayland_state_finalize()
     }
 
     if (sState.surfaces) {
-        aura_store_free_with_items(sState.surfaces,
-                                  (AuraFreeFunc) aura_wayland_surface_free);
+        aura_store_free(sState.surfaces);
         sState.surfaces = NULL;
     }
 }

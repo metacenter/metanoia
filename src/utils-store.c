@@ -115,6 +115,8 @@ void aura_store_free(AuraStore* self)
 
 //------------------------------------------------------------------------------
 
+#include "utils-log.h"
+
 /// Free store and stored items.
 void aura_store_free_with_items(AuraStore* self, AuraFreeFunc free_func)
 {
@@ -238,8 +240,8 @@ void* aura_store_delete_with_id(AuraStore* self, AuraItemId key)
         return NULL;
     }
 
-    pthread_mutex_lock(&self->mutex);
     AuraItem* item = aura_store_find(self, key);
+    pthread_mutex_lock(&self->mutex);
     if (tdelete(item, &self->root, self->compare_value) == NULL) {
         return NULL;
     }
@@ -258,8 +260,8 @@ void* aura_store_delete_with_str(AuraStore* self, char* key)
         return NULL;
     }
 
-    pthread_mutex_lock(&self->mutex);
     AuraItem* item = aura_store_find(self, key);
+    pthread_mutex_lock(&self->mutex);
     if (tdelete(item, &self->root, self->compare_value) == NULL) {
         return NULL;
     }

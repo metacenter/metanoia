@@ -15,14 +15,14 @@ typedef struct {
     AuraOutput* output;
     Chain* compositors;
     AuraCompositor* compositor;
-    __timer_t timerid;
-    pthread_mutex_t mutex;
+    bool run;
+    pthread_t thread;
 } AuraDisplay;
 
 AuraDisplay* aura_display_new(AuraOutput* output);
 void aura_display_free(AuraDisplay* self);
 
-void aura_display_start(AuraDisplay* self);
+int aura_display_start(AuraDisplay* self);
 void aura_display_stop(AuraDisplay* self);
 
 void aura_display_command_position(AuraDisplay* self,

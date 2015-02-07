@@ -27,6 +27,10 @@ void aura_surface_set_requested_size(AuraSurfaceId sid,
 
 int aura_surface_compare(AuraSurfaceId first, AuraSurfaceId second);
 
+void aura_surface_lock();
+
+void aura_surface_unlock();
+
 void aura_surface_clear_all();
 
 #endif // __AURA_SURFACE_MANAGER_H__
