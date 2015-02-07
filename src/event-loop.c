@@ -60,6 +60,23 @@ void aura_loop_free(AuraLoop* self)
 
 //------------------------------------------------------------------------------
 
+void aura_loop_process_task(AuraTask* task)
+{
+    if (task) {
+        if (task->process) {
+            LOG_EVNT4("Loop: processing task");
+            task->process(task->data);
+        } else {
+            LOG_ERROR("Invalid task processor!");
+        }
+        aura_object_unref((AuraObject*) task);
+    } else {
+        LOG_ERROR("Invalid task!");
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void* aura_loop_thread_loop(void* data)
 {
     AuraLoop* self = (AuraLoop*) data;
@@ -77,27 +94,14 @@ void* aura_loop_thread_loop(void* data)
             pthread_mutex_lock(&self->schedule_mutex);
             AuraTask* task = chain_pop(self->task_chain);
             pthread_mutex_unlock(&self->schedule_mutex);
-            if (task) {
-                if (task->process) {
-                    LOG_EVNT4("Loop: processing task");
-                    task->process(task->data);
-                } else {
-                    LOG_ERROR("Invalid task processor!");
-                }
-                aura_object_unref((AuraObject*) task);
-            } else {
-                LOG_ERROR("Invalid task!");
-            }
+            aura_loop_process_task(task);
         }
-
         pthread_cond_wait(&self->condition, &self->process_mutex);
     }
 
+    LOG_INFO1("Threads: finalizing loop '%s'", self->name);
     for (Link* link = self->finalizers->last; link; link = link->prev) {
-        AuraTaskProcessor finalize = (AuraTaskProcessor) link->data;
-        if (finalize) {
-            finalize(self);
-        }
+        aura_loop_process_task((AuraTask*) link->data);
     }
 
     LOG_INFO1("Threads: stopped loop '%s'", self->name);
@@ -160,7 +164,8 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
 
 void aura_loop_add_finalizer(AuraLoop* self, AuraTaskProcessor finalizer)
 {
-    chain_append(self->finalizers, (void*) finalizer);
+    chain_append(self->finalizers, aura_task_new(finalizer,
+                 (AuraFreeFunc) aura_task_free, NULL, NULL));
 }
 
 //------------------------------------------------------------------------------
