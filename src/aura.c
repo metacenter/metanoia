@@ -48,10 +48,10 @@ int main()
     task = factorize_initialize_output_collector_task(loop_devices);
     aura_loop_schedule_task(loop_devices, task);
 
-    task = factorize_initialize_exhibitor_task(loop_displays);
+    task = factorize_initialize_wayland_task(loop_displays);
     aura_loop_schedule_task(loop_displays, task);
 
-    task = factorize_initialize_wayland_task(loop_displays);
+    task = factorize_initialize_exhibitor_task(loop_displays);
     aura_loop_schedule_task(loop_displays, task);
 
     // Start threads

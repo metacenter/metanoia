@@ -40,7 +40,7 @@ void aura_wayland_surface_attach(AURA_UNUSED struct wl_client* client,
         LOG_WARN3("Wrong shared memory buffer!");
     }
 
-    wayland_state_surface_attach(sid, buffer_resource);
+    aura_wayland_state_surface_attach(sid, buffer_resource);
 
     if (!data) {
         aura_surface_attach_egl(sid, buffer_resource);
@@ -85,7 +85,7 @@ void aura_wayland_surface_frame(struct wl_client* client,
     // TODO: listen for destroy callback
     wl_resource_set_implementation(rc, NULL, NULL, NULL);
 
-    wayland_state_subscribe_frame(sid, rc);
+    aura_wayland_state_subscribe_frame(sid, rc);
 }
 
 //-----------------------------------------------------------------------------

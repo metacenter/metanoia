@@ -72,7 +72,7 @@ void aura_wayland_get_keyboard(struct wl_client* client,
                                    NULL, aura_wayland_keyboard_unbind);
 
     // Store resource
-    wayland_state_add_keyboard_resource(rc);
+    aura_wayland_state_add_keyboard_resource(rc);
 
     // Send keymap to client
     AuraKeymap* keymap = aura_config_get_keymap();

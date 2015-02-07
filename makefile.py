@@ -361,13 +361,6 @@ aura.add_input(t)
 # WAYLAD FRONTEND
 
 t = m.add_compile_target(
-        output='wayland.o',
-        inputs=['wayland.c'],
-        pkgs={'wayland-server'}
-    )
-aura.add_input(t)
-
-t = m.add_compile_target(
         output='wayland-surface.o',
         inputs=['wayland-surface.c'],
     )
@@ -380,8 +373,21 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='wayland-cache.o',
+        inputs=['wayland-cache.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='wayland-state.o',
         inputs=['wayland-state.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='wayland.o',
+        inputs=['wayland.c'],
+        pkgs={'wayland-server'}
     )
 aura.add_input(t)
 

@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-surface.h"
+#include "utils-log.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -27,24 +28,45 @@ void aura_wayland_surface_free(AuraWaylandSurface* self)
         return;
     }
 
-    if (self->resource) {
-        wl_resource_destroy(self->resource);
-    }
-    if (self->buffer_resource) {
-        wl_resource_destroy(self->buffer_resource);
-    }
-    if (self->frame_resource) {
-        wl_resource_destroy(self->frame_resource);
-    }
-    if (self->shell_resource) {
-        wl_resource_destroy(self->shell_resource);
-    }
-    if (self->xdg_shell_resource) {
-        wl_resource_destroy(self->xdg_shell_resource);
-    }
-
     memset(self, 0, sizeof(AuraWaylandSurface));
     free(self);
+}
+
+//------------------------------------------------------------------------------
+
+struct wl_resource* aura_wayland_surface_get_resource
+                                  (AuraWaylandSurface* self,
+                                   AuraWaylandSurfaceResourceType resource_type)
+{
+    struct wl_resource* result = NULL;
+    if (!self) {
+        return result;
+    }
+
+    if (resource_type < AURA_NUM_SURFACE_RESOURCE_TYPES) {
+        result = self->resources[resource_type];
+    } else {
+        LOG_WARN1("Reading not existing resource type (%d)", resource_type);
+    }
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_wayland_surface_set_resource
+                                  (AuraWaylandSurface* self,
+                                   AuraWaylandSurfaceResourceType resource_type,
+                                   struct wl_resource* resource)
+{
+    if (!self) {
+        return;
+    }
+
+    if (resource_type < AURA_NUM_SURFACE_RESOURCE_TYPES) {
+        self->resources[resource_type] = resource;
+    } else {
+        LOG_WARN1("Adding not existing resource type (%d)", resource_type);
+    }
 }
 
 //------------------------------------------------------------------------------

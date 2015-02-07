@@ -3,7 +3,7 @@
 
 #include "wayland-protocol-shell.h"
 #include "wayland-protocol-shell-surface.h"
-#include "wayland-state.h"
+#include "wayland-cache.h"
 
 #include "utils-log.h"
 
@@ -42,7 +42,8 @@ void aura_wayland_get_shell_surface
         return;
     }
 
-    wayland_state_add_shell_surface(sid, rc);
+    aura_wayland_cache_add_surface_resource
+                                  (sid, AURA_RESOURCE_SHELL_SURFACE, rc);
 
     wl_resource_set_implementation(rc, &shell_surface_implementation,
                                    NULL, aura_wayland_shell_surface_unbind);
