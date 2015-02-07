@@ -179,7 +179,7 @@ void* chain_pop(Chain* self)
 
     result = self->first->data;
     next = self->first->next;
-    link_free(self->first, self->freefunc);
+    link_free(self->first, NULL);
     self->first = next;
     self->len -= 1;
 
