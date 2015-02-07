@@ -4,6 +4,7 @@
 #include "wayland-protocol-compositor.h"
 #include "wayland-protocol-surface.h"
 #include "wayland-protocol-region.h"
+#include "wayland-cache.h"
 #include "wayland-state.h"
 
 #include "surface-manager.h"
@@ -103,6 +104,8 @@ void aura_wayland_compositor_bind(struct wl_client* client,
         wl_client_post_no_memory(client);
         return;
     }
+
+    aura_wayland_cache_add_general_resource(AURA_RESOURCE_OTHER, rc);
 
     wl_resource_set_implementation(rc, &compositor_implementation,
                                    NULL, aura_wayland_compositor_unbind);

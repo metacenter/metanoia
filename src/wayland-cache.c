@@ -38,17 +38,18 @@ AuraResult aura_wayland_cache_initialize()
         return AURA_RESULT_ERROR;
     }
 
-    for (int i = 0; i < AURA_NUM_SURFACE_RESOURCE_TYPES; ++i) {
-        sCache.surface_resource[i] = chain_new(NULL);
-        if (!sCache.surface_resource[i]) {
+    for (int type = 0; type < AURA_RESOURCE_BUFFER; ++type) {
+        sCache.surface_resource[type] =
+                                  chain_new((AuraFreeFunc) wl_resource_destroy);
+        if (!sCache.surface_resource[type]) {
             return AURA_RESULT_ERROR;
         }
     }
 
-    for (int i = 0; i < AURA_NUM_GENERAL_RESOURCE_TYPES; ++i) {
-        sCache.general_resource[i] =
+    for (int type = 0; type < AURA_NUM_GENERAL_RESOURCE_TYPES; ++type) {
+        sCache.general_resource[type] =
                                   chain_new((AuraFreeFunc) wl_resource_destroy);
-        if (!sCache.general_resource[i]) {
+        if (!sCache.general_resource[type]) {
             return AURA_RESULT_ERROR;
         }
     }
@@ -60,12 +61,12 @@ AuraResult aura_wayland_cache_initialize()
 
 void aura_wayland_cache_finalize()
 {
-    for (int i = 0; i < AURA_NUM_GENERAL_RESOURCE_TYPES; ++i) {
-        chain_free(sCache.general_resource[i]);
+    for (int type = 0; type < AURA_NUM_GENERAL_RESOURCE_TYPES; ++type) {
+        chain_free(sCache.general_resource[type]);
     }
 
-    for (int i = 0; i < AURA_NUM_SURFACE_RESOURCE_TYPES; ++i) {
-        chain_free(sCache.surface_resource[i]);
+    for (int type = 0; type < AURA_NUM_SURFACE_RESOURCE_TYPES; ++type) {
+        chain_free(sCache.surface_resource[type]);
     }
 
     if (sCache.surfaces) {

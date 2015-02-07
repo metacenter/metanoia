@@ -94,7 +94,10 @@ void aura_wayland_state_surface_attach(AuraSurfaceId sid,
                                        struct wl_resource* rc)
 {
     pthread_mutex_lock(&sStateMutex);
-    aura_wayland_cache_add_surface_resource(sid, AURA_RESOURCE_BUFFER, rc);
+
+    AuraWaylandSurface* surface = aura_wayland_cache_find_surface(sid);
+    aura_wayland_surface_set_resource(surface, AURA_RESOURCE_BUFFER, rc);
+
     pthread_mutex_unlock(&sStateMutex);
 }
 

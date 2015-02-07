@@ -115,6 +115,8 @@ void aura_wayland_xdg_shell_bind(struct wl_client* client,
         return;
     }
 
+    aura_wayland_cache_add_general_resource(AURA_RESOURCE_OTHER, rc);
+
     wl_resource_set_implementation(rc, &xdg_shell_implementation,
                                    NULL, aura_wayland_xdg_shell_unbind);
 }
