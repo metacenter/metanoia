@@ -4,6 +4,7 @@
 #include "exhibitor-display.h"
 #include "exhibitor-pointer.h"
 #include "utils-log.h"
+#include "utils-list.h"
 #include "utils-environment.h"
 #include "event-timer.h"
 #include "event-signals.h"
@@ -49,7 +50,7 @@ int aura_display_is_valid(AuraDisplay* self)
 
 void aura_display_redraw_all(AuraDisplay* self)
 {
-    Chain* visible_surfaces =
+    AuraList* visible_surfaces =
                          aura_compositor_get_visible_surfaces(self->compositor);
 
     AuraPosition pos = aura_exhibitor_get_pointer_position();
@@ -58,14 +59,13 @@ void aura_display_redraw_all(AuraDisplay* self)
                                  visible_surfaces, pos.x, pos.y);
     // TODO: pass as list
     if (visible_surfaces) {
-        Link* link;
-        for (link = visible_surfaces->first; link; link = link->next) {
+        FOR_EACH (visible_surfaces, link) {
             AuraSurfaceId sid = (AuraSurfaceId) link->data;
             aura_event_signal_emit_int(SIGNAL_SCREEN_REFRESH, sid);
         }
     }
 
-    chain_free(visible_surfaces);
+    aura_list_free(visible_surfaces);
 }
 
 //------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ AuraDisplay* aura_display_new(AuraOutput* output)
 
     self->output = output;
     self->compositor = aura_compositor_new();
-    self->compositors = chain_new((AuraFreeFunc) aura_compositor_free);
-    chain_append(self->compositors, self->compositor);
+    self->compositors = aura_list_new((AuraFreeFunc) aura_compositor_free);
+    aura_list_append(self->compositors, self->compositor);
     return self;
 }
 
@@ -125,7 +125,7 @@ void aura_display_free(AuraDisplay* self)
     }
 
     aura_object_unref((AuraObject*) self->output);
-    chain_free(self->compositors);
+    aura_list_free(self->compositors);
 
     memset(self, 0, sizeof(AuraDisplay));
     free(self);

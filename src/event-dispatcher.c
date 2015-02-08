@@ -3,7 +3,7 @@
 
 #include "event-dispatcher.h"
 #include "utils-log.h"
-#include "utils-chain.h"
+#include "utils-list.h"
 
 #include <errno.h>
 #include <stdlib.h>
@@ -16,7 +16,7 @@
 struct AuraEventDispatcherPriv {
     int run;
     int epfd;
-    Chain* sources;
+    AuraList* sources;
 };
 
 //------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ AuraEventDispatcher* aura_event_dispatcher_new()
     }
 
     self->run = 0;
-    self->sources = chain_new((AuraFreeFunc) aura_event_data_destroy);
+    self->sources = aura_list_new((AuraFreeFunc) aura_event_data_destroy);
     return self;
 }
 
@@ -74,7 +74,7 @@ void aura_event_dispatcher_free(AuraEventDispatcher* self)
         return;
     }
 
-    chain_free(self->sources);
+    aura_list_free(self->sources);
     memset(self, 0, sizeof(AuraEventDispatcher));
     free(self);
 }
@@ -119,7 +119,7 @@ int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
 
     LOG_INFO2("Adding event source (fd: '%d')", data->fd);
 
-    chain_append(self->sources, data);
+    aura_list_append(self->sources, data);
 
     struct epoll_event event;
     event.data.ptr = data;
@@ -163,7 +163,7 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
         }
     }
 
-    for (Link* link = self->sources->first; link; link = link->next) {
+    FOR_EACH (self->sources, link) {
         AuraEventData* data = link->data;
         if (data && data->exit) {
             data->exit(data);

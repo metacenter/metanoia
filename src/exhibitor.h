@@ -7,13 +7,14 @@
 #include "exhibitor-display.h"
 
 #include "event-loop.h"
+#include "utils-list.h"
 
 typedef struct AuraExhibitorPriv AuraExhibitorPriv;
 
 typedef struct {
-    Chain* displays;
+    AuraList* displays;
     AuraDisplay* display;
-    Chain* surface_history;
+    AuraList* surface_history;
     AuraExhibitorPriv* priv;
 } AuraExhibitor;
 

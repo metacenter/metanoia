@@ -9,6 +9,9 @@
 #define FOR_EACH(LIST,LINK) \
     for (Link* LINK = ((Chain*) LIST)->first; LINK; LINK = LINK->next)
 
+#define FOR_EACH_REVERSE(LIST,LINK) \
+    for (Link* LINK = ((Chain*) LIST)->last; LINK; LINK = LINK->prev)
+
 typedef struct {
     Chain base;
     AuraFreeFunc free_data;
@@ -45,6 +48,16 @@ static inline int aura_list_len(AuraList* self)
 static inline int aura_list_recalculate_length(AuraList* self)
 {
     return chain_recalculate_length((Chain*) self);
+}
+
+static inline Link* aura_list_first(AuraList* self)
+{
+    return self->base.first;
+}
+
+static inline Link* aura_list_last(AuraList* self)
+{
+    return self->base.last;
 }
 
 #endif // __AURA_UTILS_LIST_H__

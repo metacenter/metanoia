@@ -6,7 +6,7 @@
 
 #include "utils-store.h"
 #include "wayland-surface.h"
-#include "utils-chain.h"
+#include "utils-list.h"
 
 #include <wayland-server.h>
 
@@ -38,7 +38,7 @@ void aura_wayland_cache_remove_general_resource
                                   (AuraWaylandGeneralResourceType resource_type,
                                    struct wl_resource* resource);
 
-Chain* aura_wayland_cache_get_resources
+AuraList* aura_wayland_cache_get_resources
                                  (AuraWaylandGeneralResourceType resource_type);
 
 #endif // __AURA_WAYLAND_CACHE_H__

@@ -4,6 +4,7 @@
 #include "output-collector.h"
 #include "event-signals.h"
 #include "utils-log.h"
+#include "utils-list.h"
 #include "device-drm.h"
 #include "device-fb.h"
 #include "backend-gtk.h"
@@ -16,7 +17,7 @@
 
 /// List of all currently available outputs.
 /// @todo This should not be a global variable.
-Chain* outputs = 0;
+AuraList* outputs = 0;
 
 //------------------------------------------------------------------------------
 
@@ -27,7 +28,7 @@ Chain* outputs = 0;
 AuraPosition aura_output_collector_allocate_position()
 {
     AuraPosition result = {INT_MIN, INT_MIN};
-    for (Link* link = outputs->first; link; link = link->next) {
+    FOR_EACH (outputs, link) {
         AuraOutput* output = (AuraOutput*) link->data;
         int x = output->global_position.x + output->width;
         if (x > result.x) {
@@ -47,10 +48,10 @@ AuraPosition aura_output_collector_allocate_position()
 
 /// Fetch all available (active) outputs from all possible sources.
 /// If running in simulator, fetch only simulated outputs.
-Chain* aura_output_collector_fetch_actual_outputs()
+AuraList* aura_output_collector_fetch_actual_outputs()
 {
     int num = 0;
-    Chain* actual_outputs = chain_new(0);
+    AuraList* actual_outputs = aura_list_new(NULL);
 
     if (!aura_settings()->run_in_test_window) {
         num = aura_drm_update_devices(actual_outputs);
@@ -72,9 +73,9 @@ Chain* aura_output_collector_fetch_actual_outputs()
 
 /// Notify about newly found outputs.
 /// @param found_outputs - a list of outputs to notify about
-void aura_output_collector_notify_outputs_found(Chain* found_outputs)
+void aura_output_collector_notify_outputs_found(AuraList* found_outputs)
 {
-    for (Link* link = found_outputs->first; link; link = link->next) {
+    FOR_EACH (found_outputs, link) {
         AuraOutput* output = (AuraOutput*) link->data;
         if (!output || !output->unique_name) {
             LOG_WARN1("Invalid output found!");
@@ -90,7 +91,7 @@ void aura_output_collector_notify_outputs_found(Chain* found_outputs)
                       output->initialize(output, output->width, output->height);
 
         // store the output
-        chain_append(outputs, output);
+        aura_list_append(outputs, output);
 
         // notify about new output
         if (output->renderer) {
@@ -105,9 +106,9 @@ void aura_output_collector_notify_outputs_found(Chain* found_outputs)
 
 /// Notify about lost outputs.
 /// @param lost_outputs - a list of outputs to notify about
-void aura_output_collector_notify_outputs_lost(Chain* lost_outputs)
+void aura_output_collector_notify_outputs_lost(AuraList* lost_outputs)
 {
-    for (Link* link = lost_outputs->first; link; link = link->next) {
+    FOR_EACH (lost_outputs, link) {
         AuraOutput* output = (AuraOutput*) link->data;
         if (!output || !output->unique_name) {
             LOG_WARN1("Invalid output found!");
@@ -115,7 +116,7 @@ void aura_output_collector_notify_outputs_lost(Chain* lost_outputs)
         }
 
         LOG_INFO1("Removing output '%s'", output->unique_name);
-        chain_remove(outputs, output, (AuraCompareFunc) aura_output_compare);
+        aura_list_remove(outputs, output, (AuraCompareFunc)aura_output_compare);
         aura_event_signal_emit(SIGNAL_DISPLAY_LOST, (AuraObject*) output);
     }
 }
@@ -130,20 +131,20 @@ void aura_output_collector_update()
 {
     LOG_INFO1("Updating outputs");
 
-    Chain* actual_outputs = aura_output_collector_fetch_actual_outputs();
+    AuraList* actual_outputs = aura_output_collector_fetch_actual_outputs();
 
-    Chain* found_outputs = chain_subtract(actual_outputs, outputs,
+    AuraList* found_outputs = aura_list_subtract(actual_outputs, outputs,
                                          (AuraCompareFunc) aura_output_compare);
 
-    Chain* lost_outputs = chain_subtract(outputs, actual_outputs,
+    AuraList* lost_outputs = aura_list_subtract(outputs, actual_outputs,
                                          (AuraCompareFunc) aura_output_compare);
 
     aura_output_collector_notify_outputs_found(found_outputs);
     aura_output_collector_notify_outputs_lost(lost_outputs);
 
-    chain_free(found_outputs);
-    chain_free(lost_outputs);
-    chain_free(actual_outputs);
+    aura_list_free(found_outputs);
+    aura_list_free(lost_outputs);
+    aura_list_free(actual_outputs);
 }
 
 //------------------------------------------------------------------------------
@@ -158,7 +159,7 @@ void aura_outputs_on_display_discovered(AURA_UNUSED void* data)
 
 void aura_output_collector_finalize(AURA_UNUSED void* data)
 {
-    chain_free(outputs);
+    aura_list_free(outputs);
 }
 
 //------------------------------------------------------------------------------
@@ -172,7 +173,7 @@ void aura_output_collector_initialize(AuraLoop* this_loop)
     }
 
     // initialize
-    outputs = chain_new(NULL);
+    outputs = aura_list_new(NULL);
     aura_output_collector_update();
 
     // subscribe for signals

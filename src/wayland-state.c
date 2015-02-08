@@ -149,7 +149,7 @@ void aura_wayland_state_add_keyboard_resource(struct wl_resource* rc)
 
 void aura_wayland_state_keyboard_focus_update(AuraSurfaceId new_sid)
 {
-    Chain* resources = NULL;
+    AuraList* resources = NULL;
     struct wl_resource* new_resource = NULL;
     struct wl_client* new_client = NULL;
     struct wl_resource* old_resource = NULL;
@@ -180,7 +180,7 @@ void aura_wayland_state_keyboard_focus_update(AuraSurfaceId new_sid)
         struct wl_array array;
         wl_array_init(&array);
         resources = aura_wayland_cache_get_resources(AURA_RESOURCE_KEYBOARD);
-        for (Link* link = resources->first; link; link = link->next) {
+        FOR_EACH (resources, link) {
             struct wl_resource* rc = link->data;
             struct wl_client* rc_client = wl_resource_get_client(rc);
 
@@ -204,7 +204,7 @@ void aura_wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
 {
     struct wl_resource* resource = NULL;
     struct wl_client* focused_client = NULL;
-    Chain* resources = NULL;
+    AuraList* resources = NULL;
 
     pthread_mutex_lock(&sStateMutex);
 
@@ -224,7 +224,7 @@ void aura_wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
     if (resource && focused_client) {
         int serial = wl_display_next_serial(sState.display);
         resources = aura_wayland_cache_get_resources(AURA_RESOURCE_KEYBOARD);
-        for (Link* link = resources->first; link; link = link->next) {
+        FOR_EACH (resources, link) {
             struct wl_resource* rc = link->data;
             if (focused_client == wl_resource_get_client(rc)) {
                 wl_keyboard_send_key(rc, serial, time, key, state);

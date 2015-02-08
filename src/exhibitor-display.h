@@ -13,7 +13,7 @@
 
 typedef struct {
     AuraOutput* output;
-    Chain* compositors;
+    AuraList* compositors;
     AuraCompositor* compositor;
     bool run;
     pthread_t thread;

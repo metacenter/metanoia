@@ -12,8 +12,8 @@ pthread_mutex_t sCacheMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static struct {
     AuraStore* surfaces;
-    Chain* surface_resource[AURA_NUM_SURFACE_RESOURCE_TYPES];
-    Chain* general_resource[AURA_NUM_GENERAL_RESOURCE_TYPES];
+    AuraList* surface_resource[AURA_NUM_SURFACE_RESOURCE_TYPES];
+    AuraList* general_resource[AURA_NUM_GENERAL_RESOURCE_TYPES];
 } sCache;
 
 //------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ AuraResult aura_wayland_cache_initialize()
 
     for (int type = 0; type < AURA_NUM_SURFACE_RESOURCE_TYPES; ++type) {
         sCache.surface_resource[type] =
-                                  chain_new((AuraFreeFunc) wl_resource_destroy);
+                              aura_list_new((AuraFreeFunc) wl_resource_destroy);
         if (!sCache.surface_resource[type]) {
             return AURA_RESULT_ERROR;
         }
@@ -48,7 +48,7 @@ AuraResult aura_wayland_cache_initialize()
 
     for (int type = 0; type < AURA_NUM_GENERAL_RESOURCE_TYPES; ++type) {
         sCache.general_resource[type] =
-                                  chain_new((AuraFreeFunc) wl_resource_destroy);
+                              aura_list_new((AuraFreeFunc) wl_resource_destroy);
         if (!sCache.general_resource[type]) {
             return AURA_RESULT_ERROR;
         }
@@ -62,11 +62,11 @@ AuraResult aura_wayland_cache_initialize()
 void aura_wayland_cache_finalize()
 {
     for (int type = 0; type < AURA_NUM_GENERAL_RESOURCE_TYPES; ++type) {
-        chain_free(sCache.general_resource[type]);
+        aura_list_free(sCache.general_resource[type]);
     }
 
     for (int type = 0; type < AURA_NUM_SURFACE_RESOURCE_TYPES; ++type) {
-        chain_free(sCache.surface_resource[type]);
+        aura_list_free(sCache.surface_resource[type]);
     }
 
     if (sCache.surfaces) {
@@ -115,7 +115,7 @@ void aura_wayland_cache_add_surface_resource
 {
     pthread_mutex_lock(&sCacheMutex);
 
-    chain_append(sCache.surface_resource[resource_type], resource);
+    aura_list_append(sCache.surface_resource[resource_type], resource);
 
     AuraWaylandSurface* surface = aura_store_find(sCache.surfaces, sid);
     if (surface) {
@@ -136,7 +136,7 @@ void aura_wayland_cache_add_general_resource
     pthread_mutex_lock(&sCacheMutex);
 
     if (resource_type < AURA_NUM_GENERAL_RESOURCE_TYPES) {
-        chain_append(sCache.general_resource[resource_type], resource);
+        aura_list_append(sCache.general_resource[resource_type], resource);
     } else {
         LOG_WARN1("Adding not existing resource type (%d)", resource_type);
     }
@@ -153,7 +153,7 @@ void aura_wayland_cache_remove_surface_resource
     pthread_mutex_lock(&sCacheMutex);
 
     if (resource_type < AURA_NUM_SURFACE_RESOURCE_TYPES) {
-        chain_remove(sCache.surface_resource[resource_type], resource,
+        aura_list_remove(sCache.surface_resource[resource_type], resource,
                      (AuraCompareFunc) aura_wayland_cache_compare_resources);
     } else {
         LOG_WARN1("Removing not existing resource type (%d)", resource_type);
@@ -171,7 +171,7 @@ void aura_wayland_cache_remove_general_resource
     pthread_mutex_lock(&sCacheMutex);
 
     if (resource_type < AURA_NUM_GENERAL_RESOURCE_TYPES) {
-        chain_remove(sCache.general_resource[resource_type], resource,
+        aura_list_remove(sCache.general_resource[resource_type], resource,
                      (AuraCompareFunc) aura_wayland_cache_compare_resources);
     } else {
         LOG_WARN1("Removing not existing resource type (%d)", resource_type);
@@ -182,7 +182,7 @@ void aura_wayland_cache_remove_general_resource
 
 //------------------------------------------------------------------------------
 
-Chain* aura_wayland_cache_get_resources
+AuraList* aura_wayland_cache_get_resources
                                   (AuraWaylandGeneralResourceType resource_type)
 {
     if (resource_type >= AURA_NUM_GENERAL_RESOURCE_TYPES) {

@@ -4,7 +4,7 @@
 #include "event-signals.h"
 #include "event-loop.h"
 #include "utils-log.h"
-#include "utils-chain.h"
+#include "utils-list.h"
 #include "global-objects.h"
 
 #include <stdlib.h>
@@ -12,7 +12,7 @@
 //------------------------------------------------------------------------------
 
 typedef struct SignalSubscriber {
-    Chain** tab;
+    AuraList** tab;
 } SignalSubscriber;
 
 //------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ SignalSubscriber* get_signal_subscriber()
         return &ss;
     }
 
-    ss.tab = calloc(SIGNAL_NUM, sizeof(Chain*));
+    ss.tab = calloc(SIGNAL_NUM, sizeof(AuraList*));
     return &ss;
 }
 
@@ -57,14 +57,14 @@ AuraResult aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
         return AURA_RESULT_ERROR;
     }
 
-    Chain* chain = ss->tab[sig_num];
-    if (chain == NULL) {
-        chain = chain_new((AuraFreeFunc) aura_task_free);
-        ss->tab[sig_num] = chain;
+    AuraList* list = ss->tab[sig_num];
+    if (list == NULL) {
+        list = aura_list_new((AuraFreeFunc) aura_task_free);
+        ss->tab[sig_num] = list;
     }
 
     LOG_EVNT2("Subscription for signal %d", sig_num);
-    chain_append(chain, task);
+    aura_list_append(list, task);
 
     return AURA_RESULT_SUCCESS;
 }
@@ -79,16 +79,15 @@ AuraResult aura_event_signal_unsubscribe(void* subscription_data)
     }
 
     SignalSubscriber* ss = get_signal_subscriber();
-    if (!ss) {
+    if (ss == NULL) {
         LOG_ERROR("Invalid Signal Subscriber!");
         return AURA_RESULT_ERROR;
     }
 
     for (int s = 0; s < SIGNAL_NUM; ++s) {
-        Chain* chain = ss->tab[s];
-        if (chain) {
-            LOG_EVNT2("Unsubscription from signal %d", s);
-            chain_remove_all(chain, subscription_data, (AuraCompareFunc)
+        AuraList* list = ss->tab[s];
+        if (list) {
+            aura_list_remove_all(list, subscription_data, (AuraCompareFunc)
                               aura_event_signal_compare_task_subscription_data);
         }
     }
@@ -110,12 +109,12 @@ AuraResult aura_event_signal_emit(AuraSignalNum sig_num, AuraObject* object) {
         return AURA_RESULT_ERROR;
     }
 
-    Chain* chain = ss->tab[sig_num];
-    if (chain != NULL) {
-        LOG_EVNT4("Signal: emit (num: %d; %d listeners)", sig_num, chain->len);
+    AuraList* list = ss->tab[sig_num];
+    if (list) {
+        LOG_EVNT4("Signal: emit (num: %d; %d listeners)",
+                  sig_num, aura_list_len(list));
 
-        Link* link = chain->first;
-        while(link) {
+        FOR_EACH(list, link) {
             AuraTask* task = link->data;
             if (task) {
                 if (task->loop) {
@@ -130,7 +129,6 @@ AuraResult aura_event_signal_emit(AuraSignalNum sig_num, AuraObject* object) {
             } else {
                 LOG_WARN3("Invalid task!");
             }
-            link = link->next;
         }
     } else {
         LOG_EVNT3("Signal: emit (num: %d, no listeners)", sig_num);
@@ -161,7 +159,7 @@ void aura_event_signal_clear_all_substriptions()
 
     for (int s = 0; s < SIGNAL_NUM; ++s) {
         if (ss->tab[s]) {
-            chain_free(ss->tab[s]);
+            aura_list_free(ss->tab[s]);
         }
     }
     free(ss->tab);

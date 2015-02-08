@@ -5,9 +5,10 @@
 #define __AURA_EXHIBITOR_COMPOSITOR_H__
 
 #include "exhibitor-frame.h"
+#include "utils-list.h"
 
 typedef struct {
-    Chain* groups;
+    AuraList* groups;
     AuraFrame* frame;
     AuraFrame* selection;
 } AuraCompositor;
@@ -16,7 +17,7 @@ AuraCompositor* aura_compositor_new();
 
 void aura_compositor_free(AuraCompositor* self);
 
-Chain* aura_compositor_get_visible_surfaces(AuraCompositor* self);
+AuraList* aura_compositor_get_visible_surfaces(AuraCompositor* self);
 
 void aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid);
 

@@ -462,11 +462,10 @@ AuraOutputDRM* aura_drm_output_new(int width,
 //------------------------------------------------------------------------------
 // DEVICE
 
-int is_crtc_in_use(Chain* drm_outputs, uint32_t crtc_id)
+int is_crtc_in_use(AuraList* drm_outputs, uint32_t crtc_id)
 {
     int is_in_use = 0;
-    Link* link;
-    for (link = drm_outputs->first; link; link = link->next) {
+    FOR_EACH (drm_outputs, link) {
         AuraOutputDRM* output_drm = (AuraOutputDRM*) link->data;
         if (output_drm->crtc_id == crtc_id) {
             is_in_use = 1;
@@ -481,7 +480,7 @@ int is_crtc_in_use(Chain* drm_outputs, uint32_t crtc_id)
 uint32_t find_crtc(int drm_fd,
                    drmModeRes* resources,
                    drmModeConnector* connector,
-                   Chain* drm_outputs)
+                   AuraList* drm_outputs)
 {
     // Try to reuse old encoder
     if (connector->encoder_id) {
@@ -529,7 +528,7 @@ uint32_t find_crtc(int drm_fd,
 AuraOutputDRM* update_device(int drm_fd,
                              drmModeRes* resources,
                              drmModeConnector* connector,
-                             Chain* drm_outputs)
+                             AuraList* drm_outputs)
 {
     LOG_INFO2("Updating connector (id: %u)", connector->connector_id);
 
@@ -561,7 +560,7 @@ AuraOutputDRM* update_device(int drm_fd,
 
 //------------------------------------------------------------------------------
 
-int aura_drm_update_devices(Chain* outputs)
+int aura_drm_update_devices(AuraList* outputs)
 {
     pthread_mutex_lock(&drm_mutex);
 
@@ -569,7 +568,7 @@ int aura_drm_update_devices(Chain* outputs)
     int j, num = -1;
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
-    Chain* drm_outputs = chain_new(NULL);
+    AuraList* drm_outputs = aura_list_new(NULL);
 
     LOG_INFO1("Updating DRM devices");
 
@@ -628,16 +627,15 @@ int aura_drm_update_devices(Chain* outputs)
             AuraOutputDRM* output =
                            update_device(fd, resources, connector, drm_outputs);
             if (output) {
-                chain_append(drm_outputs, output);
+                aura_list_append(drm_outputs, output);
                 num += 1;
             }
         }
         drmModeFreeConnector(connector);
     }
 
-    Link* link;
-    for (link = drm_outputs->first; link; link = link->next) {
-        chain_append(outputs, link->data);
+    FOR_EACH (drm_outputs, link) {
+        aura_list_append(outputs, link->data);
     }
 
     // Free memory

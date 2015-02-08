@@ -315,7 +315,7 @@ void aura_renderer_gl_finalize(AURA_UNUSED AuraRenderer* self)
 //------------------------------------------------------------------------------
 
 void aura_renderer_gl_draw(AuraRenderer* self,
-                           Chain* surfaces,
+                           AuraList* surfaces,
                            AURA_UNUSED int x,
                            AURA_UNUSED int y)
 {
@@ -352,7 +352,7 @@ void aura_renderer_gl_draw(AuraRenderer* self,
         goto release_context;
     }
 
-    Link* link = surfaces->first;
+    Link* link = aura_list_first(surfaces);
     //for (link = surfaces->first; link; link = link->next) {
         AuraSurfaceData* surface = aura_surface_get((AuraSurfaceId) link->data);
         uint8_t* data = surface->buffer.data;

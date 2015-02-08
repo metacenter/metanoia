@@ -13,8 +13,8 @@
 
 //------------------------------------------------------------------------------
 
-static Chain* stack = NULL;
-static Chain* modes = NULL;
+static AuraList* stack = NULL;
+static AuraList* modes = NULL;
 static uint32_t modifiers = 0;
 
 //------------------------------------------------------------------------------
@@ -30,15 +30,15 @@ void aura_keyboard_add_binding(AuraModeEnum modeid, const AuraBinding* binding)
     }
 
     if (!stack) {
-        stack = chain_new((AuraFreeFunc) aura_argmand_free);
+        stack = aura_list_new((AuraFreeFunc) aura_argmand_free);
     }
 
     if (!modes) {
-        modes = chain_new((AuraFreeFunc) aura_mode_free);
+        modes = aura_list_new((AuraFreeFunc) aura_mode_free);
     }
 
     // Try to find mode
-    for (Link* link = modes->first; link; link = link->next) {
+    FOR_EACH (modes, link) {
         mode = (AuraMode*) link->data;
         if (mode->modeid != modeid) {
             mode = NULL;
@@ -50,7 +50,7 @@ void aura_keyboard_add_binding(AuraModeEnum modeid, const AuraBinding* binding)
     // If mode not found - create it
     if (!mode) {
         mode = aura_mode_new(modeid);
-        chain_append(modes, mode);
+        aura_list_append(modes, mode);
         if (modeid == AURA_NORMAL_MODE) {
             mode->active = 1;
         }
@@ -64,20 +64,19 @@ void aura_keyboard_add_binding(AuraModeEnum modeid, const AuraBinding* binding)
 
 void aura_keyboard_free_all()
 {
-    chain_free(modes);
-    chain_free(stack);
+    aura_list_free(modes);
+    aura_list_free(stack);
 }
 
 //------------------------------------------------------------------------------
 
-AuraBinding* aura_keyboard_find_binding(Chain* modes,
+AuraBinding* aura_keyboard_find_binding(AuraList* modes,
                                         int code,
                                         uint32_t modifiers)
 {
     AuraBinding* binding = NULL;
 
-    Link* link;
-    for (link = modes->first; link; link = link->next) {
+    FOR_EACH (modes, link) {
         AuraMode* mode = (AuraMode*) link->data;
         if (!mode->active) {
             continue;

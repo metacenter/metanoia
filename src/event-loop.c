@@ -3,7 +3,7 @@
 
 #include "event-loop.h"
 #include "utils-log.h"
-#include "utils-chain.h"
+#include "utils-list.h"
 #include "utils-environment.h"
 
 #include <errno.h>
@@ -18,8 +18,8 @@ struct AuraLoopPriv {
     pthread_mutex_t process_mutex;
     pthread_cond_t condition;
     bool run;
-    Chain* task_chain;
-    Chain* finalizers;
+    AuraList* task_list;
+    AuraList* finalizers;
 };
 
 //------------------------------------------------------------------------------
@@ -36,8 +36,8 @@ AuraLoop* aura_loop_new(const char* name)
     pthread_mutex_init(&self->process_mutex, NULL);
     pthread_cond_init(&self->condition, NULL);
     self->run = 0;
-    self->task_chain = chain_new(NULL);
-    self->finalizers = chain_new(NULL);
+    self->task_list = aura_list_new(NULL);
+    self->finalizers = aura_list_new(NULL);
     return self;
 }
 
@@ -52,8 +52,8 @@ void aura_loop_free(AuraLoop* self)
     if (self->name) {
         free(self->name);
     }
-    chain_free(self->finalizers);
-    chain_free(self->task_chain);
+    aura_list_free(self->finalizers);
+    aura_list_free(self->task_list);
     memset(self, 0, sizeof(AuraLoop));
     free(self);
 }
@@ -90,9 +90,9 @@ void* aura_loop_thread_loop(void* data)
     self->run = 1;
     pthread_mutex_lock(&self->process_mutex);
     while (self->run) {
-        while (chain_len(self->task_chain) > 0) {
+        while (aura_list_len(self->task_list) > 0) {
             pthread_mutex_lock(&self->schedule_mutex);
-            AuraTask* task = chain_pop(self->task_chain);
+            AuraTask* task = aura_list_pop(self->task_list);
             pthread_mutex_unlock(&self->schedule_mutex);
             aura_loop_process_task(task);
         }
@@ -100,7 +100,7 @@ void* aura_loop_thread_loop(void* data)
     }
 
     LOG_INFO1("Threads: finalizing loop '%s'", self->name);
-    for (Link* link = self->finalizers->last; link; link = link->prev) {
+    FOR_EACH_REVERSE (self->finalizers, link) {
         aura_loop_process_task((AuraTask*) link->data);
     }
 
@@ -154,7 +154,7 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
     }
 
     pthread_mutex_lock(&self->schedule_mutex);
-    chain_append(self->task_chain, task);
+    aura_list_append(self->task_list, task);
     pthread_mutex_unlock(&self->schedule_mutex);
     pthread_cond_signal(&self->condition);
     return 1;
@@ -164,8 +164,8 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
 
 void aura_loop_add_finalizer(AuraLoop* self, AuraTaskProcessor finalizer)
 {
-    chain_append(self->finalizers, aura_task_new(finalizer,
-                 (AuraFreeFunc) aura_task_free, NULL, NULL, NULL));
+    aura_list_append(self->finalizers, aura_task_new(finalizer,
+                    (AuraFreeFunc) aura_task_free, NULL, NULL, NULL));
 }
 
 //------------------------------------------------------------------------------

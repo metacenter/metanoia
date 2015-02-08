@@ -4,12 +4,12 @@
 #ifndef __AURA_KEYBOARD_BINDING_H__
 #define __AURA_KEYBOARD_BINDING_H__
 
-#include "utils-chain.h"
+#include "utils-list.h"
 
 #include <stdint.h>
 
-typedef void (*AuraBindingSimpleExecuteFunc) (Chain*);
-typedef void (*AuraBindingExecuteFunc) (Chain*, int, uint32_t, AuraKeyState);
+typedef void (*AuraBindingSimpleExecuteFunc) (AuraList*);
+typedef void (*AuraBindingExecuteFunc) (AuraList*, int, uint32_t, AuraKeyState);
 
 typedef struct {
     int code;

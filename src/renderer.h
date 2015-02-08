@@ -4,7 +4,7 @@
 #ifndef __AURA_RENDERER_H__
 #define __AURA_RENDERER_H__
 
-#include "utils-chain.h"
+#include "utils-list.h"
 
 // Renderer strategy interface
 // TODO: move 'attach' elsewhere
@@ -13,7 +13,7 @@ struct AuraRenderer {
     int (*initialize) (AuraRenderer*);
     void (*finalize) (AuraRenderer*);
     void (*attach) (AuraRenderer*, AuraSurfaceId, void*);
-    void (*draw) (AuraRenderer*, Chain*, int x, int y);
+    void (*draw) (AuraRenderer*, AuraList*, int x, int y);
     void (*free) (AuraRenderer*);
 };
 

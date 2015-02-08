@@ -75,7 +75,7 @@ void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
 
 // NOTE: MMap renderer can not display surfaces passed trouhgt GPU
 void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
-                                      Chain* surfaces)
+                                      AuraList* surfaces)
 {
     if (surfaces == NULL) {
         LOG_WARN4("MMap renderer: no surfaces!");
@@ -88,7 +88,7 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
     int H = mine->height;
     int S = mine->buffer[current_buffer].stride;
 
-    for (Link* link = surfaces->first; link; link = link->next) {
+    FOR_EACH (surfaces, link) {
         AuraSurfaceData* surface = aura_surface_get((AuraSurfaceId) link->data);
         if (!surface) {
             continue;
@@ -161,7 +161,7 @@ void aura_renderer_mmap_swap_buffers(AuraRendererMMap* mine)
 //------------------------------------------------------------------------------
 
 void aura_renderer_mmap_draw(AuraRenderer* self,
-                             Chain* surfaces, int X, int Y)
+                             AuraList* surfaces, int X, int Y)
 {
     AuraRendererMMap* mine = (AuraRendererMMap*) self;
     if (!mine) {

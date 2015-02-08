@@ -207,7 +207,10 @@ class Make:
                              .format(self.builddir, self.gendir, self.checkdir))
             if len(self.checks):
                 wr('checks: {0}\ncheck: checks\n'
-                   '\t@time (for c in checks/check*; do $$c; done)\n\n'
+                   '\t@time (for c in checks/check*; do $$c; done)\n'
+                   'memcheck: checks\n'
+                   '\t@time (for c in checks/check*; do valgrind '
+                   '--leak-check=full --show-leak-kinds=all $$c; done)\n\n'
                    .format(' '.join(self.checks)))
 
             for t in self.targets:

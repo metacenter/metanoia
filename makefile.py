@@ -128,6 +128,12 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 t = m.add_compile_target(
+        output='utils-list.o',
+        inputs=['utils-list.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
         output='utils-branch.o',
         inputs=['utils-branch.c'],
     )
@@ -201,6 +207,22 @@ aura.add_input(t)
 t = m.add_compile_target(
         output='event-factory.o',
         inputs=['event-factory.c'],
+    )
+aura.add_input(t)
+
+#-------------------------------------------------------------------------------
+# RENDERERS
+
+t = m.add_compile_target(
+        output='renderer-mmap.o',
+        inputs=['renderer-mmap.c'],
+    )
+aura.add_input(t)
+
+t = m.add_compile_target(
+        output='renderer-gl.o',
+        inputs=['renderer-gl.c'],
+        pkgs={'gl'}
     )
 aura.add_input(t)
 
@@ -338,22 +360,6 @@ aura.add_input(t)
 t = m.add_compile_target(
         output='exhibitor-pointer.o',
         inputs=['exhibitor-pointer.c'],
-    )
-aura.add_input(t)
-
-#-------------------------------------------------------------------------------
-# RENDERERS
-
-t = m.add_compile_target(
-        output='renderer-mmap.o',
-        inputs=['renderer-mmap.c'],
-    )
-aura.add_input(t)
-
-t = m.add_compile_target(
-        output='renderer-gl.o',
-        inputs=['renderer-gl.c'],
-        pkgs={'gl'}
     )
 aura.add_input(t)
 
@@ -526,6 +532,10 @@ aura.add_input(t)
 m.add_test(output='check-chain',
            inputs=['test-chain.c'],
            deps=['utils-chain.c'])
+
+m.add_test(output='check-list',
+           inputs=['test-list.c'],
+           deps=['utils-list.c', 'utils-chain.c'])
 
 m.add_test(output='check-store',
            inputs=['test-store.c'],

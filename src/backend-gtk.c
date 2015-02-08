@@ -105,7 +105,7 @@ AuraOutputGTK* aura_backend_gtk_output_new(int width, int height, int num)
 
 //------------------------------------------------------------------------------
 
-int aura_backend_gtk_get_outputs(Chain* outputs)
+int aura_backend_gtk_get_outputs(AuraList* outputs)
 {
     AuraSize resolution;
     int i = 0, n = 0;
@@ -115,7 +115,7 @@ int aura_backend_gtk_get_outputs(Chain* outputs)
             AuraOutputGTK* output =
                               aura_backend_gtk_output_new(resolution.width,
                                                           resolution.height, i);
-            chain_append(outputs, output);
+            aura_list_append(outputs, output);
             n +=1;
         }
         i += 1;

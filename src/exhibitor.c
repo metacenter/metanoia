@@ -28,8 +28,8 @@ AuraExhibitor* aura_exhibitor_get_instance()
         return &exhibitor;
     }
 
-    exhibitor.surface_history = chain_new(0);
-    exhibitor.displays = chain_new((AuraFreeFunc) aura_display_free);
+    exhibitor.surface_history = aura_list_new(NULL);
+    exhibitor.displays = aura_list_new((AuraFreeFunc) aura_display_free);
 
     exhibitor.priv = malloc(sizeof(AuraExhibitorPriv));
     exhibitor.priv->strategist = aura_strategist_create();
@@ -44,7 +44,7 @@ void aura_exhibitor_create_new_display(AuraOutput* output)
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
     AuraDisplay* display = aura_display_new(output);
 
-    chain_append(exhibitor->displays, display);
+    aura_list_append(exhibitor->displays, display);
     aura_display_start(display);
 
     if (!exhibitor->display) {
@@ -84,8 +84,7 @@ void aura_exhibitor_on_display_lost(void* data)
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
 
     LOG_INFO2("Deleting renderer timer");
-    Link* link;
-    for (link = exhibitor->displays->first; link; link = link->next) {
+    FOR_EACH(exhibitor->displays, link) {
         AuraDisplay* display = (AuraDisplay*) link->data;
         if (display && display->output == output) {
             aura_display_stop(display);
@@ -112,6 +111,8 @@ void aura_exhibitor_on_surface_created(void* data)
 
 void aura_exhibitor_on_surface_destroyed(void* data)
 {
+LOG_DEBUG("REM");
+
     AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
     if (sid == scInvalidSurfaceId) {
         return;
@@ -119,8 +120,8 @@ void aura_exhibitor_on_surface_destroyed(void* data)
 
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
     exhibitor->priv->strategist->on_surface_destroyed(exhibitor, sid);
-    chain_remove(exhibitor->surface_history, (void*) sid,
-                 (AuraCompareFunc) aura_surface_compare);
+    aura_list_remove(exhibitor->surface_history, (void*) sid,
+                    (AuraCompareFunc) aura_surface_compare);
 }
 
 //------------------------------------------------------------------------------
@@ -128,9 +129,9 @@ void aura_exhibitor_on_surface_destroyed(void* data)
 void aura_exhibitor_pop_surface(AuraSurfaceId sid)
 {
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
-    chain_remove(exhibitor->surface_history,
-                (void*) sid, (AuraCompareFunc) aura_surface_compare);
-    chain_append(exhibitor->surface_history, (void*) sid);
+    aura_list_remove(exhibitor->surface_history,
+                    (void*) sid, (AuraCompareFunc) aura_surface_compare);
+    aura_list_append(exhibitor->surface_history, (void*) sid);
 
     AuraSurfaceData* surface = aura_surface_get(sid);
     if (surface) {
@@ -148,11 +149,11 @@ void aura_exhibitor_pop_history_surface(int position)
     AuraSurfaceId sid = scInvalidSurfaceId;
     if (position < 0) {
         int i = 1;
-        link = exhibitor->surface_history->first;
+        link = aura_list_first(exhibitor->surface_history);
         for (; link && i < -position; ++i, link = link->next);
     } else {
         int i = 0;
-        link = exhibitor->surface_history->last;
+        link = aura_list_last(exhibitor->surface_history);
         for (; link && i < position; ++i, link = link->prev);
     }
 
@@ -185,7 +186,7 @@ void aura_exhibitor_finalize(AURA_UNUSED void* data)
 
     aura_event_signal_unsubscribe(exhibitor);
 
-    for (Link* link = exhibitor->displays->first; link; link = link->next) {
+    FOR_EACH (exhibitor->displays, link) {
         AuraDisplay* display = (AuraDisplay*) link->data;
         aura_display_stop(display);
     }
@@ -194,8 +195,8 @@ void aura_exhibitor_finalize(AURA_UNUSED void* data)
     memset(exhibitor->priv, 0, sizeof(AuraExhibitorPriv));
     free(exhibitor->priv);
 
-    chain_free(exhibitor->displays);
-    chain_free(exhibitor->surface_history);
+    aura_list_free(exhibitor->displays);
+    aura_list_free(exhibitor->surface_history);
     memset(exhibitor, 0, sizeof(AuraExhibitor));
 }
 

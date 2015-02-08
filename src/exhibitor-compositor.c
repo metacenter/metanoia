@@ -19,7 +19,7 @@ AuraCompositor* aura_compositor_new()
         return self;
     }
 
-    self->groups = chain_new(0);
+    self->groups = aura_list_new(NULL);
     self->frame = aura_frame_new();
     aura_frame_set_type(self->frame, AURA_FRAME_TYPE_STACKED);
     return self;
@@ -34,7 +34,7 @@ void aura_compositor_free(AuraCompositor* self)
     }
 
     aura_frame_free(self->frame);
-    chain_free(self->groups);
+    aura_list_free(self->groups);
 
     memset(self, 0, sizeof(AuraCompositor));
     free(self);
@@ -42,13 +42,13 @@ void aura_compositor_free(AuraCompositor* self)
 
 //------------------------------------------------------------------------------
 
-Chain* aura_compositor_get_visible_surfaces(AuraCompositor* self)
+AuraList* aura_compositor_get_visible_surfaces(AuraCompositor* self)
 {
     /// @todo Reimplement aura_compositor_get_visible_surfaces
-    Chain* surfaces = chain_new(NULL);
+    AuraList* surfaces = aura_list_new(NULL);
     FOR_EACH_TWIG(self->frame, twig) {
         AuraFrameParams* params = aura_frame_get_params(twig);
-        chain_append(surfaces, (void*) params->sid);
+        aura_list_append(surfaces, (void*) params->sid);
     }
     return surfaces;
 }

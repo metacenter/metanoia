@@ -101,7 +101,7 @@ AuraOutputFB* aura_devfb_output_new(int width, int height, char* id, int fd)
 //------------------------------------------------------------------------------
 
 /// Get info about framebuffer and create Output for use with it.
-int aura_devfb_setup_framebuffer(Chain* outputs)
+int aura_devfb_setup_framebuffer(AuraList* outputs)
 {
     struct fb_var_screeninfo screen_info;
     struct fb_fix_screeninfo fixed_info;
@@ -127,7 +127,7 @@ int aura_devfb_setup_framebuffer(Chain* outputs)
     AuraOutputFB* output = aura_devfb_output_new(screen_info.xres_virtual,
                                                  screen_info.yres_virtual,
                                                  fixed_info.id, fd);
-    chain_append(outputs, output);
+    aura_list_append(outputs, output);
 
     return 1;
 }

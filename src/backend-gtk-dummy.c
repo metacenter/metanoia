@@ -9,7 +9,7 @@
 
 //------------------------------------------------------------------------------
 
-int aura_backend_gtk_get_outputs(AURA_UNUSED Chain* outputs)
+int aura_backend_gtk_get_outputs(AURA_UNUSED AuraList* outputs)
 {
     LOG_WARN1(MSG);
     return 0;

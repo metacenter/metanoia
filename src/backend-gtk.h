@@ -6,8 +6,9 @@
 
 #include "event-loop.h"
 #include "output.h"
+#include "utils-list.h"
 
-int aura_backend_gtk_get_outputs(Chain* outputs);
+int aura_backend_gtk_get_outputs(AuraList* outputs);
 
 void aura_backend_gtk_run(AuraLoop* this_loop);
 
