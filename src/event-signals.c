@@ -30,6 +30,16 @@ SignalSubscriber* get_signal_subscriber()
 
 //------------------------------------------------------------------------------
 
+int aura_event_signal_compare_task_subscription_data(void* data, AuraTask* task)
+{
+    if (!task || !task->subscription_data || !data) {
+        return 1;
+    }
+    return task->subscription_data != data;
+}
+
+//------------------------------------------------------------------------------
+
 AuraResult aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
     if (sig_num >= SIGNAL_NUM) {
         LOG_WARN1("Unknown Signal Number: %d", sig_num);
@@ -61,6 +71,33 @@ AuraResult aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task) {
 
 //------------------------------------------------------------------------------
 
+AuraResult aura_event_signal_unsubscribe(void* subscription_data)
+{
+    if (!subscription_data) {
+        LOG_WARN1("Invalid data!");
+        return AURA_RESULT_INCORRECT_ARGUMENT;
+    }
+
+    SignalSubscriber* ss = get_signal_subscriber();
+    if (!ss) {
+        LOG_ERROR("Invalid Signal Subscriber!");
+        return AURA_RESULT_ERROR;
+    }
+
+    for (int s = 0; s < SIGNAL_NUM; ++s) {
+        Chain* chain = ss->tab[s];
+        if (chain) {
+            LOG_EVNT2("Unsubscription from signal %d", s);
+            chain_remove_all(chain, subscription_data, (AuraCompareFunc)
+                              aura_event_signal_compare_task_subscription_data);
+        }
+    }
+
+    return AURA_RESULT_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 AuraResult aura_event_signal_emit(AuraSignalNum sig_num, AuraObject* object) {
     if (sig_num >= SIGNAL_NUM) {
         LOG_WARN1("Unknown Signal Number: %d", sig_num);
@@ -84,7 +121,7 @@ AuraResult aura_event_signal_emit(AuraSignalNum sig_num, AuraObject* object) {
                 if (task->loop) {
                     LOG_EVNT4("Signal: emited (num: %d)", sig_num);
                     AuraTask* task_copy = aura_task_copy(task);
-                    task_copy->data = object;
+                    task_copy->emission_data = object;
                     aura_object_ref(object);
                     aura_loop_schedule_task(task->loop, task_copy);
                 } else {

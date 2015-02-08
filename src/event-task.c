@@ -7,14 +7,15 @@
 #include <malloc.h>
 #include <memory.h>
 
-static AuraTask sDummyTask = {{0, NULL}, NULL, NULL, NULL};
+static AuraTask sDummyTask = {{0, NULL}, NULL, NULL, NULL, NULL};
 
 //------------------------------------------------------------------------------
 
 AuraTask* aura_task_new(AuraTaskProcessor process,
                         AuraTaskFreeFunc free,
                         AuraLoop* loop,
-                        void* data)
+                        void* subscription_data,
+                        void* emission_data)
 {
     AuraTask* self = malloc(sizeof(AuraTask));
     if (!self) {
@@ -26,24 +27,27 @@ AuraTask* aura_task_new(AuraTaskProcessor process,
 
     self->process = process;
     self->loop = loop;
-    self->data = data;
+    self->subscription_data = subscription_data;
+    self->emission_data = emission_data;
     return self;
 }
 
 //------------------------------------------------------------------------------
 
 AuraTask* aura_task_create(AuraTaskProcessor process,
-                           AuraLoop* loop)
+                           AuraLoop* loop,
+                           void* subscription_data)
 {
-    return aura_task_new(process, (AuraTaskFreeFunc)aura_task_free, loop, NULL);
+    return aura_task_new(process, (AuraTaskFreeFunc) aura_task_free,
+                         loop, subscription_data, NULL);
 }
 
 //------------------------------------------------------------------------------
 
 AuraTask* aura_task_copy(AuraTask* task)
 {
-    return aura_task_new(task->process, task->base.free,
-                         task->loop, task->data);
+    return aura_task_new(task->process, task->base.free, task->loop,
+                         task->subscription_data, task->emission_data);
 }
 
 //------------------------------------------------------------------------------

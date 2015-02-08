@@ -24,6 +24,8 @@ typedef enum {
 
 AuraResult aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task);
 
+AuraResult aura_event_signal_unsubscribe(void* subscription_data);
+
 AuraResult aura_event_signal_emit(AuraSignalNum sig_num, AuraObject* object);
 
 AuraResult aura_event_signal_emit_int(AuraSignalNum sig_num, intptr_t value);

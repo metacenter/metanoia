@@ -73,7 +73,7 @@ AuraPosition aura_exhibitor_get_pointer_position()
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_pointer_initialize(AuraLoop* this_loop)
+void aura_exhibitor_pointer_initialize(AuraLoop* this_loop, void* data)
 {
     if (this_loop == 0) {
         LOG_ERROR("Invalid loop!");
@@ -81,13 +81,16 @@ void aura_exhibitor_pointer_initialize(AuraLoop* this_loop)
     }
 
     aura_event_signal_subscribe(SIGNAL_POINTER_MOTION_RESET,
-         aura_task_create(aura_exhibitor_pointer_on_motion_reset, this_loop));
+               aura_task_create(aura_exhibitor_pointer_on_motion_reset,
+                                this_loop, data));
 
     aura_event_signal_subscribe(SIGNAL_POINTER_MOTION_X,
-         aura_task_create(aura_exhibitor_pointer_on_motion_x, this_loop));
+               aura_task_create(aura_exhibitor_pointer_on_motion_x,
+                                this_loop, data));
 
     aura_event_signal_subscribe(SIGNAL_POINTER_MOTION_Y,
-         aura_task_create(aura_exhibitor_pointer_on_motion_y, this_loop));
+               aura_task_create(aura_exhibitor_pointer_on_motion_y,
+                                this_loop, data));
 }
 
 //------------------------------------------------------------------------------

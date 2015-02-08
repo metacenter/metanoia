@@ -65,7 +65,7 @@ void aura_loop_process_task(AuraTask* task)
     if (task) {
         if (task->process) {
             LOG_EVNT4("Loop: processing task");
-            task->process(task->data);
+            task->process(task->emission_data);
         } else {
             LOG_ERROR("Invalid task processor!");
         }
@@ -165,7 +165,7 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
 void aura_loop_add_finalizer(AuraLoop* self, AuraTaskProcessor finalizer)
 {
     chain_append(self->finalizers, aura_task_new(finalizer,
-                 (AuraFreeFunc) aura_task_free, NULL, NULL));
+                 (AuraFreeFunc) aura_task_free, NULL, NULL, NULL));
 }
 
 //------------------------------------------------------------------------------

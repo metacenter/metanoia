@@ -20,7 +20,7 @@
 AuraTask* factorize_setup_device_monitor_task(AuraEventDispatcher* ed)
 {
     return aura_task_new((AuraTaskProcessor) aura_udev_setup_device_monitoring,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, ed);
+                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, ed);
 }
 
 //------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ AuraTask* factorize_setup_device_monitor_task(AuraEventDispatcher* ed)
 AuraTask* factorize_setup_input_devices_task(AuraEventDispatcher* ed)
 {
     return aura_task_new((AuraTaskProcessor) aura_evdev_setup_input_devices,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, ed);
+                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, ed);
 }
 
 //------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ AuraTask* factorize_setup_input_devices_task(AuraEventDispatcher* ed)
 AuraTask* factorize_initialize_wayland_task(AuraLoop* loop)
 {
     return aura_task_new((AuraTaskProcessor) aura_wayland_initialize,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, loop);
+                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, loop);
 }
 
 //------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ AuraTask* factorize_initialize_wayland_task(AuraLoop* loop)
 AuraTask* factorize_backend_gtk_run_task(AuraLoop* loop)
 {
     return aura_task_new((AuraTaskProcessor) aura_backend_gtk_run,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, loop);
+                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, loop);
 }
 
 //------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ AuraTask* factorize_backend_gtk_run_task(AuraLoop* loop)
 AuraTask* factorize_initialize_exhibitor_task(AuraLoop* loop)
 {
     return aura_task_new((AuraTaskProcessor) aura_exhibitor_initialize,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, loop);
+                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, loop);
 }
 
 //------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ AuraTask* factorize_initialize_exhibitor_task(AuraLoop* loop)
 AuraTask* factorize_initialize_output_collector_task(AuraLoop* loop)
 {
     return aura_task_new((AuraTaskProcessor) aura_output_collector_initialize,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, loop);
+                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, loop);
 }
 
 //------------------------------------------------------------------------------

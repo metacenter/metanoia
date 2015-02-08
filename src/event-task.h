@@ -15,16 +15,19 @@ typedef struct {
     AuraObject base;
     AuraTaskProcessor process;
     AuraLoop* loop;
-    void* data;
+    void* subscription_data;
+    void* emission_data;
 } AuraTask;
 
 AuraTask* aura_task_new(AuraTaskProcessor process,
                         AuraTaskFreeFunc free,
                         AuraLoop* loop,
-                        void* data);
+                        void* subscription_data,
+                        void* emission_data);
 
 AuraTask* aura_task_create(AuraTaskProcessor process,
-                           AuraLoop* loop);
+                           AuraLoop* loop,
+                           void* subscription_data);
 
 AuraTask* aura_task_copy(AuraTask* task);
 

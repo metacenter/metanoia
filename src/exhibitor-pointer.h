@@ -7,7 +7,7 @@
 #include "event-loop.h"
 #include "global-types.h"
 
-void aura_exhibitor_pointer_initialize(AuraLoop* this_loop);
+void aura_exhibitor_pointer_initialize(AuraLoop* this_loop, void* data);
 
 AuraPosition aura_exhibitor_get_pointer_position();
 

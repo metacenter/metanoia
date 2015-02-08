@@ -183,6 +183,8 @@ void aura_exhibitor_finalize(AURA_UNUSED void* data)
 {
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
 
+    aura_event_signal_unsubscribe(exhibitor);
+
     for (Link* link = exhibitor->displays->first; link; link = link->next) {
         AuraDisplay* display = (AuraDisplay*) link->data;
         aura_display_stop(display);
@@ -206,21 +208,27 @@ void aura_exhibitor_initialize(AuraLoop* this_loop)
         return;
     }
 
+    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+
     aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
-         aura_task_create(aura_exhibitor_on_display_found, this_loop));
+               aura_task_create(aura_exhibitor_on_display_found,
+                                this_loop, exhibitor));
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
-         aura_task_create(aura_exhibitor_on_display_lost, this_loop));
+               aura_task_create(aura_exhibitor_on_display_lost,
+                                this_loop, exhibitor));
 
     aura_event_signal_subscribe(SIGNAL_SURFACE_CREATED,
-         aura_task_create(aura_exhibitor_on_surface_created, this_loop));
+               aura_task_create(aura_exhibitor_on_surface_created,
+                                this_loop, exhibitor));
 
     aura_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,
-         aura_task_create(aura_exhibitor_on_surface_destroyed, this_loop));
+               aura_task_create(aura_exhibitor_on_surface_destroyed,
+                                this_loop, exhibitor));
 
     aura_loop_add_finalizer(this_loop, aura_exhibitor_finalize);
 
-    aura_exhibitor_pointer_initialize(this_loop);
+    aura_exhibitor_pointer_initialize(this_loop, exhibitor);
 }
 
 //------------------------------------------------------------------------------

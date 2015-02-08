@@ -194,22 +194,28 @@ void aura_wayland_initialize(AuraLoop* this_loop)
 
     // Subscribe for events
     aura_event_signal_subscribe(SIGNAL_SCREEN_REFRESH,
-            aura_task_create(wayland_screen_refresh_handler, this_loop));
+               aura_task_create(wayland_screen_refresh_handler,
+                                this_loop, NULL));
 
     aura_event_signal_subscribe(SIGNAL_KEYBOARD_FOCUS_CHANGED,
-            aura_task_create(wayland_keyboard_focus_change_handler, this_loop));
+               aura_task_create(wayland_keyboard_focus_change_handler,
+                                this_loop, NULL));
 
     aura_event_signal_subscribe(SIGNAL_KEYBOARD_EVENT,
-            aura_task_create(wayland_keyboard_event_handler, this_loop));
+               aura_task_create(wayland_keyboard_event_handler,
+                                this_loop, NULL));
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
-            aura_task_create(wayland_display_found_handler, this_loop));
+               aura_task_create(wayland_display_found_handler,
+                                this_loop, NULL));
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
-            aura_task_create(wayland_display_lost_handler, this_loop));
+               aura_task_create(wayland_display_lost_handler,
+                                this_loop, NULL));
 
     aura_event_signal_subscribe(SIGNAL_SURFACE_RECONFIGURED,
-            aura_task_create(wayland_surface_reconfigured_handler, this_loop));
+               aura_task_create(wayland_surface_reconfigured_handler,
+                                this_loop, NULL));
 
     aura_loop_add_finalizer(this_loop, aura_wayland_finalize);
 

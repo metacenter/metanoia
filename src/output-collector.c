@@ -10,6 +10,7 @@
 #include "config.h"
 
 #include <limits.h>
+#include <memory.h>
 
 //------------------------------------------------------------------------------
 
@@ -165,18 +166,18 @@ void aura_output_collector_finalize(AURA_UNUSED void* data)
 /// Initialize Output Collector
 void aura_output_collector_initialize(AuraLoop* this_loop)
 {
-    if (this_loop == 0) {
+    if (!this_loop) {
         LOG_ERROR("Invalid loop!");
         return;
     }
 
     // initialize
-    outputs = chain_new(0);
+    outputs = chain_new(NULL);
     aura_output_collector_update();
 
     // subscribe for signals
     aura_event_signal_subscribe(SIGNAL_DISPLAY_DISCOVERED,
-               aura_task_create(aura_outputs_on_display_discovered, this_loop));
+         aura_task_create(aura_outputs_on_display_discovered, this_loop, NULL));
 
     aura_loop_add_finalizer(this_loop, aura_output_collector_finalize);
 }
