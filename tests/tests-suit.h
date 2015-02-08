@@ -20,6 +20,7 @@
     }
 
 #define AURA_TEST(test) {#test,test}
+#define ARRAY_LEN(a,t) (sizeof(a)/sizeof(t))
 #define AURA_NUM_TESTS(array) (sizeof(array)/(sizeof(AuraTest)))
 
 typedef enum {

@@ -17,13 +17,24 @@ Link* link_new(void* data)
 
 //------------------------------------------------------------------------------
 
-void link_free(Link* self, AuraFreeFunc freefunc)
+void link_free(Link* self)
 {
     if (!self) {
         return;
     }
-    if (freefunc) {
-        freefunc(self->data);
+    memset(self, 0, sizeof(Link));
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+void link_destroy(Link* self, AuraFreeFunc free_data)
+{
+    if (!self) {
+        return;
+    }
+    if (free_data) {
+        free_data(self->data);
     }
     memset(self, 0, sizeof(Link));
     free(self);
@@ -43,18 +54,29 @@ void link_initialize(Link* self, void* data)
 
 //------------------------------------------------------------------------------
 
-Chain* chain_new(AuraFreeFunc freefunc)
+Chain* chain_new(AuraFreeFunc free_link)
 {
     Chain* self = malloc(sizeof(Chain));
     if (!self) {
         return NULL;
     }
 
+    chain_initialize(self, free_link);
+    return self;
+}
+
+//------------------------------------------------------------------------------
+
+void chain_initialize(Chain* self, AuraFreeFunc free_link)
+{
+    if (!self) {
+        return;
+    }
+
     self->first = NULL;
     self->last = NULL;
     self->len = 0;
-    self->freefunc = freefunc;
-    return self;
+    self->free_link = free_link;
 }
 
 //------------------------------------------------------------------------------
@@ -108,28 +130,6 @@ void chain_add_first(Chain* self, Link* link)
 
 //------------------------------------------------------------------------------
 
-void chain_prepend(Chain* self, void* data)
-{
-    if (!self) {
-        return;
-    }
-
-    chain_prejoin(self, link_new(data));
-}
-
-//------------------------------------------------------------------------------
-
-void chain_append(Chain* self, void* data)
-{
-    if (!self) {
-        return;
-    }
-
-    chain_adjoin(self, link_new(data));
-}
-
-//------------------------------------------------------------------------------
-
 void chain_prejoin(Chain* self, Link* link)
 {
     if (!self) {
@@ -164,57 +164,6 @@ void chain_adjoin(Chain* self, Link* link)
         self->last = link;
         self->len += 1;
     }
-}
-
-//------------------------------------------------------------------------------
-
-void* chain_pop(Chain* self)
-{
-    void* result;
-    Link* next;
-
-    if (!self || self->len == 0) {
-        return NULL;
-    }
-
-    result = self->first->data;
-    next = self->first->next;
-    link_free(self->first, NULL);
-    self->first = next;
-    self->len -= 1;
-
-    if (self->len == 0) {
-        self->last = NULL;
-    }
-    return result;
-}
-
-//------------------------------------------------------------------------------
-
-AuraResult chain_remove(Chain* self, void* data, AuraCompareFunc compare)
-{
-    if (!self) {
-        return AURA_RESULT_INCORRECT_ARGUMENT;
-    }
-
-    int found = 0;
-    Link* link = NULL;
-    for (link = self->first; link; link = link->next) {
-        found = !compare(data, link->data);
-        if (found) {
-            break;
-        }
-    }
-
-    if (!found) {
-        return AURA_RESULT_NOT_FOUND;
-    }
-
-    AuraResult result = chain_disjoin(self, link);
-    if (result == AURA_RESULT_SUCCESS) {
-        link_free(link, self->freefunc);
-    }
-    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -275,35 +224,22 @@ AuraResult chain_disjoin(Chain* self, Link* link)
 
 void chain_clean(Chain* self)
 {
-    Link* iter = self->first;
-    while (iter) {
-        Link* next = iter->next;
-        link_free(iter, self->freefunc);
-        iter = next;
+    if (!self) {
+        return;
     }
-}
 
-//------------------------------------------------------------------------------
-
-Chain* chain_subtract(Chain* minuend,
-                      Chain* subtrahent,
-                      AuraCompareFunc compare)
-{
-    Chain* difference = chain_new(minuend->freefunc);
-
-    Link* mlink;
-    for (mlink = minuend->first; mlink; mlink = mlink->next) {
-        int found = 0;
-        Link* slink;
-        for (slink = subtrahent->first; slink && !found; slink = slink->next) {
-            found = !compare(mlink->data, slink->data);
-        }
-        if (!found) {
-            chain_append(difference, mlink->data);
+    if (self->free_link) {
+        Link* link = self->first;
+        while (link) {
+            Link* next = link->next;
+            self->free_link(link);
+            link = next;
         }
     }
 
-    return difference;
+    self->first = NULL;
+    self->last = NULL;
+    self->len = 0;
 }
 
 //------------------------------------------------------------------------------

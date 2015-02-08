@@ -6,9 +6,6 @@
 
 #include "global-constants.h"
 
-// TODO: use 'aura' prefix
-// TODO: ref and unref instead of free
-
 typedef struct Link Link;
 struct Link {
     Link* prev;
@@ -17,7 +14,8 @@ struct Link {
 };
 
 Link* link_new(void* data);
-void link_free(Link* link, AuraFreeFunc freefunc);
+void link_free(Link* link);
+void link_destroy(Link* link, AuraFreeFunc free_data);
 
 void link_initialize(Link* link, void* data);
 
@@ -25,33 +23,24 @@ typedef struct {
     Link* first;
     Link* last;
     int len;
-    AuraFreeFunc freefunc;
+    AuraFreeFunc free_link;
 } Chain;
 
-Chain* chain_new(AuraFreeFunc freefunc);
-void chain_free(Chain* chain);
+Chain* chain_new(AuraFreeFunc free_link);
+void chain_free(Chain* self);
 
-int chain_len(Chain* chain);
-int chain_recalculate_length(Chain* chain);
+void chain_initialize(Chain* self, AuraFreeFunc free_link);
 
-void chain_prepend(Chain* chain, void* data);
-void chain_append(Chain* chain, void* data);
+int chain_len(Chain* self);
+int chain_recalculate_length(Chain* self);
 
-void chain_prejoin(Chain* chain, Link* link);
-void chain_adjoin(Chain* chain, Link* link);
+void chain_prejoin(Chain* self, Link* link);
+void chain_adjoin(Chain* self, Link* link);
 
-void* chain_pop(Chain* chain);
+AuraResult chain_unjoin(Chain* self, Link* link);
+AuraResult chain_disjoin(Chain* self, Link* link);
 
-AuraResult chain_remove(Chain* chain, void* data, AuraCompareFunc compare);
-
-AuraResult chain_unjoin(Chain* chain, Link* link);
-AuraResult chain_disjoin(Chain* chain, Link* link);
-
-void chain_clean(Chain* chain);
-
-Chain* chain_subtract(Chain* minuend,
-                      Chain* subtrahent,
-                      AuraCompareFunc compare);
+void chain_clean(Chain* self);
 
 #endif // __AURA_UTILS_CHAIN_H__
 
