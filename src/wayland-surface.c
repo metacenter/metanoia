@@ -28,6 +28,10 @@ void aura_wayland_surface_free(AuraWaylandSurface* self)
         return;
     }
 
+    if (self->resources[AURA_RESOURCE_FRAME]) {
+        wl_resource_destroy(self->resources[AURA_RESOURCE_FRAME]);
+    }
+
     memset(self, 0, sizeof(AuraWaylandSurface));
     free(self);
 }

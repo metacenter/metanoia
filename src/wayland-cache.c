@@ -38,7 +38,7 @@ AuraResult aura_wayland_cache_initialize()
         return AURA_RESULT_ERROR;
     }
 
-    for (int type = 0; type < AURA_RESOURCE_BUFFER; ++type) {
+    for (int type = 0; type < AURA_NUM_SURFACE_RESOURCE_TYPES; ++type) {
         sCache.surface_resource[type] =
                                   chain_new((AuraFreeFunc) wl_resource_destroy);
         if (!sCache.surface_resource[type]) {
@@ -91,7 +91,7 @@ void aura_wayland_cache_add_surface(AuraSurfaceId sid,
 void aura_wayland_cache_remove_surface(AuraSurfaceId sid)
 {
     if (sid != scInvalidSurfaceId) {
-        aura_store_delete(sCache.surfaces, sid);
+        aura_wayland_surface_free(aura_store_delete(sCache.surfaces, sid));
     }
 }
 

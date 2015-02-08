@@ -47,7 +47,7 @@ void aura_surface_destroy(AuraSurfaceId sid)
 {
     aura_event_signal_emit_int(SIGNAL_SURFACE_DESTROYED, sid);
     aura_surface_lock();
-    aura_store_delete(sStore, sid);
+    aura_surface_data_free(aura_store_delete(sStore, sid));
     aura_surface_unlock();
 }
 
