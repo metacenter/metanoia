@@ -5,6 +5,7 @@
 #include "utils-log.h"
 
 #include <malloc.h>
+#include <memory.h>
 
 //------------------------------------------------------------------------------
 
@@ -12,25 +13,37 @@ AuraBranch* aura_branch_new()
 {
     AuraBranch* self = malloc(sizeof(AuraBranch));
     if (!self) {
-        LOG_ERROR("Memory allocation failed!");
         return NULL;
     }
 
-    link_initialize(&self->link, NULL);
+    link_initialize(&self->base, NULL);
     self->trunk = NULL;
-    self->twigs = chain_new(0);
+    self->twigs = chain_new(NULL);
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_branch_free(AuraBranch* self)
+void aura_branch_free(AuraBranch* self, AuraFreeFunc free_data)
 {
     if (!self) {
         return;
     }
 
+    AuraBranch* next = NULL;
+    AuraBranch* twig = (AuraBranch*) self->twigs->first;
+    while (twig) {
+        next = (AuraBranch*) twig->base.next;
+        aura_branch_free(twig, free_data);
+        twig = next;
+    }
     chain_free(self->twigs);
+    if (free_data) {
+        free_data(self->base.data);
+    }
+
+    memset(self, 0, sizeof(AuraBranch));
+    free(self);
 }
 
 //------------------------------------------------------------------------------
@@ -77,7 +90,7 @@ void aura_branch_set_data(AuraBranch* self, void* data)
         return;
     }
 
-    self->link.data = data;
+    self->base.data = data;
 }
 
 //------------------------------------------------------------------------------

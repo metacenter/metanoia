@@ -4,42 +4,18 @@
 #include "../src/utils-list.h"
 #include "tests-suit.h"
 
-#include <inttypes.h>
-
-int compare(int i1, int i2) {
-    if (i1 < i2) {
-        return -1;
-    } else if (i1 > i2) {
-        return 1;
-    }
-    return 0;
-}
-
-#define ASSERT_LIST(LIST, ARRAY) \
-    int i = 0, len = ARRAY_LEN(ARRAY, int); \
-    AURA_ASSERT(len == aura_list_len(LIST), \
-                "Stored list length should be %d (is %d)", \
-                len, aura_list_len(LIST)); \
-    AURA_ASSERT(len == aura_list_len(LIST), \
-                "Calculated list length should be %d (is %d)", \
-                len, aura_list_recalculate_length(LIST)); \
-    FOR_EACH(LIST, link) { \
-        intptr_t list_data = (intptr_t) link->data; \
-        int array_data = ARRAY[i++]; \
-        AURA_ASSERT(list_data == array_data, \
-                    "List data should be %d (is %" PRIdPTR ")", \
-                    array_data, list_data); }
+#include <malloc.h>
 
 //------------------------------------------------------------------------------
 
 AuraTestResult should_append_values()
 {
-    int a[] = {1, 2, 3};
+    char* a[] = {"1", "2", "3"};
 
-    AuraList* l = aura_list_new(NULL);
-    aura_list_append(l, (void*) 1);
-    aura_list_append(l, (void*) 2);
-    aura_list_append(l, (void*) 3);
+    AuraList* l = aura_list_new(free);
+    aura_list_append(l, strdup("1"));
+    aura_list_append(l, strdup("2"));
+    aura_list_append(l, strdup("3"));
 
     ASSERT_LIST(l, a);
     aura_list_free(l);
@@ -50,12 +26,12 @@ AuraTestResult should_append_values()
 
 AuraTestResult should_prepend_values()
 {
-    int a[] = {3, 2, 1};
+    char* a[] = {"3", "2", "1"};
 
-    AuraList* l = aura_list_new(NULL);
-    aura_list_prepend(l, (void*) 1);
-    aura_list_prepend(l, (void*) 2);
-    aura_list_prepend(l, (void*) 3);
+    AuraList* l = aura_list_new(free);
+    aura_list_prepend(l, strdup("1"));
+    aura_list_prepend(l, strdup("2"));
+    aura_list_prepend(l, strdup("3"));
 
     ASSERT_LIST(l, a);
     aura_list_free(l);
@@ -66,14 +42,14 @@ AuraTestResult should_prepend_values()
 
 AuraTestResult should_remove_from_begining()
 {
-    int a[] = {2, 3};
+    char* a[] = {"2", "3"};
 
-    AuraList* l = aura_list_new(NULL);
-    aura_list_append(l, (void*) 1);
-    aura_list_append(l, (void*) 2);
-    aura_list_append(l, (void*) 3);
+    AuraList* l = aura_list_new(free);
+    aura_list_append(l, strdup("1"));
+    aura_list_append(l, strdup("2"));
+    aura_list_append(l, strdup("3"));
 
-    aura_list_remove(l, (void*) 1, (AuraCompareFunc) compare);
+    aura_list_remove(l, "1", (AuraCompareFunc) strcmp);
 
     ASSERT_LIST(l, a);
     aura_list_free(l);
@@ -84,14 +60,14 @@ AuraTestResult should_remove_from_begining()
 
 AuraTestResult should_remove_from_end()
 {
-    int a[] = {1, 2};
+    char* a[] = {"1", "2"};
 
-    AuraList* l = aura_list_new(NULL);
-    aura_list_append(l, (void*) 1);
-    aura_list_append(l, (void*) 2);
-    aura_list_append(l, (void*) 3);
+    AuraList* l = aura_list_new(free);
+    aura_list_append(l, strdup("1"));
+    aura_list_append(l, strdup("2"));
+    aura_list_append(l, strdup("3"));
 
-    aura_list_remove(l, (void*) 3, (AuraCompareFunc) compare);
+    aura_list_remove(l, "3", (AuraCompareFunc) strcmp);
 
     ASSERT_LIST(l, a);
     aura_list_free(l);
@@ -102,14 +78,14 @@ AuraTestResult should_remove_from_end()
 
 AuraTestResult should_remove_from_inside()
 {
-    int a[] = {1, 3};
+    char* a[] = {"1", "3"};
 
-    AuraList* l = aura_list_new(NULL);
-    aura_list_append(l, (void*) 1);
-    aura_list_append(l, (void*) 2);
-    aura_list_append(l, (void*) 3);
+    AuraList* l = aura_list_new(free);
+    aura_list_append(l, strdup("1"));
+    aura_list_append(l, strdup("2"));
+    aura_list_append(l, strdup("3"));
 
-    aura_list_remove(l, (void*) 2, (AuraCompareFunc) compare);
+    aura_list_remove(l, "2", (AuraCompareFunc) strcmp);
 
     ASSERT_LIST(l, a);
     aura_list_free(l);
@@ -120,16 +96,16 @@ AuraTestResult should_remove_from_inside()
 
 AuraTestResult should_remove_all_equal()
 {
-    int a[] = {1, 3};
+    char* a[] = {"1", "3"};
 
-    AuraList* l = aura_list_new(NULL);
-    aura_list_append(l, (void*) 2);
-    aura_list_append(l, (void*) 1);
-    aura_list_append(l, (void*) 2);
-    aura_list_append(l, (void*) 3);
-    aura_list_append(l, (void*) 2);
+    AuraList* l = aura_list_new(free);
+    aura_list_append(l, strdup("2"));
+    aura_list_append(l, strdup("1"));
+    aura_list_append(l, strdup("2"));
+    aura_list_append(l, strdup("3"));
+    aura_list_append(l, strdup("2"));
 
-    aura_list_remove_all(l, (void*) 2, (AuraCompareFunc) compare);
+    aura_list_remove_all(l, "2", (AuraCompareFunc) strcmp);
 
     ASSERT_LIST(l, a);
     aura_list_free(l);

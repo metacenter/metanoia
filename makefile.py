@@ -535,11 +535,15 @@ m.add_test(output='check-chain',
 
 m.add_test(output='check-list',
            inputs=['test-list.c'],
-           deps=['utils-list.c', 'utils-chain.c'])
+           deps=['utils-chain.c', 'utils-list.c'])
+
+m.add_test(output='check-branch',
+           inputs=['test-branch.c'],
+           deps=['utils-chain.c', 'utils-branch.c'])
 
 m.add_test(output='check-store',
            inputs=['test-store.c'],
-           deps=['utils-store.c', 'utils-chain.c'])
+           deps=['utils-chain.c', 'utils-store.c'])
 
 #-------------------------------------------------------------------------------
 

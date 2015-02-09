@@ -5,7 +5,7 @@ res/force:
 clean:
 	rm -rf doc build gen checks callgrind*
 
-checks: checks/check-chain checks/check-list checks/check-store
+checks: checks/check-chain checks/check-list checks/check-branch checks/check-store
 check: checks
 	@time (for c in checks/check*; do $$c; done)
 memcheck: checks
@@ -1249,42 +1249,64 @@ checks/check-chain: Makefile \
 
 checks/check-list: Makefile \
                    tests/test-list.c \
-                   src/utils-list.c \
                    src/utils-chain.c \
+                   src/utils-list.c \
                    tests/../src/utils-list.h \
                    tests/../src/utils-chain.h \
                    tests/../src/global-constants.h \
                    tests/../src/global-types.h \
                    tests/tests-suit.h \
-                   src/utils-list.h \
                    src/utils-chain.h \
                    src/global-constants.h \
                    src/global-types.h \
+                   src/utils-list.h \
                    src/utils-chain.h \
                    src/global-constants.h \
                    src/global-types.h
 	@mkdir -p checks
 	@echo "  CC   check-list"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o checks/check-list -Isrc -Igen \
-	      tests/test-list.c src/utils-list.c src/utils-chain.c
+	      tests/test-list.c src/utils-chain.c src/utils-list.c
+
+checks/check-branch: Makefile \
+                     tests/test-branch.c \
+                     src/utils-chain.c \
+                     src/utils-branch.c \
+                     tests/../src/utils-branch.h \
+                     tests/../src/utils-chain.h \
+                     tests/../src/global-constants.h \
+                     tests/../src/global-types.h \
+                     tests/tests-suit.h \
+                     src/utils-chain.h \
+                     src/global-constants.h \
+                     src/global-types.h \
+                     src/utils-branch.h \
+                     src/utils-chain.h \
+                     src/global-constants.h \
+                     src/global-types.h \
+                     src/utils-log.h
+	@mkdir -p checks
+	@echo "  CC   check-branch"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o checks/check-branch -Isrc -Igen \
+	      tests/test-branch.c src/utils-chain.c src/utils-branch.c
 
 checks/check-store: Makefile \
                     tests/test-store.c \
-                    src/utils-store.c \
                     src/utils-chain.c \
+                    src/utils-store.c \
                     tests/../src/utils-store.h \
                     tests/../src/global-constants.h \
                     tests/../src/global-types.h \
                     tests/tests-suit.h \
+                    src/utils-chain.h \
+                    src/global-constants.h \
+                    src/global-types.h \
                     src/utils-store.h \
                     src/global-constants.h \
                     src/global-types.h \
-                    src/utils-log.h \
-                    src/utils-chain.h \
-                    src/global-constants.h \
-                    src/global-types.h
+                    src/utils-log.h
 	@mkdir -p checks
 	@echo "  CC   check-store"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o checks/check-store -Isrc -Igen \
-	      tests/test-store.c src/utils-store.c src/utils-chain.c
+	      tests/test-store.c src/utils-chain.c src/utils-store.c
 
