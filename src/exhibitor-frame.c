@@ -24,17 +24,33 @@ int aura_frame_compare_sid(AuraFrame* frame, AuraSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
+void aura_frame_params_free(AuraFrameParams* params)
+{
+    if (!params) {
+        return;
+    }
+
+    if (params->title) {
+        free(params->title);
+    }
+
+    memset(params, 0, sizeof(AuraFrameParams));
+    free(params);
+}
+
+//------------------------------------------------------------------------------
+
 AuraFrame* aura_frame_new()
 {
     AuraFrame* self = aura_branch_new();
 
-    self->link.data = malloc(sizeof(AuraFrameParams));
-    if (!self->link.data) {
+    self->base.data = malloc(sizeof(AuraFrameParams));
+    if (!self->base.data) {
         LOG_ERROR("Memory allocation failed!");
         return NULL;
     }
 
-    AuraFrameParams* params = self->link.data;
+    AuraFrameParams* params = self->base.data;
     memset(params, 0, sizeof(AuraFrameParams));
     params->type = AURA_FRAME_TYPE_NONE;
     params->sid = scInvalidSurfaceId;
@@ -45,7 +61,7 @@ AuraFrame* aura_frame_new()
 
 AuraFrameParams* aura_frame_get_params(AuraFrame* self)
 {
-    return self->link.data;
+    return self->base.data;
 }
 
 //------------------------------------------------------------------------------
@@ -56,14 +72,7 @@ void aura_frame_free(AuraFrame* self)
         return;
     }
 
-    AuraFrameParams* params = aura_frame_get_params(self);
-    if (params) {
-        if (params->title) {
-            free(params->title);
-        }
-        free(params);
-    }
-    aura_branch_free(self);
+    aura_branch_free(self, (AuraFreeFunc) aura_frame_params_free);
 }
 
 //------------------------------------------------------------------------------
@@ -209,9 +218,9 @@ void aura_frame_resize_anchored(AuraFrame* self,
                                 int magnitude)
 {
     if (direction == AURA_ARGMAND_N || direction == AURA_ARGMAND_W) {
-        if (self->link.prev) {
+        if (self->base.prev) {
             aura_frame_reconfigure(self, direction, magnitude);
-            aura_frame_reconfigure((AuraFrame*) self->link.prev,
+            aura_frame_reconfigure((AuraFrame*) self->base.prev,
                                    direction == AURA_ARGMAND_N ?
                                    AURA_ARGMAND_W : AURA_ARGMAND_N,
                                    -magnitude);
@@ -219,9 +228,9 @@ void aura_frame_resize_anchored(AuraFrame* self,
     }
 
     if (direction == AURA_ARGMAND_S || direction == AURA_ARGMAND_E) {
-        if (self->link.next) {
+        if (self->base.next) {
             aura_frame_reconfigure(self, direction, magnitude);
-            aura_frame_reconfigure((AuraFrame*) self->link.next,
+            aura_frame_reconfigure((AuraFrame*) self->base.next,
                                    direction == AURA_ARGMAND_S ?
                                    AURA_ARGMAND_E : AURA_ARGMAND_N,
                                    -magnitude);

@@ -44,7 +44,8 @@ void aura_compositor_free(AuraCompositor* self)
 
 AuraList* aura_compositor_get_visible_surfaces(AuraCompositor* self)
 {
-    /// @todo Reimplement aura_compositor_get_visible_surfaces
+    /// @todo Reimplement aura_compositor_get_visible_surfaces.
+    /// And don't use aura_frame_get_params - it should be `static inline`.
     AuraList* surfaces = aura_list_new(NULL);
     FOR_EACH_TWIG(self->frame, twig) {
         AuraFrameParams* params = aura_frame_get_params(twig);
