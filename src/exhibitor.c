@@ -111,8 +111,6 @@ void aura_exhibitor_on_surface_created(void* data)
 
 void aura_exhibitor_on_surface_destroyed(void* data)
 {
-LOG_DEBUG("REM");
-
     AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
     if (sid == scInvalidSurfaceId) {
         return;

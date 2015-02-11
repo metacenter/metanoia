@@ -3,6 +3,7 @@
 
 #include "exhibitor-pointer.h"
 #include "exhibitor.h"
+#include "surface-manager.h"
 
 #include "utils-log.h"
 #include "global-objects.h"
@@ -13,6 +14,7 @@
 static AuraPosition position = {100, 100};
 static int last_abs_value_x = INVALID_POINTER_VALUE;
 static int last_abs_value_y = INVALID_POINTER_VALUE;
+static AuraSurfaceId focused_sid;
 
 //------------------------------------------------------------------------------
 
@@ -24,6 +26,31 @@ void aura_exhibitor_pointer_on_motion_reset()
 
 //------------------------------------------------------------------------------
 
+void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
+{
+    AuraSurfaceId sid = scInvalidSurfaceId;
+    FOR_EACH_REVERSE (visible_surfaces, link) {
+        AuraSurfaceId current_sid = (AuraSurfaceId) link->data;
+        AuraSurfaceData* data = aura_surface_get(current_sid);
+        if (data
+        &&  position.x >= data->position.x
+        &&  position.y >= data->position.y
+        &&  position.x <= data->position.x + data->desired_size.width
+        &&  position.y <= data->position.y + data->desired_size.height) {
+            sid = current_sid;
+            break;
+        }
+    }
+
+    if (sid != focused_sid) {
+        LOG_INFO3("Pointer focus changed from %d to %d", focused_sid, sid);
+        focused_sid = sid;
+        aura_event_signal_emit_int(SIGNAL_POINTER_FOCUS_CHANGED, sid);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void aura_exhibitor_pointer_on_motion_x(void* data)
 {
     int abs_value = aura_int_unref_get((AuraIntObject*) data);
@@ -31,13 +58,13 @@ void aura_exhibitor_pointer_on_motion_x(void* data)
         position.x += abs_value - last_abs_value_x;
 
         AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
-        int max = exhibitor->display->output->width;
+        int max = exhibitor->display->output->width - 1;
 
         if (position.x < 0) {
             position.x = 0;
         }
         if (position.x > max) {
-            position.x = max - 1;
+            position.x = max;
         }
     }
     last_abs_value_x = abs_value;
@@ -52,13 +79,13 @@ void aura_exhibitor_pointer_on_motion_y(void* data)
         position.y += abs_value - last_abs_value_y;
 
         AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
-        int max = exhibitor->display->output->height;
+        int max = exhibitor->display->output->height - 1;
 
         if (position.y < 0) {
             position.y = 0;
         }
         if (position.y > max) {
-            position.y = max - 1;
+            position.y = max;
         }
     }
     last_abs_value_y = abs_value;
@@ -79,6 +106,8 @@ void aura_exhibitor_pointer_initialize(AuraLoop* this_loop, void* data)
         LOG_ERROR("Invalid loop!");
         return;
     }
+
+    focused_sid = scInvalidSurfaceId;
 
     aura_event_signal_subscribe(SIGNAL_POINTER_MOTION_RESET,
                aura_task_create(aura_exhibitor_pointer_on_motion_reset,

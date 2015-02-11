@@ -57,6 +57,9 @@ void aura_display_redraw_all(AuraDisplay* self)
 
     self->output->renderer->draw(self->output->renderer,
                                  visible_surfaces, pos.x, pos.y);
+
+    aura_exhibitor_pointer_update_hover_state(visible_surfaces);
+
     // TODO: pass as list
     if (visible_surfaces) {
         FOR_EACH (visible_surfaces, link) {
