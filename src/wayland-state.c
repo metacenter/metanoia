@@ -316,6 +316,36 @@ void aura_wayland_state_pointer_motion(AuraSurfaceId sid, AuraPosition pos)
 
 //------------------------------------------------------------------------------
 
+void aura_wayland_state_pointer_button(uint32_t time,
+                                       uint32_t button,
+                                       uint32_t state)
+{
+    AuraList* resources = NULL;
+    struct wl_resource* resource = NULL;
+    struct wl_client* client = NULL;
+
+    pthread_mutex_lock(&sStateMutex);
+
+    resource = aura_wayland_state_get_rc_for_sid(sState.pointer_focused_sid);
+    if (resource) {
+        client = wl_resource_get_client(resource);
+    }
+
+    resources = aura_wayland_cache_get_resources(AURA_RESOURCE_POINTER);
+
+    FOR_EACH (resources, link) {
+        struct wl_resource* rc = link->data;
+        if (client == wl_resource_get_client(rc)) {
+            int serial = wl_display_next_serial(sState.display);
+            wl_pointer_send_button(rc, serial, time, button, state);
+        }
+    }
+
+    pthread_mutex_unlock(&sStateMutex);
+}
+
+//------------------------------------------------------------------------------
+
 void aura_wayland_state_screen_refresh(AuraSurfaceId sid)
 {
     pthread_mutex_lock(&sStateMutex);

@@ -49,5 +49,12 @@ typedef struct {
     bool value;
 } AuraKeyData;
 
+/// Button event data
+typedef struct {
+    unsigned time;
+    int code;
+    bool value;
+} AuraButtonData;
+
 #endif // __AURA_GLOBAL_TYPES_H__
 

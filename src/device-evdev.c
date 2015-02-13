@@ -63,6 +63,10 @@ void aura_evdev_handle_touch(struct input_event* ev)
         aura_event_signal_emit_int(SIGNAL_POINTER_MOTION_X, ev->value);
     } else if (ev->code == ABS_MT_POSITION_Y) {
         aura_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y, ev->value);
+    } else if (ev->code == BTN_LEFT || ev->code == BTN_RIGHT) {
+        aura_event_signal_emit(SIGNAL_POINTER_BUTTON,
+                    (AuraObject*) aura_button_create(aura_log_get_miliseconds(),
+                                                     ev->code, ev->value));
     }
 }
 

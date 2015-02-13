@@ -98,6 +98,31 @@ AuraKeyObject* aura_key_create(unsigned time, int code, bool value)
 
 //------------------------------------------------------------------------------
 
+/// Free Button Object.
+void aura_button_free(AuraButtonObject* self) {
+    if (!self) {
+        return;
+    }
+    memset(self, 0, sizeof(AuraButtonObject));
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+/// Allocate and initialize Button Object.
+AuraButtonObject* aura_button_create(unsigned time, int code, bool value)
+{
+    AuraButtonObject* self = malloc(sizeof(AuraButtonObject));
+    aura_object_initialize(&self->base, (AuraFreeFunc) aura_button_free);
+    aura_object_ref(&self->base);
+    self->buttondata.time = time;
+    self->buttondata.code = code;
+    self->buttondata.value = value;
+    return self;
+}
+
+//------------------------------------------------------------------------------
+
 /// Free Motion Object.
 void aura_motion_free(AuraMotionObject* self) {
     if (!self) {

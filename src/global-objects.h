@@ -38,6 +38,17 @@ AuraKeyObject* aura_key_create(unsigned time, int code, bool value);
 
 //------------------------------------------------------------------------------
 
+/// Button event object.
+/// ButtonData structure with reference counting.
+typedef struct {
+    AuraObject base;
+    AuraButtonData buttondata;
+} AuraButtonObject;
+
+AuraButtonObject* aura_button_create(unsigned time, int code, bool value);
+
+//------------------------------------------------------------------------------
+
 /// Pointer motion object.
 typedef struct {
     AuraObject base;
