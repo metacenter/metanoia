@@ -28,6 +28,11 @@ void aura_wayland_state_keyboard_focus_update(AuraItemId sid);
 
 void aura_wayland_state_key(uint32_t time, uint32_t key, uint32_t state);
 
+void aura_wayland_state_pointer_focus_update(AuraSurfaceId new_sid,
+                                             AuraPosition pos);
+
+void aura_wayland_state_pointer_motion(AuraSurfaceId sid, AuraPosition pos);
+
 void aura_wayland_state_screen_refresh();
 
 void aura_wayland_state_advertise_output(AuraOutput* output);

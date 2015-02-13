@@ -4,6 +4,7 @@
 #include "wayland-protocol-seat.h"
 #include "wayland-protocol-pointer.h"
 #include "wayland-protocol-keyboard.h"
+#include "wayland-cache.h"
 #include "wayland-state.h"
 
 #include "utils-log.h"
@@ -49,6 +50,8 @@ void aura_wayland_get_pointer(struct wl_client* client,
 
     wl_resource_set_implementation(rc, &pointer_implementation,
                                    NULL, aura_wayland_pointer_unbind);
+
+    aura_wayland_cache_add_general_resource(AURA_RESOURCE_POINTER, rc);
 }
 
 //------------------------------------------------------------------------------

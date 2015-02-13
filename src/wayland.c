@@ -82,6 +82,26 @@ void wayland_keyboard_event_handler(void* data)
 
 //------------------------------------------------------------------------------
 
+void wayland_pointer_focus_change_handler(void* data)
+{
+    LOG_WAYL4("Wayland: handling pointer focus change");
+    AuraMotionObject* object = (AuraMotionObject*) data;
+    aura_wayland_state_pointer_focus_update(object->sid, object->pos);
+    aura_object_unref((AuraObject*) object);
+}
+
+//------------------------------------------------------------------------------
+
+void wayland_pointer_motion_handler(void* data)
+{
+    LOG_WAYL4("Wayland: handling pointer motion");
+    AuraMotionObject* object = (AuraMotionObject*) data;
+    aura_wayland_state_pointer_motion(object->sid, object->pos);
+    aura_object_unref((AuraObject*) object);
+}
+
+//------------------------------------------------------------------------------
+
 void wayland_display_found_handler(void* data)
 {
     AuraOutput* output = (AuraOutput*) data;
@@ -203,6 +223,14 @@ void aura_wayland_initialize(AuraLoop* this_loop)
 
     aura_event_signal_subscribe(SIGNAL_KEYBOARD_EVENT,
                aura_task_create(wayland_keyboard_event_handler,
+                                this_loop, NULL));
+
+    aura_event_signal_subscribe(SIGNAL_POINTER_FOCUS_CHANGED,
+               aura_task_create(wayland_pointer_focus_change_handler,
+                                this_loop, NULL));
+
+    aura_event_signal_subscribe(SIGNAL_POINTER_RELATIVE_MOTION,
+               aura_task_create(wayland_pointer_motion_handler,
                                 this_loop, NULL));
 
     aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,

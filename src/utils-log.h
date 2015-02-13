@@ -69,4 +69,6 @@ void aura_log(const char*, // log level
 
 void aura_print_backtrace(void);
 
+int aura_log_get_miliseconds(void);
+
 #endif // __AURA_UTILS_LOG_H__

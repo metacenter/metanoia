@@ -23,6 +23,7 @@ static struct {
     struct wl_display* display;
     AuraStore* outputs;
     AuraSurfaceId keyboard_focused_sid;
+    AuraSurfaceId pointer_focused_sid;
 } sState;
 
 //------------------------------------------------------------------------------
@@ -44,6 +45,7 @@ AuraResult aura_wayland_state_initialize(struct wl_display* display)
 
     sState.display = display;
     sState.keyboard_focused_sid = scInvalidItemId;
+    sState.pointer_focused_sid = scInvalidItemId;
 
     return AURA_RESULT_SUCCESS;
 }
@@ -52,6 +54,7 @@ AuraResult aura_wayland_state_initialize(struct wl_display* display)
 
 void aura_wayland_state_finalize()
 {
+    sState.pointer_focused_sid = scInvalidItemId;
     sState.keyboard_focused_sid = scInvalidItemId;
     sState.display = NULL;
 
@@ -237,6 +240,82 @@ void aura_wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
 
 //------------------------------------------------------------------------------
 
+void aura_wayland_state_pointer_focus_update(AuraSurfaceId new_sid,
+                                             AuraPosition pos)
+{
+    AuraList* resources = NULL;
+    struct wl_resource* new_resource = NULL;
+    struct wl_client* new_client = NULL;
+    struct wl_resource* old_resource = NULL;
+    struct wl_client* old_client = NULL;
+
+    pthread_mutex_lock(&sStateMutex);
+
+    AuraSurfaceId old_sid = sState.pointer_focused_sid;
+
+    new_resource = aura_wayland_state_get_rc_for_sid(new_sid);
+    if (new_resource) {
+        new_client = wl_resource_get_client(new_resource);
+    }
+
+    old_resource = aura_wayland_state_get_rc_for_sid(old_sid);
+    if (old_resource) {
+        old_client = wl_resource_get_client(old_resource);
+    }
+
+    int serial = wl_display_next_serial(sState.display);
+    resources = aura_wayland_cache_get_resources(AURA_RESOURCE_POINTER);
+
+    FOR_EACH (resources, link) {
+        struct wl_resource* rc = link->data;
+        if (old_client == wl_resource_get_client(rc)) {
+            wl_pointer_send_leave(rc, serial, old_resource);
+        }
+    }
+
+    sState.pointer_focused_sid = new_sid;
+
+    FOR_EACH (resources, link) {
+        struct wl_resource* rc = link->data;
+        if (new_client == wl_resource_get_client(rc)) {
+            wl_pointer_send_enter(rc, serial, new_resource,
+                            wl_fixed_from_int(pos.x), wl_fixed_from_int(pos.y));
+        }
+    }
+
+    pthread_mutex_unlock(&sStateMutex);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_wayland_state_pointer_motion(AuraSurfaceId sid, AuraPosition pos)
+{
+    AuraList* resources = NULL;
+    struct wl_resource* resource = NULL;
+    struct wl_client* client = NULL;
+
+    pthread_mutex_lock(&sStateMutex);
+
+    resource = aura_wayland_state_get_rc_for_sid(sid);
+    if (resource) {
+        client = wl_resource_get_client(resource);
+    }
+
+    resources = aura_wayland_cache_get_resources(AURA_RESOURCE_POINTER);
+
+    FOR_EACH (resources, link) {
+        struct wl_resource* rc = link->data;
+        if (client == wl_resource_get_client(rc)) {
+            wl_pointer_send_motion(rc, (int32_t) aura_log_get_miliseconds(),
+                            wl_fixed_from_int(pos.x), wl_fixed_from_int(pos.y));
+        }
+    }
+
+    pthread_mutex_unlock(&sStateMutex);
+}
+
+//------------------------------------------------------------------------------
+
 void aura_wayland_state_screen_refresh(AuraSurfaceId sid)
 {
     pthread_mutex_lock(&sStateMutex);
@@ -258,11 +337,7 @@ void aura_wayland_state_screen_refresh(AuraSurfaceId sid)
     if (frame_rc) {
         LOG_WAYL4("Wayland: Sending frame (id: %u)", sid);
 
-        struct timespec ts;
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        uint32_t msec = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
-
-        wl_callback_send_done(frame_rc, msec);
+        wl_callback_send_done(frame_rc, (uint32_t) aura_log_get_miliseconds());
         wl_resource_destroy(frame_rc);
         aura_wayland_surface_set_resource(surface, AURA_RESOURCE_FRAME, NULL);
     }

@@ -38,5 +38,16 @@ AuraKeyObject* aura_key_create(unsigned time, int code, bool value);
 
 //------------------------------------------------------------------------------
 
+/// Pointer motion object.
+typedef struct {
+    AuraObject base;
+    AuraSurfaceId sid;
+    AuraPosition pos;
+} AuraMotionObject;
+
+AuraMotionObject* aura_motion_create(AuraSurfaceId sid, AuraPosition pos);
+
+//------------------------------------------------------------------------------
+
 #endif // __AURA_GLOBAL_OBJECTS_H__
 

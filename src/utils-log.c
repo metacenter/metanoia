@@ -166,3 +166,13 @@ void aura_print_backtrace(void)
 
 //------------------------------------------------------------------------------
 
+int aura_log_get_miliseconds(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    int msec = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    return msec;
+}
+
+//------------------------------------------------------------------------------
+

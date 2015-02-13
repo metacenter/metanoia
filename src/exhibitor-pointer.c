@@ -12,22 +12,23 @@
 #define INVALID_POINTER_VALUE -1
 
 static AuraPosition position = {100, 100};
-static int last_abs_value_x = INVALID_POINTER_VALUE;
-static int last_abs_value_y = INVALID_POINTER_VALUE;
+static AuraPosition last_abs = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
+static AuraPosition last_rel = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
 static AuraSurfaceId focused_sid;
 
 //------------------------------------------------------------------------------
 
 void aura_exhibitor_pointer_on_motion_reset()
 {
-    last_abs_value_x = INVALID_POINTER_VALUE;
-    last_abs_value_y = INVALID_POINTER_VALUE;
+    last_abs.x = INVALID_POINTER_VALUE;
+    last_abs.y = INVALID_POINTER_VALUE;
 }
 
 //------------------------------------------------------------------------------
 
 void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
 {
+    AuraPosition relative;
     AuraSurfaceId sid = scInvalidSurfaceId;
     FOR_EACH_REVERSE (visible_surfaces, link) {
         AuraSurfaceId current_sid = (AuraSurfaceId) link->data;
@@ -38,14 +39,27 @@ void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
         &&  position.x <= data->position.x + data->desired_size.width
         &&  position.y <= data->position.y + data->desired_size.height) {
             sid = current_sid;
+            relative.x = position.x - data->position.x;
+            relative.y = position.y - data->position.y;
             break;
         }
     }
 
     if (sid != focused_sid) {
-        LOG_INFO3("Pointer focus changed from %d to %d", focused_sid, sid);
+        LOG_INFO2("Pointer focus changed"
+                  "(old sid: %d, new sid: %d, x: %d, y: %d)",
+                  focused_sid, sid, relative.x, relative.y);
         focused_sid = sid;
-        aura_event_signal_emit_int(SIGNAL_POINTER_FOCUS_CHANGED, sid);
+        aura_event_signal_emit(SIGNAL_POINTER_FOCUS_CHANGED,
+                               (AuraObject*) aura_motion_create(sid, relative));
+    } else if (focused_sid != scInvalidSurfaceId) {
+        LOG_INFO3("Pointer surface relative position (x: %d, y: %d)",
+                  relative.x, relative.y);
+        if (relative.x != last_rel.x || relative.y != last_rel.y) {
+            aura_event_signal_emit(SIGNAL_POINTER_RELATIVE_MOTION,
+                               (AuraObject*) aura_motion_create(sid, relative));
+            last_rel = relative;
+        }
     }
 }
 
@@ -54,8 +68,8 @@ void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
 void aura_exhibitor_pointer_on_motion_x(void* data)
 {
     int abs_value = aura_int_unref_get((AuraIntObject*) data);
-    if (last_abs_value_x != INVALID_POINTER_VALUE) {
-        position.x += abs_value - last_abs_value_x;
+    if (last_abs.x != INVALID_POINTER_VALUE) {
+        position.x += abs_value - last_abs.x;
 
         AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
         int max = exhibitor->display->output->width - 1;
@@ -67,7 +81,7 @@ void aura_exhibitor_pointer_on_motion_x(void* data)
             position.x = max;
         }
     }
-    last_abs_value_x = abs_value;
+    last_abs.x = abs_value;
 }
 
 //------------------------------------------------------------------------------
@@ -75,8 +89,8 @@ void aura_exhibitor_pointer_on_motion_x(void* data)
 void aura_exhibitor_pointer_on_motion_y(void* data)
 {
     int abs_value = aura_int_unref_get((AuraIntObject*) data);
-    if (last_abs_value_y != INVALID_POINTER_VALUE) {
-        position.y += abs_value - last_abs_value_y;
+    if (last_abs.y != INVALID_POINTER_VALUE) {
+        position.y += abs_value - last_abs.y;
 
         AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
         int max = exhibitor->display->output->height - 1;
@@ -88,7 +102,7 @@ void aura_exhibitor_pointer_on_motion_y(void* data)
             position.y = max;
         }
     }
-    last_abs_value_y = abs_value;
+    last_abs.y = abs_value;
 }
 
 //------------------------------------------------------------------------------

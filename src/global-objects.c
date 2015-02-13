@@ -98,3 +98,26 @@ AuraKeyObject* aura_key_create(unsigned time, int code, bool value)
 
 //------------------------------------------------------------------------------
 
+/// Free Motion Object.
+void aura_motion_free(AuraMotionObject* self) {
+    if (!self) {
+        return;
+    }
+    memset(self, 0, sizeof(AuraMotionObject));
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+/// Allocate and initialize Motion Object
+AuraMotionObject* aura_motion_create(AuraSurfaceId sid, AuraPosition pos)
+{
+    AuraMotionObject* self = malloc(sizeof(AuraMotionObject));
+    aura_object_initialize(&self->base, (AuraFreeFunc) aura_motion_free);
+    self->sid = sid;
+    self->pos = pos;
+    return self;
+}
+
+//------------------------------------------------------------------------------
+

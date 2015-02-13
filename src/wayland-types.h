@@ -15,6 +15,7 @@ typedef enum {
 
 typedef enum {
     AURA_RESOURCE_KEYBOARD,
+    AURA_RESOURCE_POINTER,
     AURA_RESOURCE_OTHER,
     AURA_NUM_GENERAL_RESOURCE_TYPES,
 } AuraWaylandGeneralResourceType;
