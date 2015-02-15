@@ -14,14 +14,16 @@
 
 void aura_wayland_pointer_unbind(AURA_UNUSED struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: unbind pointer");
+    LOG_WAYL3("Wayland: unbind pointer");
+    aura_wayland_cache_remove_general_resource(AURA_RESOURCE_POINTER, resource);
 }
 
 //------------------------------------------------------------------------------
 
 void aura_wayland_keyboard_unbind(AURA_UNUSED struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: unbind keyboard");
+    LOG_WAYL3("Wayland: unbind keyboard");
+    aura_wayland_cache_remove_general_resource(AURA_RESOURCE_KEYBOARD,resource);
 }
 
 //------------------------------------------------------------------------------

@@ -47,6 +47,8 @@ void aura_frame_jump(AuraFrame* self,
 
 void aura_frame_pop_recursively(AuraFrame* self, AuraFrame* pop);
 
+AuraResult aura_frame_remove_self(AuraFrame* self);
+
 AuraFrame* aura_frame_find_with_sid(AuraFrame* self, AuraSurfaceId sid);
 
 #endif // __AURA_EXHIBITOR_FRAME_H__

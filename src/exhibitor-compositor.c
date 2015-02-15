@@ -56,11 +56,11 @@ AuraList* aura_compositor_get_visible_surfaces(AuraCompositor* self)
 
 //------------------------------------------------------------------------------
 
-void aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid)
+bool aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid)
 {
     AuraSurfaceData* surface = aura_surface_get(sid);
     if (!surface || !surface->is_toplevel) {
-        return;
+        return false;
     }
 
     /// @todo Does surface need compositor?
@@ -73,6 +73,17 @@ void aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid)
 
     aura_branch_append(self->frame, frame);
     self->selection = frame;
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_compositor_unmanage_surface(AuraCompositor* self, AuraSurfaceId sid)
+{
+    AuraFrame* frame = aura_frame_find_with_sid(self->frame, sid);
+    aura_frame_remove_self(frame);
+    aura_frame_free(frame);
 }
 
 //------------------------------------------------------------------------------

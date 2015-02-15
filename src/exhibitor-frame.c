@@ -305,6 +305,17 @@ void aura_frame_pop_recursively(AuraFrame* self, AuraFrame* pop)
 
 //------------------------------------------------------------------------------
 
+AuraResult aura_frame_remove_self(AuraFrame* self)
+{
+    if (!self || !self->trunk) {
+        return AURA_RESULT_INCORRECT_ARGUMENT;
+    }
+
+    return aura_branch_remove(self->trunk, self);
+}
+
+//------------------------------------------------------------------------------
+
 AuraFrame* aura_frame_find_with_sid(AuraFrame* self, AuraSurfaceId sid)
 {
     return aura_branch_find(self, (void*) sid,

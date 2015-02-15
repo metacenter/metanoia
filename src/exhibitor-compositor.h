@@ -19,7 +19,9 @@ void aura_compositor_free(AuraCompositor* self);
 
 AuraList* aura_compositor_get_visible_surfaces(AuraCompositor* self);
 
-void aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid);
+bool aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid);
+
+void aura_compositor_unmanage_surface(AuraCompositor* self, AuraSurfaceId sid);
 
 void aura_compositor_pop_surface(AuraCompositor* self, AuraSurfaceId sid);
 

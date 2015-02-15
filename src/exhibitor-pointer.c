@@ -11,7 +11,7 @@
 
 #define INVALID_POINTER_VALUE -1
 
-static AuraSurfaceId cursor_sid = scInvalidSurfaceId;
+static AuraSurfaceId cursor_sid = 0;
 static AuraSurfaceData* cursor_data = NULL;
 static AuraPosition position = {100, 100};
 static AuraPosition last_abs = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
@@ -61,10 +61,6 @@ void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
         }
     }
 
-    if (cursor_data) {
-        cursor_data->position = position;
-    }
-
     if (sid != focused_sid) {
         LOG_INFO2("Pointer focus changed "
                   "(old sid: %d, new sid: %d, x: %d, y: %d)",
@@ -80,6 +76,10 @@ void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
         aura_event_signal_emit(SIGNAL_POINTER_RELATIVE_MOTION,
                                (AuraObject*) aura_motion_create(sid, relative));
         last_rel = relative;
+    }
+
+    if (cursor_data) {
+        cursor_data->position = position;
     }
 }
 
@@ -150,6 +150,17 @@ void aura_exhibitor_pointer_on_surface_change(void* data)
 
 //------------------------------------------------------------------------------
 
+void aura_exhibitor_pointer_on_surface_destroyed(void* data)
+{
+    AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
+    if (sid != cursor_sid) {
+        return;
+    }
+    aura_exhibitor_pointer_invalidate_surface();
+}
+
+//------------------------------------------------------------------------------
+
 void aura_exhibitor_pointer_initialize(AuraLoop* this_loop, void* data)
 {
     if (this_loop == 0) {
@@ -173,6 +184,10 @@ void aura_exhibitor_pointer_initialize(AuraLoop* this_loop, void* data)
 
     aura_event_signal_subscribe(SIGNAL_CURSOR_SURFACE_CHANGE,
                aura_task_create(aura_exhibitor_pointer_on_surface_change,
+                                this_loop, data));
+
+    aura_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,
+               aura_task_create(aura_exhibitor_pointer_on_surface_destroyed,
                                 this_loop, data));
 }
 

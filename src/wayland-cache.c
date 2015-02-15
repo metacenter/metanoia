@@ -45,16 +45,14 @@ AuraResult aura_wayland_cache_initialize()
     }
 
     for (int type = 0; type < AURA_NUM_SURFACE_RESOURCE_TYPES; ++type) {
-        sCache.surface_resource[type] =
-                              aura_list_new((AuraFreeFunc) wl_resource_destroy);
+        sCache.surface_resource[type] = aura_list_new(NULL);
         if (!sCache.surface_resource[type]) {
             return AURA_RESULT_ERROR;
         }
     }
 
     for (int type = 0; type < AURA_NUM_GENERAL_RESOURCE_TYPES; ++type) {
-        sCache.general_resource[type] =
-                              aura_list_new((AuraFreeFunc) wl_resource_destroy);
+        sCache.general_resource[type] = aura_list_new(NULL);
         if (!sCache.general_resource[type]) {
             return AURA_RESULT_ERROR;
         }

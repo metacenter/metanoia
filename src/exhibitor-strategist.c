@@ -20,9 +20,10 @@ void aura_strategist_on_surface_ready(AuraExhibitor* exhibitor,
     }
 
     // Put surface on current workspace on current display
-    aura_compositor_manage_surface(exhibitor->display->compositor, sid);
+    if (aura_compositor_manage_surface(exhibitor->display->compositor, sid)) {
+        aura_list_append(exhibitor->surface_history, (void*) sid);
+    }
 
-    aura_list_append(exhibitor->surface_history, (void*) sid);
     /// @todo Focus changing should be done in compositor strategy.
     aura_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
 }
@@ -32,9 +33,6 @@ void aura_strategist_on_surface_ready(AuraExhibitor* exhibitor,
 void aura_strategist_on_surface_destroyed(AURA_UNUSED AuraExhibitor* exhibitor,
                                           AURA_UNUSED AuraSurfaceId sid)
 {
-    // TODO: remove surface from workspace
-    //aura_compositor_unmanage_surface(exhibitor->display->compositor, sid);
-
     // TODO: move to compositor strategy
     aura_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED,
                                scInvalidSurfaceId);

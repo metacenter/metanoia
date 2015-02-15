@@ -16,6 +16,10 @@ void aura_wayland_pointer_set_cursor(
                                int32_t hotspot_x,
                                int32_t hotspot_y)
 {
+    if (!surface_resource) {
+        return;
+    }
+
     AuraSurfaceId sid =
                     (AuraSurfaceId) wl_resource_get_user_data(surface_resource);
 

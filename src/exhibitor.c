@@ -118,6 +118,9 @@ void aura_exhibitor_on_surface_destroyed(void* data)
 
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
     exhibitor->priv->strategist->on_surface_destroyed(exhibitor, sid);
+
+    aura_compositor_unmanage_surface(exhibitor->display->compositor, sid);
+
     aura_list_remove(exhibitor->surface_history, (void*) sid,
                     (AuraCompareFunc) aura_surface_compare);
 }
