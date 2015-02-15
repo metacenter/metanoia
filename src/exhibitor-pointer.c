@@ -28,7 +28,7 @@ void aura_exhibitor_pointer_on_motion_reset()
 
 void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
 {
-    AuraPosition relative;
+    AuraPosition relative = {-1, -1};
     AuraSurfaceId sid = scInvalidSurfaceId;
     FOR_EACH_REVERSE (visible_surfaces, link) {
         AuraSurfaceId current_sid = (AuraSurfaceId) link->data;
@@ -39,8 +39,8 @@ void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
         &&  position.x <= data->position.x + data->desired_size.width
         &&  position.y <= data->position.y + data->desired_size.height) {
             sid = current_sid;
-            relative.x = position.x - data->position.x;
-            relative.y = position.y - data->position.y;
+            relative.x = position.x - data->position.x + data->offset.x;
+            relative.y = position.y - data->position.y + data->offset.y;
             break;
         }
     }

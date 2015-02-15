@@ -13,6 +13,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+/// Containter for all data requred to draw the surface.
 typedef struct {
     int width;
     int height;
@@ -26,12 +27,14 @@ typedef struct {
     AuraCompositor* compositor;
 } AuraSurfaceGroup;
 
+/// Container for all data related to single surface.
 typedef struct {
     AuraItem base;
-    AuraPosition position;
-    AuraSize desired_size;
-    AuraSize requested_size;
-    AuraDrawBuffer buffer;
+    AuraPosition position; ///< Position on screen
+    AuraPosition offset; ///< Offset used to move coordinate system of surface
+    AuraSize desired_size; ///< Size desired by compositor
+    AuraSize requested_size; ///< Size requested by client
+    AuraDrawBuffer buffer; ///< Data required for draw
     AuraSurfaceGroup group;
 } AuraSurfaceData;
 

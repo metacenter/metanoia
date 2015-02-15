@@ -94,15 +94,19 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
             continue;
         }
 
+        int pos_x = surface->position.x - surface->offset.x;
+        int pos_y = surface->position.y - surface->offset.y;
+
         uint8_t* d = surface->buffer.data;
         int s = surface->buffer.stride;
-        int x, y;
-        int w = fmin(surface->buffer.width, W - surface->position.x);
-        int h = fmin(surface->buffer.height, H - surface->position.y);
+        int w = fmin(surface->buffer.width, W - pos_x);
+        int h = fmin(surface->buffer.height, H - pos_y);
+        int Y = fmax(0, -pos_y);
+        int X = fmax(0, -pos_x);
 
-        for (y = 0; y < h; ++y) {
-            for (x = 0; x < w; ++x) {
-                int P = S*(y+surface->position.y) + 4*(x+surface->position.x);
+        for (int y = Y; y < h; ++y) {
+            for (int x = X; x < w; ++x) {
+                int P = S*(y + pos_y) + 4*(x + pos_x);
                 int p = s * y + 4 * x;
                 float a = d[p+3]/255.0;
                 float A = (255-d[p+3])/255.0;

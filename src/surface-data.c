@@ -9,6 +9,7 @@
 
 //------------------------------------------------------------------------------
 
+/// Allocate Surface Data
 AuraSurfaceData* aura_surface_data_new()
 {
     AuraSurfaceData* self = malloc(sizeof(AuraSurfaceData));
@@ -24,6 +25,7 @@ AuraSurfaceData* aura_surface_data_new()
 
 //------------------------------------------------------------------------------
 
+/// Deallocate Surface Data.
 void aura_surface_data_free(AuraSurfaceData* self)
 {
     if (!self) {

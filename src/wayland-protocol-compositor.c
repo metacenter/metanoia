@@ -77,8 +77,10 @@ void aura_wayland_create_region(struct wl_client* client,
         return;
     }
 
+    AuraItemId rid = aura_wayland_cache_create_region();
+
     wl_resource_set_implementation(rc, &region_implementation,
-                                   NULL, aura_wayland_region_unbind);
+                                   (void*) rid, aura_wayland_region_unbind);
 }
 
 //------------------------------------------------------------------------------

@@ -12,6 +12,7 @@ pthread_mutex_t sCacheMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static struct {
     AuraStore* surfaces;
+    AuraStore* regions;
     AuraList* surface_resource[AURA_NUM_SURFACE_RESOURCE_TYPES];
     AuraList* general_resource[AURA_NUM_GENERAL_RESOURCE_TYPES];
 } sCache;
@@ -33,6 +34,11 @@ int aura_wayland_cache_compare_resources(struct wl_resource* rc1,
 
 AuraResult aura_wayland_cache_initialize()
 {
+    sCache.regions = aura_store_new_for_id();
+    if (!sCache.regions) {
+        return AURA_RESULT_ERROR;
+    }
+
     sCache.surfaces = aura_store_new_for_id();
     if (!sCache.surfaces) {
         return AURA_RESULT_ERROR;
@@ -74,6 +80,12 @@ void aura_wayland_cache_finalize()
                                   (AuraFreeFunc) aura_wayland_surface_free);
         sCache.surfaces = NULL;
     }
+
+    if (sCache.regions) {
+        aura_store_free_with_items(sCache.regions,
+                                  (AuraFreeFunc) aura_wayland_region_free);
+        sCache.regions = NULL;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -102,6 +114,30 @@ AuraWaylandSurface* aura_wayland_cache_find_surface(AuraSurfaceId sid)
     AuraWaylandSurface* result = NULL;
     if (sid != scInvalidSurfaceId) {
         result = aura_store_find(sCache.surfaces, sid);
+    }
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+AuraItemId aura_wayland_cache_create_region()
+{
+    AuraWaylandRegion* region = aura_wayland_region_new();
+    AuraItemId rid = scInvalidItemId;
+    if (region) {
+        rid = aura_store_generate_new_id(sCache.regions);
+        aura_store_add(sCache.regions, rid, region);
+    }
+    return rid;
+}
+
+//------------------------------------------------------------------------------
+
+AuraWaylandRegion* aura_wayland_cache_find_region(AuraItemId rid)
+{
+    AuraWaylandRegion* result = NULL;
+    if (rid != scInvalidItemId) {
+        result = aura_store_find(sCache.regions, rid);
     }
     return result;
 }

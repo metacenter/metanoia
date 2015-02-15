@@ -5,14 +5,19 @@
 #define __AURA_WAYLAND_CACHE_H__
 
 #include "utils-store.h"
+#include "wayland-region.h"
 #include "wayland-surface.h"
 #include "utils-list.h"
 
 #include <wayland-server.h>
 
+//------------------------------------------------------------------------------
+
 AuraResult aura_wayland_cache_initialize();
 
 void aura_wayland_cache_finalize();
+
+//------------------------------------------------------------------------------
 
 void aura_wayland_cache_add_surface(AuraSurfaceId sid,
                                     AuraWaylandSurface* surface);
@@ -20,6 +25,14 @@ void aura_wayland_cache_add_surface(AuraSurfaceId sid,
 AuraWaylandSurface* aura_wayland_cache_find_surface(AuraSurfaceId sid);
 
 void aura_wayland_cache_remove_surface(AuraSurfaceId sid);
+
+//------------------------------------------------------------------------------
+
+AuraItemId aura_wayland_cache_create_region();
+
+AuraWaylandRegion* aura_wayland_cache_find_region(AuraItemId rid);
+
+//------------------------------------------------------------------------------
 
 void aura_wayland_cache_add_surface_resource
                                   (AuraSurfaceId sid,
@@ -40,6 +53,8 @@ void aura_wayland_cache_remove_general_resource
 
 AuraList* aura_wayland_cache_get_resources
                                  (AuraWaylandGeneralResourceType resource_type);
+
+//------------------------------------------------------------------------------
 
 #endif // __AURA_WAYLAND_CACHE_H__
 

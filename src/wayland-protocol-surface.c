@@ -2,12 +2,13 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-protocol-surface.h"
+#include "wayland-cache.h"
 #include "wayland-state.h"
 
 #include "surface-manager.h"
 #include "utils-log.h"
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_destroy(AURA_UNUSED struct wl_client* client,
                                   AURA_UNUSED struct wl_resource* resource)
@@ -15,7 +16,7 @@ void aura_wayland_surface_destroy(AURA_UNUSED struct wl_client* client,
     LOG_NYIMP("Wayland: surface destroy");
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_attach(AURA_UNUSED struct wl_client* client,
                                  struct wl_resource* resource,
@@ -50,7 +51,7 @@ void aura_wayland_surface_attach(AURA_UNUSED struct wl_client* client,
     }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_damage(AURA_UNUSED struct wl_client* client,
                                  AURA_UNUSED struct wl_resource* resource,
@@ -61,7 +62,7 @@ void aura_wayland_surface_damage(AURA_UNUSED struct wl_client* client,
               x, y, width, height);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_frame(struct wl_client* client,
                                 struct wl_resource* resource,
@@ -88,17 +89,26 @@ void aura_wayland_surface_frame(struct wl_client* client,
     aura_wayland_state_subscribe_frame(sid, rc);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_set_opaque_region
                                (AURA_UNUSED struct wl_client* client,
                                 AURA_UNUSED struct wl_resource* resource,
                                 AURA_UNUSED struct wl_resource* region_resource)
 {
-    LOG_NYIMP("Wayland: set opaque region");
+    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
+    AuraItemId rid = (AuraItemId) wl_resource_get_user_data(region_resource);
+
+    LOG_NYIMP("Wayland: set opaque region (sid: %d, rid: %d)", sid, rid);
+
+    AuraWaylandRegion* region = aura_wayland_cache_find_region(rid);
+    if (region) {
+        aura_surface_set_offset(sid, region->pos);
+        aura_surface_set_requested_size(sid, region->size);
+    }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_set_input_region
                                (AURA_UNUSED struct wl_client* client,
@@ -108,7 +118,7 @@ void aura_wayland_surface_set_input_region
     LOG_NYIMP("Wayland: set input region");
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_commit(AURA_UNUSED struct wl_client* client,
                                  struct wl_resource* resource)
@@ -120,7 +130,7 @@ void aura_wayland_surface_commit(AURA_UNUSED struct wl_client* client,
     //aura_surface_commit(sid);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_set_buffer_transform
                                       (AURA_UNUSED struct wl_client* client,
@@ -130,7 +140,7 @@ void aura_wayland_surface_set_buffer_transform
     LOG_NYIMP("Wayland: set buffer transform (transform: %d)", transform);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void aura_wayland_surface_set_buffer_scale
                                       (AURA_UNUSED struct wl_client* client,
@@ -140,7 +150,7 @@ void aura_wayland_surface_set_buffer_scale
     LOG_NYIMP("Wayland: set buffer scale (scale: %d)", scale);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 const struct wl_surface_interface surface_implementation = {
         aura_wayland_surface_destroy,
@@ -154,5 +164,5 @@ const struct wl_surface_interface surface_implementation = {
         aura_wayland_surface_set_buffer_scale
     };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 

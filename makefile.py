@@ -364,7 +364,13 @@ t = m.add_compile_target(
 aura.add_input(t)
 
 #-------------------------------------------------------------------------------
-# WAYLAD FRONTEND
+# WAYLAND FRONTEND
+
+t = m.add_compile_target(
+        output='wayland-region.o',
+        inputs=['wayland-region.c'],
+    )
+aura.add_input(t)
 
 t = m.add_compile_target(
         output='wayland-surface.o',

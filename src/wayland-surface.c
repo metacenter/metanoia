@@ -11,13 +11,7 @@
 
 AuraWaylandSurface* aura_wayland_surface_new()
 {
-    AuraWaylandSurface* self = malloc(sizeof(AuraWaylandSurface));
-    if (!self) {
-        return self;
-    }
-
-    memset(self, 0, sizeof(AuraWaylandSurface));
-    return self;
+    return calloc(sizeof(AuraWaylandSurface), 1);
 }
 
 //------------------------------------------------------------------------------

@@ -112,8 +112,15 @@ void aura_surface_commit(AuraSurfaceId sid,
 
 //------------------------------------------------------------------------------
 
-void aura_surface_set_requested_size(AuraSurfaceId sid,
-                                     AuraSize size)
+void aura_surface_set_offset(AuraSurfaceId sid, AuraPosition offset)
+{
+    AURA_GET_AND_ASSERT_SURFACE(surface, sid);
+    surface->offset = offset;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_set_requested_size(AuraSurfaceId sid, AuraSize size)
 {
     AURA_GET_AND_ASSERT_SURFACE(surface, sid);
     surface->requested_size = size;
