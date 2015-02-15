@@ -10,7 +10,9 @@
 
 void aura_exhibitor_pointer_initialize(AuraLoop* this_loop, void* data);
 
-AuraPosition aura_exhibitor_get_pointer_position();
+AuraPosition aura_exhibitor_pointer_get_position();
+
+AuraSurfaceId aura_exhibitor_pointer_get_sid();
 
 void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces);
 

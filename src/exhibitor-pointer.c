@@ -11,6 +11,8 @@
 
 #define INVALID_POINTER_VALUE -1
 
+static AuraSurfaceId cursor_sid = scInvalidSurfaceId;
+static AuraSurfaceData* cursor_data = NULL;
 static AuraPosition position = {100, 100};
 static AuraPosition last_abs = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
 static AuraPosition last_rel = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
@@ -18,10 +20,24 @@ static AuraSurfaceId focused_sid;
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_pointer_on_motion_reset()
+AuraPosition aura_exhibitor_pointer_get_position()
 {
-    last_abs.x = INVALID_POINTER_VALUE;
-    last_abs.y = INVALID_POINTER_VALUE;
+    return position;
+}
+
+//------------------------------------------------------------------------------
+
+AuraSurfaceId aura_exhibitor_pointer_get_sid()
+{
+    return cursor_sid;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_exhibitor_pointer_invalidate_surface()
+{
+    cursor_sid = scInvalidSurfaceId;
+    cursor_data = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -45,22 +61,34 @@ void aura_exhibitor_pointer_update_hover_state(AuraList* visible_surfaces)
         }
     }
 
+    if (cursor_data) {
+        cursor_data->position = position;
+    }
+
     if (sid != focused_sid) {
-        LOG_INFO2("Pointer focus changed"
+        LOG_INFO2("Pointer focus changed "
                   "(old sid: %d, new sid: %d, x: %d, y: %d)",
                   focused_sid, sid, relative.x, relative.y);
         focused_sid = sid;
         aura_event_signal_emit(SIGNAL_POINTER_FOCUS_CHANGED,
                                (AuraObject*) aura_motion_create(sid, relative));
-    } else if (focused_sid != scInvalidSurfaceId) {
+        aura_exhibitor_pointer_invalidate_surface();
+    } else if (focused_sid != scInvalidSurfaceId
+           && (relative.x != last_rel.x || relative.y != last_rel.y)) {
         LOG_INFO3("Pointer surface relative position (x: %d, y: %d)",
                   relative.x, relative.y);
-        if (relative.x != last_rel.x || relative.y != last_rel.y) {
-            aura_event_signal_emit(SIGNAL_POINTER_RELATIVE_MOTION,
+        aura_event_signal_emit(SIGNAL_POINTER_RELATIVE_MOTION,
                                (AuraObject*) aura_motion_create(sid, relative));
-            last_rel = relative;
-        }
+        last_rel = relative;
     }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_exhibitor_pointer_on_motion_reset()
+{
+    last_abs.x = INVALID_POINTER_VALUE;
+    last_abs.y = INVALID_POINTER_VALUE;
 }
 
 //------------------------------------------------------------------------------
@@ -107,9 +135,17 @@ void aura_exhibitor_pointer_on_motion_y(void* data)
 
 //------------------------------------------------------------------------------
 
-AuraPosition aura_exhibitor_get_pointer_position()
+void aura_exhibitor_pointer_on_surface_change(void* data)
 {
-    return position;
+    AuraSurfaceId sid = aura_int_unref_get((AuraIntObject*) data);
+    AuraSurfaceData* surface_data = aura_surface_get(sid);
+    if (!surface_data) {
+        return;
+    }
+
+    cursor_data = surface_data;
+    cursor_data->position = position;
+    cursor_sid = sid;
 }
 
 //------------------------------------------------------------------------------
@@ -133,6 +169,10 @@ void aura_exhibitor_pointer_initialize(AuraLoop* this_loop, void* data)
 
     aura_event_signal_subscribe(SIGNAL_POINTER_MOTION_Y,
                aura_task_create(aura_exhibitor_pointer_on_motion_y,
+                                this_loop, data));
+
+    aura_event_signal_subscribe(SIGNAL_CURSOR_SURFACE_CHANGE,
+               aura_task_create(aura_exhibitor_pointer_on_surface_change,
                                 this_loop, data));
 }
 

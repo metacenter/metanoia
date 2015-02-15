@@ -73,12 +73,11 @@ void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
 
 //------------------------------------------------------------------------------
 
-// NOTE: MMap renderer can not display surfaces passed trouhgt GPU
-void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
-                                      AuraList* surfaces)
+void aura_renderer_mmap_draw_surface(AuraRendererMMap* mine,
+                                     AuraSurfaceId sid)
 {
-    if (surfaces == NULL) {
-        LOG_WARN4("MMap renderer: no surfaces!");
+    AuraSurfaceData* surface = aura_surface_get(sid);
+    if (!surface) {
         return;
     }
 
@@ -88,53 +87,68 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
     int H = mine->height;
     int S = mine->buffer[current_buffer].stride;
 
-    FOR_EACH (surfaces, link) {
-        AuraSurfaceData* surface = aura_surface_get((AuraSurfaceId) link->data);
-        if (!surface) {
-            continue;
-        }
+    int pos_x = surface->position.x - surface->offset.x;
+    int pos_y = surface->position.y - surface->offset.y;
 
-        int pos_x = surface->position.x - surface->offset.x;
-        int pos_y = surface->position.y - surface->offset.y;
+    uint8_t* d = surface->buffer.data;
+    int s = surface->buffer.stride;
+    int w = fmin(surface->buffer.width, W - pos_x);
+    int h = fmin(surface->buffer.height, H - pos_y);
+    int Y = fmax(0, -pos_y);
+    int X = fmax(0, -pos_x);
 
-        uint8_t* d = surface->buffer.data;
-        int s = surface->buffer.stride;
-        int w = fmin(surface->buffer.width, W - pos_x);
-        int h = fmin(surface->buffer.height, H - pos_y);
-        int Y = fmax(0, -pos_y);
-        int X = fmax(0, -pos_x);
-
-        for (int y = Y; y < h; ++y) {
-            for (int x = X; x < w; ++x) {
-                int P = S*(y + pos_y) + 4*(x + pos_x);
-                int p = s * y + 4 * x;
-                float a = d[p+3]/255.0;
-                float A = (255-d[p+3])/255.0;
-                D[P+0] = (int) (a*d[p+0] + A*D[P+0]);
-                D[P+1] = (int) (a*d[p+1] + A*D[P+1]);
-                D[P+2] = (int) (a*d[p+2] + A*D[P+2]);
-                D[P+3] = 255;
-            }
+    for (int y = Y; y < h; ++y) {
+        for (int x = X; x < w; ++x) {
+            int P = S*(y + pos_y) + 4*(x + pos_x);
+            int p = s * y + 4 * x;
+            float a = d[p+3]/255.0;
+            float A = (255-d[p+3])/255.0;
+            D[P+0] = (int) (a*d[p+0] + A*D[P+0]);
+            D[P+1] = (int) (a*d[p+1] + A*D[P+1]);
+            D[P+2] = (int) (a*d[p+2] + A*D[P+2]);
+            D[P+3] = 255;
         }
     }
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_draw_pointer(AuraRendererMMap* mine, int X, int Y)
+// NOTE: MMap renderer can not display surfaces passed trouhgt GPU
+void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
+                                      AuraList* surfaces)
 {
-    int x, y, w = 15, h = 15;
-    int current_buffer = mine->front ^ 1;
-    int S = mine->buffer[current_buffer].stride;
-    uint8_t* D = mine->buffer[current_buffer].data;
-    float a = 0.8, A = (1.0-a);
-    for (y = 0; y < h; ++y) {
-        for (x = 0; x < w; ++x) {
-            int P = S * (Y + y) + 4 * (X + x);
-            D[P+0] = (int) (a*255.0 + A*D[P+0]);
-            D[P+1] = (int) (a*255.0 + A*D[P+1]);
-            D[P+2] = (int) (a*255.0 + A*D[P+2]);
-            D[P+3] = 255;
+    if (surfaces == NULL) {
+        LOG_WARN4("MMap renderer: no surfaces!");
+        return;
+    }
+
+    FOR_EACH (surfaces, link) {
+        aura_renderer_mmap_draw_surface(mine, (AuraSurfaceId) link->data);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void aura_renderer_mmap_draw_pointer(AuraRendererMMap* mine,
+                                     int X, int Y,
+                                     AURA_UNUSED AuraSurfaceId cursor_sid)
+{
+    if (cursor_sid != scInvalidSurfaceId) {
+        aura_renderer_mmap_draw_surface(mine, cursor_sid);
+    } else {
+        int x, y, w = 15, h = 15;
+        int current_buffer = mine->front ^ 1;
+        int S = mine->buffer[current_buffer].stride;
+        uint8_t* D = mine->buffer[current_buffer].data;
+        float a = 0.8, A = (1.0-a);
+        for (y = 0; y < h; ++y) {
+            for (x = 0; x < w; ++x) {
+                int P = S * (Y + y) + 4 * (X + x);
+                D[P+0] = (int) (a*255.0 + A*D[P+0]);
+                D[P+1] = (int) (a*255.0 + A*D[P+1]);
+                D[P+2] = (int) (a*255.0 + A*D[P+2]);
+                D[P+3] = 255;
+            }
         }
     }
 }
@@ -165,7 +179,9 @@ void aura_renderer_mmap_swap_buffers(AuraRendererMMap* mine)
 //------------------------------------------------------------------------------
 
 void aura_renderer_mmap_draw(AuraRenderer* self,
-                             AuraList* surfaces, int X, int Y)
+                             AuraList* surfaces,
+                             int x, int y,
+                             AuraSurfaceId cursor_sid)
 {
     AuraRendererMMap* mine = (AuraRendererMMap*) self;
     if (!mine) {
@@ -175,7 +191,7 @@ void aura_renderer_mmap_draw(AuraRenderer* self,
 
     aura_renderer_mmap_draw_bg_image(mine);
     aura_renderer_mmap_draw_surfaces(mine, surfaces);
-    aura_renderer_mmap_draw_pointer(mine, X, Y);
+    aura_renderer_mmap_draw_pointer(mine, x, y, cursor_sid);
     aura_renderer_mmap_swap_buffers(mine);
 }
 

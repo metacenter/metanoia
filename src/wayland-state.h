@@ -37,6 +37,11 @@ void aura_wayland_state_pointer_button(uint32_t time,
                                        uint32_t button,
                                        uint32_t state);
 
+void aura_wayland_state_set_cursor(int serial,
+                                   int hotspot_x,
+                                   int hotspot_y,
+                                   AuraSurfaceId sid);
+
 void aura_wayland_state_screen_refresh();
 
 void aura_wayland_state_advertise_output(AuraOutput* output);

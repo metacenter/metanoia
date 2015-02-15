@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-protocol-keyboard.h"
+#include "wayland-state.h"
 
 #include "utils-log.h"
 
@@ -15,8 +16,14 @@ void aura_wayland_pointer_set_cursor(
                                int32_t hotspot_x,
                                int32_t hotspot_y)
 {
-    LOG_NYIMP("Wayland: set cursor (serial: %d, hotspot_x: %d, hotspot_y: %d)",
-              serial, hotspot_x, hotspot_y);
+    AuraSurfaceId sid =
+                    (AuraSurfaceId) wl_resource_get_user_data(surface_resource);
+
+    LOG_WAYL3("Wayland: set cursor "
+              "(serial: %d, hotspot_x: %d, hotspot_y: %d, sid: %d)",
+              serial, hotspot_x, hotspot_y, sid);
+
+    aura_wayland_state_set_cursor(serial, hotspot_x, hotspot_y, sid);
 }
 
 //------------------------------------------------------------------------------

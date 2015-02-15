@@ -24,6 +24,7 @@ static struct {
     AuraStore* outputs;
     AuraSurfaceId keyboard_focused_sid;
     AuraSurfaceId pointer_focused_sid;
+    int pointer_serial;
 } sState;
 
 //------------------------------------------------------------------------------
@@ -46,6 +47,7 @@ AuraResult aura_wayland_state_initialize(struct wl_display* display)
     sState.display = display;
     sState.keyboard_focused_sid = scInvalidItemId;
     sState.pointer_focused_sid = scInvalidItemId;
+    sState.pointer_serial = 0;
 
     return AURA_RESULT_SUCCESS;
 }
@@ -54,6 +56,7 @@ AuraResult aura_wayland_state_initialize(struct wl_display* display)
 
 void aura_wayland_state_finalize()
 {
+    sState.pointer_serial = 0;
     sState.pointer_focused_sid = scInvalidItemId;
     sState.keyboard_focused_sid = scInvalidItemId;
     sState.display = NULL;
@@ -263,13 +266,13 @@ void aura_wayland_state_pointer_focus_update(AuraSurfaceId new_sid,
         old_client = wl_resource_get_client(old_resource);
     }
 
-    int serial = wl_display_next_serial(sState.display);
+    sState.pointer_serial = wl_display_next_serial(sState.display);
     resources = aura_wayland_cache_get_resources(AURA_RESOURCE_POINTER);
 
     FOR_EACH (resources, link) {
         struct wl_resource* rc = link->data;
         if (old_client == wl_resource_get_client(rc)) {
-            wl_pointer_send_leave(rc, serial, old_resource);
+            wl_pointer_send_leave(rc, sState.pointer_serial, old_resource);
         }
     }
 
@@ -278,7 +281,7 @@ void aura_wayland_state_pointer_focus_update(AuraSurfaceId new_sid,
     FOR_EACH (resources, link) {
         struct wl_resource* rc = link->data;
         if (new_client == wl_resource_get_client(rc)) {
-            wl_pointer_send_enter(rc, serial, new_resource,
+            wl_pointer_send_enter(rc, sState.pointer_serial, new_resource,
                             wl_fixed_from_int(pos.x), wl_fixed_from_int(pos.y));
         }
     }
@@ -342,6 +345,25 @@ void aura_wayland_state_pointer_button(uint32_t time,
     }
 
     pthread_mutex_unlock(&sStateMutex);
+}
+
+//------------------------------------------------------------------------------
+
+void aura_wayland_state_set_cursor(int serial,
+                                   int hotspot_x,
+                                   int hotspot_y,
+                                   AuraSurfaceId sid)
+{
+    if (serial != sState.pointer_serial) {
+        LOG_WARN2("Unauthorized set of cursor "
+                  "(received serial: %d, sent serial: %d)",
+                  serial, sState.pointer_serial);
+        return;
+    }
+
+    AuraPosition hotspot = {hotspot_x, hotspot_y};
+    aura_surface_set_offset(sid, hotspot);
+    aura_surface_set_as_cursor(sid);
 }
 
 //------------------------------------------------------------------------------
@@ -422,7 +444,7 @@ void aura_wayland_state_surface_reconfigured(AuraSurfaceId sid)
     }
 
     if (surface && data) {
-        LOG_DEBUG("Wayland: surface reconfiguration "
+        LOG_INFO2("Wayland: surface reconfiguration "
                   "(sid: %d, width: %d, height: %d)",
                    sid, data->desired_size.width, data->desired_size.height);
 

@@ -105,9 +105,18 @@ void aura_surface_commit(AuraSurfaceId sid,
             surface->requested_size.width  = width;
             surface->requested_size.height = height;
         }
-        aura_event_signal_emit_int(SIGNAL_SURFACE_CREATED, sid);
+        aura_event_signal_emit_int(SIGNAL_SURFACE_READY, sid);
     }
+
     aura_surface_unlock();
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_show(AURA_UNUSED AuraSurfaceId sid)
+{
+    AURA_GET_AND_ASSERT_SURFACE(surface, sid);
+    surface->is_toplevel = true;
 }
 
 //------------------------------------------------------------------------------
@@ -124,6 +133,13 @@ void aura_surface_set_requested_size(AuraSurfaceId sid, AuraSize size)
 {
     AURA_GET_AND_ASSERT_SURFACE(surface, sid);
     surface->requested_size = size;
+}
+
+//------------------------------------------------------------------------------
+
+void aura_surface_set_as_cursor(AuraSurfaceId sid)
+{
+    aura_event_signal_emit_int(SIGNAL_CURSOR_SURFACE_CHANGE, sid);
 }
 
 //------------------------------------------------------------------------------

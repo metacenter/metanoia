@@ -13,7 +13,7 @@ struct AuraRenderer {
     int (*initialize) (AuraRenderer*);
     void (*finalize) (AuraRenderer*);
     void (*attach) (AuraRenderer*, AuraSurfaceId, void*);
-    void (*draw) (AuraRenderer*, AuraList*, int x, int y);
+    void (*draw) (AuraRenderer*, AuraList*, int x, int y, AuraSurfaceId);
     void (*free) (AuraRenderer*);
 };
 

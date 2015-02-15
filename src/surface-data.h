@@ -36,6 +36,7 @@ typedef struct {
     AuraSize requested_size; ///< Size requested by client
     AuraDrawBuffer buffer; ///< Data required for draw
     AuraSurfaceGroup group;
+    bool is_toplevel;
 } AuraSurfaceData;
 
 AuraSurfaceData* aura_surface_data_new();

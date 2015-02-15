@@ -96,7 +96,7 @@ void aura_exhibitor_on_display_lost(void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_on_surface_created(void* data)
+void aura_exhibitor_on_surface_ready(void* data)
 {
     AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
     if (sid == scInvalidSurfaceId) {
@@ -104,7 +104,7 @@ void aura_exhibitor_on_surface_created(void* data)
     }
 
     AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
-    exhibitor->priv->strategist->on_surface_created(exhibitor, sid);
+    exhibitor->priv->strategist->on_surface_ready(exhibitor, sid);
 }
 
 //------------------------------------------------------------------------------
@@ -217,8 +217,8 @@ void aura_exhibitor_initialize(AuraLoop* this_loop)
                aura_task_create(aura_exhibitor_on_display_lost,
                                 this_loop, exhibitor));
 
-    aura_event_signal_subscribe(SIGNAL_SURFACE_CREATED,
-               aura_task_create(aura_exhibitor_on_surface_created,
+    aura_event_signal_subscribe(SIGNAL_SURFACE_READY,
+               aura_task_create(aura_exhibitor_on_surface_ready,
                                 this_loop, exhibitor));
 
     aura_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,

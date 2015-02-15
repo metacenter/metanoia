@@ -53,10 +53,10 @@ void aura_display_redraw_all(AuraDisplay* self)
     AuraList* visible_surfaces =
                          aura_compositor_get_visible_surfaces(self->compositor);
 
-    AuraPosition pos = aura_exhibitor_get_pointer_position();
+    AuraPosition pos = aura_exhibitor_pointer_get_position();
 
-    self->output->renderer->draw(self->output->renderer,
-                                 visible_surfaces, pos.x, pos.y);
+    self->output->renderer->draw(self->output->renderer, visible_surfaces,
+                                pos.x, pos.y, aura_exhibitor_pointer_get_sid());
 
     aura_exhibitor_pointer_update_hover_state(visible_surfaces);
 

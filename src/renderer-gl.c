@@ -317,7 +317,8 @@ void aura_renderer_gl_finalize(AURA_UNUSED AuraRenderer* self)
 void aura_renderer_gl_draw(AuraRenderer* self,
                            AuraList* surfaces,
                            AURA_UNUSED int x,
-                           AURA_UNUSED int y)
+                           AURA_UNUSED int y,
+                           AURA_UNUSED AuraSurfaceId sid)
 {
     int r;
     AuraRendererGL* mine;

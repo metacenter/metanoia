@@ -5,6 +5,7 @@
 #include "wayland-protocol-xdg-surface.h"
 #include "wayland-cache.h"
 
+#include "surface-manager.h"
 #include "utils-log.h"
 
 #include "xdg-shell-server-protocol.h"
@@ -56,6 +57,7 @@ void aura_wayland_xdg_get_xdg_surface
 
     aura_wayland_cache_add_surface_resource
                                      (sid, AURA_RESOURCE_XDG_SHELL_SURFACE, rc);
+    aura_surface_show(sid);
 
     wl_resource_set_implementation(rc, &xdg_surface_implementation, (void*) sid,
                                    aura_wayland_xdg_surface_unbind);

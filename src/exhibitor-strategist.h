@@ -13,7 +13,7 @@ typedef void (*AuraStrategistOnSurfaceDestroyedFunc)
              (AuraExhibitor*, AuraSurfaceId);
 
 typedef struct {
-    AuraStrategistOnSurfaceCreatedFunc   on_surface_created;
+    AuraStrategistOnSurfaceCreatedFunc   on_surface_ready;
     AuraStrategistOnSurfaceDestroyedFunc on_surface_destroyed;
 } AuraStrategist;
 

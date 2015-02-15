@@ -11,7 +11,7 @@
 
 //------------------------------------------------------------------------------
 
-void aura_strategist_on_surface_created(AuraExhibitor* exhibitor,
+void aura_strategist_on_surface_ready(AuraExhibitor* exhibitor,
                                         AuraSurfaceId sid)
 {
     if (!exhibitor || !exhibitor->display || !exhibitor->display->compositor) {
@@ -52,7 +52,7 @@ AuraStrategist* aura_strategist_create()
 
     memset(self, 0, sizeof(AuraStrategist));
 
-    self->on_surface_created   = aura_strategist_on_surface_created;
+    self->on_surface_ready     = aura_strategist_on_surface_ready;
     self->on_surface_destroyed = aura_strategist_on_surface_destroyed;
     return self;
 }
