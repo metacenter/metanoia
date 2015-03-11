@@ -9,9 +9,9 @@
 
 //------------------------------------------------------------------------------
 
-AuraBranch* aura_branch_new()
+NoiaBranch* noia_branch_new()
 {
-    AuraBranch* self = malloc(sizeof(AuraBranch));
+    NoiaBranch* self = malloc(sizeof(NoiaBranch));
     if (!self) {
         return NULL;
     }
@@ -24,17 +24,17 @@ AuraBranch* aura_branch_new()
 
 //------------------------------------------------------------------------------
 
-void aura_branch_free(AuraBranch* self, AuraFreeFunc free_data)
+void noia_branch_free(NoiaBranch* self, NoiaFreeFunc free_data)
 {
     if (!self) {
         return;
     }
 
-    AuraBranch* next = NULL;
-    AuraBranch* twig = (AuraBranch*) self->twigs->first;
+    NoiaBranch* next = NULL;
+    NoiaBranch* twig = (NoiaBranch*) self->twigs->first;
     while (twig) {
-        next = (AuraBranch*) twig->base.next;
-        aura_branch_free(twig, free_data);
+        next = (NoiaBranch*) twig->base.next;
+        noia_branch_free(twig, free_data);
         twig = next;
     }
     chain_free(self->twigs);
@@ -42,13 +42,13 @@ void aura_branch_free(AuraBranch* self, AuraFreeFunc free_data)
         free_data(self->base.data);
     }
 
-    memset(self, 0, sizeof(AuraBranch));
+    memset(self, 0, sizeof(NoiaBranch));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_branch_prepend(AuraBranch* self, AuraBranch* other)
+void noia_branch_prepend(NoiaBranch* self, NoiaBranch* other)
 {
     if (!self || !other) {
         return;
@@ -60,7 +60,7 @@ void aura_branch_prepend(AuraBranch* self, AuraBranch* other)
 
 //------------------------------------------------------------------------------
 
-void aura_branch_append(AuraBranch* self, AuraBranch* other)
+void noia_branch_append(NoiaBranch* self, NoiaBranch* other)
 {
     if (!self || !other) {
         return;
@@ -72,10 +72,10 @@ void aura_branch_append(AuraBranch* self, AuraBranch* other)
 
 //------------------------------------------------------------------------------
 
-AuraResult aura_branch_remove(AuraBranch* self, AuraBranch* other)
+NoiaResult noia_branch_remove(NoiaBranch* self, NoiaBranch* other)
 {
     if (!self || !other) {
-        return AURA_RESULT_INCORRECT_ARGUMENT;
+        return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
     other->trunk = NULL;
@@ -84,7 +84,7 @@ AuraResult aura_branch_remove(AuraBranch* self, AuraBranch* other)
 
 //------------------------------------------------------------------------------
 
-void aura_branch_set_data(AuraBranch* self, void* data)
+void noia_branch_set_data(NoiaBranch* self, void* data)
 {
     if (!self) {
         return;
@@ -95,9 +95,9 @@ void aura_branch_set_data(AuraBranch* self, void* data)
 
 //------------------------------------------------------------------------------
 
-AuraBranch* aura_branch_find(AuraBranch* self,
+NoiaBranch* noia_branch_find(NoiaBranch* self,
                              void* data,
-                             AuraBranchCompare compare)
+                             NoiaBranchCompare compare)
 {
     if (!self) {
         return NULL;
@@ -108,7 +108,7 @@ AuraBranch* aura_branch_find(AuraBranch* self,
     }
 
     FOR_EACH_TWIG(self, twig) {
-        AuraBranch* branch = aura_branch_find(twig, data, compare);
+        NoiaBranch* branch = noia_branch_find(twig, data, compare);
         if (branch) {
             return branch;
         }

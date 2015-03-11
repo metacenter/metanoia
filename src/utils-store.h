@@ -1,43 +1,43 @@
 // file: utils-store.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_STORE_H__
-#define __AURA_STORE_H__
+#ifndef __NOIA_STORE_H__
+#define __NOIA_STORE_H__
 
 #include "global-constants.h"
 
-typedef int (*AuraStoreValueCompareFunc) (const void*, const void*);
-typedef void (*AuraStoreKeyFreeFunc) (void*);
+typedef int (*NoiaStoreValueCompareFunc) (const void*, const void*);
+typedef void (*NoiaStoreKeyFreeFunc) (void*);
 
-typedef struct AuraStorePriv AuraStore;
+typedef struct NoiaStorePriv NoiaStore;
 
-AuraStore* aura_store_new(AuraStoreValueCompareFunc value_compare_func,
-                          AuraStoreKeyFreeFunc key_free_func);
-AuraStore* aura_store_new_for_id();
-AuraStore* aura_store_new_for_str();
+NoiaStore* noia_store_new(NoiaStoreValueCompareFunc value_compare_func,
+                          NoiaStoreKeyFreeFunc key_free_func);
+NoiaStore* noia_store_new_for_id();
+NoiaStore* noia_store_new_for_str();
 
-void aura_store_free(AuraStore* self);
-void aura_store_free_with_items(AuraStore* self, AuraFreeFunc free_func);
+void noia_store_free(NoiaStore* self);
+void noia_store_free_with_items(NoiaStore* self, NoiaFreeFunc free_func);
 
-AuraItemId aura_store_generate_new_id(AuraStore* self);
+NoiaItemId noia_store_generate_new_id(NoiaStore* self);
 
-AuraResult aura_store_add_with_id(AuraStore* self, AuraItemId key, void* data);
-AuraResult aura_store_add_with_str(AuraStore* self, char* key, void* data);
-#define aura_store_add(store, key, data) _Generic(key, \
-        AuraItemId: aura_store_add_with_id, \
-        char*:      aura_store_add_with_str) (store, key, data)
+NoiaResult noia_store_add_with_id(NoiaStore* self, NoiaItemId key, void* data);
+NoiaResult noia_store_add_with_str(NoiaStore* self, char* key, void* data);
+#define noia_store_add(store, key, data) _Generic(key, \
+        NoiaItemId: noia_store_add_with_id, \
+        char*:      noia_store_add_with_str) (store, key, data)
 
-void* aura_store_find_with_id(AuraStore* self, AuraItemId key);
-void* aura_store_find_with_str(AuraStore* self, char* key);
-#define aura_store_find(store, key) _Generic(key, \
-        AuraItemId: aura_store_find_with_id, \
-        char*:      aura_store_find_with_str) (store, key)
+void* noia_store_find_with_id(NoiaStore* self, NoiaItemId key);
+void* noia_store_find_with_str(NoiaStore* self, char* key);
+#define noia_store_find(store, key) _Generic(key, \
+        NoiaItemId: noia_store_find_with_id, \
+        char*:      noia_store_find_with_str) (store, key)
 
-void* aura_store_delete_with_id(AuraStore* self, AuraItemId key);
-void* aura_store_delete_with_str(AuraStore* self, char* key);
-#define aura_store_delete(store, key) _Generic(key, \
-        AuraItemId: aura_store_delete_with_id, \
-        char*:      aura_store_delete_with_str) (store, key)
+void* noia_store_delete_with_id(NoiaStore* self, NoiaItemId key);
+void* noia_store_delete_with_str(NoiaStore* self, char* key);
+#define noia_store_delete(store, key) _Generic(key, \
+        NoiaItemId: noia_store_delete_with_id, \
+        char*:      noia_store_delete_with_str) (store, key)
 
-#endif // __AURA_STORE_H__
+#endif // __NOIA_STORE_H__
 

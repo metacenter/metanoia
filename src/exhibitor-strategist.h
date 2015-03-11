@@ -1,23 +1,23 @@
 // file: exhibitor-strategist.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_EXHIBITOR_STRATEGIST_H__
-#define __AURA_EXHIBITOR_STRATEGIST_H__
+#ifndef __NOIA_EXHIBITOR_STRATEGIST_H__
+#define __NOIA_EXHIBITOR_STRATEGIST_H__
 
 #include "exhibitor.h"
 #include "global-types.h"
 
-typedef void (*AuraStrategistOnSurfaceCreatedFunc)
-             (AuraExhibitor*, AuraSurfaceId);
-typedef void (*AuraStrategistOnSurfaceDestroyedFunc)
-             (AuraExhibitor*, AuraSurfaceId);
+typedef void (*NoiaStrategistOnSurfaceCreatedFunc)
+             (NoiaExhibitor*, NoiaSurfaceId);
+typedef void (*NoiaStrategistOnSurfaceDestroyedFunc)
+             (NoiaExhibitor*, NoiaSurfaceId);
 
 typedef struct {
-    AuraStrategistOnSurfaceCreatedFunc   on_surface_ready;
-    AuraStrategistOnSurfaceDestroyedFunc on_surface_destroyed;
-} AuraStrategist;
+    NoiaStrategistOnSurfaceCreatedFunc   on_surface_ready;
+    NoiaStrategistOnSurfaceDestroyedFunc on_surface_destroyed;
+} NoiaStrategist;
 
-AuraStrategist* aura_strategist_create();
-void aura_strategist_destroy(AuraStrategist* self);
+NoiaStrategist* noia_strategist_create();
+void noia_strategist_destroy(NoiaStrategist* self);
 
-#endif // __AURA_EXHIBITOR_STRATEGIST_H__
+#endif // __NOIA_EXHIBITOR_STRATEGIST_H__

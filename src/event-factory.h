@@ -1,27 +1,27 @@
 // file: event-factory.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_EVENT_TASK_FACTORY_H__
-#define __AURA_EVENT_TASK_FACTORY_H__
+#ifndef __NOIA_EVENT_TASK_FACTORY_H__
+#define __NOIA_EVENT_TASK_FACTORY_H__
 
 #include "event-task.h"
 #include "event-dispatcher.h"
 
-AuraTask* factorize_setup_input_devices_task(AuraEventDispatcher* ed);
+NoiaTask* factorize_setup_input_devices_task(NoiaEventDispatcher* ed);
 
-AuraTask* factorize_setup_device_monitor_task(AuraEventDispatcher* ed);
+NoiaTask* factorize_setup_device_monitor_task(NoiaEventDispatcher* ed);
 
-AuraTask* factorize_backend_gtk_run_task(AuraLoop* loop);
+NoiaTask* factorize_backend_gtk_run_task(NoiaLoop* loop);
 
-AuraTask* factorize_stop_dispatcher_task(AuraEventDispatcher* dispatcher);
+NoiaTask* factorize_stop_dispatcher_task(NoiaEventDispatcher* dispatcher);
 
-AuraTask* factorize_initialize_wayland_task(AuraLoop* loop);
+NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop);
 
-AuraTask* factorize_initialize_exhibitor_task(AuraLoop* loop);
+NoiaTask* factorize_initialize_exhibitor_task(NoiaLoop* loop);
 
-AuraTask* factorize_initialize_output_collector_task(AuraLoop* loop);
+NoiaTask* factorize_initialize_output_collector_task(NoiaLoop* loop);
 
-AuraEventData* factorize_signal_event_data(AuraEventDispatcher* dispatcher);
+NoiaEventData* factorize_signal_event_data(NoiaEventDispatcher* dispatcher);
 
-#endif // __AURA_EVENT_TASK_FACTORY_H__
+#endif // __NOIA_EVENT_TASK_FACTORY_H__
 

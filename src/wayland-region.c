@@ -9,26 +9,26 @@
 
 //------------------------------------------------------------------------------
 
-AuraWaylandRegion* aura_wayland_region_new()
+NoiaWaylandRegion* noia_wayland_region_new()
 {
-    return calloc(sizeof(AuraWaylandRegion), 1);
+    return calloc(sizeof(NoiaWaylandRegion), 1);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_region_free(AuraWaylandRegion* self)
+void noia_wayland_region_free(NoiaWaylandRegion* self)
 {
     if (!self) {
         return;
     }
 
-    memset(self, 0, sizeof(AuraWaylandRegion));
+    memset(self, 0, sizeof(NoiaWaylandRegion));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-bool aura_wayland_region_is_valid(AuraWaylandRegion* self)
+bool noia_wayland_region_is_valid(NoiaWaylandRegion* self)
 {
     if (!self) {
         return false;
@@ -39,14 +39,14 @@ bool aura_wayland_region_is_valid(AuraWaylandRegion* self)
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_region_inflate(AuraWaylandRegion* self,
+void noia_wayland_region_inflate(NoiaWaylandRegion* self,
                                  int x, int y,
                                  int width, int height)
 {
     int diff = 0;
 
-    if (aura_wayland_region_is_valid(self)) {
-        AuraWaylandRegion old = *self;
+    if (noia_wayland_region_is_valid(self)) {
+        NoiaWaylandRegion old = *self;
 
         diff = old.pos.x - x;
         if (diff > 0) {

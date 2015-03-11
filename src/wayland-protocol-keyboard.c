@@ -7,7 +7,7 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_keyboard_release(AURA_UNUSED struct wl_client* client,
+void noia_wayland_keyboard_release(NOIA_UNUSED struct wl_client* client,
                                    struct wl_resource* resource)
 {
     LOG_WAYL2("Wayland: keyboard release");
@@ -17,7 +17,7 @@ void aura_wayland_keyboard_release(AURA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 const struct wl_keyboard_interface keyboard_implementation = {
-        aura_wayland_keyboard_release
+        noia_wayland_keyboard_release
     };
 
 //------------------------------------------------------------------------------

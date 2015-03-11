@@ -12,7 +12,7 @@
 //------------------------------------------------------------------------------
 
 /// Handle epoll event from Event Dispatcher about new device
-void aura_udev_handle_device(AuraEventData* data, struct epoll_event* epev)
+void noia_udev_handle_device(NoiaEventData* data, struct epoll_event* epev)
 {
     struct udev_device* dev;
     struct udev_monitor* mon;
@@ -34,7 +34,7 @@ void aura_udev_handle_device(AuraEventData* data, struct epoll_event* epev)
               udev_device_get_devtype(dev), udev_device_get_action(dev));
 
     if (strcmp("drm", udev_device_get_subsystem(dev)) == 0) {
-        aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
+        noia_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
     }
 
     udev_device_unref(dev);
@@ -43,7 +43,7 @@ void aura_udev_handle_device(AuraEventData* data, struct epoll_event* epev)
 //------------------------------------------------------------------------------
 
 /// Handle exit of event dispatcher
-void aura_udev_handle_exit(AuraEventData* data)
+void noia_udev_handle_exit(NoiaEventData* data)
 {
     if (!data || !data->data) {
         return;
@@ -57,7 +57,7 @@ void aura_udev_handle_exit(AuraEventData* data)
 
 /// Set up device monitoring.
 /// Subscribe for dev types "input" and "drm".
-void aura_udev_setup_device_monitoring(AuraEventDispatcher* ed)
+void noia_udev_setup_device_monitoring(NoiaEventDispatcher* ed)
 {
     struct udev* udev;
     struct udev_monitor* mon;
@@ -77,11 +77,11 @@ void aura_udev_setup_device_monitoring(AuraEventDispatcher* ed)
     udev_monitor_enable_receiving(mon);
 
     // Prepare event handler
-    AuraEventData* data = aura_event_data_create(udev_monitor_get_fd(mon),
-                                                 aura_udev_handle_device,
-                                                 aura_udev_handle_exit,
+    NoiaEventData* data = noia_event_data_create(udev_monitor_get_fd(mon),
+                                                 noia_udev_handle_device,
+                                                 noia_udev_handle_exit,
                                                  0x0, mon);
-    aura_event_dispatcher_add_event_source(ed, data);
+    noia_event_dispatcher_add_event_source(ed, data);
 
     udev_unref(udev);
 }

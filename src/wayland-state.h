@@ -1,8 +1,8 @@
 // file: wayland-state.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_WAYLAND_STATE_H__
-#define __AURA_WAYLAND_STATE_H__
+#ifndef __NOIA_WAYLAND_STATE_H__
+#define __NOIA_WAYLAND_STATE_H__
 
 #include "utils-store.h"
 #include "output.h"
@@ -10,45 +10,45 @@
 
 #include <wayland-server.h>
 
-AuraResult aura_wayland_state_initialize(struct wl_display* display);
+NoiaResult noia_wayland_state_initialize(struct wl_display* display);
 
-void aura_wayland_state_finalize();
+void noia_wayland_state_finalize();
 
-void aura_wayland_state_add_surface(AuraItemId sid, struct wl_resource* rc);
+void noia_wayland_state_add_surface(NoiaItemId sid, struct wl_resource* rc);
 
-void aura_wayland_state_remove_surface(AuraItemId sid);
+void noia_wayland_state_remove_surface(NoiaItemId sid);
 
-void aura_wayland_state_surface_attach(AuraItemId sid, struct wl_resource* rc);
+void noia_wayland_state_surface_attach(NoiaItemId sid, struct wl_resource* rc);
 
-void aura_wayland_state_subscribe_frame(AuraItemId sid, struct wl_resource* rc);
+void noia_wayland_state_subscribe_frame(NoiaItemId sid, struct wl_resource* rc);
 
-void aura_wayland_state_add_keyboard_resource(struct wl_resource* rc);
+void noia_wayland_state_add_keyboard_resource(struct wl_resource* rc);
 
-void aura_wayland_state_keyboard_focus_update(AuraItemId sid);
+void noia_wayland_state_keyboard_focus_update(NoiaItemId sid);
 
-void aura_wayland_state_key(uint32_t time, uint32_t key, uint32_t state);
+void noia_wayland_state_key(uint32_t time, uint32_t key, uint32_t state);
 
-void aura_wayland_state_pointer_focus_update(AuraSurfaceId new_sid,
-                                             AuraPosition pos);
+void noia_wayland_state_pointer_focus_update(NoiaSurfaceId new_sid,
+                                             NoiaPosition pos);
 
-void aura_wayland_state_pointer_motion(AuraSurfaceId sid, AuraPosition pos);
+void noia_wayland_state_pointer_motion(NoiaSurfaceId sid, NoiaPosition pos);
 
-void aura_wayland_state_pointer_button(uint32_t time,
+void noia_wayland_state_pointer_button(uint32_t time,
                                        uint32_t button,
                                        uint32_t state);
 
-void aura_wayland_state_set_cursor(int serial,
+void noia_wayland_state_set_cursor(int serial,
                                    int hotspot_x,
                                    int hotspot_y,
-                                   AuraSurfaceId sid);
+                                   NoiaSurfaceId sid);
 
-void aura_wayland_state_screen_refresh();
+void noia_wayland_state_screen_refresh();
 
-void aura_wayland_state_advertise_output(AuraOutput* output);
+void noia_wayland_state_advertise_output(NoiaOutput* output);
 
-void aura_wayland_state_destroy_output(AuraOutput* output);
+void noia_wayland_state_destroy_output(NoiaOutput* output);
 
-void aura_wayland_state_surface_reconfigured(AuraSurfaceId sid);
+void noia_wayland_state_surface_reconfigured(NoiaSurfaceId sid);
 
-#endif // __AURA_WAYLAND_STATE_H__
+#endif // __NOIA_WAYLAND_STATE_H__
 

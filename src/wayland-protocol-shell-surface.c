@@ -7,8 +7,8 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_pong(AURA_UNUSED struct wl_client* client,
-                                     AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_shell_surface_pong(NOIA_UNUSED struct wl_client* client,
+                                     NOIA_UNUSED struct wl_resource* resource,
                                      uint32_t serial)
 {
     LOG_NYIMP("Wayland: pong (serial: %d)", serial);
@@ -16,10 +16,10 @@ void aura_wayland_shell_surface_pong(AURA_UNUSED struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_move
-                                 (AURA_UNUSED struct wl_client* client,
-                                  AURA_UNUSED struct wl_resource* resource,
-                                  AURA_UNUSED struct wl_resource* seat_resource,
+void noia_wayland_shell_surface_move
+                                 (NOIA_UNUSED struct wl_client* client,
+                                  NOIA_UNUSED struct wl_resource* resource,
+                                  NOIA_UNUSED struct wl_resource* seat_resource,
                                   uint32_t serial)
 {
     LOG_NYIMP("Wayland: move (serial: %d)", serial);
@@ -27,10 +27,10 @@ void aura_wayland_shell_surface_move
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_resize
-                                 (AURA_UNUSED struct wl_client* client,
-                                  AURA_UNUSED struct wl_resource* resource,
-                                  AURA_UNUSED struct wl_resource* seat_resource,
+void noia_wayland_shell_surface_resize
+                                 (NOIA_UNUSED struct wl_client* client,
+                                  NOIA_UNUSED struct wl_resource* resource,
+                                  NOIA_UNUSED struct wl_resource* seat_resource,
                                   uint32_t serial,
                                   uint32_t edges)
 {
@@ -39,19 +39,19 @@ void aura_wayland_shell_surface_resize
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_set_toplevel
-                                      (AURA_UNUSED struct wl_client* client,
-                                       AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_shell_surface_set_toplevel
+                                      (NOIA_UNUSED struct wl_client* client,
+                                       NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: set toplevel");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_set_transient
-                               (AURA_UNUSED struct wl_client* client,
-                                AURA_UNUSED struct wl_resource* resource,
-                                AURA_UNUSED struct wl_resource* parent_resource,
+void noia_wayland_shell_surface_set_transient
+                               (NOIA_UNUSED struct wl_client* client,
+                                NOIA_UNUSED struct wl_resource* resource,
+                                NOIA_UNUSED struct wl_resource* parent_resource,
                                 int32_t x,
                                 int32_t y,
                                 uint32_t f)
@@ -61,12 +61,12 @@ void aura_wayland_shell_surface_set_transient
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_set_fullscreen
-                               (AURA_UNUSED struct wl_client* client,
-                                AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_shell_surface_set_fullscreen
+                               (NOIA_UNUSED struct wl_client* client,
+                                NOIA_UNUSED struct wl_resource* resource,
                                 uint32_t method,
                                 uint32_t framerate,
-                                AURA_UNUSED struct wl_resource* output_resource)
+                                NOIA_UNUSED struct wl_resource* output_resource)
 {
     LOG_NYIMP("Wayland: set fullscreen (method: %d, framerate: %d)",
               method, framerate);
@@ -74,12 +74,12 @@ void aura_wayland_shell_surface_set_fullscreen
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_set_popup
-                               (AURA_UNUSED struct wl_client* client,
-                                AURA_UNUSED struct wl_resource* resource,
-                                AURA_UNUSED struct wl_resource* seat_resource,
+void noia_wayland_shell_surface_set_popup
+                               (NOIA_UNUSED struct wl_client* client,
+                                NOIA_UNUSED struct wl_resource* resource,
+                                NOIA_UNUSED struct wl_resource* seat_resource,
                                 uint32_t serial,
-                                AURA_UNUSED struct wl_resource* parent_resource,
+                                NOIA_UNUSED struct wl_resource* parent_resource,
                                 int32_t x,
                                 int32_t y,
                                 uint32_t flags)
@@ -90,19 +90,19 @@ void aura_wayland_shell_surface_set_popup
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_set_maximized
-                               (AURA_UNUSED struct wl_client* client,
-                                AURA_UNUSED struct wl_resource* resource,
-                                AURA_UNUSED struct wl_resource* output_resource)
+void noia_wayland_shell_surface_set_maximized
+                               (NOIA_UNUSED struct wl_client* client,
+                                NOIA_UNUSED struct wl_resource* resource,
+                                NOIA_UNUSED struct wl_resource* output_resource)
 {
     LOG_NYIMP("Wayland: set maximized");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_set_title
-                                      (AURA_UNUSED struct wl_client* client,
-                                       AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_shell_surface_set_title
+                                      (NOIA_UNUSED struct wl_client* client,
+                                       NOIA_UNUSED struct wl_resource* resource,
                                        const char* title)
 {
     LOG_NYIMP("Wayland: set title (title: '%s')", title);
@@ -110,9 +110,9 @@ void aura_wayland_shell_surface_set_title
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_set_class
-                                      (AURA_UNUSED struct wl_client* client,
-                                       AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_shell_surface_set_class
+                                      (NOIA_UNUSED struct wl_client* client,
+                                       NOIA_UNUSED struct wl_resource* resource,
                                        const char* class)
 {
     LOG_NYIMP("Wayland: set class (class: '%s')", class);
@@ -121,16 +121,16 @@ void aura_wayland_shell_surface_set_class
 //------------------------------------------------------------------------------
 
 const struct wl_shell_surface_interface shell_surface_implementation = {
-        aura_wayland_shell_surface_pong,
-        aura_wayland_shell_surface_move,
-        aura_wayland_shell_surface_resize,
-        aura_wayland_shell_surface_set_toplevel,
-        aura_wayland_shell_surface_set_transient,
-        aura_wayland_shell_surface_set_fullscreen,
-        aura_wayland_shell_surface_set_popup,
-        aura_wayland_shell_surface_set_maximized,
-        aura_wayland_shell_surface_set_title,
-        aura_wayland_shell_surface_set_class
+        noia_wayland_shell_surface_pong,
+        noia_wayland_shell_surface_move,
+        noia_wayland_shell_surface_resize,
+        noia_wayland_shell_surface_set_toplevel,
+        noia_wayland_shell_surface_set_transient,
+        noia_wayland_shell_surface_set_fullscreen,
+        noia_wayland_shell_surface_set_popup,
+        noia_wayland_shell_surface_set_maximized,
+        noia_wayland_shell_surface_set_title,
+        noia_wayland_shell_surface_set_class
     };
 
 //------------------------------------------------------------------------------

@@ -5,11 +5,11 @@
 #include "utils-log.h"
 #include "global-functions.h"
 
-#define MSG "This version of Aura was compiled without GTK support!"
+#define MSG "This version of Noia was compiled without GTK support!"
 
 //------------------------------------------------------------------------------
 
-int aura_backend_gtk_get_outputs(AURA_UNUSED AuraList* outputs)
+int noia_backend_gtk_get_outputs(NOIA_UNUSED NoiaList* outputs)
 {
     LOG_WARN1(MSG);
     return 0;
@@ -17,10 +17,10 @@ int aura_backend_gtk_get_outputs(AURA_UNUSED AuraList* outputs)
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_run(AURA_UNUSED AuraLoop* this_loop)
+void noia_backend_gtk_run(NOIA_UNUSED NoiaLoop* this_loop)
 {
     LOG_WARN1(MSG);
-    aura_quit();
+    noia_quit();
 }
 
 //------------------------------------------------------------------------------

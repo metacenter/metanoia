@@ -38,16 +38,16 @@ static const uint32_t scIdInputKeyboardFlag    = 0x0040;
 //------------------------------------------------------------------------------
 
 /// Handle epoll events from EventDispatcher comming from keyboard devices.
-void aura_evdev_handle_key(struct input_event* ev)
+void noia_evdev_handle_key(struct input_event* ev)
 {
     if (ev->type == EV_KEY) {
-        bool catched = aura_keyboard_catch_key(ev->code,
-                              ev->value ? AURA_KEY_PRESSED : AURA_KEY_RELEASED);
+        bool catched = noia_keyboard_catch_key(ev->code,
+                              ev->value ? NOIA_KEY_PRESSED : NOIA_KEY_RELEASED);
         if (!catched) {
             unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
-            AuraKeyObject* key = aura_key_create(time, ev->code, ev->value);
-            aura_event_signal_emit(SIGNAL_KEYBOARD_EVENT, (AuraObject*) key);
-            aura_object_unref((AuraObject*) key);
+            NoiaKeyObject* key = noia_key_create(time, ev->code, ev->value);
+            noia_event_signal_emit(SIGNAL_KEYBOARD_EVENT, (NoiaObject*) key);
+            noia_object_unref((NoiaObject*) key);
         }
     }
 }
@@ -55,17 +55,17 @@ void aura_evdev_handle_key(struct input_event* ev)
 //------------------------------------------------------------------------------
 
 /// Handle epoll events from EventDispatcher comming from touch devices.
-void aura_evdev_handle_touch(struct input_event* ev)
+void noia_evdev_handle_touch(struct input_event* ev)
 {
     if (ev->code == ABS_MT_TRACKING_ID) {
-        aura_event_signal_emit(SIGNAL_POINTER_MOTION_RESET, NULL);
+        noia_event_signal_emit(SIGNAL_POINTER_MOTION_RESET, NULL);
     } else if (ev->code == ABS_MT_POSITION_X) {
-        aura_event_signal_emit_int(SIGNAL_POINTER_MOTION_X, ev->value);
+        noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_X, ev->value);
     } else if (ev->code == ABS_MT_POSITION_Y) {
-        aura_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y, ev->value);
+        noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y, ev->value);
     } else if (ev->code == BTN_LEFT || ev->code == BTN_RIGHT) {
-        aura_event_signal_emit(SIGNAL_POINTER_BUTTON,
-                    (AuraObject*) aura_button_create(aura_log_get_miliseconds(),
+        noia_event_signal_emit(SIGNAL_POINTER_BUTTON,
+                    (NoiaObject*) noia_button_create(noia_log_get_miliseconds(),
                                                      ev->code, ev->value));
     }
 }
@@ -73,7 +73,7 @@ void aura_evdev_handle_touch(struct input_event* ev)
 //------------------------------------------------------------------------------
 
 /// Handle epoll events from EventDispatcher.
-void aura_evdev_handle_event(AuraEventData* data, struct epoll_event* epev)
+void noia_evdev_handle_event(NoiaEventData* data, struct epoll_event* epev)
 {
     if (!epev || !data) {
         return;
@@ -98,16 +98,16 @@ void aura_evdev_handle_event(AuraEventData* data, struct epoll_event* epev)
               ev.type, ev.code, ev.value, flags);
 
     if (flags & scIdInputKeyboardFlag) {
-        aura_evdev_handle_key(&ev);
+        noia_evdev_handle_key(&ev);
     } else if (flags & scIdInputTouchpadFlag) {
-        aura_evdev_handle_touch(&ev);
+        noia_evdev_handle_touch(&ev);
     }
 }
 
 //------------------------------------------------------------------------------
 
 /// Find input devices using idev.
-void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
+void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
 {
     int fd;
     uint32_t flags;
@@ -188,7 +188,7 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
         }
 
         // Add event source
-        fd = aura_open(devnode, O_RDONLY);
+        fd = noia_open(devnode, O_RDONLY);
         if (fd < 0) {
             LOG_INFO1("Failed to open device '%s'", devnode);
             udev_device_unref(dev);
@@ -199,10 +199,10 @@ void aura_evdev_setup_input_devices(AuraEventDispatcher* ed)
         ioctl(fd, EVIOCGNAME(sizeof(name)), name);
         LOG_INFO1("Found input device: '%s' (%s)", name, devnode);
 
-        AuraEventData* data = aura_event_data_create(fd,
-                                                     aura_evdev_handle_event,
+        NoiaEventData* data = noia_event_data_create(fd,
+                                                     noia_evdev_handle_event,
                                                      NULL, flags, NULL);
-        aura_event_dispatcher_add_event_source(ed, data);
+        noia_event_dispatcher_add_event_source(ed, data);
         udev_device_unref(dev);
     }
 

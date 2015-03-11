@@ -13,36 +13,36 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_compositor_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_compositor_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind compositor");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_region_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_region_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind region");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_unbind(struct wl_resource* resource)
+void noia_wayland_surface_unbind(struct wl_resource* resource)
 {
-    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: unbind surface (sid: %d)", sid);
-    aura_surface_destroy(sid);
-    aura_wayland_state_remove_surface(sid);
+    noia_surface_destroy(sid);
+    noia_wayland_state_remove_surface(sid);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_create_surface(struct wl_client* client,
+void noia_wayland_create_surface(struct wl_client* client,
                                  struct wl_resource* resource,
                                  uint32_t id)
 {
     struct wl_resource* rc;
-    AuraSurfaceId new_sid;
+    NoiaSurfaceId new_sid;
 
     LOG_WAYL2("Wayland: create surface (id: %d)", id);
 
@@ -53,16 +53,16 @@ void aura_wayland_create_surface(struct wl_client* client,
         return;
     }
 
-    new_sid = aura_surface_create();
-    aura_wayland_state_add_surface(new_sid, rc);
+    new_sid = noia_surface_create();
+    noia_wayland_state_add_surface(new_sid, rc);
 
     wl_resource_set_implementation(rc, &surface_implementation,
-                                  (void*) new_sid, aura_wayland_surface_unbind);
+                                  (void*) new_sid, noia_wayland_surface_unbind);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_create_region(struct wl_client* client,
+void noia_wayland_create_region(struct wl_client* client,
                                 struct wl_resource* resource,
                                 uint32_t id)
 {
@@ -77,23 +77,23 @@ void aura_wayland_create_region(struct wl_client* client,
         return;
     }
 
-    AuraItemId rid = aura_wayland_cache_create_region();
+    NoiaItemId rid = noia_wayland_cache_create_region();
 
     wl_resource_set_implementation(rc, &region_implementation,
-                                   (void*) rid, aura_wayland_region_unbind);
+                                   (void*) rid, noia_wayland_region_unbind);
 }
 
 //------------------------------------------------------------------------------
 
 const struct wl_compositor_interface compositor_implementation = {
-        aura_wayland_create_surface,
-        aura_wayland_create_region
+        noia_wayland_create_surface,
+        noia_wayland_create_region
     };
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_compositor_bind(struct wl_client* client,
-                                  AURA_UNUSED void* data,
+void noia_wayland_compositor_bind(struct wl_client* client,
+                                  NOIA_UNUSED void* data,
                                   uint32_t version,
                                   uint32_t id)
 {
@@ -107,10 +107,10 @@ void aura_wayland_compositor_bind(struct wl_client* client,
         return;
     }
 
-    aura_wayland_cache_add_general_resource(AURA_RESOURCE_OTHER, rc);
+    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 
     wl_resource_set_implementation(rc, &compositor_implementation,
-                                   NULL, aura_wayland_compositor_unbind);
+                                   NULL, noia_wayland_compositor_unbind);
 }
 
 //------------------------------------------------------------------------------

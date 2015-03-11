@@ -23,26 +23,26 @@ static const char* scSessionObjectErrorMsg = "Not connected to session!";
 static DBusConnection* sDBusSystemConn = NULL;
 static bool sHaveSessionControl = FALSE;
 
-#define AURA_DBUS_ASSERT(_ok_, _message_) \
+#define NOIA_DBUS_ASSERT(_ok_, _message_) \
     if (!(_ok_)) { \
         LOG_ERROR(_message_); \
         return -ENODEV; \
     }
 
-#define AURA_DBUS_ASSERT_MESSAGE(_ok_) \
+#define NOIA_DBUS_ASSERT_MESSAGE(_ok_) \
     if (!(_ok_)) { \
         LOG_ERROR("Failed to initialize DBus message!"); \
         return -ENOMEM; \
     }
 
-#define AURA_DBUS_ASSERT_ARGUMENTS(_ok_) \
+#define NOIA_DBUS_ASSERT_ARGUMENTS(_ok_) \
     if (!(_ok_)) { \
         LOG_ERROR("Failed to store DBus message arguments!"); \
         result = -ENOMEM; \
         goto clear_msg; \
     }
 
-#define AURA_DBUS_ASSERT_SEND(_ok_, _message_) \
+#define NOIA_DBUS_ASSERT_SEND(_ok_, _message_) \
     if (dbus_error_is_set(&err)) { \
         LOG_WARN1("DBus: %s", err.message); \
         dbus_error_free(&err); \
@@ -53,7 +53,7 @@ static bool sHaveSessionControl = FALSE;
         goto clear_msg; \
     }
 
-#define AURA_DBUS_ASSERT_REPLY(_ok_) \
+#define NOIA_DBUS_ASSERT_REPLY(_ok_) \
     if (dbus_error_is_set(&err)) { \
         LOG_WARN1("DBus: %s", err.message); \
         dbus_error_free(&err); \
@@ -66,7 +66,7 @@ static bool sHaveSessionControl = FALSE;
 
 //------------------------------------------------------------------------------
 
-bool aura_dbus_initalize(void)
+bool noia_dbus_initalize(void)
 {
     DBusError err;
 
@@ -87,7 +87,7 @@ bool aura_dbus_initalize(void)
     }
 
     // Get session ID
-    if (aura_dbus_session_get_session_by_pid(getpid(), &scSessionObject)) {
+    if (noia_dbus_session_get_session_by_pid(getpid(), &scSessionObject)) {
         LOG_INFO2("Session DBus path is: '%s'", scSessionObject);
     } else {
         LOG_WARN2("Could not get session DBus path!");
@@ -95,7 +95,7 @@ bool aura_dbus_initalize(void)
     }
 
     // Take control over session
-    if (aura_dbus_session_take_control() < 0) {
+    if (noia_dbus_session_take_control() < 0) {
         LOG_WARN2("Could not take controll over session!");
         sHaveSessionControl = FALSE;
     } else {
@@ -109,11 +109,11 @@ bool aura_dbus_initalize(void)
 
 //------------------------------------------------------------------------------
 
-void aura_dbus_finalize(void)
+void noia_dbus_finalize(void)
 {
     LOG_INFO1("Finallizing DBus...");
     if (sHaveSessionControl == TRUE) {
-        aura_dbus_session_release_control();
+        noia_dbus_session_release_control();
         sHaveSessionControl = FALSE;
     }
 
@@ -125,7 +125,7 @@ void aura_dbus_finalize(void)
 
 //------------------------------------------------------------------------------
 
-int aura_dbus_session_get_session_by_pid(int pid, const char** sid_out)
+int noia_dbus_session_get_session_by_pid(int pid, const char** sid_out)
 {
     static const char* const cMessageName = "GetSessionByPID";
 
@@ -136,7 +136,7 @@ int aura_dbus_session_get_session_by_pid(int pid, const char** sid_out)
     DBusMessage *reply;
     DBusError err;
 
-    AURA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
+    NOIA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
     dbus_error_init(&err);
 
     // Create new method call
@@ -144,24 +144,24 @@ int aura_dbus_session_get_session_by_pid(int pid, const char** sid_out)
                                        scLoginObject,
                                        scManagerInterface,
                                        cMessageName);
-    AURA_DBUS_ASSERT_MESSAGE(msg);
+    NOIA_DBUS_ASSERT_MESSAGE(msg);
 
     // Append arguments
     ok = dbus_message_append_args(msg,
                                   DBUS_TYPE_UINT32, &pid,
                                   DBUS_TYPE_INVALID);
-    AURA_DBUS_ASSERT_ARGUMENTS(ok);
+    NOIA_DBUS_ASSERT_ARGUMENTS(ok);
 
     // Send message and block
     reply = dbus_connection_send_with_reply_and_block(sDBusSystemConn,
                                                       msg, -1, &err);
-    AURA_DBUS_ASSERT_SEND(reply, cMessageName);
+    NOIA_DBUS_ASSERT_SEND(reply, cMessageName);
 
     // Read result
     ok = dbus_message_get_args(reply, NULL,
                                DBUS_TYPE_OBJECT_PATH, &sid,
                                DBUS_TYPE_INVALID);
-    AURA_DBUS_ASSERT_REPLY(ok);
+    NOIA_DBUS_ASSERT_REPLY(ok);
 
     // Copy sid
     *sid_out = strdup(sid);
@@ -175,7 +175,7 @@ int aura_dbus_session_get_session_by_pid(int pid, const char** sid_out)
 
 //------------------------------------------------------------------------------
 
-int aura_dbus_session_take_control()
+int noia_dbus_session_take_control()
 {
     static const char* const cMessageName = "TakeControl";
 
@@ -187,8 +187,8 @@ int aura_dbus_session_take_control()
     DBusError err;
 
     LOG_INFO2("Taking control over session...");
-    AURA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
-    AURA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
+    NOIA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
+    NOIA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
     dbus_error_init(&err);
 
     // Create new method call
@@ -196,18 +196,18 @@ int aura_dbus_session_take_control()
                                        scSessionObject,
                                        scSessionInterface,
                                        cMessageName);
-    AURA_DBUS_ASSERT_MESSAGE(msg);
+    NOIA_DBUS_ASSERT_MESSAGE(msg);
 
     // Append arguments
     ok = dbus_message_append_args(msg,
                                   DBUS_TYPE_BOOLEAN, &force,
                                   DBUS_TYPE_INVALID);
-    AURA_DBUS_ASSERT_ARGUMENTS(ok);
+    NOIA_DBUS_ASSERT_ARGUMENTS(ok);
 
     // Send message and block
     reply = dbus_connection_send_with_reply_and_block(sDBusSystemConn,
                                                       msg, -1, &err);
-    AURA_DBUS_ASSERT_SEND(reply, cMessageName);
+    NOIA_DBUS_ASSERT_SEND(reply, cMessageName);
 
     // Clear and return
     result = TRUE;
@@ -217,7 +217,7 @@ int aura_dbus_session_take_control()
 
 //------------------------------------------------------------------------------
 
-int aura_dbus_session_release_control()
+int noia_dbus_session_release_control()
 {
     static const char* const cMessageName = "ReleaseControl";
 
@@ -227,8 +227,8 @@ int aura_dbus_session_release_control()
     DBusError err;
 
     LOG_INFO2("Releasing control over session...");
-    AURA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
-    AURA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
+    NOIA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
+    NOIA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
     dbus_error_init(&err);
 
     // Create new method call
@@ -236,12 +236,12 @@ int aura_dbus_session_release_control()
                                        scSessionObject,
                                        scSessionInterface,
                                        cMessageName);
-    AURA_DBUS_ASSERT_MESSAGE(msg);
+    NOIA_DBUS_ASSERT_MESSAGE(msg);
 
     // Send message and block
     reply = dbus_connection_send_with_reply_and_block(sDBusSystemConn,
                                                       msg, -1, &err);
-    AURA_DBUS_ASSERT_SEND(reply, cMessageName);
+    NOIA_DBUS_ASSERT_SEND(reply, cMessageName);
 
     // Clear and return
     LOG_INFO2("Releasing control over session: SUCCESS");
@@ -252,7 +252,7 @@ int aura_dbus_session_release_control()
 
 //------------------------------------------------------------------------------
 
-int aura_dbus_session_take_device(uint32_t major, uint32_t minor)
+int noia_dbus_session_take_device(uint32_t major, uint32_t minor)
 {
     static const char* const cMessageName = "TakeDevice";
 
@@ -262,8 +262,8 @@ int aura_dbus_session_take_device(uint32_t major, uint32_t minor)
     DBusMessage *reply;
     DBusError err;
 
-    AURA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
-    AURA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
+    NOIA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
+    NOIA_DBUS_ASSERT(scSessionObject, scSessionObjectErrorMsg);
     dbus_error_init(&err);
 
     // Create new method call
@@ -271,26 +271,26 @@ int aura_dbus_session_take_device(uint32_t major, uint32_t minor)
                                        scSessionObject,
                                        scSessionInterface,
                                        cMessageName);
-    AURA_DBUS_ASSERT_MESSAGE(msg);
+    NOIA_DBUS_ASSERT_MESSAGE(msg);
 
     // Append arguments
     ok = dbus_message_append_args(msg,
                                   DBUS_TYPE_UINT32, &major,
                                   DBUS_TYPE_UINT32, &minor,
                                   DBUS_TYPE_INVALID);
-    AURA_DBUS_ASSERT_ARGUMENTS(ok);
+    NOIA_DBUS_ASSERT_ARGUMENTS(ok);
 
     // Send message and block
     reply = dbus_connection_send_with_reply_and_block(sDBusSystemConn,
                                                       msg, -1, &err);
-    AURA_DBUS_ASSERT_SEND(reply, cMessageName);
+    NOIA_DBUS_ASSERT_SEND(reply, cMessageName);
 
     // Read result
     ok = dbus_message_get_args(reply, &err,
                                DBUS_TYPE_UNIX_FD, &fd,
                                DBUS_TYPE_BOOLEAN, &paused,
                                DBUS_TYPE_INVALID);
-    AURA_DBUS_ASSERT_REPLY(ok);
+    NOIA_DBUS_ASSERT_REPLY(ok);
 
     // Clear and return
     result = fd;

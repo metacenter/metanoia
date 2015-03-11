@@ -131,8 +131,8 @@ GLuint create_shader(const char* filename, GLenum type)
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_attach(AuraRenderer* self,
-                             AuraSurfaceId surfaceId,
+void noia_renderer_gl_attach(NoiaRenderer* self,
+                             NoiaSurfaceId surfaceId,
                              void* resource)
 {
     xxxx_resource = resource;
@@ -141,7 +141,7 @@ void aura_renderer_gl_attach(AuraRenderer* self,
         LOG_ERROR("Wrong renderer!");
         return;
     }
-    AuraRendererGL* mine = (AuraRendererGL*) self;
+    NoiaRendererGL* mine = (NoiaRendererGL*) self;
 
     GLint format;
     int ret = mine->query_buffer(mine->egl_display, resource,
@@ -150,7 +150,7 @@ void aura_renderer_gl_attach(AuraRenderer* self,
 
     EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
 
-    AuraSurfaceData* surface = aura_surface_get(surfaceId);
+    NoiaSurfaceData* surface = noia_surface_get(surfaceId);
 
     //glBindTexture(GL_TEXTURE_2D, surface->buffer.texture);
     //glGenTextures(1, &surface->buffer.texture);
@@ -179,10 +179,10 @@ void aura_renderer_gl_attach(AuraRenderer* self,
 
 //------------------------------------------------------------------------------
 
-int aura_renderer_gl_initialize(AuraRenderer* self)
+int noia_renderer_gl_initialize(NoiaRenderer* self)
 {
     int r, result = 0;
-    AuraRendererGL* mine;
+    NoiaRendererGL* mine;
 
     // TODO: add mutex
     LOG_INFO1("Initializing GL renderer...");
@@ -191,7 +191,7 @@ int aura_renderer_gl_initialize(AuraRenderer* self)
         LOG_ERROR("Wrong renderer!");
         return result;
     }
-    mine = (AuraRendererGL*) self;
+    mine = (NoiaRendererGL*) self;
 
     // Setup EGL extensions
     const char* extensions =
@@ -292,7 +292,7 @@ int aura_renderer_gl_initialize(AuraRenderer* self)
     LOG_INFO1("Initializing GL renderer: SUCCESS");
 
     // TODO: signal
-    aura_bind_egl_wayland(mine);
+    noia_bind_egl_wayland(mine);
 
 clear_context:
     // Release current context
@@ -307,21 +307,21 @@ clear_context:
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_finalize(AURA_UNUSED AuraRenderer* self)
+void noia_renderer_gl_finalize(NOIA_UNUSED NoiaRenderer* self)
 {
     return;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_gl_draw(AuraRenderer* self,
-                           AuraList* surfaces,
-                           AURA_UNUSED int x,
-                           AURA_UNUSED int y,
-                           AURA_UNUSED AuraSurfaceId sid)
+void noia_renderer_gl_draw(NoiaRenderer* self,
+                           NoiaList* surfaces,
+                           NOIA_UNUSED int x,
+                           NOIA_UNUSED int y,
+                           NOIA_UNUSED NoiaSurfaceId sid)
 {
     int r;
-    AuraRendererGL* mine;
+    NoiaRendererGL* mine;
 
     // TODO: add mutex
     LOG_DEBUG(">>>>");
@@ -330,7 +330,7 @@ void aura_renderer_gl_draw(AuraRenderer* self,
         LOG_ERROR("Wrong renderer!");
         return;
     }
-    mine = (AuraRendererGL*) self;
+    mine = (NoiaRendererGL*) self;
 
     // Connect the context to the surface
     r = eglMakeCurrent(mine->egl_display, mine->egl_surface,
@@ -353,9 +353,9 @@ void aura_renderer_gl_draw(AuraRenderer* self,
         goto release_context;
     }
 
-    Link* link = aura_list_first(surfaces);
+    Link* link = noia_list_first(surfaces);
     //for (link = surfaces->first; link; link = link->next) {
-        AuraSurfaceData* surface = aura_surface_get((AuraSurfaceId) link->data);
+        NoiaSurfaceData* surface = noia_surface_get((NoiaSurfaceId) link->data);
         uint8_t* data = surface->buffer.data;
         int width = surface->buffer.width;
         int height = surface->buffer.height;
@@ -458,7 +458,7 @@ release_context:
 }
 
 //------------------------------------------------------------------------------
-void aura_renderer_gl_free(AuraRenderer* self)
+void noia_renderer_gl_free(NoiaRenderer* self)
 {
     // TODO
     if (self) {
@@ -468,22 +468,22 @@ void aura_renderer_gl_free(AuraRenderer* self)
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_renderer_gl_create(EGLDisplay egl_display,
+NoiaRenderer* noia_renderer_gl_create(EGLDisplay egl_display,
                                       EGLSurface egl_surface,
                                       EGLContext egl_context)
 {
-    AuraRendererGL* mine = malloc(sizeof(AuraRendererGL));
+    NoiaRendererGL* mine = malloc(sizeof(NoiaRendererGL));
     if (mine == NULL) {
         return NULL;
     }
 
-    memset(mine, 0, sizeof(AuraRendererGL));
+    memset(mine, 0, sizeof(NoiaRendererGL));
 
-    mine->base.initialize = aura_renderer_gl_initialize;
-    mine->base.finalize   = aura_renderer_gl_finalize;
-    mine->base.attach     = aura_renderer_gl_attach;
-    mine->base.draw       = aura_renderer_gl_draw;
-    mine->base.free       = aura_renderer_gl_free;
+    mine->base.initialize = noia_renderer_gl_initialize;
+    mine->base.finalize   = noia_renderer_gl_finalize;
+    mine->base.attach     = noia_renderer_gl_attach;
+    mine->base.draw       = noia_renderer_gl_draw;
+    mine->base.free       = noia_renderer_gl_free;
 
     mine->egl_display = egl_display;
     mine->egl_surface = egl_surface;
@@ -496,7 +496,7 @@ AuraRenderer* aura_renderer_gl_create(EGLDisplay egl_display,
     mine->query_buffer   = NULL;
     mine->has_wayland_support = 0;
 
-    return (AuraRenderer*) mine;
+    return (NoiaRenderer*) mine;
 }
 
 //------------------------------------------------------------------------------

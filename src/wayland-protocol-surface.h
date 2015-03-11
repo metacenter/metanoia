@@ -1,12 +1,12 @@
 // file: wayland-protocol-surface.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_WAYLAND_PROTOCOL_SURFACE_H__
-#define __AURA_WAYLAND_PROTOCOL_SURFACE_H__
+#ifndef __NOIA_WAYLAND_PROTOCOL_SURFACE_H__
+#define __NOIA_WAYLAND_PROTOCOL_SURFACE_H__
 
 #include <wayland-server.h>
 
 const struct wl_surface_interface surface_implementation;
 
-#endif // __AURA_WAYLAND_PROTOCOL_SURFACE_H__
+#endif // __NOIA_WAYLAND_PROTOCOL_SURFACE_H__
 

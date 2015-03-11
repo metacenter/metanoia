@@ -17,55 +17,55 @@
 
 //------------------------------------------------------------------------------
 
-AuraTask* factorize_setup_device_monitor_task(AuraEventDispatcher* ed)
+NoiaTask* factorize_setup_device_monitor_task(NoiaEventDispatcher* ed)
 {
-    return aura_task_new((AuraTaskProcessor) aura_udev_setup_device_monitoring,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, ed);
+    return noia_task_new((NoiaTaskProcessor) noia_udev_setup_device_monitoring,
+                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, ed);
 }
 
 //------------------------------------------------------------------------------
 
-AuraTask* factorize_setup_input_devices_task(AuraEventDispatcher* ed)
+NoiaTask* factorize_setup_input_devices_task(NoiaEventDispatcher* ed)
 {
-    return aura_task_new((AuraTaskProcessor) aura_evdev_setup_input_devices,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, ed);
+    return noia_task_new((NoiaTaskProcessor) noia_evdev_setup_input_devices,
+                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, ed);
 }
 
 //------------------------------------------------------------------------------
 
-AuraTask* factorize_initialize_wayland_task(AuraLoop* loop)
+NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop)
 {
-    return aura_task_new((AuraTaskProcessor) aura_wayland_initialize,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, loop);
+    return noia_task_new((NoiaTaskProcessor) noia_wayland_initialize,
+                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, loop);
 }
 
 //------------------------------------------------------------------------------
 
-AuraTask* factorize_backend_gtk_run_task(AuraLoop* loop)
+NoiaTask* factorize_backend_gtk_run_task(NoiaLoop* loop)
 {
-    return aura_task_new((AuraTaskProcessor) aura_backend_gtk_run,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, loop);
+    return noia_task_new((NoiaTaskProcessor) noia_backend_gtk_run,
+                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, loop);
 }
 
 //------------------------------------------------------------------------------
 
-AuraTask* factorize_initialize_exhibitor_task(AuraLoop* loop)
+NoiaTask* factorize_initialize_exhibitor_task(NoiaLoop* loop)
 {
-    return aura_task_new((AuraTaskProcessor) aura_exhibitor_initialize,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, loop);
+    return noia_task_new((NoiaTaskProcessor) noia_exhibitor_initialize,
+                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, loop);
 }
 
 //------------------------------------------------------------------------------
 
-AuraTask* factorize_initialize_output_collector_task(AuraLoop* loop)
+NoiaTask* factorize_initialize_output_collector_task(NoiaLoop* loop)
 {
-    return aura_task_new((AuraTaskProcessor) aura_output_collector_initialize,
-                         (AuraTaskFreeFunc) aura_task_free, NULL, NULL, loop);
+    return noia_task_new((NoiaTaskProcessor) noia_output_collector_initialize,
+                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, loop);
 }
 
 //------------------------------------------------------------------------------
 
-AuraEventData* factorize_signal_event_data(AuraEventDispatcher* dispatcher)
+NoiaEventData* factorize_signal_event_data(NoiaEventDispatcher* dispatcher)
 {
     sigset_t mask;
     sigemptyset(&mask);
@@ -76,8 +76,8 @@ AuraEventData* factorize_signal_event_data(AuraEventDispatcher* dispatcher)
         return NULL;
     }
 
-    return aura_event_data_create(fd,
-                                  aura_event_dispatcher_default_signal_handler,
+    return noia_event_data_create(fd,
+                                  noia_event_dispatcher_default_signal_handler,
                                   NULL, 0x0, dispatcher);
 }
 

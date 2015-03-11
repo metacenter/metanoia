@@ -12,8 +12,8 @@
 
 //------------------------------------------------------------------------------
 
-timer_t aura_event_timer_run(int miliseconds,
-                             AuraTimerHandler timer_handler,
+timer_t noia_event_timer_run(int miliseconds,
+                             NoiaTimerHandler timer_handler,
                              void* data)
 {
     timer_t timerid;
@@ -57,14 +57,14 @@ timer_t aura_event_timer_run(int miliseconds,
 
 //------------------------------------------------------------------------------
 
-void aura_event_timer_delete(timer_t timerid)
+void noia_event_timer_delete(timer_t timerid)
 {
     timer_delete(timerid);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_event_timer_nanosleep(long nanoseconds)
+void noia_event_timer_nanosleep(long nanoseconds)
 {
     struct timespec req;
     req.tv_sec = 0;

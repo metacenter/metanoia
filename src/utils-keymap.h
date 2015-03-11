@@ -1,25 +1,25 @@
 // file: utils-keymap.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_UTILS_KEYMAP_H__
-#define __AURA_UTILS_KEYMAP_H__
+#ifndef __NOIA_UTILS_KEYMAP_H__
+#define __NOIA_UTILS_KEYMAP_H__
 
-typedef struct AuraKeymapPriv AuraKeymapPriv;
+typedef struct NoiaKeymapPriv NoiaKeymapPriv;
 
 typedef struct {
-    AuraKeymapPriv* priv;
+    NoiaKeymapPriv* priv;
     unsigned format;
     int keymap_fd;
     unsigned keymap_size;
-} AuraKeymap;
+} NoiaKeymap;
 
-AuraKeymap* aura_utils_keymap_new(void);
+NoiaKeymap* noia_utils_keymap_new(void);
 
-void aura_utils_keymap_free(AuraKeymap* self);
+void noia_utils_keymap_free(NoiaKeymap* self);
 
-int aura_utils_keymap_initialize(AuraKeymap* self);
+int noia_utils_keymap_initialize(NoiaKeymap* self);
 
-void aura_utils_keymap_finalize(AuraKeymap* self);
+void noia_utils_keymap_finalize(NoiaKeymap* self);
 
-#endif // __AURA_UTILS_KEYMAP_H__
+#endif // __NOIA_UTILS_KEYMAP_H__
 

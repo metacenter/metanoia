@@ -17,8 +17,8 @@
 
 static int compare(const void* data1, const void* data2)
 {
-    const AuraBinding* binding1 = (const AuraBinding*) data1;
-    const AuraBinding* binding2 = (const AuraBinding*) data2;
+    const NoiaBinding* binding1 = (const NoiaBinding*) data1;
+    const NoiaBinding* binding2 = (const NoiaBinding*) data2;
 
     if (binding1->modifiers < binding2->modifiers) return -1;
     if (binding1->modifiers > binding2->modifiers) return  1;
@@ -31,9 +31,9 @@ static int compare(const void* data1, const void* data2)
 
 //------------------------------------------------------------------------------
 
-AuraMode* aura_mode_new(AuraModeEnum modeid)
+NoiaMode* noia_mode_new(NoiaModeEnum modeid)
 {
-    AuraMode* self = malloc(sizeof(AuraMode));
+    NoiaMode* self = malloc(sizeof(NoiaMode));
     if (!self) {
         LOG_ERROR("Memory allocation failure!");
         return self;
@@ -47,20 +47,20 @@ AuraMode* aura_mode_new(AuraModeEnum modeid)
 
 //------------------------------------------------------------------------------
 
-void aura_mode_free(AuraMode* self)
+void noia_mode_free(NoiaMode* self)
 {
     if (!self) {
         return;
     }
 
-    tdestroy(self->bindings, (AuraFreeFunc) aura_binding_free);
-    memset(self, 0, sizeof(AuraMode));
+    tdestroy(self->bindings, (NoiaFreeFunc) noia_binding_free);
+    memset(self, 0, sizeof(NoiaMode));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_mode_add_binding(AuraMode* self, const AuraBinding* binding)
+void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding)
 {
     void* found;
 
@@ -73,12 +73,12 @@ void aura_mode_add_binding(AuraMode* self, const AuraBinding* binding)
     }
 
     // Add binding
-    AuraBinding* copy = aura_binding_copy(binding);
+    NoiaBinding* copy = noia_binding_copy(binding);
 
     found = tsearch((void*) copy, &self->bindings, compare);
     if (!found) {
         LOG_ERROR("Could not store binding!");
-        aura_binding_free(copy);
+        noia_binding_free(copy);
         return;
     }
 
@@ -88,12 +88,12 @@ void aura_mode_add_binding(AuraMode* self, const AuraBinding* binding)
 
 //------------------------------------------------------------------------------
 
-AuraBinding* aura_mode_find_binding(AuraMode* self,
+NoiaBinding* noia_mode_find_binding(NoiaMode* self,
                                     int code,
                                     uint32_t modifiers)
 {
-    AuraBinding** found = NULL;
-    AuraBinding searched;
+    NoiaBinding** found = NULL;
+    NoiaBinding searched;
     searched.code = code;
     searched.modifiers = modifiers;
 

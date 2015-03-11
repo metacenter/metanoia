@@ -16,15 +16,15 @@
 #define NUM_STARTUP_DISPLAYS 1
 #define DEFAULT_RESOLUTION 1
 
-static const gchar* scMainGuiResPath = "/org/aura/res/backend-gtk-main.ui";
-static const gchar* scMenuGuiResPath = "/org/aura/res/backend-gtk-menu.ui";
-static const gchar* scAreaGuiResPath = "/org/aura/res/backend-gtk-area.ui";
+static const gchar* scMainGuiResPath = "/org/metanoia/res/backend-gtk-main.ui";
+static const gchar* scMenuGuiResPath = "/org/metanoia/res/backend-gtk-menu.ui";
+static const gchar* scAreaGuiResPath = "/org/metanoia/res/backend-gtk-area.ui";
 
 pthread_mutex_t mutex_buffer = PTHREAD_MUTEX_INITIALIZER;
 
-AuraViewGroup group[NUM_VIEW_GROUPS];
+NoiaViewGroup group[NUM_VIEW_GROUPS];
 
-AuraSize resolution[] = {
+NoiaSize resolution[] = {
         { 600, 400},
         { 800, 600},
         {1000, 800},
@@ -33,7 +33,7 @@ AuraSize resolution[] = {
 //------------------------------------------------------------------------------
 // HELPERS
 
-GVariant* aura_backend_gtk_pack_resolution_variant(AuraSize resolution)
+GVariant* noia_backend_gtk_pack_resolution_variant(NoiaSize resolution)
 {
     GVariant** tuple = g_new(GVariant*, 2);
     tuple[0] = g_variant_new_int32(resolution.width);
@@ -43,9 +43,9 @@ GVariant* aura_backend_gtk_pack_resolution_variant(AuraSize resolution)
 
 //------------------------------------------------------------------------------
 
-AuraSize aura_backend_gtk_unpack_resolution_variant(GVariant* variant)
+NoiaSize noia_backend_gtk_unpack_resolution_variant(GVariant* variant)
 {
-    AuraSize result = {0, 0};
+    NoiaSize result = {0, 0};
     if (g_variant_n_children(variant) != 2) {
         return result;
     }
@@ -63,7 +63,7 @@ AuraSize aura_backend_gtk_unpack_resolution_variant(GVariant* variant)
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_initialize_groups(void)
+void noia_backend_gtk_initialize_groups(void)
 {
     memset(&group, 0, sizeof(group));
 
@@ -88,7 +88,7 @@ static void clear_surface(int n)
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_group_set_enabled(int n, int enabled)
+void noia_backend_gtk_group_set_enabled(int n, int enabled)
 {
     group[n].enabled = enabled;
 
@@ -110,9 +110,9 @@ void aura_backend_gtk_group_set_enabled(int n, int enabled)
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_group_toggle_enabled(int n)
+void noia_backend_gtk_group_toggle_enabled(int n)
 {
-    aura_backend_gtk_group_set_enabled(n, !group[n].enabled);
+    noia_backend_gtk_group_set_enabled(n, !group[n].enabled);
 }
 
 //------------------------------------------------------------------------------
@@ -138,8 +138,8 @@ static gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data)
 
 //------------------------------------------------------------------------------
 
-static gboolean on_configure_event(AURA_UNUSED GtkWidget* widget,
-                                   AURA_UNUSED GdkEventConfigure* event,
+static gboolean on_configure_event(NOIA_UNUSED GtkWidget* widget,
+                                   NOIA_UNUSED GdkEventConfigure* event,
                                    gpointer data)
 {
     intptr_t n = (intptr_t) data;
@@ -149,7 +149,7 @@ static gboolean on_configure_event(AURA_UNUSED GtkWidget* widget,
 
 //------------------------------------------------------------------------------
 
-static gboolean on_timer(AURA_UNUSED void* data)
+static gboolean on_timer(NOIA_UNUSED void* data)
 {
     int i;
     for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
@@ -162,26 +162,26 @@ static gboolean on_timer(AURA_UNUSED void* data)
 
 //------------------------------------------------------------------------------
 
-void on_display_activation(AURA_UNUSED GSimpleAction* action,
-                           AURA_UNUSED GParamSpec* pspec,
+void on_display_activation(NOIA_UNUSED GSimpleAction* action,
+                           NOIA_UNUSED GParamSpec* pspec,
                            gpointer data)
 {
     intptr_t n = (intptr_t) data;
     LOG_INFO1("GTK backend: display '%d' toogled", n);
-    aura_backend_gtk_group_toggle_enabled(n);
-    aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
+    noia_backend_gtk_group_toggle_enabled(n);
+    noia_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
 }
 
 //------------------------------------------------------------------------------
 
 void on_resolution_change(GSimpleAction* action,
-                          AURA_UNUSED GParamSpec* pspec,
+                          NOIA_UNUSED GParamSpec* pspec,
                           gpointer data)
 {
     intptr_t n = (intptr_t) data;
     GVariant* variant;
     g_object_get(action, "state", &variant, NULL);
-    group[n].resolution = aura_backend_gtk_unpack_resolution_variant(variant);
+    group[n].resolution = noia_backend_gtk_unpack_resolution_variant(variant);
 
     LOG_INFO1("GTK backend: resolution of display '%d' changed to '%d x %d'",
                       n, group[n].resolution.width, group[n].resolution.height);
@@ -190,7 +190,7 @@ void on_resolution_change(GSimpleAction* action,
 //------------------------------------------------------------------------------
 // OUTPUT IMPLEMENTATION
 
-AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AURA_UNUSED AuraWin* win,
+NoiaViewGroup* noia_backend_gtk_win_prepare_view_group(NOIA_UNUSED NoiaWin* win,
                                                        int n,
                                                        int width,
                                                        int height)
@@ -215,7 +215,7 @@ AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AURA_UNUSED AuraWin* win,
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_win_discard_view_group(AURA_UNUSED AuraWin* win, int n)
+void noia_backend_gtk_win_discard_view_group(NOIA_UNUSED NoiaWin* win, int n)
 {
     for (int i = 0; i < NUM_BUFFERS; ++i) {
         free(group[n].buffer[i].data);
@@ -224,7 +224,7 @@ void aura_backend_gtk_win_discard_view_group(AURA_UNUSED AuraWin* win, int n)
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_win_swap_buffers(AURA_UNUSED AuraWin* win, int n)
+void noia_backend_gtk_win_swap_buffers(NOIA_UNUSED NoiaWin* win, int n)
 {
     pthread_mutex_lock(&mutex_buffer);
     group[n].front ^= 1;
@@ -233,15 +233,15 @@ void aura_backend_gtk_win_swap_buffers(AURA_UNUSED AuraWin* win, int n)
 
 //------------------------------------------------------------------------------
 
-AuraSize aura_backend_gtk_win_get_resolution(AURA_UNUSED AuraWin* win,
+NoiaSize noia_backend_gtk_win_get_resolution(NOIA_UNUSED NoiaWin* win,
                                                    int n)
 {
     if (n < 0 || NUM_VIEW_GROUPS <= n) {
-        return (AuraSize) {-1, -1};
+        return (NoiaSize) {-1, -1};
     }
 
     if (!group[n].enabled) {
-        return (AuraSize) {0, 0};
+        return (NoiaSize) {0, 0};
     }
 
     return group[n].resolution;
@@ -250,7 +250,7 @@ AuraSize aura_backend_gtk_win_get_resolution(AURA_UNUSED AuraWin* win,
 //------------------------------------------------------------------------------
 // BUILDING
 
-GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
+GtkWidget* noia_backend_gtk_build_menu_button(GActionMap* action_map,
                                               gint i)
 {
     gchar* name;
@@ -291,19 +291,19 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
     win_name = g_strdup_printf("win.%s", name);
 
     action_variant =
-       aura_backend_gtk_pack_resolution_variant(resolution[DEFAULT_RESOLUTION]);
+       noia_backend_gtk_pack_resolution_variant(resolution[DEFAULT_RESOLUTION]);
     //action_variant = g_variant_new_string(name);
     action = G_ACTION(g_simple_action_new_stateful(name,
                            g_variant_get_type(action_variant), action_variant));
     group[i].resolution_action = G_SIMPLE_ACTION(action);
 
     unsigned int j;
-    for (j = 0; j < sizeof(resolution)/sizeof(AuraSize); ++j)
+    for (j = 0; j < sizeof(resolution)/sizeof(NoiaSize); ++j)
     {
         gchar* label = g_strdup_printf("%4d x %4d", resolution[j].width,
                                                     resolution[j].height);
 
-        item_variant = aura_backend_gtk_pack_resolution_variant(resolution[j]);
+        item_variant = noia_backend_gtk_pack_resolution_variant(resolution[j]);
         //item_variant = g_variant_new_string(g_strdup_printf("res%d", j));
 
         item = g_menu_item_new(label, win_name);
@@ -324,7 +324,7 @@ GtkWidget* aura_backend_gtk_build_menu_button(GActionMap* action_map,
 
 //------------------------------------------------------------------------------
 
-GtkWidget* aura_backend_gtk_build_display_area(int i)
+GtkWidget* noia_backend_gtk_build_display_area(int i)
 {
     intptr_t l = i;
     GtkBuilder* builder = gtk_builder_new_from_resource(scAreaGuiResPath);
@@ -341,48 +341,48 @@ GtkWidget* aura_backend_gtk_build_display_area(int i)
 //------------------------------------------------------------------------------
 // GTK WINDOW
 
-struct _AuraWin
+struct _NoiaWin
 {
     GtkApplicationWindow parent;
 };
 
-struct _AuraWinClass
+struct _NoiaWinClass
 {
     GtkApplicationWindowClass parent_class;
 };
 
-typedef struct _AuraWinPrivate AuraWinPrivate;
+typedef struct _NoiaWinPrivate NoiaWinPrivate;
 
-struct _AuraWinPrivate
+struct _NoiaWinPrivate
 {
     GtkWidget* header_bar;
     GtkWidget* box_inner;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE(AuraWin, aura_win, GTK_TYPE_APPLICATION_WINDOW)
+G_DEFINE_TYPE_WITH_PRIVATE(NoiaWin, noia_win, GTK_TYPE_APPLICATION_WINDOW)
 
 //------------------------------------------------------------------------------
 
-static void aura_win_init(AuraWin* win)
+static void noia_win_init(NoiaWin* win)
 {
-    aura_backend_gtk_initialize_groups();
+    noia_backend_gtk_initialize_groups();
 
-    AuraWinPrivate* priv = aura_win_get_instance_private(win);
+    NoiaWinPrivate* priv = noia_win_get_instance_private(win);
     gtk_widget_init_template(GTK_WIDGET(win));
 
     gtk_header_bar_set_subtitle(GTK_HEADER_BAR(priv->header_bar),
-                    "Build: " __TIME__ " " __DATE__ "; Version: " AURA_VERSION);
+                    "Build: " __TIME__ " " __DATE__ "; Version: " NOIA_VERSION);
     // Build UI
     gint i;
     for (i = 0; i < NUM_VIEW_GROUPS; ++i) {
         GtkWidget* button =
-                       aura_backend_gtk_build_menu_button(G_ACTION_MAP(win), i);
+                       noia_backend_gtk_build_menu_button(G_ACTION_MAP(win), i);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(priv->header_bar), button);
 
-        GtkWidget* area = aura_backend_gtk_build_display_area(i);
+        GtkWidget* area = noia_backend_gtk_build_display_area(i);
         gtk_box_pack_start(GTK_BOX(priv->box_inner), area, 1, 0, 5);
 
-        aura_backend_gtk_group_set_enabled(i, i < NUM_STARTUP_DISPLAYS);
+        noia_backend_gtk_group_set_enabled(i, i < NUM_STARTUP_DISPLAYS);
     }
 
     // Run timer
@@ -391,31 +391,31 @@ static void aura_win_init(AuraWin* win)
 
 //------------------------------------------------------------------------------
 
-static void aura_win_dispose(GObject *object)
+static void noia_win_dispose(GObject *object)
 {
-    G_OBJECT_CLASS(aura_win_parent_class)->dispose(object);
+    G_OBJECT_CLASS(noia_win_parent_class)->dispose(object);
 }
 
 //------------------------------------------------------------------------------
 
-static void aura_win_class_init(AuraWinClass* class)
+static void noia_win_class_init(NoiaWinClass* class)
 {
-    G_OBJECT_CLASS(class)->dispose = aura_win_dispose;
+    G_OBJECT_CLASS(class)->dispose = noia_win_dispose;
 
     gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class),
                                                 scMainGuiResPath);
 
     gtk_widget_class_bind_template_child_private(GTK_WIDGET_CLASS(class),
-                                                 AuraWin, header_bar);
+                                                 NoiaWin, header_bar);
     gtk_widget_class_bind_template_child_private(GTK_WIDGET_CLASS(class),
-                                                 AuraWin, box_inner);
+                                                 NoiaWin, box_inner);
 }
 
 //------------------------------------------------------------------------------
 
-AuraWin* aura_win_new(AuraApp* app)
+NoiaWin* noia_win_new(NoiaApp* app)
 {
-    return g_object_new(AURA_WIN_TYPE, "application", app, NULL);
+    return g_object_new(NOIA_WIN_TYPE, "application", app, NULL);
 }
 
 //------------------------------------------------------------------------------

@@ -1,22 +1,22 @@
 // file: utils-object.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_OBJECT_H__
-#define __AURA_OBJECT_H__
+#ifndef __NOIA_OBJECT_H__
+#define __NOIA_OBJECT_H__
 
 #include "global-constants.h"
 
 /// Reference count implementation.
 typedef struct {
     int refcount;
-    AuraFreeFunc free;
-} AuraObject;
+    NoiaFreeFunc free;
+} NoiaObject;
 
-void aura_object_initialize(AuraObject* self, AuraFreeFunc free);
+void noia_object_initialize(NoiaObject* self, NoiaFreeFunc free);
 
-void aura_object_ref(AuraObject* self);
+void noia_object_ref(NoiaObject* self);
 
-void aura_object_unref(AuraObject* self);
+void noia_object_unref(NoiaObject* self);
 
-#endif // __AURA_OBJECT_H__
+#endif // __NOIA_OBJECT_H__
 

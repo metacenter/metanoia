@@ -1,8 +1,8 @@
 // file: event-signals.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_EVENT_SIGNALS_H__
-#define __AURA_EVENT_SIGNALS_H__
+#ifndef __NOIA_EVENT_SIGNALS_H__
+#define __NOIA_EVENT_SIGNALS_H__
 
 #include "event-task.h"
 
@@ -24,17 +24,17 @@ typedef enum {
     SIGNAL_KEYBOARD_FOCUS_CHANGED,
     SIGNAL_KEYBOARD_EVENT,
     SIGNAL_NUM,
-} AuraSignalNum;
+} NoiaSignalNum;
 
-AuraResult aura_event_signal_subscribe(AuraSignalNum sig_num, AuraTask* task);
+NoiaResult noia_event_signal_subscribe(NoiaSignalNum sig_num, NoiaTask* task);
 
-AuraResult aura_event_signal_unsubscribe(void* subscription_data);
+NoiaResult noia_event_signal_unsubscribe(void* subscription_data);
 
-AuraResult aura_event_signal_emit(AuraSignalNum sig_num, AuraObject* object);
+NoiaResult noia_event_signal_emit(NoiaSignalNum sig_num, NoiaObject* object);
 
-AuraResult aura_event_signal_emit_int(AuraSignalNum sig_num, intptr_t value);
+NoiaResult noia_event_signal_emit_int(NoiaSignalNum sig_num, intptr_t value);
 
-void aura_event_signal_clear_all_substriptions();
+void noia_event_signal_clear_all_substriptions();
 
-#endif // __AURA_EVENT_SIGNAL_H__
+#endif // __NOIA_EVENT_SIGNAL_H__
 

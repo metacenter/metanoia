@@ -1,8 +1,8 @@
 // file: renderer-gl.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_RENDERER_GL_H__
-#define __AURA_RENDERER_GL_H__
+#ifndef __NOIA_RENDERER_GL_H__
+#define __NOIA_RENDERER_GL_H__
 
 #include "renderer.h"
 
@@ -10,7 +10,7 @@
 #include <EGL/eglext.h>
 
 typedef struct {
-    AuraRenderer base;
+    NoiaRenderer base;
     EGLDisplay egl_display;
     EGLSurface egl_surface;
     EGLContext egl_context;
@@ -21,12 +21,12 @@ typedef struct {
     PFNEGLDESTROYIMAGEKHRPROC    destroy_image;
     PFNEGLQUERYWAYLANDBUFFERWL   query_buffer;
     int has_wayland_support;
-} AuraRendererGL;
+} NoiaRendererGL;
 
-AuraRenderer* aura_renderer_gl_create(EGLDisplay egl_display,
+NoiaRenderer* noia_renderer_gl_create(EGLDisplay egl_display,
                                       EGLSurface egl_surface,
                                       EGLContext egl_context);
 
-#endif // __AURA_RENDERER_GL_H__
+#endif // __NOIA_RENDERER_GL_H__
 
 

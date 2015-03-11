@@ -10,10 +10,10 @@
 
 //------------------------------------------------------------------------------
 
-AuraWaylandOutput* aura_wayland_output_create(struct wl_global* global_output,
-                                              AuraOutput* output)
+NoiaWaylandOutput* noia_wayland_output_create(struct wl_global* global_output,
+                                              NoiaOutput* output)
 {
-    AuraWaylandOutput* self = malloc(sizeof(AuraWaylandOutput));
+    NoiaWaylandOutput* self = malloc(sizeof(NoiaWaylandOutput));
     if (!self) {
         LOG_ERROR("Memory allocation failure");
         return self;
@@ -27,17 +27,17 @@ AuraWaylandOutput* aura_wayland_output_create(struct wl_global* global_output,
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_output_destroy(AuraWaylandOutput* self)
+void noia_wayland_output_destroy(NoiaWaylandOutput* self)
 {
     if (!self) {
         return;
     }
 
-    aura_object_unref((AuraObject*) self->output);
+    noia_object_unref((NoiaObject*) self->output);
     if (self->base.str) {
         free(self->base.str);
     }
-    memset(self, 0, sizeof(AuraWaylandOutput));
+    memset(self, 0, sizeof(NoiaWaylandOutput));
     free(self);
 }
 

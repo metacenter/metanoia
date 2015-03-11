@@ -1,39 +1,39 @@
 // file: output.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_OUTPUT_H__
-#define __AURA_OUTPUT_H__
+#ifndef __NOIA_OUTPUT_H__
+#define __NOIA_OUTPUT_H__
 
 #include "renderer.h"
 #include "utils-object.h"
 
-typedef struct AuraOutput AuraOutput;
+typedef struct NoiaOutput NoiaOutput;
 
-typedef AuraRenderer* (*AuraOutputInitRendererFunc) (AuraOutput*, int, int);
-typedef int (*AuraOutputSwapFunc) (AuraOutput*);
-typedef void (*AuraOutputFreeFunc) (AuraOutput*);
+typedef NoiaRenderer* (*NoiaOutputInitRendererFunc) (NoiaOutput*, int, int);
+typedef int (*NoiaOutputSwapFunc) (NoiaOutput*);
+typedef void (*NoiaOutputFreeFunc) (NoiaOutput*);
 
-struct AuraOutput {
+struct NoiaOutput {
     // TODO: keep list of available modes instead of just width and height
-    AuraObject base;
+    NoiaObject base;
     int width;
     int height;
     char* unique_name;
-    AuraPosition global_position;
-    AuraRenderer* renderer;
-    AuraOutputInitRendererFunc initialize;
-    AuraOutputSwapFunc swap_buffers;
+    NoiaPosition global_position;
+    NoiaRenderer* renderer;
+    NoiaOutputInitRendererFunc initialize;
+    NoiaOutputSwapFunc swap_buffers;
 };
 
-AuraResult aura_output_initialize(AuraOutput* self,
+NoiaResult noia_output_initialize(NoiaOutput* self,
                                   int width,
                                   int height,
                                   char* unique_name,
-                                  AuraOutputInitRendererFunc initialize,
-                                  AuraOutputSwapFunc swap_buffers,
-                                  AuraOutputFreeFunc free);
+                                  NoiaOutputInitRendererFunc initialize,
+                                  NoiaOutputSwapFunc swap_buffers,
+                                  NoiaOutputFreeFunc free);
 
-int aura_output_compare(AuraOutput* first, AuraOutput* second);
+int noia_output_compare(NoiaOutput* first, NoiaOutput* second);
 
-#endif // __AURA_OUTPUT_H__
+#endif // __NOIA_OUTPUT_H__
 

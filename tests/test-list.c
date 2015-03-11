@@ -8,124 +8,124 @@
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_append_values()
+NoiaTestResult should_append_values()
 {
     char* a[] = {"1", "2", "3"};
 
-    AuraList* l = aura_list_new(free);
-    aura_list_append(l, strdup("1"));
-    aura_list_append(l, strdup("2"));
-    aura_list_append(l, strdup("3"));
+    NoiaList* l = noia_list_new(free);
+    noia_list_append(l, strdup("1"));
+    noia_list_append(l, strdup("2"));
+    noia_list_append(l, strdup("3"));
 
     ASSERT_LIST(l, a);
-    aura_list_free(l);
-    return AURA_TEST_SUCCESS;
+    noia_list_free(l);
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_prepend_values()
+NoiaTestResult should_prepend_values()
 {
     char* a[] = {"3", "2", "1"};
 
-    AuraList* l = aura_list_new(free);
-    aura_list_prepend(l, strdup("1"));
-    aura_list_prepend(l, strdup("2"));
-    aura_list_prepend(l, strdup("3"));
+    NoiaList* l = noia_list_new(free);
+    noia_list_prepend(l, strdup("1"));
+    noia_list_prepend(l, strdup("2"));
+    noia_list_prepend(l, strdup("3"));
 
     ASSERT_LIST(l, a);
-    aura_list_free(l);
-    return AURA_TEST_SUCCESS;
+    noia_list_free(l);
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_remove_from_begining()
+NoiaTestResult should_remove_from_begining()
 {
     char* a[] = {"2", "3"};
 
-    AuraList* l = aura_list_new(free);
-    aura_list_append(l, strdup("1"));
-    aura_list_append(l, strdup("2"));
-    aura_list_append(l, strdup("3"));
+    NoiaList* l = noia_list_new(free);
+    noia_list_append(l, strdup("1"));
+    noia_list_append(l, strdup("2"));
+    noia_list_append(l, strdup("3"));
 
-    aura_list_remove(l, "1", (AuraCompareFunc) strcmp);
+    noia_list_remove(l, "1", (NoiaCompareFunc) strcmp);
 
     ASSERT_LIST(l, a);
-    aura_list_free(l);
-    return AURA_TEST_SUCCESS;
+    noia_list_free(l);
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_remove_from_end()
+NoiaTestResult should_remove_from_end()
 {
     char* a[] = {"1", "2"};
 
-    AuraList* l = aura_list_new(free);
-    aura_list_append(l, strdup("1"));
-    aura_list_append(l, strdup("2"));
-    aura_list_append(l, strdup("3"));
+    NoiaList* l = noia_list_new(free);
+    noia_list_append(l, strdup("1"));
+    noia_list_append(l, strdup("2"));
+    noia_list_append(l, strdup("3"));
 
-    aura_list_remove(l, "3", (AuraCompareFunc) strcmp);
+    noia_list_remove(l, "3", (NoiaCompareFunc) strcmp);
 
     ASSERT_LIST(l, a);
-    aura_list_free(l);
-    return AURA_TEST_SUCCESS;
+    noia_list_free(l);
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_remove_from_inside()
+NoiaTestResult should_remove_from_inside()
 {
     char* a[] = {"1", "3"};
 
-    AuraList* l = aura_list_new(free);
-    aura_list_append(l, strdup("1"));
-    aura_list_append(l, strdup("2"));
-    aura_list_append(l, strdup("3"));
+    NoiaList* l = noia_list_new(free);
+    noia_list_append(l, strdup("1"));
+    noia_list_append(l, strdup("2"));
+    noia_list_append(l, strdup("3"));
 
-    aura_list_remove(l, "2", (AuraCompareFunc) strcmp);
+    noia_list_remove(l, "2", (NoiaCompareFunc) strcmp);
 
     ASSERT_LIST(l, a);
-    aura_list_free(l);
-    return AURA_TEST_SUCCESS;
+    noia_list_free(l);
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_remove_all_equal()
+NoiaTestResult should_remove_all_equal()
 {
     char* a[] = {"1", "3"};
 
-    AuraList* l = aura_list_new(free);
-    aura_list_append(l, strdup("2"));
-    aura_list_append(l, strdup("1"));
-    aura_list_append(l, strdup("2"));
-    aura_list_append(l, strdup("3"));
-    aura_list_append(l, strdup("2"));
+    NoiaList* l = noia_list_new(free);
+    noia_list_append(l, strdup("2"));
+    noia_list_append(l, strdup("1"));
+    noia_list_append(l, strdup("2"));
+    noia_list_append(l, strdup("3"));
+    noia_list_append(l, strdup("2"));
 
-    aura_list_remove_all(l, "2", (AuraCompareFunc) strcmp);
+    noia_list_remove_all(l, "2", (NoiaCompareFunc) strcmp);
 
     ASSERT_LIST(l, a);
-    aura_list_free(l);
-    return AURA_TEST_SUCCESS;
+    noia_list_free(l);
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
 int main()
 {
-    AuraTest test[] = {
-            AURA_TEST(should_append_values),
-            AURA_TEST(should_prepend_values),
-            AURA_TEST(should_remove_from_begining),
-            AURA_TEST(should_remove_from_end),
-            AURA_TEST(should_remove_from_inside),
-            AURA_TEST(should_remove_all_equal),
+    NoiaTest test[] = {
+            NOIA_TEST(should_append_values),
+            NOIA_TEST(should_prepend_values),
+            NOIA_TEST(should_remove_from_begining),
+            NOIA_TEST(should_remove_from_end),
+            NOIA_TEST(should_remove_from_inside),
+            NOIA_TEST(should_remove_all_equal),
         };
 
-    return aura_test_run("List", test, AURA_NUM_TESTS(test));
+    return noia_test_run("List", test, NOIA_NUM_TESTS(test));
 }
 
 //------------------------------------------------------------------------------

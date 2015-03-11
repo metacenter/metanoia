@@ -8,20 +8,20 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_output_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_output_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     /// @todo Unbind Wayland output
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_output_bind(struct wl_client* client,
+void noia_wayland_output_bind(struct wl_client* client,
                               void* data,
                               uint32_t version,
                               uint32_t id)
 {
     struct wl_resource* rc;
-    AuraOutput* output = (AuraOutput*) data;
+    NoiaOutput* output = (NoiaOutput*) data;
 
     LOG_NYIMP("Binding Wayland output (version: %d, id: %d)", version, id);
 
@@ -37,7 +37,7 @@ void aura_wayland_output_bind(struct wl_client* client,
         return;
     }
 
-    wl_resource_set_implementation(rc, NULL, NULL, aura_wayland_output_unbind);
+    wl_resource_set_implementation(rc, NULL, NULL, noia_wayland_output_unbind);
 
     /// @todo Pass more realistic data ot wl_output_send_geometry
     wl_output_send_geometry(rc, 0, 0,

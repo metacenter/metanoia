@@ -16,16 +16,16 @@
 //------------------------------------------------------------------------------
 
 typedef struct {
-    AuraOutput base;
+    NoiaOutput base;
     int num;
-} AuraOutputGTK;
+} NoiaOutputGTK;
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_backend_gtk_output_initialize(AuraOutput* output,
+NoiaRenderer* noia_backend_gtk_output_initialize(NoiaOutput* output,
                                                  int width, int height)
 {
-    AuraOutputGTK* output_gtk = (AuraOutputGTK*) output;
+    NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
     if (!output_gtk) {
         LOG_ERROR("Invalid GTK output!");
         return NULL;
@@ -33,8 +33,8 @@ AuraRenderer* aura_backend_gtk_output_initialize(AuraOutput* output,
 
     LOG_INFO1("Initializing GTK output...");
 
-    AuraViewGroup* group =
-        aura_backend_gtk_app_prepare_view_group(output_gtk->num, width, height);
+    NoiaViewGroup* group =
+        noia_backend_gtk_app_prepare_view_group(output_gtk->num, width, height);
     if (!group) {
         LOG_WARN1("Initializing GTK output: no displays");
         return NULL;
@@ -42,11 +42,11 @@ AuraRenderer* aura_backend_gtk_output_initialize(AuraOutput* output,
 
     LOG_INFO1("Initializing GTK output: SUCCESS");
 
-    AuraRenderer* renderer = aura_renderer_mmap_create(output, width, height);
-    aura_renderer_mmap_set_buffer(renderer, 0,
+    NoiaRenderer* renderer = noia_renderer_mmap_create(output, width, height);
+    noia_renderer_mmap_set_buffer(renderer, 0,
                                   group->buffer[0].data,
                                   group->stride);
-    aura_renderer_mmap_set_buffer(renderer, 1,
+    noia_renderer_mmap_set_buffer(renderer, 1,
                                   group->buffer[1].data,
                                   group->stride);
     return renderer;
@@ -54,30 +54,30 @@ AuraRenderer* aura_backend_gtk_output_initialize(AuraOutput* output,
 
 //------------------------------------------------------------------------------
 
-int aura_backend_gtk_output_swap_buffers(AuraOutput* output)
+int noia_backend_gtk_output_swap_buffers(NoiaOutput* output)
 {
-    AuraOutputGTK* output_gtk = (AuraOutputGTK*) output;
+    NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
     if (!output_gtk) {
         LOG_ERROR("Invalid output!");
         return -1;
     }
 
-    aura_backend_gtk_app_swap_buffers(output_gtk->num);
+    noia_backend_gtk_app_swap_buffers(output_gtk->num);
     return 0;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_output_free(AuraOutput* output)
+void noia_backend_gtk_output_free(NoiaOutput* output)
 {
-    AuraOutputGTK* output_gtk = (AuraOutputGTK*) output;
+    NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
     if (!output) {
         return;
     }
 
-    aura_backend_gtk_app_discard_view_group(output_gtk->num);
+    noia_backend_gtk_app_discard_view_group(output_gtk->num);
     if (output->renderer) {
-        aura_renderer_mmap_free(output->renderer);
+        noia_renderer_mmap_free(output->renderer);
     }
     if (output->unique_name) {
         free(output->unique_name);
@@ -87,17 +87,17 @@ void aura_backend_gtk_output_free(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
-AuraOutputGTK* aura_backend_gtk_output_new(int width, int height, int num)
+NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
 {
-    AuraOutputGTK* output_gtk = malloc(sizeof(AuraOutputGTK));
-    memset(output_gtk, 0, sizeof(AuraOutputGTK));
+    NoiaOutputGTK* output_gtk = malloc(sizeof(NoiaOutputGTK));
+    memset(output_gtk, 0, sizeof(NoiaOutputGTK));
 
-    aura_output_initialize(&output_gtk->base,
+    noia_output_initialize(&output_gtk->base,
                            width, height,
                            g_strdup_printf("GTK-output-%d", num),
-                           aura_backend_gtk_output_initialize,
-                           aura_backend_gtk_output_swap_buffers,
-                           aura_backend_gtk_output_free);
+                           noia_backend_gtk_output_initialize,
+                           noia_backend_gtk_output_swap_buffers,
+                           noia_backend_gtk_output_free);
 
     output_gtk->num = num;
     return output_gtk;
@@ -105,17 +105,17 @@ AuraOutputGTK* aura_backend_gtk_output_new(int width, int height, int num)
 
 //------------------------------------------------------------------------------
 
-int aura_backend_gtk_get_outputs(AuraList* outputs)
+int noia_backend_gtk_get_outputs(NoiaList* outputs)
 {
-    AuraSize resolution;
+    NoiaSize resolution;
     int i = 0, n = 0;
     do {
-        resolution = aura_backend_gtk_app_get_resolution(i);
+        resolution = noia_backend_gtk_app_get_resolution(i);
         if (resolution.width > 0 && resolution.height > 0) {
-            AuraOutputGTK* output =
-                              aura_backend_gtk_output_new(resolution.width,
+            NoiaOutputGTK* output =
+                              noia_backend_gtk_output_new(resolution.width,
                                                           resolution.height, i);
-            aura_list_append(outputs, output);
+            noia_list_append(outputs, output);
             n +=1;
         }
         i += 1;
@@ -126,43 +126,43 @@ int aura_backend_gtk_get_outputs(AuraList* outputs)
 
 //------------------------------------------------------------------------------
 
-void* aura_backend_gtk_main(AURA_UNUSED void* data)
+void* noia_backend_gtk_main(NOIA_UNUSED void* data)
 {
-    aura_environment_on_enter_new_thread(0, "aura:gtk");
+    noia_environment_on_enter_new_thread(0, "noia:gtk");
 
     int argc = 1;
-    char* args[] = {"aura", NULL};
+    char* args[] = {"noia", NULL};
     char** argv = args;
 
-    g_application_run(G_APPLICATION(aura_app_new()), argc, argv);
+    g_application_run(G_APPLICATION(noia_app_new()), argc, argv);
 
     LOG_INFO1("Quit GTK backend!");
-    aura_quit();
+    noia_quit();
     return NULL;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_quit(AURA_UNUSED void* data)
+void noia_backend_gtk_quit(NOIA_UNUSED void* data)
 {
 }
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_run(AuraLoop* this_loop)
+void noia_backend_gtk_run(NoiaLoop* this_loop)
 {
     LOG_INFO1("Initializing GTK backend...");
 
     pthread_t thread;
 
     // Run GTK application in separate thread
-    int result = pthread_create(&thread, NULL, aura_backend_gtk_main, NULL);
+    int result = pthread_create(&thread, NULL, noia_backend_gtk_main, NULL);
     if (result != 0) {
         LOG_ERROR("Could not run GTK thread!");
         return;
     }
 
-    aura_loop_add_finalizer(this_loop, aura_backend_gtk_quit);
+    noia_loop_add_finalizer(this_loop, noia_backend_gtk_quit);
 
     LOG_INFO1("Initializing GTK backend: SUCCESS");
 }

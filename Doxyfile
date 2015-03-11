@@ -1,4 +1,4 @@
-PROJECT_NAME          = Aura
+PROJECT_NAME          = Metanoia
 INPUT                 = src tests
 OUTPUT_DIRECTORY      = doc
 EXTRACT_ALL           = YES

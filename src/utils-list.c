@@ -8,33 +8,33 @@
 
 //------------------------------------------------------------------------------
 
-AuraList* aura_list_new(AuraFreeFunc free_data)
+NoiaList* noia_list_new(NoiaFreeFunc free_data)
 {
-    AuraList* self = malloc(sizeof(AuraList));
+    NoiaList* self = malloc(sizeof(NoiaList));
     if (!self) {
         return NULL;
     }
 
-    chain_initialize(&self->base, (AuraFreeFunc) link_free);
+    chain_initialize(&self->base, (NoiaFreeFunc) link_free);
     self->free_data = free_data;
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_list_free(AuraList* self)
+void noia_list_free(NoiaList* self)
 {
     if (!self) {
         return;
     }
 
-    aura_list_clean(self);
+    noia_list_clean(self);
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_list_prepend(AuraList* self, void* data)
+void noia_list_prepend(NoiaList* self, void* data)
 {
     if (!self) {
         return;
@@ -45,7 +45,7 @@ void aura_list_prepend(AuraList* self, void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_list_append(AuraList* self, void* data)
+void noia_list_append(NoiaList* self, void* data)
 {
     if (!self) {
         return;
@@ -56,7 +56,7 @@ void aura_list_append(AuraList* self, void* data)
 
 //------------------------------------------------------------------------------
 
-void* aura_list_pop(AuraList* self)
+void* noia_list_pop(NoiaList* self)
 {
     void* result;
     Link* next;
@@ -79,10 +79,10 @@ void* aura_list_pop(AuraList* self)
 
 //------------------------------------------------------------------------------
 
-AuraResult aura_list_remove(AuraList* self, void* data, AuraCompareFunc compare)
+NoiaResult noia_list_remove(NoiaList* self, void* data, NoiaCompareFunc compare)
 {
     if (!self) {
-        return AURA_RESULT_INCORRECT_ARGUMENT;
+        return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
     int found = false;
@@ -95,11 +95,11 @@ AuraResult aura_list_remove(AuraList* self, void* data, AuraCompareFunc compare)
     }
 
     if (!found) {
-        return AURA_RESULT_NOT_FOUND;
+        return NOIA_RESULT_NOT_FOUND;
     }
 
-    AuraResult result = chain_disjoin(&self->base, link);
-    if (result == AURA_RESULT_SUCCESS) {
+    NoiaResult result = chain_disjoin(&self->base, link);
+    if (result == NOIA_RESULT_SUCCESS) {
         link_destroy(link, self->free_data);
     }
     return result;
@@ -107,25 +107,25 @@ AuraResult aura_list_remove(AuraList* self, void* data, AuraCompareFunc compare)
 
 //------------------------------------------------------------------------------
 
-AuraResult aura_list_remove_all(AuraList* self,
+NoiaResult noia_list_remove_all(NoiaList* self,
                                 void* data,
-                                AuraCompareFunc compare)
+                                NoiaCompareFunc compare)
 {
     bool removed_all = false;
     while (!removed_all) {
-        AuraResult result = aura_list_remove(self, data, compare);
-        if (result == AURA_RESULT_NOT_FOUND) {
+        NoiaResult result = noia_list_remove(self, data, compare);
+        if (result == NOIA_RESULT_NOT_FOUND) {
             removed_all = true;
-        } else if (result != AURA_RESULT_SUCCESS) {
+        } else if (result != NOIA_RESULT_SUCCESS) {
             return result;
         }
     }
-    return AURA_RESULT_SUCCESS;
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_list_clean(AuraList* self)
+void noia_list_clean(NoiaList* self)
 {
     Link* iter = self->base.first;
     while (iter) {
@@ -141,11 +141,11 @@ void aura_list_clean(AuraList* self)
 
 //------------------------------------------------------------------------------
 
-AuraList* aura_list_subtract(AuraList* minuend,
-                             AuraList* subtrahent,
-                             AuraCompareFunc compare)
+NoiaList* noia_list_subtract(NoiaList* minuend,
+                             NoiaList* subtrahent,
+                             NoiaCompareFunc compare)
 {
-    AuraList* difference = aura_list_new(minuend->free_data);
+    NoiaList* difference = noia_list_new(minuend->free_data);
 
     FOR_EACH (minuend, mlink) {
         int found = 0;
@@ -153,7 +153,7 @@ AuraList* aura_list_subtract(AuraList* minuend,
             found = !compare(mlink->data, slink->data);
         }
         if (!found) {
-            aura_list_append(difference, mlink->data);
+            noia_list_append(difference, mlink->data);
         }
     }
 

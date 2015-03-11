@@ -1,8 +1,8 @@
 // file: utils-log.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_UTILS_LOG_H__
-#define __AURA_UTILS_LOG_H__
+#ifndef __NOIA_UTILS_LOG_H__
+#define __NOIA_UTILS_LOG_H__
 
 #include "global-constants.h"
 
@@ -35,7 +35,7 @@
 #define LEVEL_WAYL5 0
 
 #define _LOG_(L, ...) \
-     do{if(LEVEL_##L)aura_log(LEVEL_##L,__LINE__,__FILE__,__VA_ARGS__);}while(0)
+     do{if(LEVEL_##L)noia_log(LEVEL_##L,__LINE__,__FILE__,__VA_ARGS__);}while(0)
 
 #define LOG(L, ...)    _LOG_(L,     __VA_ARGS__)
 #define LOG_ERROR(...) _LOG_(ERROR, __VA_ARGS__)
@@ -58,17 +58,17 @@
 #define LOG_EVNT4(...) _LOG_(EVNT4, __VA_ARGS__)
 #define LOG_WAYL5(...) _LOG_(WAYL5, __VA_ARGS__)
 
-void aura_log_initialize(void);
-void aura_log_finalize(void);
+void noia_log_initialize(void);
+void noia_log_finalize(void);
 
-void aura_log(const char*, // log level
+void noia_log(const char*, // log level
               const int,   // line number
               const char*, // file name
               const char*, // format
               ...);        // log content
 
-void aura_print_backtrace(void);
+void noia_print_backtrace(void);
 
-int aura_log_get_miliseconds(void);
+int noia_log_get_miliseconds(void);
 
-#endif // __AURA_UTILS_LOG_H__
+#endif // __NOIA_UTILS_LOG_H__

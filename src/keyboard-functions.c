@@ -10,37 +10,37 @@
 
 //------------------------------------------------------------------------------
 
-void aura_clean_stack(AuraList* stack)
+void noia_clean_stack(NoiaList* stack)
 {
-    aura_list_clean(stack);
+    noia_list_clean(stack);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_put_focus(AuraList* stack)
+void noia_put_focus(NoiaList* stack)
 {
-    aura_list_append(stack, aura_argmand_new(AURA_ARGMAND_FOCUS, 0));
+    noia_list_append(stack, noia_argmand_new(NOIA_ARGMAND_FOCUS, 0));
 }
 
 //------------------------------------------------------------------------------
 
-void aura_put_move(AuraList* stack)
+void noia_put_move(NoiaList* stack)
 {
-    aura_list_append(stack, aura_argmand_new(AURA_ARGMAND_MOVE, 0));
+    noia_list_append(stack, noia_argmand_new(NOIA_ARGMAND_MOVE, 0));
 }
 
 //------------------------------------------------------------------------------
 
-void aura_put_resize(AuraList* stack)
+void noia_put_resize(NoiaList* stack)
 {
-    aura_list_append(stack, aura_argmand_new(AURA_ARGMAND_RESIZE, 0));
+    noia_list_append(stack, noia_argmand_new(NOIA_ARGMAND_RESIZE, 0));
 }
 
 //------------------------------------------------------------------------------
 
-void aura_put_number(AuraList* stack, int code,
-                     AURA_UNUSED uint32_t modifiers,
-                     AURA_UNUSED AuraKeyState state)
+void noia_put_number(NoiaList* stack, int code,
+                     NOIA_UNUSED uint32_t modifiers,
+                     NOIA_UNUSED NoiaKeyState state)
 {
     int number = 0;
     switch (code) {
@@ -57,65 +57,65 @@ void aura_put_number(AuraList* stack, int code,
         case KEY_9: case KEY_NUMERIC_9: number = 9; break;
     }
 
-    if (aura_list_len(stack) != 0
-    && ((AuraArgmand*) aura_list_last(stack)->data)->type
-    == AURA_ARGMAND_NUMBER) {
-        AuraArgmand* argmand = (AuraArgmand*) aura_list_last(stack)->data;
+    if (noia_list_len(stack) != 0
+    && ((NoiaArgmand*) noia_list_last(stack)->data)->type
+    == NOIA_ARGMAND_NUMBER) {
+        NoiaArgmand* argmand = (NoiaArgmand*) noia_list_last(stack)->data;
         argmand->value *= number;
     } else {
-        aura_list_append(stack, aura_argmand_new(AURA_ARGMAND_NUMBER, number));
+        noia_list_append(stack, noia_argmand_new(NOIA_ARGMAND_NUMBER, number));
     }
 }
 
 //------------------------------------------------------------------------------
 
-static inline void aura_position_change(AuraList* stack,
-                                        AuraArgmandType direction)
+static inline void noia_position_change(NoiaList* stack,
+                                        NoiaArgmandType direction)
 {
     int magnitude = 1;
-    while (aura_list_len(stack)) {
-        AuraArgmand* argmand = (AuraArgmand*) aura_list_pop(stack);
+    while (noia_list_len(stack)) {
+        NoiaArgmand* argmand = (NoiaArgmand*) noia_list_pop(stack);
 
-        if (argmand->type == AURA_ARGMAND_FOCUS
-        ||  argmand->type == AURA_ARGMAND_MOVE
-        ||  argmand->type == AURA_ARGMAND_RESIZE) {
-            aura_exhibitor_command_position(argmand->type,
+        if (argmand->type == NOIA_ARGMAND_FOCUS
+        ||  argmand->type == NOIA_ARGMAND_MOVE
+        ||  argmand->type == NOIA_ARGMAND_RESIZE) {
+            noia_exhibitor_command_position(argmand->type,
                                             direction, magnitude);
             magnitude = 1;
-        } else if (argmand->type == AURA_ARGMAND_NUMBER) {
+        } else if (argmand->type == NOIA_ARGMAND_NUMBER) {
             magnitude = argmand->value;
         }
 
-        aura_argmand_free(argmand);
+        noia_argmand_free(argmand);
     }
 }
 
 //------------------------------------------------------------------------------
 
-void aura_right(AuraList* stack)
+void noia_right(NoiaList* stack)
 {
-    aura_position_change(stack, AURA_ARGMAND_E);
+    noia_position_change(stack, NOIA_ARGMAND_E);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_left(AuraList* stack)
+void noia_left(NoiaList* stack)
 {
-    aura_position_change(stack, AURA_ARGMAND_W);
+    noia_position_change(stack, NOIA_ARGMAND_W);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_up(AuraList* stack)
+void noia_up(NoiaList* stack)
 {
-    aura_position_change(stack, AURA_ARGMAND_N);
+    noia_position_change(stack, NOIA_ARGMAND_N);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_down(AuraList* stack)
+void noia_down(NoiaList* stack)
 {
-    aura_position_change(stack, AURA_ARGMAND_S);
+    noia_position_change(stack, NOIA_ARGMAND_S);
 }
 
 //------------------------------------------------------------------------------

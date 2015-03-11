@@ -10,15 +10,15 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_destroy(AURA_UNUSED struct wl_client* client,
-                                  AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_surface_destroy(NOIA_UNUSED struct wl_client* client,
+                                  NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: surface destroy");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_attach(AURA_UNUSED struct wl_client* client,
+void noia_wayland_surface_attach(NOIA_UNUSED struct wl_client* client,
                                  struct wl_resource* resource,
                                  struct wl_resource* buffer_resource,
                                  int32_t sx, int32_t sy)
@@ -27,7 +27,7 @@ void aura_wayland_surface_attach(AURA_UNUSED struct wl_client* client,
     int height = 0;
     int stride = 0;
     uint8_t* data = NULL;
-    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
 
     LOG_WAYL3("Wayland: surface attach (sx: %d, sy: %d, sid: %d)", sx, sy, sid);
 
@@ -41,20 +41,20 @@ void aura_wayland_surface_attach(AURA_UNUSED struct wl_client* client,
         LOG_WARN3("Wrong shared memory buffer!");
     }
 
-    aura_wayland_state_surface_attach(sid, buffer_resource);
+    noia_wayland_state_surface_attach(sid, buffer_resource);
 
     if (!data) {
-        aura_surface_attach_egl(sid, buffer_resource);
+        noia_surface_attach_egl(sid, buffer_resource);
     } else {
         // TODO: do this on commit
-        aura_surface_commit(sid, width, height, stride, data);
+        noia_surface_commit(sid, width, height, stride, data);
     }
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_damage(AURA_UNUSED struct wl_client* client,
-                                 AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_surface_damage(NOIA_UNUSED struct wl_client* client,
+                                 NOIA_UNUSED struct wl_resource* resource,
                                  int32_t x, int32_t y,
                                  int32_t width, int32_t height)
 {
@@ -64,13 +64,13 @@ void aura_wayland_surface_damage(AURA_UNUSED struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_frame(struct wl_client* client,
+void noia_wayland_surface_frame(struct wl_client* client,
                                 struct wl_resource* resource,
                                 uint32_t callback)
 {
     // TODO: subscribe for destroy
 
-    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
 
     LOG_NYIMP("Wayland: surface frame (cb: %d, sid: %d)", callback, sid);
 
@@ -86,55 +86,55 @@ void aura_wayland_surface_frame(struct wl_client* client,
     // TODO: listen for destroy callback
     wl_resource_set_implementation(rc, NULL, NULL, NULL);
 
-    aura_wayland_state_subscribe_frame(sid, rc);
+    noia_wayland_state_subscribe_frame(sid, rc);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_set_opaque_region
-                               (AURA_UNUSED struct wl_client* client,
-                                AURA_UNUSED struct wl_resource* resource,
-                                AURA_UNUSED struct wl_resource* region_resource)
+void noia_wayland_surface_set_opaque_region
+                               (NOIA_UNUSED struct wl_client* client,
+                                NOIA_UNUSED struct wl_resource* resource,
+                                NOIA_UNUSED struct wl_resource* region_resource)
 {
-    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
-    AuraItemId rid = (AuraItemId) wl_resource_get_user_data(region_resource);
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
 
     LOG_NYIMP("Wayland: set opaque region (sid: %d, rid: %d)", sid, rid);
 
-    AuraWaylandRegion* region = aura_wayland_cache_find_region(rid);
+    NoiaWaylandRegion* region = noia_wayland_cache_find_region(rid);
     if (region) {
-        aura_surface_set_offset(sid, region->pos);
-        aura_surface_set_requested_size(sid, region->size);
+        noia_surface_set_offset(sid, region->pos);
+        noia_surface_set_requested_size(sid, region->size);
     }
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_set_input_region
-                               (AURA_UNUSED struct wl_client* client,
-                                AURA_UNUSED struct wl_resource* resource,
-                                AURA_UNUSED struct wl_resource* region_resource)
+void noia_wayland_surface_set_input_region
+                               (NOIA_UNUSED struct wl_client* client,
+                                NOIA_UNUSED struct wl_resource* resource,
+                                NOIA_UNUSED struct wl_resource* region_resource)
 {
     LOG_NYIMP("Wayland: set input region");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_commit(AURA_UNUSED struct wl_client* client,
+void noia_wayland_surface_commit(NOIA_UNUSED struct wl_client* client,
                                  struct wl_resource* resource)
 {
-    AuraSurfaceId sid = (AuraSurfaceId) wl_resource_get_user_data(resource);
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
 
     LOG_WAYL3("Wayland: commit (sid: %d)", sid);
 
-    //aura_surface_commit(sid);
+    //noia_surface_commit(sid);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_set_buffer_transform
-                                      (AURA_UNUSED struct wl_client* client,
-                                       AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_surface_set_buffer_transform
+                                      (NOIA_UNUSED struct wl_client* client,
+                                       NOIA_UNUSED struct wl_resource* resource,
                                        int32_t transform)
 {
     LOG_NYIMP("Wayland: set buffer transform (transform: %d)", transform);
@@ -142,9 +142,9 @@ void aura_wayland_surface_set_buffer_transform
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_surface_set_buffer_scale
-                                      (AURA_UNUSED struct wl_client* client,
-                                       AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_surface_set_buffer_scale
+                                      (NOIA_UNUSED struct wl_client* client,
+                                       NOIA_UNUSED struct wl_resource* resource,
                                        int32_t scale)
 {
     LOG_NYIMP("Wayland: set buffer scale (scale: %d)", scale);
@@ -153,15 +153,15 @@ void aura_wayland_surface_set_buffer_scale
 //------------------------------------------------------------------------------
 
 const struct wl_surface_interface surface_implementation = {
-        aura_wayland_surface_destroy,
-        aura_wayland_surface_attach,
-        aura_wayland_surface_damage,
-        aura_wayland_surface_frame,
-        aura_wayland_surface_set_opaque_region,
-        aura_wayland_surface_set_input_region,
-        aura_wayland_surface_commit,
-        aura_wayland_surface_set_buffer_transform,
-        aura_wayland_surface_set_buffer_scale
+        noia_wayland_surface_destroy,
+        noia_wayland_surface_attach,
+        noia_wayland_surface_damage,
+        noia_wayland_surface_frame,
+        noia_wayland_surface_set_opaque_region,
+        noia_wayland_surface_set_input_region,
+        noia_wayland_surface_commit,
+        noia_wayland_surface_set_buffer_transform,
+        noia_wayland_surface_set_buffer_scale
     };
 
 //------------------------------------------------------------------------------

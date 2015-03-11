@@ -22,22 +22,22 @@ static const char* scFrameBufferPath = "/dev/fb0";
 
 /// Specialization of Output for use with framebuffer.
 typedef struct {
-    AuraOutput base;
+    NoiaOutput base;
     int fd;
-} AuraOutputFB;
+} NoiaOutputFB;
 
 //------------------------------------------------------------------------------
 
 /// Initialize render for draw to framebuffer.
 /// Frame buffer does not directly support double buffering.
-AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
+NoiaRenderer* noia_devfb_output_initialize(NoiaOutput* output,
                                            int width, int height)
 {
     struct fb_fix_screeninfo fixed_info;
     uint8_t* buffer;
     size_t buflen;
 
-    AuraOutputFB* output_fb = (AuraOutputFB*) output;
+    NoiaOutputFB* output_fb = (NoiaOutputFB*) output;
     if (output_fb == NULL) {
         LOG_ERROR("Invalid output!");
         return NULL;
@@ -59,16 +59,16 @@ AuraRenderer* aura_devfb_output_initialize(AuraOutput* output,
     }
 
     // Prepare renderer
-    AuraRenderer* renderer = aura_renderer_mmap_create(output, width, height);
-    aura_renderer_mmap_set_buffer(renderer, 0, buffer, fixed_info.line_length);
-    aura_renderer_mmap_set_buffer(renderer, 1, buffer, fixed_info.line_length);
+    NoiaRenderer* renderer = noia_renderer_mmap_create(output, width, height);
+    noia_renderer_mmap_set_buffer(renderer, 0, buffer, fixed_info.line_length);
+    noia_renderer_mmap_set_buffer(renderer, 1, buffer, fixed_info.line_length);
     return renderer;
 }
 
 //------------------------------------------------------------------------------
 
 /// Free framebuffer output object and its base.
-void aura_devfb_output_free(AuraOutput* output)
+void noia_devfb_output_free(NoiaOutput* output)
 {
     if (!output) {
         return;
@@ -83,17 +83,17 @@ void aura_devfb_output_free(AuraOutput* output)
 //------------------------------------------------------------------------------
 
 /// Allocate memory for framebuffer object.
-AuraOutputFB* aura_devfb_output_new(int width, int height, char* id, int fd)
+NoiaOutputFB* noia_devfb_output_new(int width, int height, char* id, int fd)
 {
-    AuraOutputFB* output_fb = malloc(sizeof(AuraOutputFB));
-    memset(output_fb, 0, sizeof(AuraOutputFB));
+    NoiaOutputFB* output_fb = malloc(sizeof(NoiaOutputFB));
+    memset(output_fb, 0, sizeof(NoiaOutputFB));
 
-    aura_output_initialize(&output_fb->base,
+    noia_output_initialize(&output_fb->base,
                            width, height,
                            strdup(id),
-                           aura_devfb_output_initialize,
+                           noia_devfb_output_initialize,
                            NULL,
-                           aura_devfb_output_free);
+                           noia_devfb_output_free);
     output_fb->fd = fd;
     return output_fb;
 }
@@ -101,13 +101,13 @@ AuraOutputFB* aura_devfb_output_new(int width, int height, char* id, int fd)
 //------------------------------------------------------------------------------
 
 /// Get info about framebuffer and create Output for use with it.
-int aura_devfb_setup_framebuffer(AuraList* outputs)
+int noia_devfb_setup_framebuffer(NoiaList* outputs)
 {
     struct fb_var_screeninfo screen_info;
     struct fb_fix_screeninfo fixed_info;
     int fd;
 
-    fd = aura_open(scFrameBufferPath, O_RDWR);
+    fd = noia_open(scFrameBufferPath, O_RDWR);
     if (fd < 0) {
         LOG_ERROR("Could not open '%s'!", scFrameBufferPath);
         return -1;
@@ -124,10 +124,10 @@ int aura_devfb_setup_framebuffer(AuraList* outputs)
               screen_info.xres_virtual, screen_info.yres_virtual,
               fixed_info.line_length);
 
-    AuraOutputFB* output = aura_devfb_output_new(screen_info.xres_virtual,
+    NoiaOutputFB* output = noia_devfb_output_new(screen_info.xres_virtual,
                                                  screen_info.yres_virtual,
                                                  fixed_info.id, fd);
-    aura_list_append(outputs, output);
+    noia_list_append(outputs, output);
 
     return 1;
 }

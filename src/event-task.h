@@ -1,37 +1,37 @@
 // file: event-task.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_EVENT_TASK_H__
-#define __AURA_EVENT_TASK_H__
+#ifndef __NOIA_EVENT_TASK_H__
+#define __NOIA_EVENT_TASK_H__
 
 #include "utils-object.h"
 
-typedef struct AuraLoopPriv AuraLoop;
+typedef struct NoiaLoopPriv NoiaLoop;
 
-typedef void (*AuraTaskProcessor) (void*);
-typedef void (*AuraTaskFreeFunc) (void*);
+typedef void (*NoiaTaskProcessor) (void*);
+typedef void (*NoiaTaskFreeFunc) (void*);
 
 typedef struct {
-    AuraObject base;
-    AuraTaskProcessor process;
-    AuraLoop* loop;
+    NoiaObject base;
+    NoiaTaskProcessor process;
+    NoiaLoop* loop;
     void* subscription_data;
     void* emission_data;
-} AuraTask;
+} NoiaTask;
 
-AuraTask* aura_task_new(AuraTaskProcessor process,
-                        AuraTaskFreeFunc free,
-                        AuraLoop* loop,
+NoiaTask* noia_task_new(NoiaTaskProcessor process,
+                        NoiaTaskFreeFunc free,
+                        NoiaLoop* loop,
                         void* subscription_data,
                         void* emission_data);
 
-AuraTask* aura_task_create(AuraTaskProcessor process,
-                           AuraLoop* loop,
+NoiaTask* noia_task_create(NoiaTaskProcessor process,
+                           NoiaLoop* loop,
                            void* subscription_data);
 
-AuraTask* aura_task_copy(AuraTask* task);
+NoiaTask* noia_task_copy(NoiaTask* task);
 
-void aura_task_free(AuraTask *self);
+void noia_task_free(NoiaTask *self);
 
-#endif // __AURA_EVENT_TASK_H__
+#endif // __NOIA_EVENT_TASK_H__
 

@@ -1,8 +1,8 @@
 // file: exhibitor-display.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_EXHIBITOR_DISPLAY_H__
-#define __AURA_EXHIBITOR_DISPLAY_H__
+#ifndef __NOIA_EXHIBITOR_DISPLAY_H__
+#define __NOIA_EXHIBITOR_DISPLAY_H__
 
 #include "exhibitor-compositor.h"
 #include "output.h"
@@ -12,23 +12,23 @@
 #include <pthread.h>
 
 typedef struct {
-    AuraOutput* output;
-    AuraList* compositors;
-    AuraCompositor* compositor;
+    NoiaOutput* output;
+    NoiaList* compositors;
+    NoiaCompositor* compositor;
     bool run;
     pthread_t thread;
-} AuraDisplay;
+} NoiaDisplay;
 
-AuraDisplay* aura_display_new(AuraOutput* output);
-void aura_display_free(AuraDisplay* self);
+NoiaDisplay* noia_display_new(NoiaOutput* output);
+void noia_display_free(NoiaDisplay* self);
 
-int aura_display_start(AuraDisplay* self);
-void aura_display_stop(AuraDisplay* self);
+int noia_display_start(NoiaDisplay* self);
+void noia_display_stop(NoiaDisplay* self);
 
-void aura_display_command_position(AuraDisplay* self,
-                                   AuraArgmandType type,
-                                   AuraArgmandType direction,
+void noia_display_command_position(NoiaDisplay* self,
+                                   NoiaArgmandType type,
+                                   NoiaArgmandType direction,
                                    int position);
 
-#endif // __AURA_EXHIBITOR_DISPLAY_H__
+#endif // __NOIA_EXHIBITOR_DISPLAY_H__
 

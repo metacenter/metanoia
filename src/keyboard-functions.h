@@ -1,29 +1,29 @@
 // file: keyboard-functions.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_KEYBOARD_FUNCTIONS_H__
-#define __AURA_KEYBOARD_FUNCTIONS_H__
+#ifndef __NOIA_KEYBOARD_FUNCTIONS_H__
+#define __NOIA_KEYBOARD_FUNCTIONS_H__
 
 #include "utils-list.h"
 
-void aura_clean_stack(AuraList* stack);
+void noia_clean_stack(NoiaList* stack);
 
-void aura_put_focus(AuraList* stack);
+void noia_put_focus(NoiaList* stack);
 
-void aura_put_move(AuraList* stack);
+void noia_put_move(NoiaList* stack);
 
-void aura_put_resize(AuraList* stack);
+void noia_put_resize(NoiaList* stack);
 
-void aura_put_number(AuraList* stack, int code,
-                     uint32_t modifiers, AuraKeyState state);
+void noia_put_number(NoiaList* stack, int code,
+                     uint32_t modifiers, NoiaKeyState state);
 
-void aura_right(AuraList* stack);
+void noia_right(NoiaList* stack);
 
-void aura_left(AuraList* stack);
+void noia_left(NoiaList* stack);
 
-void aura_up(AuraList* stack);
+void noia_up(NoiaList* stack);
 
-void aura_down(AuraList* stack);
+void noia_down(NoiaList* stack);
 
-#endif // __AURA_KEYBOARD_FUNCTIONS_H__
+#endif // __NOIA_KEYBOARD_FUNCTIONS_H__
 

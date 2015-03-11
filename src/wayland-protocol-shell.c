@@ -10,29 +10,29 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_surface_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_shell_surface_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind shell surface");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_shell_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind shell");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_get_shell_surface
-                              (AURA_UNUSED struct wl_client* client,
-                               AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_get_shell_surface
+                              (NOIA_UNUSED struct wl_client* client,
+                               NOIA_UNUSED struct wl_resource* resource,
                                uint32_t id,
-                               AURA_UNUSED struct wl_resource* surface_resource)
+                               NOIA_UNUSED struct wl_resource* surface_resource)
 {
     struct wl_resource* rc;
-    AuraSurfaceId sid =
-                    (AuraSurfaceId) wl_resource_get_user_data(surface_resource);
+    NoiaSurfaceId sid =
+                    (NoiaSurfaceId) wl_resource_get_user_data(surface_resource);
 
     LOG_NYIMP("Getting Wayland shell surface (id: %32d, sid: %d)", id, sid);
 
@@ -43,24 +43,24 @@ void aura_wayland_get_shell_surface
         return;
     }
 
-    aura_wayland_cache_add_surface_resource
-                                  (sid, AURA_RESOURCE_SHELL_SURFACE, rc);
-    aura_surface_show(sid);
+    noia_wayland_cache_add_surface_resource
+                                  (sid, NOIA_RESOURCE_SHELL_SURFACE, rc);
+    noia_surface_show(sid);
 
     wl_resource_set_implementation(rc, &shell_surface_implementation,
-                                   NULL, aura_wayland_shell_surface_unbind);
+                                   NULL, noia_wayland_shell_surface_unbind);
 }
 
 //------------------------------------------------------------------------------
 
 static const struct wl_shell_interface shell_implementation = {
-        aura_wayland_get_shell_surface
+        noia_wayland_get_shell_surface
     };
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_shell_bind(struct wl_client* client,
-                             AURA_UNUSED void* data,
+void noia_wayland_shell_bind(struct wl_client* client,
+                             NOIA_UNUSED void* data,
                              uint32_t version,
                              uint32_t id)
 {
@@ -75,7 +75,7 @@ void aura_wayland_shell_bind(struct wl_client* client,
     }
 
     wl_resource_set_implementation(rc, &shell_implementation,
-                                   NULL, aura_wayland_shell_unbind);
+                                   NULL, noia_wayland_shell_unbind);
 }
 
 //------------------------------------------------------------------------------

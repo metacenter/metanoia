@@ -8,9 +8,9 @@
 
 //------------------------------------------------------------------------------
 
-AuraBinding* aura_binding_new()
+NoiaBinding* noia_binding_new()
 {
-    AuraBinding* self = malloc(sizeof(AuraBinding));
+    NoiaBinding* self = malloc(sizeof(NoiaBinding));
     if (!self) {
         LOG_ERROR("Memory allocation failed!");
         return self;
@@ -24,7 +24,7 @@ AuraBinding* aura_binding_new()
 
 //------------------------------------------------------------------------------
 
-void aura_binding_free(AuraBinding* self)
+void noia_binding_free(NoiaBinding* self)
 {
     if (!self) {
         return;
@@ -34,9 +34,9 @@ void aura_binding_free(AuraBinding* self)
 
 //------------------------------------------------------------------------------
 
-AuraBinding* aura_binding_copy(const AuraBinding* self)
+NoiaBinding* noia_binding_copy(const NoiaBinding* self)
 {
-    AuraBinding* copy = aura_binding_new();
+    NoiaBinding* copy = noia_binding_new();
     copy->code      = self->code;
     copy->modifiers = self->modifiers;
     copy->execute   = self->execute;

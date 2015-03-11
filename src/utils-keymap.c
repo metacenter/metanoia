@@ -13,34 +13,34 @@
 
 //------------------------------------------------------------------------------
 
-struct AuraKeymapPriv {
+struct NoiaKeymapPriv {
     struct xkb_context* context;
     struct xkb_keymap* keymap;
 };
 
 //------------------------------------------------------------------------------
 
-AuraKeymap* aura_utils_keymap_new(void)
+NoiaKeymap* noia_utils_keymap_new(void)
 {
-    AuraKeymap* self = malloc(sizeof(AuraKeymap));
+    NoiaKeymap* self = malloc(sizeof(NoiaKeymap));
     if (!self) {
         return NULL;
     }
-    memset(self, 0, sizeof(AuraKeymap));
+    memset(self, 0, sizeof(NoiaKeymap));
 
-    self->priv = malloc(sizeof(AuraKeymap));
+    self->priv = malloc(sizeof(NoiaKeymap));
     if (!self->priv) {
         free(self);
         return NULL;
     }
-    memset(self->priv, 0, sizeof(AuraKeymapPriv));
+    memset(self->priv, 0, sizeof(NoiaKeymapPriv));
 
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_utils_keymap_free(AuraKeymap* self)
+void noia_utils_keymap_free(NoiaKeymap* self)
 {
     if (!self) {
         return;
@@ -54,7 +54,7 @@ void aura_utils_keymap_free(AuraKeymap* self)
 
 //------------------------------------------------------------------------------
 
-int aura_utils_keymap_initialize(AuraKeymap* self)
+int noia_utils_keymap_initialize(NoiaKeymap* self)
 {
     // Create context
     self->priv->context = xkb_context_new(0);
@@ -82,7 +82,7 @@ int aura_utils_keymap_initialize(AuraKeymap* self)
     self->keymap_size = strlen(keymap_str) + 1;
 
     char* name = "keymap_us";
-    self->keymap_fd = aura_environment_open_file(name, self->keymap_size,
+    self->keymap_fd = noia_environment_open_file(name, self->keymap_size,
                                                  RUNTIME_PATH);
     if (self->keymap_fd < 0) {
         LOG_ERROR("Creating a keymap file for %u bytes failed! (%m)",
@@ -106,7 +106,7 @@ int aura_utils_keymap_initialize(AuraKeymap* self)
 
 //------------------------------------------------------------------------------
 
-void aura_utils_keymap_finalize(AuraKeymap* self)
+void noia_utils_keymap_finalize(NoiaKeymap* self)
 {
     if (self->keymap_fd > 0) {
         close(self->keymap_fd);

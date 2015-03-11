@@ -1,42 +1,42 @@
 // file: surface-manager.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_SURFACE_MANAGER_H__
-#define __AURA_SURFACE_MANAGER_H__
+#ifndef __NOIA_SURFACE_MANAGER_H__
+#define __NOIA_SURFACE_MANAGER_H__
 
 #include "surface-data.h"
 
-AuraSurfaceId aura_surface_create(void);
+NoiaSurfaceId noia_surface_create(void);
 
-void aura_surface_destroy(AuraSurfaceId sid);
+void noia_surface_destroy(NoiaSurfaceId sid);
 
-AuraSurfaceData* aura_surface_get(AuraSurfaceId sid);
+NoiaSurfaceData* noia_surface_get(NoiaSurfaceId sid);
 
-void aura_surface_attach_egl(AuraSurfaceId sid,
+void noia_surface_attach_egl(NoiaSurfaceId sid,
                              void* resource);
 
-void aura_surface_commit(AuraSurfaceId sid,
+void noia_surface_commit(NoiaSurfaceId sid,
                          int width,
                          int height,
                          int stride,
                          uint8_t* buffer);
 
-void aura_surface_show(AuraSurfaceId sid);
+void noia_surface_show(NoiaSurfaceId sid);
 
-void aura_surface_set_offset(AuraSurfaceId sid, AuraPosition offset);
+void noia_surface_set_offset(NoiaSurfaceId sid, NoiaPosition offset);
 
-void aura_surface_set_requested_size(AuraSurfaceId sid,
-                                     AuraSize size);
+void noia_surface_set_requested_size(NoiaSurfaceId sid,
+                                     NoiaSize size);
 
-void aura_surface_set_as_cursor(AuraSurfaceId sid);
+void noia_surface_set_as_cursor(NoiaSurfaceId sid);
 
-int aura_surface_compare(AuraSurfaceId first, AuraSurfaceId second);
+int noia_surface_compare(NoiaSurfaceId first, NoiaSurfaceId second);
 
-void aura_surface_lock();
+void noia_surface_lock();
 
-void aura_surface_unlock();
+void noia_surface_unlock();
 
-void aura_surface_clear_all();
+void noia_surface_clear_all();
 
-#endif // __AURA_SURFACE_MANAGER_H__
+#endif // __NOIA_SURFACE_MANAGER_H__
 

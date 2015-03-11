@@ -9,23 +9,23 @@
 #include <stdlib.h>
 #include <memory.h>
 
-AuraKeymap* keymap;
+NoiaKeymap* keymap;
 
-static AuraSettings sSettings;
+static NoiaSettings sSettings;
 
 //------------------------------------------------------------------------------
 
-void aura_config_apply()
+void noia_config_apply()
 {
-    memset(&sSettings, 0, sizeof(AuraSettings));
+    memset(&sSettings, 0, sizeof(NoiaSettings));
 
     // Apply keybinding config
-    keymap = aura_utils_keymap_new();
-    aura_utils_keymap_initialize(keymap);
+    keymap = noia_utils_keymap_new();
+    noia_utils_keymap_initialize(keymap);
 
     unsigned int i;
-    for (i=0; i < sizeof(scBindings)/sizeof(AuraBinding); ++i) {
-        aura_keyboard_add_binding(AURA_NORMAL_MODE, &scBindings[i]);
+    for (i=0; i < sizeof(scBindings)/sizeof(NoiaBinding); ++i) {
+        noia_keyboard_add_binding(NOIA_NORMAL_MODE, &scBindings[i]);
     }
 
     // Apply evironment variables
@@ -34,31 +34,31 @@ void aura_config_apply()
 
 //------------------------------------------------------------------------------
 
-void aura_config_finalize()
+void noia_config_finalize()
 {
-    aura_utils_keymap_finalize(keymap);
-    aura_utils_keymap_free(keymap);
+    noia_utils_keymap_finalize(keymap);
+    noia_utils_keymap_free(keymap);
 
-    aura_keyboard_free_all();
+    noia_keyboard_free_all();
 }
 
 //------------------------------------------------------------------------------
 
-AuraKeymap* aura_config_get_keymap()
+NoiaKeymap* noia_config_get_keymap()
 {
     return keymap;
 }
 
 //------------------------------------------------------------------------------
 
-const AuraConfig* aura_config()
+const NoiaConfig* noia_config()
 {
     return &scConfig;
 }
 
 //------------------------------------------------------------------------------
 
-const AuraSettings* aura_settings()
+const NoiaSettings* noia_settings()
 {
     return &sSettings;
 }

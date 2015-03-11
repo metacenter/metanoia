@@ -1,8 +1,8 @@
 // file: utils-list.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_UTILS_LIST_H__
-#define __AURA_UTILS_LIST_H__
+#ifndef __NOIA_UTILS_LIST_H__
+#define __NOIA_UTILS_LIST_H__
 
 #include "utils-chain.h"
 
@@ -14,51 +14,51 @@
 
 typedef struct {
     Chain base;
-    AuraFreeFunc free_data;
-} AuraList;
+    NoiaFreeFunc free_data;
+} NoiaList;
 
-AuraList* aura_list_new(AuraFreeFunc free_data);
-void aura_list_free(AuraList* self);
+NoiaList* noia_list_new(NoiaFreeFunc free_data);
+void noia_list_free(NoiaList* self);
 
-void aura_list_prepend(AuraList* self, void* data);
+void noia_list_prepend(NoiaList* self, void* data);
 
-void aura_list_append(AuraList* self, void* data);
+void noia_list_append(NoiaList* self, void* data);
 
-void* aura_list_pop(AuraList* self);
+void* noia_list_pop(NoiaList* self);
 
-AuraResult aura_list_remove(AuraList* self,
+NoiaResult noia_list_remove(NoiaList* self,
                             void* data,
-                            AuraCompareFunc compare);
+                            NoiaCompareFunc compare);
 
-AuraResult aura_list_remove_all(AuraList* self,
+NoiaResult noia_list_remove_all(NoiaList* self,
                                 void* data,
-                                AuraCompareFunc compare);
+                                NoiaCompareFunc compare);
 
-void aura_list_clean(AuraList* self);
+void noia_list_clean(NoiaList* self);
 
-AuraList* aura_list_subtract(AuraList* minuend,
-                             AuraList* subtrahent,
-                             AuraCompareFunc compare);
+NoiaList* noia_list_subtract(NoiaList* minuend,
+                             NoiaList* subtrahent,
+                             NoiaCompareFunc compare);
 
-static inline int aura_list_len(AuraList* self)
+static inline int noia_list_len(NoiaList* self)
 {
     return chain_len((Chain*) self);
 }
 
-static inline int aura_list_recalculate_length(AuraList* self)
+static inline int noia_list_recalculate_length(NoiaList* self)
 {
     return chain_recalculate_length((Chain*) self);
 }
 
-static inline Link* aura_list_first(AuraList* self)
+static inline Link* noia_list_first(NoiaList* self)
 {
     return self->base.first;
 }
 
-static inline Link* aura_list_last(AuraList* self)
+static inline Link* noia_list_last(NoiaList* self)
 {
     return self->base.last;
 }
 
-#endif // __AURA_UTILS_LIST_H__
+#endif // __NOIA_UTILS_LIST_H__
 

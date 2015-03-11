@@ -1,18 +1,18 @@
 // file: keyboard-argmand.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_KEYBOARD_ARGMAND_H__
-#define __AURA_KEYBOARD_ARGMAND_H__
+#ifndef __NOIA_KEYBOARD_ARGMAND_H__
+#define __NOIA_KEYBOARD_ARGMAND_H__
 
 #include "global-constants.h"
 
 typedef struct {
-    AuraArgmandType type;
+    NoiaArgmandType type;
     int value;
-} AuraArgmand;
+} NoiaArgmand;
 
-AuraArgmand* aura_argmand_new(AuraArgmandType type, int value);
-void aura_argmand_free(AuraArgmand* self);
+NoiaArgmand* noia_argmand_new(NoiaArgmandType type, int value);
+void noia_argmand_free(NoiaArgmand* self);
 
-#endif // __AURA_KEYBOARD_ARGMAND_H__
+#endif // __NOIA_KEYBOARD_ARGMAND_H__
 

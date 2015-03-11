@@ -1,27 +1,27 @@
 // file: config.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_CONFIG_H__
-#define __AURA_CONFIG_H__
+#ifndef __NOIA_CONFIG_H__
+#define __NOIA_CONFIG_H__
 
 #include "utils-keymap.h"
 #include "global-constants.h"
 
 typedef struct {
     int dummy;
-} AuraConfig;
+} NoiaConfig;
 
 typedef struct {
     bool run_in_test_window;
-} AuraSettings;
+} NoiaSettings;
 
-const AuraConfig* aura_config();
-const AuraSettings* aura_settings();
+const NoiaConfig* noia_config();
+const NoiaSettings* noia_settings();
 
-void aura_config_apply();
-void aura_config_finalize();
+void noia_config_apply();
+void noia_config_finalize();
 
-AuraKeymap* aura_config_get_keymap();
+NoiaKeymap* noia_config_get_keymap();
 
-#endif // __AURA_CONFIG_H__
+#endif // __NOIA_CONFIG_H__
 

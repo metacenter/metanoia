@@ -1,30 +1,30 @@
 // file: backend-gtk-win.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_BACKEND_GTK_WIN_H__
-#define __AURA_BACKEND_GTK_WIN_H__
+#ifndef __NOIA_BACKEND_GTK_WIN_H__
+#define __NOIA_BACKEND_GTK_WIN_H__
 
 #include "backend-gtk-app.h"
 #include <gtk/gtk.h>
 
-#define AURA_WIN_TYPE (aura_win_get_type ())
-#define AURA_WIN(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj),AURA_WIN_TYPE,AuraWin))
+#define NOIA_WIN_TYPE (noia_win_get_type ())
+#define NOIA_WIN(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj),NOIA_WIN_TYPE,NoiaWin))
 
-typedef struct _AuraWin      AuraWin;
-typedef struct _AuraWinClass AuraWinClass;
+typedef struct _NoiaWin      NoiaWin;
+typedef struct _NoiaWinClass NoiaWinClass;
 
-GType    aura_win_get_type(void);
-AuraWin* aura_win_new(AuraApp* app);
+GType    noia_win_get_type(void);
+NoiaWin* noia_win_new(NoiaApp* app);
 
-AuraViewGroup* aura_backend_gtk_win_prepare_view_group(AuraWin* win,
+NoiaViewGroup* noia_backend_gtk_win_prepare_view_group(NoiaWin* win,
                                                        int n,
                                                        int width,
                                                        int height);
 
-void aura_backend_gtk_win_discard_view_group(AuraWin* win, int n);
+void noia_backend_gtk_win_discard_view_group(NoiaWin* win, int n);
 
-void aura_backend_gtk_win_swap_buffers(AuraWin* win, int n);
+void noia_backend_gtk_win_swap_buffers(NoiaWin* win, int n);
 
-AuraSize aura_backend_gtk_win_get_resolution(AuraWin* win, int n);
+NoiaSize noia_backend_gtk_win_get_resolution(NoiaWin* win, int n);
 
-#endif // __AURA_BACKEND_GTK_WIN_H__
+#endif // __NOIA_BACKEND_GTK_WIN_H__

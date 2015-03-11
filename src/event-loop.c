@@ -11,22 +11,22 @@
 #include <stdbool.h>
 #include <string.h>
 
-struct AuraLoopPriv {
+struct NoiaLoopPriv {
     char* name;
     pthread_t thread;
     pthread_mutex_t schedule_mutex;
     pthread_mutex_t process_mutex;
     pthread_cond_t condition;
     bool run;
-    AuraList* task_list;
-    AuraList* finalizers;
+    NoiaList* task_list;
+    NoiaList* finalizers;
 };
 
 //------------------------------------------------------------------------------
 
-AuraLoop* aura_loop_new(const char* name)
+NoiaLoop* noia_loop_new(const char* name)
 {
-    AuraLoop* self = malloc(sizeof(AuraLoop));
+    NoiaLoop* self = malloc(sizeof(NoiaLoop));
     if (!self) {
         return NULL;
     }
@@ -36,14 +36,14 @@ AuraLoop* aura_loop_new(const char* name)
     pthread_mutex_init(&self->process_mutex, NULL);
     pthread_cond_init(&self->condition, NULL);
     self->run = 0;
-    self->task_list = aura_list_new(NULL);
-    self->finalizers = aura_list_new(NULL);
+    self->task_list = noia_list_new(NULL);
+    self->finalizers = noia_list_new(NULL);
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_loop_free(AuraLoop* self)
+void noia_loop_free(NoiaLoop* self)
 {
     if (!self) {
         return;
@@ -52,15 +52,15 @@ void aura_loop_free(AuraLoop* self)
     if (self->name) {
         free(self->name);
     }
-    aura_list_free(self->finalizers);
-    aura_list_free(self->task_list);
-    memset(self, 0, sizeof(AuraLoop));
+    noia_list_free(self->finalizers);
+    noia_list_free(self->task_list);
+    memset(self, 0, sizeof(NoiaLoop));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_loop_process_task(AuraTask* task)
+void noia_loop_process_task(NoiaTask* task)
 {
     if (task) {
         if (task->process) {
@@ -69,7 +69,7 @@ void aura_loop_process_task(AuraTask* task)
         } else {
             LOG_ERROR("Invalid task processor!");
         }
-        aura_object_unref((AuraObject*) task);
+        noia_object_unref((NoiaObject*) task);
     } else {
         LOG_ERROR("Invalid task!");
     }
@@ -77,31 +77,31 @@ void aura_loop_process_task(AuraTask* task)
 
 //------------------------------------------------------------------------------
 
-void* aura_loop_thread_loop(void* data)
+void* noia_loop_thread_loop(void* data)
 {
-    AuraLoop* self = (AuraLoop*) data;
+    NoiaLoop* self = (NoiaLoop*) data;
     if (!self) {
         return NULL;
     }
 
     LOG_INFO1("Threads: starting loop '%s'", self->name);
-    aura_environment_on_enter_new_thread(self->thread, self->name);
+    noia_environment_on_enter_new_thread(self->thread, self->name);
 
     self->run = 1;
     pthread_mutex_lock(&self->process_mutex);
     while (self->run) {
-        while (aura_list_len(self->task_list) > 0) {
+        while (noia_list_len(self->task_list) > 0) {
             pthread_mutex_lock(&self->schedule_mutex);
-            AuraTask* task = aura_list_pop(self->task_list);
+            NoiaTask* task = noia_list_pop(self->task_list);
             pthread_mutex_unlock(&self->schedule_mutex);
-            aura_loop_process_task(task);
+            noia_loop_process_task(task);
         }
         pthread_cond_wait(&self->condition, &self->process_mutex);
     }
 
     LOG_INFO1("Threads: finalizing loop '%s'", self->name);
     FOR_EACH_REVERSE (self->finalizers, link) {
-        aura_loop_process_task((AuraTask*) link->data);
+        noia_loop_process_task((NoiaTask*) link->data);
     }
 
     LOG_INFO1("Threads: stopped loop '%s'", self->name);
@@ -110,18 +110,18 @@ void* aura_loop_thread_loop(void* data)
 
 //------------------------------------------------------------------------------
 
-int aura_loop_run(AuraLoop* self)
+int noia_loop_run(NoiaLoop* self)
 {
     if (!self) {
         return -ENOMEM;
     }
 
-    return pthread_create(&self->thread, NULL, aura_loop_thread_loop, self);
+    return pthread_create(&self->thread, NULL, noia_loop_thread_loop, self);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_loop_stop(AuraLoop* self)
+void noia_loop_stop(NoiaLoop* self)
 {
     if (!self) {
         return;
@@ -136,7 +136,7 @@ void aura_loop_stop(AuraLoop* self)
 
 //------------------------------------------------------------------------------
 
-void aura_loop_join(AuraLoop* self)
+void noia_loop_join(NoiaLoop* self)
 {
     if (!self) {
         return;
@@ -146,7 +146,7 @@ void aura_loop_join(AuraLoop* self)
 
 //------------------------------------------------------------------------------
 
-int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
+int noia_loop_schedule_task(NoiaLoop* self, NoiaTask* task)
 {
     if (!self || !task) {
         LOG_ERROR("Invalid Loop or Task!");
@@ -154,7 +154,7 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
     }
 
     pthread_mutex_lock(&self->schedule_mutex);
-    aura_list_append(self->task_list, task);
+    noia_list_append(self->task_list, task);
     pthread_mutex_unlock(&self->schedule_mutex);
     pthread_cond_signal(&self->condition);
     return 1;
@@ -162,10 +162,10 @@ int aura_loop_schedule_task(AuraLoop* self, AuraTask* task)
 
 //------------------------------------------------------------------------------
 
-void aura_loop_add_finalizer(AuraLoop* self, AuraTaskProcessor finalizer)
+void noia_loop_add_finalizer(NoiaLoop* self, NoiaTaskProcessor finalizer)
 {
-    aura_list_append(self->finalizers, aura_task_new(finalizer,
-                    (AuraFreeFunc) aura_task_free, NULL, NULL, NULL));
+    noia_list_append(self->finalizers, noia_task_new(finalizer,
+                    (NoiaFreeFunc) noia_task_free, NULL, NULL, NULL));
 }
 
 //------------------------------------------------------------------------------

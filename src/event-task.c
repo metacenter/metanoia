@@ -7,23 +7,23 @@
 #include <malloc.h>
 #include <memory.h>
 
-static AuraTask sDummyTask = {{0, NULL}, NULL, NULL, NULL, NULL};
+static NoiaTask sDummyTask = {{0, NULL}, NULL, NULL, NULL, NULL};
 
 //------------------------------------------------------------------------------
 
-AuraTask* aura_task_new(AuraTaskProcessor process,
-                        AuraTaskFreeFunc free,
-                        AuraLoop* loop,
+NoiaTask* noia_task_new(NoiaTaskProcessor process,
+                        NoiaTaskFreeFunc free,
+                        NoiaLoop* loop,
                         void* subscription_data,
                         void* emission_data)
 {
-    AuraTask* self = malloc(sizeof(AuraTask));
+    NoiaTask* self = malloc(sizeof(NoiaTask));
     if (!self) {
         return &sDummyTask;
     }
 
-    aura_object_initialize(&self->base, free);
-    aura_object_ref(&self->base);
+    noia_object_initialize(&self->base, free);
+    noia_object_ref(&self->base);
 
     self->process = process;
     self->loop = loop;
@@ -34,31 +34,31 @@ AuraTask* aura_task_new(AuraTaskProcessor process,
 
 //------------------------------------------------------------------------------
 
-AuraTask* aura_task_create(AuraTaskProcessor process,
-                           AuraLoop* loop,
+NoiaTask* noia_task_create(NoiaTaskProcessor process,
+                           NoiaLoop* loop,
                            void* subscription_data)
 {
-    return aura_task_new(process, (AuraTaskFreeFunc) aura_task_free,
+    return noia_task_new(process, (NoiaTaskFreeFunc) noia_task_free,
                          loop, subscription_data, NULL);
 }
 
 //------------------------------------------------------------------------------
 
-AuraTask* aura_task_copy(AuraTask* task)
+NoiaTask* noia_task_copy(NoiaTask* task)
 {
-    return aura_task_new(task->process, task->base.free, task->loop,
+    return noia_task_new(task->process, task->base.free, task->loop,
                          task->subscription_data, task->emission_data);
 }
 
 //------------------------------------------------------------------------------
 
 /// Free only task, keep data.
-void aura_task_free(AuraTask* self)
+void noia_task_free(NoiaTask* self)
 {
     if (!self) {
         return;
     }
-    memset(self, 0, sizeof(AuraTask));
+    memset(self, 0, sizeof(NoiaTask));
     free(self);
 }
 

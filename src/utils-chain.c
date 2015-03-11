@@ -28,7 +28,7 @@ void link_free(Link* self)
 
 //------------------------------------------------------------------------------
 
-void link_destroy(Link* self, AuraFreeFunc free_data)
+void link_destroy(Link* self, NoiaFreeFunc free_data)
 {
     if (!self) {
         return;
@@ -54,7 +54,7 @@ void link_initialize(Link* self, void* data)
 
 //------------------------------------------------------------------------------
 
-Chain* chain_new(AuraFreeFunc free_link)
+Chain* chain_new(NoiaFreeFunc free_link)
 {
     Chain* self = malloc(sizeof(Chain));
     if (!self) {
@@ -67,7 +67,7 @@ Chain* chain_new(AuraFreeFunc free_link)
 
 //------------------------------------------------------------------------------
 
-void chain_initialize(Chain* self, AuraFreeFunc free_link)
+void chain_initialize(Chain* self, NoiaFreeFunc free_link)
 {
     if (!self) {
         return;
@@ -168,10 +168,10 @@ void chain_adjoin(Chain* self, Link* link)
 
 //------------------------------------------------------------------------------
 
-AuraResult chain_unjoin(Chain* self, Link* unjoinee)
+NoiaResult chain_unjoin(Chain* self, Link* unjoinee)
 {
     if (!self || !unjoinee) {
-        return AURA_RESULT_INCORRECT_ARGUMENT;
+        return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
     int found = false;
@@ -184,19 +184,19 @@ AuraResult chain_unjoin(Chain* self, Link* unjoinee)
     }
 
     if (!found) {
-        return AURA_RESULT_NOT_FOUND;
+        return NOIA_RESULT_NOT_FOUND;
     }
 
-    AuraResult result = chain_disjoin(self, link);
+    NoiaResult result = chain_disjoin(self, link);
     return result;
 }
 
 //------------------------------------------------------------------------------
 
-AuraResult chain_disjoin(Chain* self, Link* link)
+NoiaResult chain_disjoin(Chain* self, Link* link)
 {
     if (!self || !link) {
-        return AURA_RESULT_INCORRECT_ARGUMENT;
+        return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
     Link* prev = link->prev;
@@ -217,7 +217,7 @@ AuraResult chain_disjoin(Chain* self, Link* link)
     link->prev = NULL;
     link->next = NULL;
     self->len = chain_recalculate_length(self);
-    return AURA_RESULT_SUCCESS;
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------

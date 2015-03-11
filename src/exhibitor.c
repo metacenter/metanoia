@@ -15,37 +15,37 @@
 
 //------------------------------------------------------------------------------
 
-struct AuraExhibitorPriv {
-    AuraStrategist* strategist;
+struct NoiaExhibitorPriv {
+    NoiaStrategist* strategist;
 };
 
 //------------------------------------------------------------------------------
 
-AuraExhibitor* aura_exhibitor_get_instance()
+NoiaExhibitor* noia_exhibitor_get_instance()
 {
-    static AuraExhibitor exhibitor;
+    static NoiaExhibitor exhibitor;
     if (exhibitor.priv) {
         return &exhibitor;
     }
 
-    exhibitor.surface_history = aura_list_new(NULL);
-    exhibitor.displays = aura_list_new((AuraFreeFunc) aura_display_free);
+    exhibitor.surface_history = noia_list_new(NULL);
+    exhibitor.displays = noia_list_new((NoiaFreeFunc) noia_display_free);
 
-    exhibitor.priv = malloc(sizeof(AuraExhibitorPriv));
-    exhibitor.priv->strategist = aura_strategist_create();
+    exhibitor.priv = malloc(sizeof(NoiaExhibitorPriv));
+    exhibitor.priv->strategist = noia_strategist_create();
 
     return &exhibitor;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_create_new_display(AuraOutput* output)
+void noia_exhibitor_create_new_display(NoiaOutput* output)
 {
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
-    AuraDisplay* display = aura_display_new(output);
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+    NoiaDisplay* display = noia_display_new(output);
 
-    aura_list_append(exhibitor->displays, display);
-    aura_display_start(display);
+    noia_list_append(exhibitor->displays, display);
+    noia_display_start(display);
 
     if (!exhibitor->display) {
         exhibitor->display = display;
@@ -54,9 +54,9 @@ void aura_exhibitor_create_new_display(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_on_display_found(void* data)
+void noia_exhibitor_on_display_found(void* data)
 {
-    AuraOutput* output = (AuraOutput*) data;
+    NoiaOutput* output = (NoiaOutput*) data;
     if (!output) {
         LOG_ERROR("Invalid output!");
         return;
@@ -68,26 +68,26 @@ void aura_exhibitor_on_display_found(void* data)
 
     LOG_INFO1("Adding new renderer!");
     output->renderer->initialize(output->renderer);
-    aura_exhibitor_create_new_display(output);
+    noia_exhibitor_create_new_display(output);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_on_display_lost(void* data)
+void noia_exhibitor_on_display_lost(void* data)
 {
-    AuraOutput* output = (AuraOutput*) data;
+    NoiaOutput* output = (NoiaOutput*) data;
     if (!output) {
         LOG_ERROR("Invalid output");
         return;
     }
 
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
     LOG_INFO2("Deleting renderer timer");
     FOR_EACH(exhibitor->displays, link) {
-        AuraDisplay* display = (AuraDisplay*) link->data;
+        NoiaDisplay* display = (NoiaDisplay*) link->data;
         if (display && display->output == output) {
-            aura_display_stop(display);
+            noia_display_stop(display);
             // TODO: Remove display
             break;
         }
@@ -96,141 +96,141 @@ void aura_exhibitor_on_display_lost(void* data)
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_on_surface_ready(void* data)
+void noia_exhibitor_on_surface_ready(void* data)
 {
-    AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
+    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
     if (sid == scInvalidSurfaceId) {
         return;
     }
 
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
     exhibitor->priv->strategist->on_surface_ready(exhibitor, sid);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_on_surface_destroyed(void* data)
+void noia_exhibitor_on_surface_destroyed(void* data)
 {
-    AuraSurfaceId sid = aura_uint_unref_get((AuraIntObject*) data);
+    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
     if (sid == scInvalidSurfaceId) {
         return;
     }
 
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
     exhibitor->priv->strategist->on_surface_destroyed(exhibitor, sid);
 
-    aura_compositor_unmanage_surface(exhibitor->display->compositor, sid);
+    noia_compositor_unmanage_surface(exhibitor->display->compositor, sid);
 
-    aura_list_remove(exhibitor->surface_history, (void*) sid,
-                    (AuraCompareFunc) aura_surface_compare);
+    noia_list_remove(exhibitor->surface_history, (void*) sid,
+                    (NoiaCompareFunc) noia_surface_compare);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_pop_surface(AuraSurfaceId sid)
+void noia_exhibitor_pop_surface(NoiaSurfaceId sid)
 {
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
-    aura_list_remove(exhibitor->surface_history,
-                    (void*) sid, (AuraCompareFunc) aura_surface_compare);
-    aura_list_append(exhibitor->surface_history, (void*) sid);
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+    noia_list_remove(exhibitor->surface_history,
+                    (void*) sid, (NoiaCompareFunc) noia_surface_compare);
+    noia_list_append(exhibitor->surface_history, (void*) sid);
 
-    AuraSurfaceData* surface = aura_surface_get(sid);
+    NoiaSurfaceData* surface = noia_surface_get(sid);
     if (surface) {
-        aura_compositor_pop_surface(surface->group.compositor, sid);
+        noia_compositor_pop_surface(surface->group.compositor, sid);
     }
 }
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_pop_history_surface(int position)
+void noia_exhibitor_pop_history_surface(int position)
 {
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
     Link* link = NULL;
-    AuraSurfaceId sid = scInvalidSurfaceId;
+    NoiaSurfaceId sid = scInvalidSurfaceId;
     if (position < 0) {
         int i = 1;
-        link = aura_list_first(exhibitor->surface_history);
+        link = noia_list_first(exhibitor->surface_history);
         for (; link && i < -position; ++i, link = link->next);
     } else {
         int i = 0;
-        link = aura_list_last(exhibitor->surface_history);
+        link = noia_list_last(exhibitor->surface_history);
         for (; link && i < position; ++i, link = link->prev);
     }
 
     if (link) {
-        sid = (AuraSurfaceId) link->data;
+        sid = (NoiaSurfaceId) link->data;
     }
     if (sid == scInvalidSurfaceId) {
         return;
     }
 
-    aura_exhibitor_pop_surface(sid);
+    noia_exhibitor_pop_surface(sid);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_command_position(AuraArgmandType type,
-                                     AuraArgmandType direction,
+void noia_exhibitor_command_position(NoiaArgmandType type,
+                                     NoiaArgmandType direction,
                                      int magnitude)
 {
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
-    aura_display_command_position(exhibitor->display,
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+    noia_display_command_position(exhibitor->display,
                                   type, direction, magnitude);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_finalize(AURA_UNUSED void* data)
+void noia_exhibitor_finalize(NOIA_UNUSED void* data)
 {
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
-    aura_event_signal_unsubscribe(exhibitor);
+    noia_event_signal_unsubscribe(exhibitor);
 
     FOR_EACH (exhibitor->displays, link) {
-        AuraDisplay* display = (AuraDisplay*) link->data;
-        aura_display_stop(display);
+        NoiaDisplay* display = (NoiaDisplay*) link->data;
+        noia_display_stop(display);
     }
 
-    aura_strategist_destroy(exhibitor->priv->strategist);
-    memset(exhibitor->priv, 0, sizeof(AuraExhibitorPriv));
+    noia_strategist_destroy(exhibitor->priv->strategist);
+    memset(exhibitor->priv, 0, sizeof(NoiaExhibitorPriv));
     free(exhibitor->priv);
 
-    aura_list_free(exhibitor->displays);
-    aura_list_free(exhibitor->surface_history);
-    memset(exhibitor, 0, sizeof(AuraExhibitor));
+    noia_list_free(exhibitor->displays);
+    noia_list_free(exhibitor->surface_history);
+    memset(exhibitor, 0, sizeof(NoiaExhibitor));
 }
 
 //------------------------------------------------------------------------------
 
-void aura_exhibitor_initialize(AuraLoop* this_loop)
+void noia_exhibitor_initialize(NoiaLoop* this_loop)
 {
     if (this_loop == 0) {
         LOG_ERROR("Invalid loop!");
         return;
     }
 
-    AuraExhibitor* exhibitor = aura_exhibitor_get_instance();
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
-    aura_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
-               aura_task_create(aura_exhibitor_on_display_found,
+    noia_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
+               noia_task_create(noia_exhibitor_on_display_found,
                                 this_loop, exhibitor));
 
-    aura_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
-               aura_task_create(aura_exhibitor_on_display_lost,
+    noia_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
+               noia_task_create(noia_exhibitor_on_display_lost,
                                 this_loop, exhibitor));
 
-    aura_event_signal_subscribe(SIGNAL_SURFACE_READY,
-               aura_task_create(aura_exhibitor_on_surface_ready,
+    noia_event_signal_subscribe(SIGNAL_SURFACE_READY,
+               noia_task_create(noia_exhibitor_on_surface_ready,
                                 this_loop, exhibitor));
 
-    aura_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,
-               aura_task_create(aura_exhibitor_on_surface_destroyed,
+    noia_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,
+               noia_task_create(noia_exhibitor_on_surface_destroyed,
                                 this_loop, exhibitor));
 
-    aura_loop_add_finalizer(this_loop, aura_exhibitor_finalize);
+    noia_loop_add_finalizer(this_loop, noia_exhibitor_finalize);
 
-    aura_exhibitor_pointer_initialize(this_loop, exhibitor);
+    noia_exhibitor_pointer_initialize(this_loop, exhibitor);
 }
 
 //------------------------------------------------------------------------------

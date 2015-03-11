@@ -11,54 +11,54 @@
 
 //------------------------------------------------------------------------------
 
-AuraCompositor* aura_compositor_new()
+NoiaCompositor* noia_compositor_new()
 {
-    AuraCompositor* self = malloc(sizeof(AuraCompositor));
+    NoiaCompositor* self = malloc(sizeof(NoiaCompositor));
     if (!self) {
         LOG_ERROR("Could not create new compositor!");
         return self;
     }
 
-    self->groups = aura_list_new(NULL);
-    self->frame = aura_frame_new();
-    aura_frame_set_type(self->frame, AURA_FRAME_TYPE_STACKED);
+    self->groups = noia_list_new(NULL);
+    self->frame = noia_frame_new();
+    noia_frame_set_type(self->frame, NOIA_FRAME_TYPE_STACKED);
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_compositor_free(AuraCompositor* self)
+void noia_compositor_free(NoiaCompositor* self)
 {
     if (!self) {
         return;
     }
 
-    aura_frame_free(self->frame);
-    aura_list_free(self->groups);
+    noia_frame_free(self->frame);
+    noia_list_free(self->groups);
 
-    memset(self, 0, sizeof(AuraCompositor));
+    memset(self, 0, sizeof(NoiaCompositor));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-AuraList* aura_compositor_get_visible_surfaces(AuraCompositor* self)
+NoiaList* noia_compositor_get_visible_surfaces(NoiaCompositor* self)
 {
-    /// @todo Reimplement aura_compositor_get_visible_surfaces.
-    /// And don't use aura_frame_get_params - it should be `static inline`.
-    AuraList* surfaces = aura_list_new(NULL);
+    /// @todo Reimplement noia_compositor_get_visible_surfaces.
+    /// And don't use noia_frame_get_params - it should be `static inline`.
+    NoiaList* surfaces = noia_list_new(NULL);
     FOR_EACH_TWIG(self->frame, twig) {
-        AuraFrameParams* params = aura_frame_get_params(twig);
-        aura_list_append(surfaces, (void*) params->sid);
+        NoiaFrameParams* params = noia_frame_get_params(twig);
+        noia_list_append(surfaces, (void*) params->sid);
     }
     return surfaces;
 }
 
 //------------------------------------------------------------------------------
 
-bool aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid)
+bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 {
-    AuraSurfaceData* surface = aura_surface_get(sid);
+    NoiaSurfaceData* surface = noia_surface_get(sid);
     if (!surface || !surface->is_toplevel) {
         return false;
     }
@@ -67,11 +67,11 @@ bool aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid)
     surface->group.compositor = self;
 
     /// @todo Frame type should be configurable.
-    AuraFrame* frame = aura_frame_new();
-    aura_frame_set_type(frame, AURA_FRAME_TYPE_FLOATING);
-    aura_frame_set_surface(frame, sid);
+    NoiaFrame* frame = noia_frame_new();
+    noia_frame_set_type(frame, NOIA_FRAME_TYPE_FLOATING);
+    noia_frame_set_surface(frame, sid);
 
-    aura_branch_append(self->frame, frame);
+    noia_branch_append(self->frame, frame);
     self->selection = frame;
 
     return true;
@@ -79,37 +79,37 @@ bool aura_compositor_manage_surface(AuraCompositor* self, AuraSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-void aura_compositor_unmanage_surface(AuraCompositor* self, AuraSurfaceId sid)
+void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 {
-    AuraFrame* frame = aura_frame_find_with_sid(self->frame, sid);
-    aura_frame_remove_self(frame);
-    aura_frame_free(frame);
+    NoiaFrame* frame = noia_frame_find_with_sid(self->frame, sid);
+    noia_frame_remove_self(frame);
+    noia_frame_free(frame);
 }
 
 //------------------------------------------------------------------------------
 
 /// Pop up a surface if covered with others.
 ///
-/// Here `aura_frame_find_with_sid` is used. Pointer to Frame could also be
+/// Here `noia_frame_find_with_sid` is used. Pointer to Frame could also be
 /// stored in SurfaceData for faster access, but this would require carrying
 /// about this pointer this other operation (e.g. jumps) which also would
 /// require additional computations. Pop is done very rarely and we do not have
 /// overwhelming number of surfaces, so searching is justified here.
 ///
-/// @see aura_frame_find_with_sid
-void aura_compositor_pop_surface(AURA_UNUSED AuraCompositor* self,
-                                 AURA_UNUSED AuraSurfaceId sid)
+/// @see noia_frame_find_with_sid
+void noia_compositor_pop_surface(NOIA_UNUSED NoiaCompositor* self,
+                                 NOIA_UNUSED NoiaSurfaceId sid)
 {
-    AuraFrame* frame = aura_frame_find_with_sid(self->frame, sid);
-    aura_frame_pop_recursively(self->frame, frame);
+    NoiaFrame* frame = noia_frame_find_with_sid(self->frame, sid);
+    noia_frame_pop_recursively(self->frame, frame);
     self->selection = frame;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_compositor_command_position(AuraCompositor* self,
-                                      AuraArgmandType type,
-                                      AuraArgmandType direction,
+void noia_compositor_command_position(NoiaCompositor* self,
+                                      NoiaArgmandType type,
+                                      NoiaArgmandType direction,
                                       int magnitude)
 {
     if (!self->selection) {
@@ -118,14 +118,14 @@ void aura_compositor_command_position(AuraCompositor* self,
 
     /// @todo Magnitude scale should be configurable
     int scale = 10;
-    if (type == AURA_ARGMAND_RESIZE) {
-        aura_frame_resize(self->selection, direction, scale*magnitude);
-    } else if (type == AURA_ARGMAND_MOVE) {
-        aura_frame_move(self->selection, direction, scale*magnitude);
-    } else if (type == AURA_ARGMAND_JUMP) {
-        aura_frame_jump(self->selection, direction, magnitude);
-    } else if (type == AURA_ARGMAND_FOCUS) {
-        /// @todo Handle AURA_ARGMAND_FOCUS
+    if (type == NOIA_ARGMAND_RESIZE) {
+        noia_frame_resize(self->selection, direction, scale*magnitude);
+    } else if (type == NOIA_ARGMAND_MOVE) {
+        noia_frame_move(self->selection, direction, scale*magnitude);
+    } else if (type == NOIA_ARGMAND_JUMP) {
+        noia_frame_jump(self->selection, direction, magnitude);
+    } else if (type == NOIA_ARGMAND_FOCUS) {
+        /// @todo Handle NOIA_ARGMAND_FOCUS
     }
 }
 

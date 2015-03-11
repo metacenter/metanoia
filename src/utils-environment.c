@@ -10,15 +10,15 @@
 #include <fcntl.h>
 #include <signal.h>
 
-static const char scRuntimeDirTemplate[] = "/aura-XXXXXX";
-static const char scDataDirTemplate[] = "/aura";
+static const char scRuntimeDirTemplate[] = "/noia-XXXXXX";
+static const char scDataDirTemplate[] = "/noia";
 
-char* aura_data_path = NULL;
-char* aura_runtime_path = NULL;
+char* noia_data_path = NULL;
+char* noia_runtime_path = NULL;
 
 //------------------------------------------------------------------------------
 
-void aura_environment_block_system_signals(void)
+void noia_environment_block_system_signals(void)
 {
     sigset_t mask;
     sigemptyset(&mask);
@@ -29,7 +29,7 @@ void aura_environment_block_system_signals(void)
 
 //------------------------------------------------------------------------------
 
-void aura_environment_unblock_system_signals(void)
+void noia_environment_unblock_system_signals(void)
 {
     sigset_t mask;
     sigemptyset(&mask);
@@ -40,7 +40,7 @@ void aura_environment_unblock_system_signals(void)
 
 //------------------------------------------------------------------------------
 
-void aura_environment_set_thread_name(pthread_t thread, char* name)
+void noia_environment_set_thread_name(pthread_t thread, char* name)
 {
     if (!thread) {
         thread = pthread_self();
@@ -50,24 +50,24 @@ void aura_environment_set_thread_name(pthread_t thread, char* name)
 
 //------------------------------------------------------------------------------
 
-void aura_environment_on_enter_new_thread(pthread_t thread, char* name)
+void noia_environment_on_enter_new_thread(pthread_t thread, char* name)
 {
-    aura_environment_block_system_signals();
-    aura_environment_set_thread_name(thread, name);
+    noia_environment_block_system_signals();
+    noia_environment_set_thread_name(thread, name);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_environment_async_signal_handler(int sig,
-                                           AURA_UNUSED siginfo_t* si,
-                                           AURA_UNUSED void* arg)
+void noia_environment_async_signal_handler(int sig,
+                                           NOIA_UNUSED siginfo_t* si,
+                                           NOIA_UNUSED void* arg)
 {
     switch (sig) {
         case SIGINT:
         case SIGTERM:
         case SIGSEGV:
             LOG_INFO1("Signal '%d' received asynchronously", sig);
-            aura_print_backtrace();
+            noia_print_backtrace();
             abort();
         default:
             LOG_INFO2("Unhandled signal: '%d'", sig);
@@ -76,13 +76,13 @@ void aura_environment_async_signal_handler(int sig,
 
 //------------------------------------------------------------------------------
 
-void aura_environment_signal_handler_set_up(void)
+void noia_environment_signal_handler_set_up(void)
 {
     struct sigaction sa;
     memset(&sa, 0, sizeof(struct sigaction));
     sigemptyset(&sa.sa_mask);
 
-    sa.sa_sigaction = aura_environment_async_signal_handler;
+    sa.sa_sigaction = noia_environment_async_signal_handler;
     sa.sa_flags = SA_SIGINFO;
 
     sigaction(SIGINT,  &sa, NULL);
@@ -92,22 +92,22 @@ void aura_environment_signal_handler_set_up(void)
 
 //------------------------------------------------------------------------------
 
-int aura_environment_data_path_setup(void)
+int noia_environment_data_path_setup(void)
 {
     char* data_path = getenv("XDG_DATA_HOME");
     if (!data_path) {
         data_path = "/var";
     }
 
-    aura_data_path = malloc(strlen(data_path) + sizeof(scDataDirTemplate));
-    if (!aura_data_path) {
+    noia_data_path = malloc(strlen(data_path) + sizeof(scDataDirTemplate));
+    if (!noia_data_path) {
         return -1;
     }
 
-    strcpy(aura_data_path, data_path);
-    strcat(aura_data_path, scDataDirTemplate);
+    strcpy(noia_data_path, data_path);
+    strcat(noia_data_path, scDataDirTemplate);
 
-    LOG_INFO1("Data path: '%s'", aura_data_path);
+    LOG_INFO1("Data path: '%s'", noia_data_path);
 
     // TODO: create subdirectories
 
@@ -116,7 +116,7 @@ int aura_environment_data_path_setup(void)
 
 //------------------------------------------------------------------------------
 
-int aura_environment_runtime_path_setup(void)
+int noia_environment_runtime_path_setup(void)
 {
     int result = 0;
 
@@ -125,46 +125,46 @@ int aura_environment_runtime_path_setup(void)
         runtime_path = "/tmp";
     }
 
-    char* aura_runtime_path_template =
+    char* noia_runtime_path_template =
                     malloc(strlen(runtime_path) + sizeof(scRuntimeDirTemplate));
-    if (!aura_runtime_path_template) {
+    if (!noia_runtime_path_template) {
         return -1;
     }
 
-    strcpy(aura_runtime_path_template, runtime_path);
-    strcat(aura_runtime_path_template, scRuntimeDirTemplate);
+    strcpy(noia_runtime_path_template, runtime_path);
+    strcat(noia_runtime_path_template, scRuntimeDirTemplate);
 
-    aura_runtime_path = mkdtemp(aura_runtime_path_template);
-    if (aura_runtime_path == NULL) {
+    noia_runtime_path = mkdtemp(noia_runtime_path_template);
+    if (noia_runtime_path == NULL) {
         LOG_WARN1("Failed to create runtime directory (template: %s)",
-                  aura_runtime_path_template);
+                  noia_runtime_path_template);
         result = -1;
         goto cleanup;
     }
 
-    LOG_INFO1("Runtime path: '%s'", aura_runtime_path);
+    LOG_INFO1("Runtime path: '%s'", noia_runtime_path);
     return 0;
 
 cleanup:
-    free(aura_runtime_path_template);
+    free(noia_runtime_path_template);
     return result;
 }
 
 //------------------------------------------------------------------------------
 
-int aura_environment_setup(void)
+int noia_environment_setup(void)
 {
     // Set up async signal handler
-    aura_environment_signal_handler_set_up();
+    noia_environment_signal_handler_set_up();
 
-    // Create $XDG_DATA_HOME/aura directory
-    int result1 = aura_environment_data_path_setup();
+    // Create $XDG_DATA_HOME/noia directory
+    int result1 = noia_environment_data_path_setup();
 
     // Open log file
-    aura_log_initialize();
+    noia_log_initialize();
 
-    // Create temporary $XDG_RUNTIME_DIR/aura-XXXXXX directory
-    int result2 = aura_environment_runtime_path_setup();
+    // Create temporary $XDG_RUNTIME_DIR/noia-XXXXXX directory
+    int result2 = noia_environment_runtime_path_setup();
 
     if (result1 < 0 || result2 < 0) {
         return -1;
@@ -174,35 +174,35 @@ int aura_environment_setup(void)
 
 //------------------------------------------------------------------------------
 
-void aura_environment_cleanup(void)
+void noia_environment_cleanup(void)
 {
     // TODO
 
-    if (aura_runtime_path) {
-        free(aura_runtime_path);
-        aura_runtime_path = NULL;
+    if (noia_runtime_path) {
+        free(noia_runtime_path);
+        noia_runtime_path = NULL;
     }
 
-    if (aura_data_path) {
-        free(aura_data_path);
-        aura_data_path = NULL;
+    if (noia_data_path) {
+        free(noia_data_path);
+        noia_data_path = NULL;
     }
 
-    aura_log_finalize();
+    noia_log_finalize();
 }
 
 //------------------------------------------------------------------------------
 
-int aura_environment_open_file(const char *file_name,
+int noia_environment_open_file(const char *file_name,
                                unsigned size,
-                               AuraPath path)
+                               NoiaPath path)
 {
     int fd = -1;
 
     char* base_path;
     switch (path) {
-        case RUNTIME_PATH: base_path = aura_runtime_path; break;
-        case DATA_PATH:    base_path = aura_data_path;    break;
+        case RUNTIME_PATH: base_path = noia_runtime_path; break;
+        case DATA_PATH:    base_path = noia_data_path;    break;
     }
 
     char* file_path = malloc(strlen(base_path) + strlen(file_name) + 2);

@@ -8,117 +8,117 @@
 
 #include <gtk/gtk.h>
 
-AuraWin* win;
+NoiaWin* win;
 
 //------------------------------------------------------------------------------
 
-AuraViewGroup* aura_backend_gtk_app_prepare_view_group(int n, int w, int h)
+NoiaViewGroup* noia_backend_gtk_app_prepare_view_group(int n, int w, int h)
 {
     if (!win) {
         return NULL;
     }
 
-    return aura_backend_gtk_win_prepare_view_group(win, n, w, h);
+    return noia_backend_gtk_win_prepare_view_group(win, n, w, h);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_app_discard_view_group(int n)
+void noia_backend_gtk_app_discard_view_group(int n)
 {
     if (!win) {
         return;
     }
 
-    aura_backend_gtk_win_discard_view_group(win, n);
+    noia_backend_gtk_win_discard_view_group(win, n);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_backend_gtk_app_swap_buffers(int n)
+void noia_backend_gtk_app_swap_buffers(int n)
 {
     if (!win) {
         return;
     }
 
-    aura_backend_gtk_win_swap_buffers(win, n);
+    noia_backend_gtk_win_swap_buffers(win, n);
 }
 
 //------------------------------------------------------------------------------
 
-AuraSize aura_backend_gtk_app_get_resolution(int n)
+NoiaSize noia_backend_gtk_app_get_resolution(int n)
 {
     if (!win) {
-        return (AuraSize) {-2, -2};
+        return (NoiaSize) {-2, -2};
     }
 
-    return aura_backend_gtk_win_get_resolution(win, n);
+    return noia_backend_gtk_win_get_resolution(win, n);
 }
 
 //------------------------------------------------------------------------------
 // APPLICATION
 
-struct _AuraApp
+struct _NoiaApp
 {
     GtkApplication parent;
 };
 
-struct _AuraAppClass
+struct _NoiaAppClass
 {
     GtkApplicationClass parent_class;
 };
 
-G_DEFINE_TYPE(AuraApp, aura_app, GTK_TYPE_APPLICATION)
+G_DEFINE_TYPE(NoiaApp, noia_app, GTK_TYPE_APPLICATION)
 
 //------------------------------------------------------------------------------
 
-void aura_app_init(AURA_UNUSED AuraApp* app)
+void noia_app_init(NOIA_UNUSED NoiaApp* app)
 {
 }
 
 //------------------------------------------------------------------------------
 
-void aura_app_startup(GApplication* app)
+void noia_app_startup(GApplication* app)
 {
-    G_APPLICATION_CLASS(aura_app_parent_class)->startup(app);
+    G_APPLICATION_CLASS(noia_app_parent_class)->startup(app);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_app_activate(GApplication* app)
+void noia_app_activate(GApplication* app)
 {
-    win = aura_win_new(AURA_APP(app));
+    win = noia_win_new(NOIA_APP(app));
     gtk_window_present(GTK_WINDOW(win));
 
     LOG_INFO1("GTK Backend: application activated");
 
     // Inform compositor about new outputs
-    aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
+    noia_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_app_open(AURA_UNUSED GApplication* app,
-                   AURA_UNUSED GFile** files,
-                   AURA_UNUSED gint n_files,
-                   AURA_UNUSED const gchar* hint)
+void noia_app_open(NOIA_UNUSED GApplication* app,
+                   NOIA_UNUSED GFile** files,
+                   NOIA_UNUSED gint n_files,
+                   NOIA_UNUSED const gchar* hint)
 {
 }
 
 //------------------------------------------------------------------------------
 
-void aura_app_class_init(AuraAppClass* class)
+void noia_app_class_init(NoiaAppClass* class)
 {
-    G_APPLICATION_CLASS(class)->startup = aura_app_startup;
-    G_APPLICATION_CLASS(class)->activate = aura_app_activate;
-    G_APPLICATION_CLASS(class)->open = aura_app_open;
+    G_APPLICATION_CLASS(class)->startup = noia_app_startup;
+    G_APPLICATION_CLASS(class)->activate = noia_app_activate;
+    G_APPLICATION_CLASS(class)->open = noia_app_open;
 }
 
 //------------------------------------------------------------------------------
 
-AuraApp* aura_app_new(void)
+NoiaApp* noia_app_new(void)
 {
     // TODO: use proper settings
-    return g_object_new(AURA_APP_TYPE,
+    return g_object_new(NOIA_APP_TYPE,
                         "application-id", "org.gtk.exampleapp", "flags",
                         G_APPLICATION_HANDLES_OPEN, NULL);
 }

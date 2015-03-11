@@ -23,7 +23,7 @@
 
 static const char scLogEnd[] = " | ";
 static const char scLogWelcomeText[] =
-"******************************************** AURA "
+"******************************************** NOIA "
 "*******************************************\n";
 static const char scLogGoodByeText[] =
 "**************************************************"
@@ -46,22 +46,22 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //------------------------------------------------------------------------------
 
-void aura_log_initialize(void)
+void noia_log_initialize(void)
 {
     setbuf(stdout, NULL);
-    sLogFD = aura_environment_open_file(scConfLogFile, 0, DATA_PATH);
+    sLogFD = noia_environment_open_file(scConfLogFile, 0, DATA_PATH);
     if (sLogFD == -1) {
         LOG_ERROR("Log file could not be opened!");
     } else {
         write(sLogFD, scLogWelcomeText, sizeof scLogWelcomeText - 1);
     }
     fputs(scLogWelcomeText, stdout);
-    LOG_INFO1("Build: " __TIME__ " " __DATE__ "; Version: " AURA_VERSION);
+    LOG_INFO1("Build: " __TIME__ " " __DATE__ "; Version: " NOIA_VERSION);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_log_finalize(void)
+void noia_log_finalize(void)
 {
     LOG_INFO1("Closing log file. Bye!");
     if (sLogFD != -1) {
@@ -73,7 +73,7 @@ void aura_log_finalize(void)
 
 //------------------------------------------------------------------------------
 
-void aura_log(const char* log_level,
+void noia_log(const char* log_level,
               const int   line,
               const char* file,
               const char* format,
@@ -126,7 +126,7 @@ void aura_log(const char* log_level,
 
 //------------------------------------------------------------------------------
 
-void aura_print_backtrace(void)
+void noia_print_backtrace(void)
 {
     size_t size, i, n;
     void *array[128];
@@ -166,7 +166,7 @@ void aura_print_backtrace(void)
 
 //------------------------------------------------------------------------------
 
-int aura_log_get_miliseconds(void)
+int noia_log_get_miliseconds(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);

@@ -1,8 +1,8 @@
 // file: utils-environment.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_UTILS_ENVIRONMENT_H__
-#define __AURA_UTILS_ENVIRONMENT_H__
+#ifndef __NOIA_UTILS_ENVIRONMENT_H__
+#define __NOIA_UTILS_ENVIRONMENT_H__
 
 #include "global-constants.h"
 
@@ -10,25 +10,25 @@
 #define _GNU_SOURCE
 #include <pthread.h>
 
-typedef enum AuraFilePath {
+typedef enum NoiaFilePath {
     RUNTIME_PATH,
     DATA_PATH
-} AuraPath;
+} NoiaPath;
 
-void aura_environment_block_system_signals(void);
+void noia_environment_block_system_signals(void);
 
-void aura_environment_unblock_system_signals(void);
+void noia_environment_unblock_system_signals(void);
 
-void aura_environment_set_thread_name(pthread_t, char*);
+void noia_environment_set_thread_name(pthread_t, char*);
 
-void aura_environment_on_enter_new_thread(pthread_t, char*);
+void noia_environment_on_enter_new_thread(pthread_t, char*);
 
-int aura_environment_setup(void);
+int noia_environment_setup(void);
 
-void aura_environment_cleanup(void);
+void noia_environment_cleanup(void);
 
-int aura_environment_open_file(const char *file_name,
+int noia_environment_open_file(const char *file_name,
                                unsigned size,
-                               AuraPath path);
+                               NoiaPath path);
 
-#endif // __AURA_UTILS_ENVIRONMENT_H__
+#endif // __NOIA_UTILS_ENVIRONMENT_H__

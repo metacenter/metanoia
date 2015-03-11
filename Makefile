@@ -1,4 +1,4 @@
-all: build/aura
+all: build/metanoia
 
 res/force:
 
@@ -12,75 +12,75 @@ memcheck: checks
 	@time (for c in checks/check*; do valgrind --leak-check=full --show-leak-kinds=all $$c; done)
 
 
-build/aura: Makefile \
-            build/config.o \
-            build/global-objects.o \
-            build/global-functions.o \
-            build/utils-object.o \
-            build/utils-chain.o \
-            build/utils-list.o \
-            build/utils-branch.o \
-            build/utils-store.o \
-            build/utils-dbus.o \
-            build/utils-keymap.o \
-            build/utils-log.o \
-            build/utils-environment.o \
-            build/event-dispatcher.o \
-            build/event-timer.o \
-            build/event-signals.o \
-            build/event-loop.o \
-            build/event-task.o \
-            build/event-factory.o \
-            build/renderer-mmap.o \
-            build/renderer-gl.o \
-            build/device-common.o \
-            build/device-fb.o \
-            build/device-drm.o \
-            build/device-evdev.o \
-            build/device-udev.o \
-            build/output.o \
-            build/output-collector.o \
-            build/surface-data.o \
-            build/surface-manager.o \
-            build/keyboard-functions.o \
-            build/keyboard-binding.o \
-            build/keyboard-argmand.o \
-            build/keyboard-bindings.o \
-            build/keyboard-mode.o \
-            build/exhibitor.o \
-            build/exhibitor-display.o \
-            build/exhibitor-compositor.o \
-            build/exhibitor-frame.o \
-            build/exhibitor-strategist.o \
-            build/exhibitor-pointer.o \
-            build/wayland-region.o \
-            build/wayland-surface.o \
-            build/wayland-output.o \
-            build/wayland-cache.o \
-            build/wayland-state.o \
-            build/wayland.o \
-            build/wayland-protocol-compositor.o \
-            build/wayland-protocol-surface.o \
-            build/wayland-protocol-region.o \
-            build/wayland-protocol-shell.o \
-            build/wayland-protocol-shell-surface.o \
-            build/wayland-protocol-xdg-shell.o \
-            build/wayland-protocol-xdg-surface.o \
-            build/xdg-shell-protocol.o \
-            build/wayland-protocol-output.o \
-            build/wayland-protocol-seat.o \
-            build/wayland-protocol-pointer.o \
-            build/wayland-protocol-keyboard.o \
-            build/bind-egl-wayland.o \
-            build/backend-gtk-res.o \
-            build/backend-gtk-win.o \
-            build/backend-gtk-app.o \
-            build/backend-gtk.o \
-            build/aura.o
+build/metanoia: Makefile \
+                build/config.o \
+                build/global-objects.o \
+                build/global-functions.o \
+                build/utils-object.o \
+                build/utils-chain.o \
+                build/utils-list.o \
+                build/utils-branch.o \
+                build/utils-store.o \
+                build/utils-dbus.o \
+                build/utils-keymap.o \
+                build/utils-log.o \
+                build/utils-environment.o \
+                build/event-dispatcher.o \
+                build/event-timer.o \
+                build/event-signals.o \
+                build/event-loop.o \
+                build/event-task.o \
+                build/event-factory.o \
+                build/renderer-mmap.o \
+                build/renderer-gl.o \
+                build/device-common.o \
+                build/device-fb.o \
+                build/device-drm.o \
+                build/device-evdev.o \
+                build/device-udev.o \
+                build/output.o \
+                build/output-collector.o \
+                build/surface-data.o \
+                build/surface-manager.o \
+                build/keyboard-functions.o \
+                build/keyboard-binding.o \
+                build/keyboard-argmand.o \
+                build/keyboard-bindings.o \
+                build/keyboard-mode.o \
+                build/exhibitor.o \
+                build/exhibitor-display.o \
+                build/exhibitor-compositor.o \
+                build/exhibitor-frame.o \
+                build/exhibitor-strategist.o \
+                build/exhibitor-pointer.o \
+                build/wayland-region.o \
+                build/wayland-surface.o \
+                build/wayland-output.o \
+                build/wayland-cache.o \
+                build/wayland-state.o \
+                build/wayland.o \
+                build/wayland-protocol-compositor.o \
+                build/wayland-protocol-surface.o \
+                build/wayland-protocol-region.o \
+                build/wayland-protocol-shell.o \
+                build/wayland-protocol-shell-surface.o \
+                build/wayland-protocol-xdg-shell.o \
+                build/wayland-protocol-xdg-surface.o \
+                build/xdg-shell-protocol.o \
+                build/wayland-protocol-output.o \
+                build/wayland-protocol-seat.o \
+                build/wayland-protocol-pointer.o \
+                build/wayland-protocol-keyboard.o \
+                build/bind-egl-wayland.o \
+                build/backend-gtk-res.o \
+                build/backend-gtk-win.o \
+                build/backend-gtk-app.o \
+                build/backend-gtk.o \
+                build/metanoia.o
 	@mkdir -p build
-	@echo "  LD   aura"
-	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/aura \
-	       build/config.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-argmand.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk-res.o build/backend-gtk-win.o build/backend-gtk-app.o build/backend-gtk.o build/aura.o \
+	@echo "  LD   metanoia"
+	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/metanoia \
+	       build/config.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-argmand.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk-res.o build/backend-gtk-win.o build/backend-gtk-app.o build/backend-gtk.o build/metanoia.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -ldrm -ludev -lwayland-server -lxkbcommon 
 
 gen/xdg-shell-server-protocol.h: Makefile \
@@ -96,19 +96,19 @@ gen/xdg-shell-protocol.c: Makefile \
 	@wayland-scanner code  < "res/xdg-shell.xml" > "gen/xdg-shell-protocol.c"
 
 gen/backend-gtk-res.c: Makefile \
-                       res/aura.gresource.xml \
+                       res/metanoia.gresource.xml \
                        res/backend-gtk-main.ui \
                        res/backend-gtk-menu.ui \
                        res/backend-gtk-area.ui
 	@mkdir -p gen
 	@echo "  GEN  backend-gtk-res.c"
-	@glib-compile-resources res/aura.gresource.xml --target=gen/backend-gtk-res.c --generate-source
+	@glib-compile-resources res/metanoia.gresource.xml --target=gen/backend-gtk-res.c --generate-source
 
 gen/version.h: Makefile \
                res/force
 	@mkdir -p gen
 	@echo "  GEN  version.h"
-	@desc=`git describe --always`; if ! grep -q "$$desc" gen/version.h 2> /dev/null; then echo -e "#ifndef AURA_VERSION\n#define AURA_VERSION \"$$desc\"\n#endif\n" > gen/version.h; fi
+	@desc=`git describe --always`; if ! grep -q "$$desc" gen/version.h 2> /dev/null; then echo -e "#ifndef NOIA_VERSION\n#define NOIA_VERSION \"$$desc\"\n#endif\n" > gen/version.h; fi
 
 build/config.o: Makefile \
                 src/config.c \
@@ -377,8 +377,6 @@ build/renderer-mmap.o: Makefile \
                        src/global-types.h \
                        src/utils-object.h \
                        src/surface-manager.h \
-                       src/event-loop.h \
-                       src/event-task.h \
                        src/surface-data.h \
                        src/utils-store.h \
                        src/exhibitor-compositor.h \
@@ -399,9 +397,6 @@ build/renderer-gl.o: Makefile \
                      src/global-constants.h \
                      src/global-types.h \
                      src/surface-manager.h \
-                     src/event-loop.h \
-                     src/event-task.h \
-                     src/utils-object.h \
                      src/surface-data.h \
                      src/utils-store.h \
                      src/exhibitor-compositor.h \
@@ -560,13 +555,10 @@ build/surface-data.o: Makefile \
 build/surface-manager.o: Makefile \
                          src/surface-manager.c \
                          src/surface-manager.h \
-                         src/event-loop.h \
-                         src/event-task.h \
-                         src/utils-object.h \
-                         src/global-constants.h \
-                         src/global-types.h \
                          src/surface-data.h \
+                         src/global-types.h \
                          src/utils-store.h \
+                         src/global-constants.h \
                          src/exhibitor-compositor.h \
                          src/exhibitor-frame.h \
                          src/utils-branch.h \
@@ -574,7 +566,9 @@ build/surface-manager.o: Makefile \
                          src/utils-list.h \
                          src/utils-log.h \
                          src/event-timer.h \
-                         src/event-signals.h
+                         src/event-signals.h \
+                         src/event-task.h \
+                         src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   surface-manager.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/surface-manager.o -Isrc -Igen \
@@ -725,9 +719,6 @@ build/exhibitor-compositor.o: Makefile \
                               src/global-types.h \
                               src/utils-list.h \
                               src/surface-manager.h \
-                              src/event-loop.h \
-                              src/event-task.h \
-                              src/utils-object.h \
                               src/surface-data.h \
                               src/utils-store.h \
                               src/utils-log.h
@@ -745,14 +736,13 @@ build/exhibitor-frame.o: Makefile \
                          src/global-types.h \
                          src/utils-log.h \
                          src/surface-manager.h \
-                         src/event-loop.h \
-                         src/event-task.h \
-                         src/utils-object.h \
                          src/surface-data.h \
                          src/utils-store.h \
                          src/exhibitor-compositor.h \
                          src/utils-list.h \
-                         src/event-signals.h
+                         src/event-signals.h \
+                         src/event-task.h \
+                         src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-frame.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/exhibitor-frame.o -Isrc -Igen \
@@ -885,8 +875,6 @@ build/wayland-state.o: Makefile \
                        src/wayland-region.h \
                        src/wayland-protocol-output.h \
                        src/surface-manager.h \
-                       src/event-loop.h \
-                       src/event-task.h \
                        src/surface-data.h \
                        src/exhibitor-compositor.h \
                        src/exhibitor-frame.h \
@@ -950,8 +938,6 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/renderer.h \
                                      src/utils-object.h \
                                      src/surface-manager.h \
-                                     src/event-loop.h \
-                                     src/event-task.h \
                                      src/surface-data.h \
                                      src/exhibitor-compositor.h \
                                      src/exhibitor-frame.h \
@@ -979,8 +965,6 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/renderer.h \
                                   src/utils-object.h \
                                   src/surface-manager.h \
-                                  src/event-loop.h \
-                                  src/event-task.h \
                                   src/surface-data.h \
                                   src/exhibitor-compositor.h \
                                   src/exhibitor-frame.h \
@@ -1022,6 +1006,11 @@ build/wayland-protocol-shell.o: Makefile \
                                 src/wayland-types.h \
                                 src/utils-list.h \
                                 src/utils-chain.h \
+                                src/surface-manager.h \
+                                src/surface-data.h \
+                                src/exhibitor-compositor.h \
+                                src/exhibitor-frame.h \
+                                src/utils-branch.h \
                                 src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-shell.o"
@@ -1053,6 +1042,11 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/wayland-types.h \
                                     src/utils-list.h \
                                     src/utils-chain.h \
+                                    src/surface-manager.h \
+                                    src/surface-data.h \
+                                    src/exhibitor-compositor.h \
+                                    src/exhibitor-frame.h \
+                                    src/utils-branch.h \
                                     src/utils-log.h \
                                     gen/xdg-shell-server-protocol.h
 	@mkdir -p build
@@ -1067,9 +1061,6 @@ build/wayland-protocol-xdg-surface.o: Makefile \
                                       src/global-constants.h \
                                       src/global-types.h \
                                       src/surface-manager.h \
-                                      src/event-loop.h \
-                                      src/event-task.h \
-                                      src/utils-object.h \
                                       src/surface-data.h \
                                       src/utils-store.h \
                                       src/exhibitor-compositor.h \
@@ -1135,9 +1126,18 @@ build/wayland-protocol-seat.o: Makefile \
 build/wayland-protocol-pointer.o: Makefile \
                                   src/wayland-protocol-pointer.c \
                                   src/wayland-protocol-keyboard.h \
-                                  src/utils-log.h \
+                                  src/wayland-state.h \
+                                  src/utils-store.h \
                                   src/global-constants.h \
-                                  src/global-types.h
+                                  src/global-types.h \
+                                  src/output.h \
+                                  src/renderer.h \
+                                  src/utils-list.h \
+                                  src/utils-chain.h \
+                                  src/utils-object.h \
+                                  src/wayland-surface.h \
+                                  src/wayland-types.h \
+                                  src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-pointer.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-pointer.o -Isrc -Igen \
@@ -1236,33 +1236,33 @@ build/backend-gtk.o: Makefile \
 	       -c src/backend-gtk.c \
 	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
-build/aura.o: Makefile \
-              src/aura.c \
-              src/utils-log.h \
-              src/global-constants.h \
-              src/global-types.h \
-              src/utils-dbus.h \
-              src/utils-environment.h \
-              src/event-dispatcher.h \
-              src/event-loop.h \
-              src/event-task.h \
-              src/utils-object.h \
-              src/event-signals.h \
-              src/event-factory.h \
-              src/surface-manager.h \
-              src/surface-data.h \
-              src/utils-store.h \
-              src/exhibitor-compositor.h \
-              src/exhibitor-frame.h \
-              src/utils-branch.h \
-              src/utils-chain.h \
-              src/utils-list.h \
-              src/config.h \
-              src/utils-keymap.h
+build/metanoia.o: Makefile \
+                  src/metanoia.c \
+                  src/utils-log.h \
+                  src/global-constants.h \
+                  src/global-types.h \
+                  src/utils-dbus.h \
+                  src/utils-environment.h \
+                  src/event-dispatcher.h \
+                  src/event-loop.h \
+                  src/event-task.h \
+                  src/utils-object.h \
+                  src/event-signals.h \
+                  src/event-factory.h \
+                  src/surface-manager.h \
+                  src/surface-data.h \
+                  src/utils-store.h \
+                  src/exhibitor-compositor.h \
+                  src/exhibitor-frame.h \
+                  src/utils-branch.h \
+                  src/utils-chain.h \
+                  src/utils-list.h \
+                  src/config.h \
+                  src/utils-keymap.h
 	@mkdir -p build
-	@echo "  CC   aura.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/aura.o -Isrc -Igen \
-	       -c src/aura.c
+	@echo "  CC   metanoia.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/metanoia.o -Isrc -Igen \
+	       -c src/metanoia.c
 
 checks/check-chain: Makefile \
                     tests/test-chain.c \

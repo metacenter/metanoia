@@ -8,9 +8,9 @@
 
 //------------------------------------------------------------------------------
 
-AuraArgmand* aura_argmand_new(AuraArgmandType type, int value)
+NoiaArgmand* noia_argmand_new(NoiaArgmandType type, int value)
 {
-    AuraArgmand* self = malloc(sizeof(AuraArgmand));
+    NoiaArgmand* self = malloc(sizeof(NoiaArgmand));
     if (!self) {
         LOG_ERROR("Memory allocation failed!");
         return self;
@@ -23,7 +23,7 @@ AuraArgmand* aura_argmand_new(AuraArgmandType type, int value)
 
 //------------------------------------------------------------------------------
 
-void aura_argmand_free(AuraArgmand* self)
+void noia_argmand_free(NoiaArgmand* self)
 {
     if (!self) {
         return;

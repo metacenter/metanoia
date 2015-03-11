@@ -11,8 +11,8 @@
 
 //------------------------------------------------------------------------------
 
-void aura_strategist_on_surface_ready(AuraExhibitor* exhibitor,
-                                        AuraSurfaceId sid)
+void noia_strategist_on_surface_ready(NoiaExhibitor* exhibitor,
+                                        NoiaSurfaceId sid)
 {
     if (!exhibitor || !exhibitor->display || !exhibitor->display->compositor) {
         LOG_ERROR("Invalid Exhibitor!");
@@ -20,50 +20,50 @@ void aura_strategist_on_surface_ready(AuraExhibitor* exhibitor,
     }
 
     // Put surface on current workspace on current display
-    if (aura_compositor_manage_surface(exhibitor->display->compositor, sid)) {
-        aura_list_append(exhibitor->surface_history, (void*) sid);
+    if (noia_compositor_manage_surface(exhibitor->display->compositor, sid)) {
+        noia_list_append(exhibitor->surface_history, (void*) sid);
     }
 
     /// @todo Focus changing should be done in compositor strategy.
-    aura_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
+    noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_strategist_on_surface_destroyed(AURA_UNUSED AuraExhibitor* exhibitor,
-                                          AURA_UNUSED AuraSurfaceId sid)
+void noia_strategist_on_surface_destroyed(NOIA_UNUSED NoiaExhibitor* exhibitor,
+                                          NOIA_UNUSED NoiaSurfaceId sid)
 {
     // TODO: move to compositor strategy
-    aura_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED,
+    noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED,
                                scInvalidSurfaceId);
 }
 
 //------------------------------------------------------------------------------
 
-AuraStrategist* aura_strategist_create()
+NoiaStrategist* noia_strategist_create()
 {
-    AuraStrategist* self = malloc(sizeof(AuraStrategist));
+    NoiaStrategist* self = malloc(sizeof(NoiaStrategist));
     if (!self) {
         LOG_ERROR("Could not create strategist!");
         return self;
     }
 
-    memset(self, 0, sizeof(AuraStrategist));
+    memset(self, 0, sizeof(NoiaStrategist));
 
-    self->on_surface_ready     = aura_strategist_on_surface_ready;
-    self->on_surface_destroyed = aura_strategist_on_surface_destroyed;
+    self->on_surface_ready     = noia_strategist_on_surface_ready;
+    self->on_surface_destroyed = noia_strategist_on_surface_destroyed;
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_strategist_destroy(AuraStrategist* self)
+void noia_strategist_destroy(NoiaStrategist* self)
 {
     if (!self) {
         return;
     }
 
-    memset(self, 0, sizeof(AuraStrategist));
+    memset(self, 0, sizeof(NoiaStrategist));
     free(self);
 }
 

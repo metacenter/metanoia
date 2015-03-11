@@ -5,7 +5,7 @@
 #include "wayland.h"
 #include "utils-log.h"
 
-void aura_bind_egl_wayland(AuraRendererGL* renderer)
+void noia_bind_egl_wayland(NoiaRendererGL* renderer)
 {
     LOG_INFO2("Binding EGL to Wayland...");
 

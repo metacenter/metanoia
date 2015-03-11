@@ -16,7 +16,7 @@
 //------------------------------------------------------------------------------
 // PRIVATE
 
-int aura_display_is_valid(AuraDisplay* self)
+int noia_display_is_valid(NoiaDisplay* self)
 {
     if (!self) {
         LOG_ERROR("Invalid risplay!");
@@ -48,48 +48,48 @@ int aura_display_is_valid(AuraDisplay* self)
 
 //------------------------------------------------------------------------------
 
-void aura_display_redraw_all(AuraDisplay* self)
+void noia_display_redraw_all(NoiaDisplay* self)
 {
-    AuraList* visible_surfaces =
-                         aura_compositor_get_visible_surfaces(self->compositor);
+    NoiaList* visible_surfaces =
+                         noia_compositor_get_visible_surfaces(self->compositor);
 
-    AuraPosition pos = aura_exhibitor_pointer_get_position();
+    NoiaPosition pos = noia_exhibitor_pointer_get_position();
 
     self->output->renderer->draw(self->output->renderer, visible_surfaces,
-                                pos.x, pos.y, aura_exhibitor_pointer_get_sid());
+                                pos.x, pos.y, noia_exhibitor_pointer_get_sid());
 
-    aura_exhibitor_pointer_update_hover_state(visible_surfaces);
+    noia_exhibitor_pointer_update_hover_state(visible_surfaces);
 
     // TODO: pass as list
     if (visible_surfaces) {
         FOR_EACH (visible_surfaces, link) {
-            AuraSurfaceId sid = (AuraSurfaceId) link->data;
-            aura_event_signal_emit_int(SIGNAL_SCREEN_REFRESH, sid);
+            NoiaSurfaceId sid = (NoiaSurfaceId) link->data;
+            noia_event_signal_emit_int(SIGNAL_SCREEN_REFRESH, sid);
         }
     }
 
-    aura_list_free(visible_surfaces);
+    noia_list_free(visible_surfaces);
 }
 
 //------------------------------------------------------------------------------
 
-void* aura_display_thread_loop(void* data)
+void* noia_display_thread_loop(void* data)
 {
-    AuraDisplay* self = (AuraDisplay*) data;
-    if (!aura_display_is_valid(self)) {
+    NoiaDisplay* self = (NoiaDisplay*) data;
+    if (!noia_display_is_valid(self)) {
         return NULL;
     }
 
-    char* name = "aura@";
-    aura_environment_on_enter_new_thread(self->thread, name);
+    char* name = "noia@";
+    noia_environment_on_enter_new_thread(self->thread, name);
     LOG_INFO1("Threads: starting display loop '%s'", name);
 
     self->run = 1;
     while (self->run) {
-        aura_surface_lock();
-        aura_display_redraw_all(self);
-        aura_surface_unlock();
-        aura_event_timer_nanosleep(100 * 1000000);
+        noia_surface_lock();
+        noia_display_redraw_all(self);
+        noia_surface_unlock();
+        noia_event_timer_nanosleep(100 * 1000000);
     }
 
     LOG_INFO1("Threads: stopped display loop '%s'", name);
@@ -99,24 +99,24 @@ void* aura_display_thread_loop(void* data)
 //------------------------------------------------------------------------------
 // PUBLIC
 
-AuraDisplay* aura_display_new(AuraOutput* output)
+NoiaDisplay* noia_display_new(NoiaOutput* output)
 {
-    AuraDisplay* self = malloc(sizeof(AuraDisplay));
+    NoiaDisplay* self = malloc(sizeof(NoiaDisplay));
     if (!self) {
         LOG_ERROR("Could not create new display!");
         return self;
     }
 
     self->output = output;
-    self->compositor = aura_compositor_new();
-    self->compositors = aura_list_new((AuraFreeFunc) aura_compositor_free);
-    aura_list_append(self->compositors, self->compositor);
+    self->compositor = noia_compositor_new();
+    self->compositors = noia_list_new((NoiaFreeFunc) noia_compositor_free);
+    noia_list_append(self->compositors, self->compositor);
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_display_free(AuraDisplay* self)
+void noia_display_free(NoiaDisplay* self)
 {
     if (!self) {
         return;
@@ -127,27 +127,27 @@ void aura_display_free(AuraDisplay* self)
         return;
     }
 
-    aura_object_unref((AuraObject*) self->output);
-    aura_list_free(self->compositors);
+    noia_object_unref((NoiaObject*) self->output);
+    noia_list_free(self->compositors);
 
-    memset(self, 0, sizeof(AuraDisplay));
+    memset(self, 0, sizeof(NoiaDisplay));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-int aura_display_start(AuraDisplay* self)
+int noia_display_start(NoiaDisplay* self)
 {
     if (!self) {
         return -1;
     }
 
-    return pthread_create(&self->thread, NULL, aura_display_thread_loop, self);
+    return pthread_create(&self->thread, NULL, noia_display_thread_loop, self);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_display_stop(AuraDisplay* self)
+void noia_display_stop(NoiaDisplay* self)
 {
     if (!self) {
         return;
@@ -158,12 +158,12 @@ void aura_display_stop(AuraDisplay* self)
 
 //------------------------------------------------------------------------------
 
-void aura_display_command_position(AuraDisplay* self,
-                                   AuraArgmandType type,
-                                   AuraArgmandType direction,
+void noia_display_command_position(NoiaDisplay* self,
+                                   NoiaArgmandType type,
+                                   NoiaArgmandType direction,
                                    int position)
 {
-    aura_compositor_command_position(self->compositor,
+    noia_compositor_command_position(self->compositor,
                                      type, direction, position);
 }
 

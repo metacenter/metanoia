@@ -1,50 +1,50 @@
 // file: event-dispatcher.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_EVENT_DISPATCHER_H__
-#define __AURA_EVENT_DISPATCHER_H__
+#ifndef __NOIA_EVENT_DISPATCHER_H__
+#define __NOIA_EVENT_DISPATCHER_H__
 
 #include <sys/epoll.h>
 
-typedef struct AuraEventData AuraEventData;
-typedef struct AuraEventDispatcherPriv AuraEventDispatcher;
+typedef struct NoiaEventData NoiaEventData;
+typedef struct NoiaEventDispatcherPriv NoiaEventDispatcher;
 
-typedef void (*AuraEventHandler) (AuraEventData*, struct epoll_event*);
-typedef void (*AuraEventExitHandler) (AuraEventData*);
+typedef void (*NoiaEventHandler) (NoiaEventData*, struct epoll_event*);
+typedef void (*NoiaEventExitHandler) (NoiaEventData*);
 
-/// @todo Mode AuraEventData to separate file and change name.
-struct AuraEventData {
+/// @todo Mode NoiaEventData to separate file and change name.
+struct NoiaEventData {
     int fd;
-    AuraEventHandler handler;
-    AuraEventExitHandler exit;
+    NoiaEventHandler handler;
+    NoiaEventExitHandler exit;
     uint32_t flags;
     void* data;
 };
 
-AuraEventData* aura_event_data_create(int fd,
-                                      AuraEventHandler handler,
-                                      AuraEventExitHandler exit,
+NoiaEventData* noia_event_data_create(int fd,
+                                      NoiaEventHandler handler,
+                                      NoiaEventExitHandler exit,
                                       uint32_t flags,
                                       void* data);
 
 /// Does not free stored data!
-void aura_event_data_destroy(AuraEventData* event_data);
+void noia_event_data_destroy(NoiaEventData* event_data);
 
-AuraEventDispatcher* aura_event_dispatcher_new(void);
-void aura_event_dispatcher_free(AuraEventDispatcher* self);
+NoiaEventDispatcher* noia_event_dispatcher_new(void);
+void noia_event_dispatcher_free(NoiaEventDispatcher* self);
 
-int aura_event_dispatcher_is_running(AuraEventDispatcher* self);
+int noia_event_dispatcher_is_running(NoiaEventDispatcher* self);
 
-int aura_event_dispatcher_initialize(AuraEventDispatcher* self);
+int noia_event_dispatcher_initialize(NoiaEventDispatcher* self);
 
-int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
-                                           AuraEventData* data);
+int noia_event_dispatcher_add_event_source(NoiaEventDispatcher* self,
+                                           NoiaEventData* data);
 
-void aura_event_dispatcher_start(AuraEventDispatcher* self);
-void aura_event_dispatcher_stop(AuraEventDispatcher* self);
+void noia_event_dispatcher_start(NoiaEventDispatcher* self);
+void noia_event_dispatcher_stop(NoiaEventDispatcher* self);
 
-void aura_event_dispatcher_default_signal_handler(AuraEventData* data,
+void noia_event_dispatcher_default_signal_handler(NoiaEventData* data,
                                                   struct epoll_event* event);
 
-#endif // __AURA_EVENT_DISPATCHER_H__
+#endif // __NOIA_EVENT_DISPATCHER_H__
 

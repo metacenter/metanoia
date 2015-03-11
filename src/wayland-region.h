@@ -1,24 +1,24 @@
 // file: wayland-region.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_WAYLAND_REGION_H__
-#define __AURA_WAYLAND_REGION_H__
+#ifndef __NOIA_WAYLAND_REGION_H__
+#define __NOIA_WAYLAND_REGION_H__
 
 #include "global-types.h"
 
 typedef struct {
-    AuraItem base;
-    AuraPosition pos;
-    AuraSize size;
-} AuraWaylandRegion;
+    NoiaItem base;
+    NoiaPosition pos;
+    NoiaSize size;
+} NoiaWaylandRegion;
 
-AuraWaylandRegion* aura_wayland_region_new(void);
+NoiaWaylandRegion* noia_wayland_region_new(void);
 
-void aura_wayland_region_free(AuraWaylandRegion* self);
+void noia_wayland_region_free(NoiaWaylandRegion* self);
 
-void aura_wayland_region_inflate(AuraWaylandRegion* self,
+void noia_wayland_region_inflate(NoiaWaylandRegion* self,
                                  int x, int y,
                                  int width, int height);
 
-#endif // __AURA_WAYLAND_REGION_H__
+#endif // __NOIA_WAYLAND_REGION_H__
 

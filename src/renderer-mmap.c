@@ -13,7 +13,7 @@
 //------------------------------------------------------------------------------
 
 typedef struct {
-    AuraRenderer base;
+    NoiaRenderer base;
     int height;
     int width;
     int front;
@@ -21,26 +21,26 @@ typedef struct {
         int stride;
         uint8_t* data;
     } buffer[2];
-    AuraOutput* output;
-} AuraRendererMMap;
+    NoiaOutput* output;
+} NoiaRendererMMap;
 
 //------------------------------------------------------------------------------
 
-int aura_renderer_mmap_initialize(AURA_UNUSED AuraRenderer* self)
+int noia_renderer_mmap_initialize(NOIA_UNUSED NoiaRenderer* self)
 {
     return 1;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_finalize(AURA_UNUSED AuraRenderer* self)
+void noia_renderer_mmap_finalize(NOIA_UNUSED NoiaRenderer* self)
 {
     return;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
+void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine)
 {
     int current_buffer = mine->front ^ 1;
     uint8_t* D = mine->buffer[current_buffer].data;
@@ -73,10 +73,10 @@ void aura_renderer_mmap_draw_bg_image(AuraRendererMMap* mine)
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_draw_surface(AuraRendererMMap* mine,
-                                     AuraSurfaceId sid)
+void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
+                                     NoiaSurfaceId sid)
 {
-    AuraSurfaceData* surface = aura_surface_get(sid);
+    NoiaSurfaceData* surface = noia_surface_get(sid);
     if (!surface) {
         return;
     }
@@ -114,8 +114,8 @@ void aura_renderer_mmap_draw_surface(AuraRendererMMap* mine,
 //------------------------------------------------------------------------------
 
 // NOTE: MMap renderer can not display surfaces passed trouhgt GPU
-void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
-                                      AuraList* surfaces)
+void noia_renderer_mmap_draw_surfaces(NoiaRendererMMap* mine,
+                                      NoiaList* surfaces)
 {
     if (surfaces == NULL) {
         LOG_WARN4("MMap renderer: no surfaces!");
@@ -123,18 +123,18 @@ void aura_renderer_mmap_draw_surfaces(AuraRendererMMap* mine,
     }
 
     FOR_EACH (surfaces, link) {
-        aura_renderer_mmap_draw_surface(mine, (AuraSurfaceId) link->data);
+        noia_renderer_mmap_draw_surface(mine, (NoiaSurfaceId) link->data);
     }
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_draw_pointer(AuraRendererMMap* mine,
+void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
                                      int X, int Y,
-                                     AURA_UNUSED AuraSurfaceId cursor_sid)
+                                     NOIA_UNUSED NoiaSurfaceId cursor_sid)
 {
     if (cursor_sid != scInvalidSurfaceId) {
-        aura_renderer_mmap_draw_surface(mine, cursor_sid);
+        noia_renderer_mmap_draw_surface(mine, cursor_sid);
     } else {
         int x, y, w = 15, h = 15;
         int current_buffer = mine->front ^ 1;
@@ -155,7 +155,7 @@ void aura_renderer_mmap_draw_pointer(AuraRendererMMap* mine,
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_swap_buffers(AuraRendererMMap* mine)
+void noia_renderer_mmap_swap_buffers(NoiaRendererMMap* mine)
 {
     int ok = 1;
     int new_front = mine->front ^ 1;
@@ -178,26 +178,26 @@ void aura_renderer_mmap_swap_buffers(AuraRendererMMap* mine)
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_draw(AuraRenderer* self,
-                             AuraList* surfaces,
+void noia_renderer_mmap_draw(NoiaRenderer* self,
+                             NoiaList* surfaces,
                              int x, int y,
-                             AuraSurfaceId cursor_sid)
+                             NoiaSurfaceId cursor_sid)
 {
-    AuraRendererMMap* mine = (AuraRendererMMap*) self;
+    NoiaRendererMMap* mine = (NoiaRendererMMap*) self;
     if (!mine) {
         LOG_ERROR("Invalid renderer!");
         return;
     }
 
-    aura_renderer_mmap_draw_bg_image(mine);
-    aura_renderer_mmap_draw_surfaces(mine, surfaces);
-    aura_renderer_mmap_draw_pointer(mine, x, y, cursor_sid);
-    aura_renderer_mmap_swap_buffers(mine);
+    noia_renderer_mmap_draw_bg_image(mine);
+    noia_renderer_mmap_draw_surfaces(mine, surfaces);
+    noia_renderer_mmap_draw_pointer(mine, x, y, cursor_sid);
+    noia_renderer_mmap_swap_buffers(mine);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_free(AuraRenderer* self)
+void noia_renderer_mmap_free(NoiaRenderer* self)
 {
     if (self) {
         free(self);
@@ -206,21 +206,21 @@ void aura_renderer_mmap_free(AuraRenderer* self)
 
 //------------------------------------------------------------------------------
 
-AuraRenderer* aura_renderer_mmap_create(AuraOutput* output,
+NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output,
                                         int width, int height)
 {
-    AuraRendererMMap* mine = malloc(sizeof(AuraRendererMMap));
+    NoiaRendererMMap* mine = malloc(sizeof(NoiaRendererMMap));
     if (!mine) {
         return NULL;
     }
 
-    memset(mine, 0, sizeof(AuraRendererMMap));
+    memset(mine, 0, sizeof(NoiaRendererMMap));
 
-    mine->base.initialize = aura_renderer_mmap_initialize;
-    mine->base.finalize   = aura_renderer_mmap_finalize;
+    mine->base.initialize = noia_renderer_mmap_initialize;
+    mine->base.finalize   = noia_renderer_mmap_finalize;
     mine->base.attach     = NULL; // TODO
-    mine->base.draw       = aura_renderer_mmap_draw;
-    mine->base.free       = aura_renderer_mmap_free;
+    mine->base.draw       = noia_renderer_mmap_draw;
+    mine->base.free       = noia_renderer_mmap_free;
 
     mine->width = width;
     mine->height = height;
@@ -231,17 +231,17 @@ AuraRenderer* aura_renderer_mmap_create(AuraOutput* output,
     mine->buffer[1].stride = width;
     mine->output = output;
 
-    return (AuraRenderer*) mine;
+    return (NoiaRenderer*) mine;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_renderer_mmap_set_buffer(AuraRenderer* self,
+void noia_renderer_mmap_set_buffer(NoiaRenderer* self,
                                    int num,
                                    uint8_t* data,
                                    int stride)
 {
-    AuraRendererMMap* mine = (AuraRendererMMap*) self;
+    NoiaRendererMMap* mine = (NoiaRendererMMap*) self;
     if (!mine) {
         return;
     }

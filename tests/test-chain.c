@@ -8,18 +8,18 @@
 
 //------------------------------------------------------------------------------
 
-void aura_test_free_link_with_str(void* data)
+void noia_test_free_link_with_str(void* data)
 {
     link_destroy((Link*) data, free);
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_adjoin_and_prejoin_links()
+NoiaTestResult should_adjoin_and_prejoin_links()
 {
     char* a[] = {"4", "2", "1", "3"};
 
-    Chain* ch = chain_new(aura_test_free_link_with_str);
+    Chain* ch = chain_new(noia_test_free_link_with_str);
     chain_adjoin (ch, link_new(strdup("1")));
     chain_prejoin(ch, link_new(strdup("2")));
     chain_adjoin (ch, link_new(strdup("3")));
@@ -27,16 +27,16 @@ AuraTestResult should_adjoin_and_prejoin_links()
 
     ASSERT_CHAIN(ch, a);
     chain_free(ch);
-    return AURA_TEST_SUCCESS;
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_unjoin_from_begining()
+NoiaTestResult should_unjoin_from_begining()
 {
     char* a[] = {"2", "3"};
 
-    Chain* ch = chain_new(aura_test_free_link_with_str);
+    Chain* ch = chain_new(noia_test_free_link_with_str);
     chain_adjoin(ch, link_new(strdup("1")));
     chain_adjoin(ch, link_new(strdup("2")));
     chain_adjoin(ch, link_new(strdup("3")));
@@ -47,16 +47,16 @@ AuraTestResult should_unjoin_from_begining()
     ASSERT_CHAIN(ch, a);
     link_destroy(link, free);
     chain_free(ch);
-    return AURA_TEST_SUCCESS;
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_unjoin_from_end()
+NoiaTestResult should_unjoin_from_end()
 {
     char* a[] = {"1", "2"};
 
-    Chain* ch = chain_new(aura_test_free_link_with_str);
+    Chain* ch = chain_new(noia_test_free_link_with_str);
     chain_adjoin(ch, link_new(strdup("1")));
     chain_adjoin(ch, link_new(strdup("2")));
     chain_adjoin(ch, link_new(strdup("3")));
@@ -67,16 +67,16 @@ AuraTestResult should_unjoin_from_end()
     ASSERT_CHAIN(ch, a);
     link_destroy(link, free);
     chain_free(ch);
-    return AURA_TEST_SUCCESS;
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_unjoin_from_inside()
+NoiaTestResult should_unjoin_from_inside()
 {
     char* a[] = {"1", "3"};
 
-    Chain* ch = chain_new(aura_test_free_link_with_str);
+    Chain* ch = chain_new(noia_test_free_link_with_str);
     chain_adjoin(ch, link_new(strdup("1")));
     chain_adjoin(ch, link_new(strdup("2")));
     chain_adjoin(ch, link_new(strdup("3")));
@@ -87,16 +87,16 @@ AuraTestResult should_unjoin_from_inside()
     ASSERT_CHAIN(ch, a);
     link_destroy(link, free);
     chain_free(ch);
-    return AURA_TEST_SUCCESS;
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-AuraTestResult should_rejoin_without_cicles()
+NoiaTestResult should_rejoin_without_cicles()
 {
     char* a[] = {"2", "1"};
 
-    Chain* ch = chain_new(aura_test_free_link_with_str);
+    Chain* ch = chain_new(noia_test_free_link_with_str);
     chain_adjoin(ch, link_new(strdup("1")));
     chain_adjoin(ch, link_new(strdup("2")));
 
@@ -106,22 +106,22 @@ AuraTestResult should_rejoin_without_cicles()
 
     ASSERT_CHAIN(ch, a);
     chain_free(ch);
-    return AURA_TEST_SUCCESS;
+    return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
 int main()
 {
-    AuraTest test[] = {
-            AURA_TEST(should_adjoin_and_prejoin_links),
-            AURA_TEST(should_unjoin_from_begining),
-            AURA_TEST(should_unjoin_from_end),
-            AURA_TEST(should_unjoin_from_inside),
-            AURA_TEST(should_rejoin_without_cicles)
+    NoiaTest test[] = {
+            NOIA_TEST(should_adjoin_and_prejoin_links),
+            NOIA_TEST(should_unjoin_from_begining),
+            NOIA_TEST(should_unjoin_from_end),
+            NOIA_TEST(should_unjoin_from_inside),
+            NOIA_TEST(should_rejoin_without_cicles)
         };
 
-    return aura_test_run("Chain", test, AURA_NUM_TESTS(test));
+    return noia_test_run("Chain", test, NOIA_NUM_TESTS(test));
 }
 
 //------------------------------------------------------------------------------

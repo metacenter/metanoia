@@ -12,20 +12,20 @@
 #define _GNU_SOURCE
 #include <search.h>
 
-struct AuraStorePriv {
+struct NoiaStorePriv {
     void* root;
-    AuraStoreValueCompareFunc compare_value;
-    AuraStoreKeyFreeFunc free_key;
+    NoiaStoreValueCompareFunc compare_value;
+    NoiaStoreKeyFreeFunc free_key;
     pthread_mutex_t mutex;
 };
 
 //------------------------------------------------------------------------------
 
-/// Compare two AuraItems using identifies.
-int aura_store_id_compare(const void* data1, const void* data2)
+/// Compare two NoiaItems using identifies.
+int noia_store_id_compare(const void* data1, const void* data2)
 {
-    AuraItemId id1 = ((AuraItem*) data1)->id;
-    AuraItemId id2 = ((AuraItem*) data2)->id;
+    NoiaItemId id1 = ((NoiaItem*) data1)->id;
+    NoiaItemId id2 = ((NoiaItem*) data2)->id;
 
     if (id1 < id2) return -1;
     if (id1 > id2) return  1;
@@ -34,27 +34,27 @@ int aura_store_id_compare(const void* data1, const void* data2)
 
 //------------------------------------------------------------------------------
 
-/// Compare two AuraItems using strings.
-int aura_store_str_compare(const void* data1, const void* data2)
+/// Compare two NoiaItems using strings.
+int noia_store_str_compare(const void* data1, const void* data2)
 {
-    char* str1 = ((AuraItem*) data1)->str;
-    char* str2 = ((AuraItem*) data2)->str;
+    char* str1 = ((NoiaItem*) data1)->str;
+    char* str2 = ((NoiaItem*) data2)->str;
     return strcmp(str1, str2);
 }
 
 //------------------------------------------------------------------------------
 
 /// Tree destroy action used to free duplicated id-keys when freeing store.
-void aura_store_destroy_id_key(AURA_UNUSED void* data)
+void noia_store_destroy_id_key(NOIA_UNUSED void* data)
 {
 }
 
 //------------------------------------------------------------------------------
 
 /// Tree destroy action used to free duplicated string-keys when freeing store.
-void aura_store_destroy_string_key(void* data)
+void noia_store_destroy_string_key(void* data)
 {
-    AuraItem* item = (AuraItem*) data;
+    NoiaItem* item = (NoiaItem*) data;
     if (item && item->str) {
         free(item->str);
     }
@@ -62,11 +62,11 @@ void aura_store_destroy_string_key(void* data)
 
 //------------------------------------------------------------------------------
 
-/// Allocate memory for new AuraStore with arbitrary compare function.
-AuraStore* aura_store_new(AuraStoreValueCompareFunc value_compare_func,
-                          AuraStoreKeyFreeFunc key_free_func)
+/// Allocate memory for new NoiaStore with arbitrary compare function.
+NoiaStore* noia_store_new(NoiaStoreValueCompareFunc value_compare_func,
+                          NoiaStoreKeyFreeFunc key_free_func)
 {
-    AuraStore* self = malloc(sizeof(AuraStore));
+    NoiaStore* self = malloc(sizeof(NoiaStore));
     if (!self) {
         return NULL;
     }
@@ -80,25 +80,25 @@ AuraStore* aura_store_new(AuraStoreValueCompareFunc value_compare_func,
 
 //------------------------------------------------------------------------------
 
-/// Allocate memory for new AuraStore that uses IDs to distinguish items.
-AuraStore* aura_store_new_for_id()
+/// Allocate memory for new NoiaStore that uses IDs to distinguish items.
+NoiaStore* noia_store_new_for_id()
 {
-    return aura_store_new(aura_store_id_compare, aura_store_destroy_id_key);
+    return noia_store_new(noia_store_id_compare, noia_store_destroy_id_key);
 }
 
 //------------------------------------------------------------------------------
 
-/// Allocate memory for new AuraStore that uses strings to distinguish items.
-AuraStore* aura_store_new_for_str()
+/// Allocate memory for new NoiaStore that uses strings to distinguish items.
+NoiaStore* noia_store_new_for_str()
 {
-    return aura_store_new(aura_store_str_compare,
-                          aura_store_destroy_string_key);
+    return noia_store_new(noia_store_str_compare,
+                          noia_store_destroy_string_key);
 }
 
 //------------------------------------------------------------------------------
 
 /// Free store without freeing stored items.
-void aura_store_free(AuraStore* self)
+void noia_store_free(NoiaStore* self)
 {
     if (!self) {
         return;
@@ -109,7 +109,7 @@ void aura_store_free(AuraStore* self)
         tdestroy(self->root, self->free_key);
     }
     pthread_mutex_unlock(&self->mutex);
-    memset(self, 0, sizeof(AuraStore));
+    memset(self, 0, sizeof(NoiaStore));
     free(self);
 }
 
@@ -118,7 +118,7 @@ void aura_store_free(AuraStore* self)
 #include "utils-log.h"
 
 /// Free store and stored items.
-void aura_store_free_with_items(AuraStore* self, AuraFreeFunc free_func)
+void noia_store_free_with_items(NoiaStore* self, NoiaFreeFunc free_func)
 {
     if (!self) {
         return;
@@ -129,23 +129,23 @@ void aura_store_free_with_items(AuraStore* self, AuraFreeFunc free_func)
         tdestroy(self->root, free_func);
     }
     pthread_mutex_unlock(&self->mutex);
-    memset(self, 0, sizeof(AuraStore));
+    memset(self, 0, sizeof(NoiaStore));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
 /// Generate new ID that is not yet present in store.
-AuraItemId aura_store_generate_new_id(AuraStore* self)
+NoiaItemId noia_store_generate_new_id(NoiaStore* self)
 {
     if (!self) {
         return scInvalidItemId;
     }
 
     pthread_mutex_lock(&self->mutex);
-    AuraItem item;
+    NoiaItem item;
     do {
-        item.id = (AuraItemId) rand();
+        item.id = (NoiaItemId) rand();
     } while (item.id == scInvalidItemId
           || tfind((void *) &item, &self->root, self->compare_value) != NULL);
 
@@ -158,21 +158,21 @@ AuraItemId aura_store_generate_new_id(AuraStore* self)
 /// Store item using ID.
 /// @param key - ID used as a key
 /// @param data - item to be stored
-AuraResult aura_store_add_with_id(AuraStore* self, AuraItemId key, void* data)
+NoiaResult noia_store_add_with_id(NoiaStore* self, NoiaItemId key, void* data)
 {
     if (!self) {
-        return AURA_RESULT_INCORRECT_ARGUMENT;
+        return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
-    AuraItem* item = (AuraItem*) data;
+    NoiaItem* item = (NoiaItem*) data;
     item->id = key;
 
     pthread_mutex_lock(&self->mutex);
     if (tsearch(item, &self->root, self->compare_value) == NULL) {
-        return AURA_RESULT_NOT_FOUND;
+        return NOIA_RESULT_NOT_FOUND;
     }
     pthread_mutex_unlock(&self->mutex);
-    return AURA_RESULT_SUCCESS;
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -181,28 +181,28 @@ AuraResult aura_store_add_with_id(AuraStore* self, AuraItemId key, void* data)
 /// The string used as a key is duplicated.
 /// @param key - string used as a key
 /// @param data - item to be stored
-AuraResult aura_store_add_with_str(AuraStore* self, char* key, void* data)
+NoiaResult noia_store_add_with_str(NoiaStore* self, char* key, void* data)
 {
     if (!self) {
-        return AURA_RESULT_INCORRECT_ARGUMENT;
+        return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
-    AuraItem* item = (AuraItem*) data;
+    NoiaItem* item = (NoiaItem*) data;
     item->str = strdup(key);
 
     pthread_mutex_lock(&self->mutex);
     if (tsearch(item, &self->root, self->compare_value) == NULL) {
-        return AURA_RESULT_NOT_FOUND;
+        return NOIA_RESULT_NOT_FOUND;
     }
     pthread_mutex_unlock(&self->mutex);
-    return AURA_RESULT_SUCCESS;
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-#define aura_store_find_template(KEYTYPE) \
+#define noia_store_find_template(KEYTYPE) \
     if (!self) { return NULL; } \
-    AuraItem item; item.KEYTYPE = key; \
+    NoiaItem item; item.KEYTYPE = key; \
     pthread_mutex_lock(&self->mutex); \
     void** result = tfind((void*) &item, &self->root, self->compare_value); \
     pthread_mutex_unlock(&self->mutex); \
@@ -214,9 +214,9 @@ AuraResult aura_store_add_with_str(AuraStore* self, char* key, void* data)
 /// Store item using ID.
 /// @param key - ID used to reference an item
 /// @return pointer to found item or null if nothing found
-void* aura_store_find_with_id(AuraStore* self, AuraItemId key)
+void* noia_store_find_with_id(NoiaStore* self, NoiaItemId key)
 {
-    aura_store_find_template(id);
+    noia_store_find_template(id);
 }
 
 //------------------------------------------------------------------------------
@@ -224,9 +224,9 @@ void* aura_store_find_with_id(AuraStore* self, AuraItemId key)
 /// Store item using string.
 /// @param key - string used to reference an item
 /// @return pointer to found item or null if nothing found
-void* aura_store_find_with_str(AuraStore* self, char* key)
+void* noia_store_find_with_str(NoiaStore* self, char* key)
 {
-    aura_store_find_template(str);
+    noia_store_find_template(str);
 }
 
 //------------------------------------------------------------------------------
@@ -234,13 +234,13 @@ void* aura_store_find_with_str(AuraStore* self, char* key)
 /// Delete an item using ID.
 /// @param key - ID used to reference an item
 /// @return pointer to found item or null if nothing found
-void* aura_store_delete_with_id(AuraStore* self, AuraItemId key)
+void* noia_store_delete_with_id(NoiaStore* self, NoiaItemId key)
 {
     if (!self) {
         return NULL;
     }
 
-    AuraItem* item = aura_store_find(self, key);
+    NoiaItem* item = noia_store_find(self, key);
     pthread_mutex_lock(&self->mutex);
     if (tdelete(item, &self->root, self->compare_value) == NULL) {
         return NULL;
@@ -254,13 +254,13 @@ void* aura_store_delete_with_id(AuraStore* self, AuraItemId key)
 /// Delete an item using string.
 /// @param key - string used to reference an item
 /// @return pointer to found item or null if nothing found
-void* aura_store_delete_with_str(AuraStore* self, char* key)
+void* noia_store_delete_with_str(NoiaStore* self, char* key)
 {
     if (!self) {
         return NULL;
     }
 
-    AuraItem* item = aura_store_find(self, key);
+    NoiaItem* item = noia_store_find(self, key);
     pthread_mutex_lock(&self->mutex);
     if (tdelete(item, &self->root, self->compare_value) == NULL) {
         return NULL;

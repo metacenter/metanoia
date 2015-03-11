@@ -1,27 +1,27 @@
 // file: keyboard-mode.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_KEYBOARD_MODE_H__
-#define __AURA_KEYBOARD_MODE_H__
+#ifndef __NOIA_KEYBOARD_MODE_H__
+#define __NOIA_KEYBOARD_MODE_H__
 
 #include "keyboard-binding.h"
 #include "global-constants.h"
 
 typedef struct {
-    AuraModeEnum modeid;
+    NoiaModeEnum modeid;
     void* bindings;
     int active;
-} AuraMode;
+} NoiaMode;
 
-AuraMode* aura_mode_new(AuraModeEnum modeid);
+NoiaMode* noia_mode_new(NoiaModeEnum modeid);
 
-void aura_mode_free(AuraMode* self);
+void noia_mode_free(NoiaMode* self);
 
-void aura_mode_add_binding(AuraMode* self, const AuraBinding* binding);
+void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding);
 
-AuraBinding* aura_mode_find_binding(AuraMode* self,
+NoiaBinding* noia_mode_find_binding(NoiaMode* self,
                                     int code,
-                                    uint32_t Auramodifiers);
+                                    uint32_t Noiamodifiers);
 
-#endif // __AURA_KEYBOARD_MODE_H__
+#endif // __NOIA_KEYBOARD_MODE_H__
 

@@ -6,7 +6,7 @@
 //------------------------------------------------------------------------------
 
 /// Initialize object by setting free function and zeroing reference count.
-void aura_object_initialize(AuraObject* self, AuraFreeFunc free)
+void noia_object_initialize(NoiaObject* self, NoiaFreeFunc free)
 {
     if (!self) {
         return;
@@ -19,7 +19,7 @@ void aura_object_initialize(AuraObject* self, AuraFreeFunc free)
 //------------------------------------------------------------------------------
 
 /// Increase reference count by one.
-void aura_object_ref(AuraObject* self)
+void noia_object_ref(NoiaObject* self)
 {
     if (!self) {
         return;
@@ -31,7 +31,7 @@ void aura_object_ref(AuraObject* self)
 //------------------------------------------------------------------------------
 
 /// Decrease reference count by one and free object if nothing references it.
-void aura_object_unref(AuraObject* self)
+void noia_object_unref(NoiaObject* self)
 {
     if (!self) {
         return;

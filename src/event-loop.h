@@ -1,23 +1,23 @@
 // file: event-loop.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_EVENT_LOOP_H__
-#define __AURA_EVENT_LOOP_H__
+#ifndef __NOIA_EVENT_LOOP_H__
+#define __NOIA_EVENT_LOOP_H__
 
 #include "event-task.h"
 
-AuraLoop* aura_loop_new(const char* name);
+NoiaLoop* noia_loop_new(const char* name);
 
-void aura_loop_free(AuraLoop* loop);
+void noia_loop_free(NoiaLoop* loop);
 
-int aura_loop_run(AuraLoop* loop);
+int noia_loop_run(NoiaLoop* loop);
 
-void aura_loop_stop(AuraLoop* loop);
+void noia_loop_stop(NoiaLoop* loop);
 
-void aura_loop_join(AuraLoop* loop);
+void noia_loop_join(NoiaLoop* loop);
 
-int aura_loop_schedule_task(AuraLoop* loop, AuraTask* task);
+int noia_loop_schedule_task(NoiaLoop* loop, NoiaTask* task);
 
-void aura_loop_add_finalizer(AuraLoop* self, AuraTaskProcessor finalizer);
+void noia_loop_add_finalizer(NoiaLoop* self, NoiaTaskProcessor finalizer);
 
-#endif // __AURA_EVENT_LOOP_H__
+#endif // __NOIA_EVENT_LOOP_H__

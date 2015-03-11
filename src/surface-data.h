@@ -1,8 +1,8 @@
 // file: surface-data.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_SURFACE_DATA_H__
-#define __AURA_SURFACE_DATA_H__
+#ifndef __NOIA_SURFACE_DATA_H__
+#define __NOIA_SURFACE_DATA_H__
 
 #include "global-types.h"
 #include "utils-store.h"
@@ -21,27 +21,27 @@ typedef struct {
     uint8_t* data;
     GLuint texture;
     EGLImageKHR image;
-} AuraDrawBuffer;
+} NoiaDrawBuffer;
 
 typedef struct {
-    AuraCompositor* compositor;
-} AuraSurfaceGroup;
+    NoiaCompositor* compositor;
+} NoiaSurfaceGroup;
 
 /// Container for all data related to single surface.
 typedef struct {
-    AuraItem base;
-    AuraPosition position; ///< Position on screen
-    AuraPosition offset; ///< Offset used to move coordinate system of surface
-    AuraSize desired_size; ///< Size desired by compositor
-    AuraSize requested_size; ///< Size requested by client
-    AuraDrawBuffer buffer; ///< Data required for draw
-    AuraSurfaceGroup group;
+    NoiaItem base;
+    NoiaPosition position; ///< Position on screen
+    NoiaPosition offset; ///< Offset used to move coordinate system of surface
+    NoiaSize desired_size; ///< Size desired by compositor
+    NoiaSize requested_size; ///< Size requested by client
+    NoiaDrawBuffer buffer; ///< Data required for draw
+    NoiaSurfaceGroup group;
     bool is_toplevel;
-} AuraSurfaceData;
+} NoiaSurfaceData;
 
-AuraSurfaceData* aura_surface_data_new();
+NoiaSurfaceData* noia_surface_data_new();
 
-void aura_surface_data_free(AuraSurfaceData* self);
+void noia_surface_data_free(NoiaSurfaceData* self);
 
-#endif // __AURA_SURFACE_DATA_H__
+#endif // __NOIA_SURFACE_DATA_H__
 

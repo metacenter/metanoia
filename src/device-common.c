@@ -11,7 +11,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-int aura_open(const char* node, int flags)
+int noia_open(const char* node, int flags)
 {
     struct stat st;
     int result, fd;
@@ -26,7 +26,7 @@ int aura_open(const char* node, int flags)
 
     result = stat(node, &st);
     if (result >= 0) {
-        return aura_dbus_session_take_device(major(st.st_rdev),
+        return noia_dbus_session_take_device(major(st.st_rdev),
                                              minor(st.st_rdev));
     }
 

@@ -1,39 +1,39 @@
 // file: utils-branch.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_UTILS_BRANCH_H__
-#define __AURA_UTILS_BRANCH_H__
+#ifndef __NOIA_UTILS_BRANCH_H__
+#define __NOIA_UTILS_BRANCH_H__
 
 #include "utils-chain.h"
 
 #define FOR_EACH_TWIG(TRUNK,BRANCH) \
-    for (AuraBranch* BRANCH = (AuraBranch*) TRUNK->twigs->first; \
-    BRANCH; BRANCH = (AuraBranch*) BRANCH->base.next)
+    for (NoiaBranch* BRANCH = (NoiaBranch*) TRUNK->twigs->first; \
+    BRANCH; BRANCH = (NoiaBranch*) BRANCH->base.next)
 
-typedef int (*AuraBranchCompare) (void*, void*);
+typedef int (*NoiaBranchCompare) (void*, void*);
 
-typedef struct AuraBranch AuraBranch;
+typedef struct NoiaBranch NoiaBranch;
 
-/// @todo Unit tests for AuraBranch
-struct AuraBranch {
+/// @todo Unit tests for NoiaBranch
+struct NoiaBranch {
     Link base;
-    AuraBranch* trunk;
+    NoiaBranch* trunk;
     Chain* twigs;
 };
 
-AuraBranch* aura_branch_new();
-void aura_branch_free(AuraBranch* self, AuraFreeFunc free_data);
+NoiaBranch* noia_branch_new();
+void noia_branch_free(NoiaBranch* self, NoiaFreeFunc free_data);
 
-void aura_branch_prepend(AuraBranch* self, AuraBranch* other);
-void aura_branch_append(AuraBranch* self, AuraBranch* other);
+void noia_branch_prepend(NoiaBranch* self, NoiaBranch* other);
+void noia_branch_append(NoiaBranch* self, NoiaBranch* other);
 
-AuraResult aura_branch_remove(AuraBranch* self, AuraBranch* other);
+NoiaResult noia_branch_remove(NoiaBranch* self, NoiaBranch* other);
 
-void aura_branch_set_data(AuraBranch* self, void* data);
+void noia_branch_set_data(NoiaBranch* self, void* data);
 
-AuraBranch* aura_branch_find(AuraBranch* self,
+NoiaBranch* noia_branch_find(NoiaBranch* self,
                              void* data,
-                             AuraBranchCompare compare);
+                             NoiaBranchCompare compare);
 
-#endif // __AURA_UTILS_BRANCH_H__
+#endif // __NOIA_UTILS_BRANCH_H__
 

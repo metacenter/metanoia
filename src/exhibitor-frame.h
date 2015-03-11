@@ -1,55 +1,55 @@
 // file: exhibitor-frame.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_EXHIBITOR_FRAME_H__
-#define __AURA_EXHIBITOR_FRAME_H__
+#ifndef __NOIA_EXHIBITOR_FRAME_H__
+#define __NOIA_EXHIBITOR_FRAME_H__
 
 #include "utils-branch.h"
 
 typedef enum {
-    AURA_FRAME_TYPE_NONE       = 0x00,
-    AURA_FRAME_TYPE_LEAF       = 0x01,
-    AURA_FRAME_TYPE_STACKED    = 0x02,
-    AURA_FRAME_TYPE_HORIZONTAL = 0x04,
-    AURA_FRAME_TYPE_VERTICAL   = 0x08,
-    AURA_FRAME_TYPE_FLOATING   = 0x10,
-} AuraFrameType;
+    NOIA_FRAME_TYPE_NONE       = 0x00,
+    NOIA_FRAME_TYPE_LEAF       = 0x01,
+    NOIA_FRAME_TYPE_STACKED    = 0x02,
+    NOIA_FRAME_TYPE_HORIZONTAL = 0x04,
+    NOIA_FRAME_TYPE_VERTICAL   = 0x08,
+    NOIA_FRAME_TYPE_FLOATING   = 0x10,
+} NoiaFrameType;
 
-/// @todo Unit tests for AuraFrame
-typedef AuraBranch AuraFrame;
+/// @todo Unit tests for NoiaFrame
+typedef NoiaBranch NoiaFrame;
 
 typedef struct {
-    AuraFrameType type;
+    NoiaFrameType type;
     char* title;
-    AuraSurfaceId sid;
-    AuraPosition floating_position;
-} AuraFrameParams;
+    NoiaSurfaceId sid;
+    NoiaPosition floating_position;
+} NoiaFrameParams;
 
-AuraFrame* aura_frame_new();
-void aura_frame_free(AuraFrame* self);
+NoiaFrame* noia_frame_new();
+void noia_frame_free(NoiaFrame* self);
 
-void aura_frame_set_surface(AuraFrame* self, AuraSurfaceId sid);
-void aura_frame_set_type(AuraFrame* self, AuraFrameType type);
+void noia_frame_set_surface(NoiaFrame* self, NoiaSurfaceId sid);
+void noia_frame_set_type(NoiaFrame* self, NoiaFrameType type);
 
-AuraFrameParams* aura_frame_get_params(AuraFrame* self);
+NoiaFrameParams* noia_frame_get_params(NoiaFrame* self);
 
-void aura_frame_resize(AuraFrame* self,
-                       AuraArgmandType direction,
+void noia_frame_resize(NoiaFrame* self,
+                       NoiaArgmandType direction,
                        int magnitude);
 
-void aura_frame_move(AuraFrame* self,
-                     AuraArgmandType direction,
+void noia_frame_move(NoiaFrame* self,
+                     NoiaArgmandType direction,
                      int magnitude);
 
-void aura_frame_jump(AuraFrame* self,
-                     AuraArgmandType direction,
+void noia_frame_jump(NoiaFrame* self,
+                     NoiaArgmandType direction,
                      int magnitude);
 
-void aura_frame_pop_recursively(AuraFrame* self, AuraFrame* pop);
+void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
 
-AuraResult aura_frame_remove_self(AuraFrame* self);
+NoiaResult noia_frame_remove_self(NoiaFrame* self);
 
-AuraFrame* aura_frame_find_with_sid(AuraFrame* self, AuraSurfaceId sid);
+NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid);
 
-#endif // __AURA_EXHIBITOR_FRAME_H__
+#endif // __NOIA_EXHIBITOR_FRAME_H__
 

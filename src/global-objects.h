@@ -1,8 +1,8 @@
 // file: global-objects.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_GLOBAL_OBJECTS_H__
-#define __AURA_GLOBAL_OBJECTS_H__
+#ifndef __NOIA_GLOBAL_OBJECTS_H__
+#define __NOIA_GLOBAL_OBJECTS_H__
 
 #include "global-types.h"
 #include "utils-object.h"
@@ -12,53 +12,53 @@
 /// Object wrapping integer value.
 /// Integer with reference counting.
 typedef struct {
-    AuraObject base;
+    NoiaObject base;
     union {
         uintptr_t uint;
         intptr_t sint;
     };
-} AuraIntObject;
+} NoiaIntObject;
 
-AuraIntObject* aura_uint_create(uintptr_t value);
-AuraIntObject* aura_int_create(intptr_t value);
+NoiaIntObject* noia_uint_create(uintptr_t value);
+NoiaIntObject* noia_int_create(intptr_t value);
 
-uintptr_t aura_uint_unref_get(AuraIntObject* self);
-intptr_t aura_int_unref_get(AuraIntObject* self);
+uintptr_t noia_uint_unref_get(NoiaIntObject* self);
+intptr_t noia_int_unref_get(NoiaIntObject* self);
 
 //------------------------------------------------------------------------------
 
 /// Key event object.
 /// KeyData structure with reference counting.
 typedef struct {
-    AuraObject base;
-    AuraKeyData keydata;
-} AuraKeyObject;
+    NoiaObject base;
+    NoiaKeyData keydata;
+} NoiaKeyObject;
 
-AuraKeyObject* aura_key_create(unsigned time, int code, bool value);
+NoiaKeyObject* noia_key_create(unsigned time, int code, bool value);
 
 //------------------------------------------------------------------------------
 
 /// Button event object.
 /// ButtonData structure with reference counting.
 typedef struct {
-    AuraObject base;
-    AuraButtonData buttondata;
-} AuraButtonObject;
+    NoiaObject base;
+    NoiaButtonData buttondata;
+} NoiaButtonObject;
 
-AuraButtonObject* aura_button_create(unsigned time, int code, bool value);
+NoiaButtonObject* noia_button_create(unsigned time, int code, bool value);
 
 //------------------------------------------------------------------------------
 
 /// Pointer motion object.
 typedef struct {
-    AuraObject base;
-    AuraSurfaceId sid;
-    AuraPosition pos;
-} AuraMotionObject;
+    NoiaObject base;
+    NoiaSurfaceId sid;
+    NoiaPosition pos;
+} NoiaMotionObject;
 
-AuraMotionObject* aura_motion_create(AuraSurfaceId sid, AuraPosition pos);
+NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos);
 
 //------------------------------------------------------------------------------
 
-#endif // __AURA_GLOBAL_OBJECTS_H__
+#endif // __NOIA_GLOBAL_OBJECTS_H__
 

@@ -12,7 +12,7 @@
 
 //------------------------------------------------------------------------------
 
-void aura_quit()
+void noia_quit()
 {
     LOG_INFO1("QUIT!");
     kill(getpid(), SIGTERM);
@@ -20,23 +20,23 @@ void aura_quit()
 
 //------------------------------------------------------------------------------
 
-void aura_refresh_displays()
+void noia_refresh_displays()
 {
-    aura_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
+    noia_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_cicle_history_forward()
+void noia_cicle_history_forward()
 {
-    aura_exhibitor_pop_history_surface(1);
+    noia_exhibitor_pop_history_surface(1);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_cicle_history_back()
+void noia_cicle_history_back()
 {
-    aura_exhibitor_pop_history_surface(-1);
+    noia_exhibitor_pop_history_surface(-1);
 }
 
 //------------------------------------------------------------------------------

@@ -1,13 +1,13 @@
 // file: device-drm.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_DEVICE_DRM_H__
-#define __AURA_DEVICE_DRM_H__
+#ifndef __NOIA_DEVICE_DRM_H__
+#define __NOIA_DEVICE_DRM_H__
 
 #include "output.h"
 #include "utils-list.h"
 
-int aura_drm_update_devices(AuraList* outputs);
+int noia_drm_update_devices(NoiaList* outputs);
 
-#endif // __AURA_DEVICE_DRM_H__
+#endif // __NOIA_DEVICE_DRM_H__
 

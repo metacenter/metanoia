@@ -12,30 +12,30 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_pointer_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_pointer_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_WAYL3("Wayland: unbind pointer");
-    aura_wayland_cache_remove_general_resource(AURA_RESOURCE_POINTER, resource);
+    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_POINTER, resource);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_keyboard_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_keyboard_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_WAYL3("Wayland: unbind keyboard");
-    aura_wayland_cache_remove_general_resource(AURA_RESOURCE_KEYBOARD,resource);
+    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_KEYBOARD,resource);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_seat_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_seat_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind seat");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_get_pointer(struct wl_client* client,
+void noia_wayland_get_pointer(struct wl_client* client,
                               struct wl_resource* resource,
                               uint32_t id)
 {
@@ -51,14 +51,14 @@ void aura_wayland_get_pointer(struct wl_client* client,
     }
 
     wl_resource_set_implementation(rc, &pointer_implementation,
-                                   NULL, aura_wayland_pointer_unbind);
+                                   NULL, noia_wayland_pointer_unbind);
 
-    aura_wayland_cache_add_general_resource(AURA_RESOURCE_POINTER, rc);
+    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_POINTER, rc);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_get_keyboard(struct wl_client* client,
+void noia_wayland_get_keyboard(struct wl_client* client,
                                struct wl_resource* resource,
                                uint32_t id)
 {
@@ -74,13 +74,13 @@ void aura_wayland_get_keyboard(struct wl_client* client,
     }
 
     wl_resource_set_implementation(rc, &keyboard_implementation,
-                                   NULL, aura_wayland_keyboard_unbind);
+                                   NULL, noia_wayland_keyboard_unbind);
 
     // Store resource
-    aura_wayland_state_add_keyboard_resource(rc);
+    noia_wayland_state_add_keyboard_resource(rc);
 
     // Send keymap to client
-    AuraKeymap* keymap = aura_config_get_keymap();
+    NoiaKeymap* keymap = noia_config_get_keymap();
     if (!keymap) {
         return;
     }
@@ -94,8 +94,8 @@ void aura_wayland_get_keyboard(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_get_touch(AURA_UNUSED struct wl_client* client,
-                            AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_get_touch(NOIA_UNUSED struct wl_client* client,
+                            NOIA_UNUSED struct wl_resource* resource,
                             uint32_t id)
 {
     LOG_NYIMP("Wayland: get touch (id: %d)", id);
@@ -104,15 +104,15 @@ void aura_wayland_get_touch(AURA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 static const struct wl_seat_interface seat_implementation = {
-        aura_wayland_get_pointer,
-        aura_wayland_get_keyboard,
-        aura_wayland_get_touch
+        noia_wayland_get_pointer,
+        noia_wayland_get_keyboard,
+        noia_wayland_get_touch
     };
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_seat_bind(struct wl_client* client,
-                            AURA_UNUSED void* data,
+void noia_wayland_seat_bind(struct wl_client* client,
+                            NOIA_UNUSED void* data,
                             uint32_t version,
                             uint32_t id)
 {
@@ -127,7 +127,7 @@ void aura_wayland_seat_bind(struct wl_client* client,
     }
 
     wl_resource_set_implementation(rc, &seat_implementation,
-                                   NULL, aura_wayland_seat_unbind);
+                                   NULL, noia_wayland_seat_unbind);
 
     // TODO:
     wl_seat_send_capabilities(rc, WL_SEAT_CAPABILITY_POINTER

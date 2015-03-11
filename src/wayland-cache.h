@@ -1,8 +1,8 @@
 // file: wayland-cache.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __AURA_WAYLAND_CACHE_H__
-#define __AURA_WAYLAND_CACHE_H__
+#ifndef __NOIA_WAYLAND_CACHE_H__
+#define __NOIA_WAYLAND_CACHE_H__
 
 #include "utils-store.h"
 #include "wayland-region.h"
@@ -13,48 +13,48 @@
 
 //------------------------------------------------------------------------------
 
-AuraResult aura_wayland_cache_initialize();
+NoiaResult noia_wayland_cache_initialize();
 
-void aura_wayland_cache_finalize();
-
-//------------------------------------------------------------------------------
-
-void aura_wayland_cache_add_surface(AuraSurfaceId sid,
-                                    AuraWaylandSurface* surface);
-
-AuraWaylandSurface* aura_wayland_cache_find_surface(AuraSurfaceId sid);
-
-void aura_wayland_cache_remove_surface(AuraSurfaceId sid);
+void noia_wayland_cache_finalize();
 
 //------------------------------------------------------------------------------
 
-AuraItemId aura_wayland_cache_create_region();
+void noia_wayland_cache_add_surface(NoiaSurfaceId sid,
+                                    NoiaWaylandSurface* surface);
 
-AuraWaylandRegion* aura_wayland_cache_find_region(AuraItemId rid);
+NoiaWaylandSurface* noia_wayland_cache_find_surface(NoiaSurfaceId sid);
 
-//------------------------------------------------------------------------------
-
-void aura_wayland_cache_add_surface_resource
-                                  (AuraSurfaceId sid,
-                                   AuraWaylandSurfaceResourceType resource_type,
-                                   struct wl_resource* resource);
-
-void aura_wayland_cache_add_general_resource
-                                  (AuraWaylandGeneralResourceType resource_type,
-                                   struct wl_resource* resource);
-
-void aura_wayland_cache_remove_surface_resource
-                                  (AuraWaylandSurfaceResourceType resource_type,
-                                   struct wl_resource* resource);
-
-void aura_wayland_cache_remove_general_resource
-                                  (AuraWaylandGeneralResourceType resource_type,
-                                   struct wl_resource* resource);
-
-AuraList* aura_wayland_cache_get_resources
-                                 (AuraWaylandGeneralResourceType resource_type);
+void noia_wayland_cache_remove_surface(NoiaSurfaceId sid);
 
 //------------------------------------------------------------------------------
 
-#endif // __AURA_WAYLAND_CACHE_H__
+NoiaItemId noia_wayland_cache_create_region();
+
+NoiaWaylandRegion* noia_wayland_cache_find_region(NoiaItemId rid);
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_cache_add_surface_resource
+                                  (NoiaSurfaceId sid,
+                                   NoiaWaylandSurfaceResourceType resource_type,
+                                   struct wl_resource* resource);
+
+void noia_wayland_cache_add_general_resource
+                                  (NoiaWaylandGeneralResourceType resource_type,
+                                   struct wl_resource* resource);
+
+void noia_wayland_cache_remove_surface_resource
+                                  (NoiaWaylandSurfaceResourceType resource_type,
+                                   struct wl_resource* resource);
+
+void noia_wayland_cache_remove_general_resource
+                                  (NoiaWaylandGeneralResourceType resource_type,
+                                   struct wl_resource* resource);
+
+NoiaList* noia_wayland_cache_get_resources
+                                 (NoiaWaylandGeneralResourceType resource_type);
+
+//------------------------------------------------------------------------------
+
+#endif // __NOIA_WAYLAND_CACHE_H__
 

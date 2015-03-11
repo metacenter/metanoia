@@ -32,14 +32,14 @@
 #define INVALID_CRTC_ID 0
 
 typedef struct {
-    AuraOutput base;
+    NoiaOutput base;
     int fd;
     int front;
     uint32_t crtc_id;
     uint32_t connector_id;
     uint32_t fb[2];
     drmModeModeInfo mode;
-} AuraOutputDRM;
+} NoiaOutputDRM;
 
 static int fd = -1;
 
@@ -62,7 +62,7 @@ pthread_mutex_t drm_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //------------------------------------------------------------------------------
 
-void aura_drm_log(int drm_fd, drmModeRes* resources)
+void noia_drm_log(int drm_fd, drmModeRes* resources)
 {
     int i;
 
@@ -102,8 +102,8 @@ void aura_drm_log(int drm_fd, drmModeRes* resources)
 //------------------------------------------------------------------------------
 // DUMB BUFFERS
 
-static int create_dumb_buffer(AuraOutputDRM* output_drm,
-                              AuraRenderer* renderer,
+static int create_dumb_buffer(NoiaOutputDRM* output_drm,
+                              NoiaRenderer* renderer,
                               int num)
 {
     int result = 0;
@@ -153,7 +153,7 @@ static int create_dumb_buffer(AuraOutputDRM* output_drm,
         goto clear_fb;
     }
 
-    aura_renderer_mmap_set_buffer(renderer, num, map, carg.pitch);
+    noia_renderer_mmap_set_buffer(renderer, num, map, carg.pitch);
     return 0;
 
 clear_fb:
@@ -169,21 +169,21 @@ clear_db:
 
 //------------------------------------------------------------------------------
 
-static AuraRenderer* create_dumb_buffers(AuraOutputDRM* output_drm)
+static NoiaRenderer* create_dumb_buffers(NoiaOutputDRM* output_drm)
 {
-    AuraRenderer* renderer = aura_renderer_mmap_create((AuraOutput*) output_drm,
+    NoiaRenderer* renderer = noia_renderer_mmap_create((NoiaOutput*) output_drm,
                                                        output_drm->base.width,
                                                        output_drm->base.height);
     create_dumb_buffer(output_drm, renderer, 0);
     create_dumb_buffer(output_drm, renderer, 1);
 
-    return (AuraRenderer*) renderer;
+    return (NoiaRenderer*) renderer;
 }
 
 //------------------------------------------------------------------------------
 // EGL
 
-AuraRenderer* initialize_egl_with_gbm(AURA_UNUSED AuraOutputDRM* output_drm)
+NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
 {
     /*int r; // TODO EGLint ?
     uint32_t fb_id;
@@ -328,7 +328,7 @@ AuraRenderer* initialize_egl_with_gbm(AURA_UNUSED AuraOutputDRM* output_drm)
 
     LOG_INFO1("Creating GBM and initializing EGL: SUCCESS");
 
-    return aura_renderer_gl_create(egl_display, egl_surface, egl_context);
+    return noia_renderer_gl_create(egl_display, egl_surface, egl_context);
 
 clear_fb:
     drmModeRmFB(output_drm->fd, fb_id);*/
@@ -338,13 +338,13 @@ clear_fb:
 //------------------------------------------------------------------------------
 // OUTPUT
 
-AuraRenderer* aura_drm_output_initialize(AuraOutput* output,
-                                         AURA_UNUSED int width,
-                                         AURA_UNUSED int height)
+NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
+                                         NOIA_UNUSED int width,
+                                         NOIA_UNUSED int height)
 {
-    AuraRenderer* renderer = NULL;
+    NoiaRenderer* renderer = NULL;
 
-    AuraOutputDRM* output_drm = (AuraOutputDRM*) output;
+    NoiaOutputDRM* output_drm = (NoiaOutputDRM*) output;
     if (!output_drm) {
         return NULL;
     }
@@ -381,12 +381,12 @@ AuraRenderer* aura_drm_output_initialize(AuraOutput* output,
 
 //------------------------------------------------------------------------------
 
-int aura_drm_output_swap_buffers(AuraOutput* output)
+int noia_drm_output_swap_buffers(NoiaOutput* output)
 {
     pthread_mutex_lock(&drm_mutex);
     int result = 0;
 
-    AuraOutputDRM* output_drm = (AuraOutputDRM*) output;
+    NoiaOutputDRM* output_drm = (NoiaOutputDRM*) output;
     if (!output_drm) {
         result = -1;
         goto unlock;
@@ -416,7 +416,7 @@ unlock:
 
 //------------------------------------------------------------------------------
 
-void aura_drm_output_free(AuraOutput* output)
+void noia_drm_output_free(NoiaOutput* output)
 {
     if (!output) {
         return;
@@ -430,7 +430,7 @@ void aura_drm_output_free(AuraOutput* output)
 
 //------------------------------------------------------------------------------
 
-AuraOutputDRM* aura_drm_output_new(int width,
+NoiaOutputDRM* noia_drm_output_new(int width,
                                    int height,
                                    char* connector_name,
                                    int drm_fd,
@@ -438,15 +438,15 @@ AuraOutputDRM* aura_drm_output_new(int width,
                                    uint32_t connector_id,
                                    drmModeModeInfo mode)
 {
-    AuraOutputDRM* output_drm = malloc(sizeof(AuraOutputDRM));
-    memset(output_drm, 0, sizeof(AuraOutputDRM));
+    NoiaOutputDRM* output_drm = malloc(sizeof(NoiaOutputDRM));
+    memset(output_drm, 0, sizeof(NoiaOutputDRM));
 
-    aura_output_initialize(&output_drm->base,
+    noia_output_initialize(&output_drm->base,
                            width, height,
                            strdup(connector_name),
-                           aura_drm_output_initialize,
-                           aura_drm_output_swap_buffers,
-                           aura_drm_output_free);
+                           noia_drm_output_initialize,
+                           noia_drm_output_swap_buffers,
+                           noia_drm_output_free);
 
     output_drm->fd = drm_fd;
     output_drm->front = 0;
@@ -462,11 +462,11 @@ AuraOutputDRM* aura_drm_output_new(int width,
 //------------------------------------------------------------------------------
 // DEVICE
 
-int is_crtc_in_use(AuraList* drm_outputs, uint32_t crtc_id)
+int is_crtc_in_use(NoiaList* drm_outputs, uint32_t crtc_id)
 {
     int is_in_use = 0;
     FOR_EACH (drm_outputs, link) {
-        AuraOutputDRM* output_drm = (AuraOutputDRM*) link->data;
+        NoiaOutputDRM* output_drm = (NoiaOutputDRM*) link->data;
         if (output_drm->crtc_id == crtc_id) {
             is_in_use = 1;
             break;
@@ -480,7 +480,7 @@ int is_crtc_in_use(AuraList* drm_outputs, uint32_t crtc_id)
 uint32_t find_crtc(int drm_fd,
                    drmModeRes* resources,
                    drmModeConnector* connector,
-                   AuraList* drm_outputs)
+                   NoiaList* drm_outputs)
 {
     // Try to reuse old encoder
     if (connector->encoder_id) {
@@ -525,10 +525,10 @@ uint32_t find_crtc(int drm_fd,
 
 //------------------------------------------------------------------------------
 
-AuraOutputDRM* update_device(int drm_fd,
+NoiaOutputDRM* update_device(int drm_fd,
                              drmModeRes* resources,
                              drmModeConnector* connector,
-                             AuraList* drm_outputs)
+                             NoiaList* drm_outputs)
 {
     LOG_INFO2("Updating connector (id: %u)", connector->connector_id);
 
@@ -547,8 +547,8 @@ AuraOutputDRM* update_device(int drm_fd,
     LOG_INFO2("Updating connector (CRTC: %u)", crtc_id);
 
     // Create output
-    AuraOutputDRM* output =
-     aura_drm_output_new(connector->modes[0].hdisplay,
+    NoiaOutputDRM* output =
+     noia_drm_output_new(connector->modes[0].hdisplay,
                          connector->modes[0].vdisplay,
                          (char*) scConnectorTypeName[connector->connector_type],
                          drm_fd,
@@ -560,7 +560,7 @@ AuraOutputDRM* update_device(int drm_fd,
 
 //------------------------------------------------------------------------------
 
-int aura_drm_update_devices(AuraList* outputs)
+int noia_drm_update_devices(NoiaList* outputs)
 {
     pthread_mutex_lock(&drm_mutex);
 
@@ -568,7 +568,7 @@ int aura_drm_update_devices(AuraList* outputs)
     int j, num = -1;
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
-    AuraList* drm_outputs = aura_list_new(NULL);
+    NoiaList* drm_outputs = noia_list_new(NULL);
 
     LOG_INFO1("Updating DRM devices");
 
@@ -608,7 +608,7 @@ int aura_drm_update_devices(AuraList* outputs)
         goto unlock;
     }
 
-    aura_drm_log(fd, resources);
+    noia_drm_log(fd, resources);
 
     num = 0;
     // Find a connected connectors
@@ -624,10 +624,10 @@ int aura_drm_update_devices(AuraList* outputs)
 
         // If connector is connected - update device
         if (connector->connection == DRM_MODE_CONNECTED) {
-            AuraOutputDRM* output =
+            NoiaOutputDRM* output =
                            update_device(fd, resources, connector, drm_outputs);
             if (output) {
-                aura_list_append(drm_outputs, output);
+                noia_list_append(drm_outputs, output);
                 num += 1;
             }
         }
@@ -635,7 +635,7 @@ int aura_drm_update_devices(AuraList* outputs)
     }
 
     FOR_EACH (drm_outputs, link) {
-        aura_list_append(outputs, link->data);
+        noia_list_append(outputs, link->data);
     }
 
     // Free memory

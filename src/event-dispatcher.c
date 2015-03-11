@@ -13,21 +13,21 @@
 #include <unistd.h>
 #include <sys/signalfd.h>
 
-struct AuraEventDispatcherPriv {
+struct NoiaEventDispatcherPriv {
     int run;
     int epfd;
-    AuraList* sources;
+    NoiaList* sources;
 };
 
 //------------------------------------------------------------------------------
 
-AuraEventData* aura_event_data_create(int fd,
-                                      AuraEventHandler handler,
-                                      AuraEventExitHandler exit,
+NoiaEventData* noia_event_data_create(int fd,
+                                      NoiaEventHandler handler,
+                                      NoiaEventExitHandler exit,
                                       uint32_t flags,
                                       void* data)
 {
-    AuraEventData* self = malloc(sizeof(AuraEventData));
+    NoiaEventData* self = malloc(sizeof(NoiaEventData));
     if (!self) {
         return NULL;
     }
@@ -42,46 +42,46 @@ AuraEventData* aura_event_data_create(int fd,
 
 //------------------------------------------------------------------------------
 
-void aura_event_data_destroy(AuraEventData* event_data)
+void noia_event_data_destroy(NoiaEventData* event_data)
 {
     if (!event_data) {
         return;
     }
 
-    memset(event_data, 0, sizeof(AuraEventData));
+    memset(event_data, 0, sizeof(NoiaEventData));
     free(event_data);
 }
 
 //------------------------------------------------------------------------------
 
-AuraEventDispatcher* aura_event_dispatcher_new()
+NoiaEventDispatcher* noia_event_dispatcher_new()
 {
-    AuraEventDispatcher* self = malloc(sizeof(AuraEventDispatcher));
+    NoiaEventDispatcher* self = malloc(sizeof(NoiaEventDispatcher));
     if (!self) {
         return NULL;
     }
 
     self->run = 0;
-    self->sources = aura_list_new((AuraFreeFunc) aura_event_data_destroy);
+    self->sources = noia_list_new((NoiaFreeFunc) noia_event_data_destroy);
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void aura_event_dispatcher_free(AuraEventDispatcher* self)
+void noia_event_dispatcher_free(NoiaEventDispatcher* self)
 {
     if (!self) {
         return;
     }
 
-    aura_list_free(self->sources);
-    memset(self, 0, sizeof(AuraEventDispatcher));
+    noia_list_free(self->sources);
+    memset(self, 0, sizeof(NoiaEventDispatcher));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-int aura_event_dispatcher_is_running(AuraEventDispatcher* self)
+int noia_event_dispatcher_is_running(NoiaEventDispatcher* self)
 {
     if (!self) {
         return 0;
@@ -92,7 +92,7 @@ int aura_event_dispatcher_is_running(AuraEventDispatcher* self)
 
 //------------------------------------------------------------------------------
 
-int aura_event_dispatcher_initialize(AuraEventDispatcher* self)
+int noia_event_dispatcher_initialize(NoiaEventDispatcher* self)
 {
     if (!self) {
         return -1;
@@ -110,8 +110,8 @@ int aura_event_dispatcher_initialize(AuraEventDispatcher* self)
 
 //------------------------------------------------------------------------------
 
-int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
-                                           AuraEventData* data)
+int noia_event_dispatcher_add_event_source(NoiaEventDispatcher* self,
+                                           NoiaEventData* data)
 {
     if (!self || !data) {
         return -ENOMEM;
@@ -119,7 +119,7 @@ int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
 
     LOG_INFO2("Adding event source (fd: '%d')", data->fd);
 
-    aura_list_append(self->sources, data);
+    noia_list_append(self->sources, data);
 
     struct epoll_event event;
     event.data.ptr = data;
@@ -130,7 +130,7 @@ int aura_event_dispatcher_add_event_source(AuraEventDispatcher* self,
 
 //------------------------------------------------------------------------------
 
-void aura_event_dispatcher_start(AuraEventDispatcher* self)
+void noia_event_dispatcher_start(NoiaEventDispatcher* self)
 {
     int r;
     struct epoll_event event;
@@ -146,7 +146,7 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
         LOG_EVNT4("Waiting for events...");
         r = epoll_wait(self->epfd, &event, 1, -1);
         if (r > 0) {
-            AuraEventData* data = event.data.ptr;
+            NoiaEventData* data = event.data.ptr;
             if (data) {
                 LOG_EVNT4("New event from %d", data->fd);
                 if (data->handler) {
@@ -164,7 +164,7 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
     }
 
     FOR_EACH (self->sources, link) {
-        AuraEventData* data = link->data;
+        NoiaEventData* data = link->data;
         if (data && data->exit) {
             data->exit(data);
         }
@@ -175,7 +175,7 @@ void aura_event_dispatcher_start(AuraEventDispatcher* self)
 
 //------------------------------------------------------------------------------
 
-void aura_event_dispatcher_stop(AuraEventDispatcher* self)
+void noia_event_dispatcher_stop(NoiaEventDispatcher* self)
 {
     if (!self) {
         return;
@@ -187,9 +187,9 @@ void aura_event_dispatcher_stop(AuraEventDispatcher* self)
 
 //------------------------------------------------------------------------------
 
-void aura_event_dispatcher_default_signal_handler
-                                         (AuraEventData* data,
-                                          AURA_UNUSED struct epoll_event* event)
+void noia_event_dispatcher_default_signal_handler
+                                         (NoiaEventData* data,
+                                          NOIA_UNUSED struct epoll_event* event)
 {
     int size;
     struct signalfd_siginfo fdsi;
@@ -205,9 +205,9 @@ void aura_event_dispatcher_default_signal_handler
     LOG_INFO1("Signal '%d' received", fdsi.ssi_signo);
 
     if (fdsi.ssi_signo == SIGINT || fdsi.ssi_signo == SIGTERM) {
-        AuraEventDispatcher* dispather = data->data;
-        if (dispather && aura_event_dispatcher_is_running(dispather)) {
-            aura_event_dispatcher_stop(dispather);
+        NoiaEventDispatcher* dispather = data->data;
+        if (dispather && noia_event_dispatcher_is_running(dispather)) {
+            noia_event_dispatcher_stop(dispather);
         } else {
             LOG_ERROR("Invalid dispatcher!");
         }

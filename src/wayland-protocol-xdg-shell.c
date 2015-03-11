@@ -12,23 +12,23 @@
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_xdg_surface_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_xdg_surface_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind XDG shell surface");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_xdg_shell_unbind(AURA_UNUSED struct wl_resource* resource)
+void noia_wayland_xdg_shell_unbind(NOIA_UNUSED struct wl_resource* resource)
 {
     LOG_NYIMP("Wayland: unbind XDG shell");
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_xdg_use_unstable_version
-                                      (AURA_UNUSED struct wl_client* client,
-                                       AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_xdg_use_unstable_version
+                                      (NOIA_UNUSED struct wl_client* client,
+                                       NOIA_UNUSED struct wl_resource* resource,
                                        int32_t version)
 {
     LOG_NYIMP("Wayland: use unstable version (version: %d)", version);
@@ -36,15 +36,15 @@ void aura_wayland_xdg_use_unstable_version
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_xdg_get_xdg_surface
-                              (AURA_UNUSED struct wl_client* client,
-                               AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_xdg_get_xdg_surface
+                              (NOIA_UNUSED struct wl_client* client,
+                               NOIA_UNUSED struct wl_resource* resource,
                                uint32_t id,
-                               AURA_UNUSED struct wl_resource* surface_resource)
+                               NOIA_UNUSED struct wl_resource* surface_resource)
 {
     struct wl_resource* rc;
-    AuraSurfaceId sid =
-                    (AuraSurfaceId) wl_resource_get_user_data(surface_resource);
+    NoiaSurfaceId sid =
+                    (NoiaSurfaceId) wl_resource_get_user_data(surface_resource);
 
     LOG_NYIMP("Wayland: get XDG surface (id: %d, sid: %d)", id, sid);
 
@@ -55,23 +55,23 @@ void aura_wayland_xdg_get_xdg_surface
         return;
     }
 
-    aura_wayland_cache_add_surface_resource
-                                     (sid, AURA_RESOURCE_XDG_SHELL_SURFACE, rc);
-    aura_surface_show(sid);
+    noia_wayland_cache_add_surface_resource
+                                     (sid, NOIA_RESOURCE_XDG_SHELL_SURFACE, rc);
+    noia_surface_show(sid);
 
     wl_resource_set_implementation(rc, &xdg_surface_implementation, (void*) sid,
-                                   aura_wayland_xdg_surface_unbind);
+                                   noia_wayland_xdg_surface_unbind);
 }
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_xdg_get_xdg_popup
-                              (AURA_UNUSED struct wl_client* client,
-                               AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_xdg_get_xdg_popup
+                              (NOIA_UNUSED struct wl_client* client,
+                               NOIA_UNUSED struct wl_resource* resource,
                                uint32_t id,
-                               AURA_UNUSED struct wl_resource* surface_resource,
-                               AURA_UNUSED struct wl_resource* parent_resource,
-                               AURA_UNUSED struct wl_resource* seat_resource,
+                               NOIA_UNUSED struct wl_resource* surface_resource,
+                               NOIA_UNUSED struct wl_resource* parent_resource,
+                               NOIA_UNUSED struct wl_resource* seat_resource,
                                uint32_t serial,
                                int32_t x,
                                int32_t y,
@@ -84,8 +84,8 @@ void aura_wayland_xdg_get_xdg_popup
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_xdg_pong(AURA_UNUSED struct wl_client* client,
-                           AURA_UNUSED struct wl_resource* resource,
+void noia_wayland_xdg_pong(NOIA_UNUSED struct wl_client* client,
+                           NOIA_UNUSED struct wl_resource* resource,
                            uint32_t serial)
 {
     LOG_NYIMP("Wayland: XDG pong (serial: %d)", serial);
@@ -94,16 +94,16 @@ void aura_wayland_xdg_pong(AURA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 static const struct xdg_shell_interface xdg_shell_implementation = {
-        aura_wayland_xdg_use_unstable_version,
-        aura_wayland_xdg_get_xdg_surface,
-        aura_wayland_xdg_get_xdg_popup,
-        aura_wayland_xdg_pong
+        noia_wayland_xdg_use_unstable_version,
+        noia_wayland_xdg_get_xdg_surface,
+        noia_wayland_xdg_get_xdg_popup,
+        noia_wayland_xdg_pong
     };
 
 //------------------------------------------------------------------------------
 
-void aura_wayland_xdg_shell_bind(struct wl_client* client,
-                                 AURA_UNUSED void* data,
+void noia_wayland_xdg_shell_bind(struct wl_client* client,
+                                 NOIA_UNUSED void* data,
                                  uint32_t version,
                                  uint32_t id)
 {
@@ -117,10 +117,10 @@ void aura_wayland_xdg_shell_bind(struct wl_client* client,
         return;
     }
 
-    aura_wayland_cache_add_general_resource(AURA_RESOURCE_OTHER, rc);
+    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 
     wl_resource_set_implementation(rc, &xdg_shell_implementation,
-                                   NULL, aura_wayland_xdg_shell_unbind);
+                                   NULL, noia_wayland_xdg_shell_unbind);
 }
 
 //------------------------------------------------------------------------------

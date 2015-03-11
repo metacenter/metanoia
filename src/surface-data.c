@@ -10,15 +10,15 @@
 //------------------------------------------------------------------------------
 
 /// Allocate Surface Data
-AuraSurfaceData* aura_surface_data_new()
+NoiaSurfaceData* noia_surface_data_new()
 {
-    AuraSurfaceData* self = malloc(sizeof(AuraSurfaceData));
+    NoiaSurfaceData* self = malloc(sizeof(NoiaSurfaceData));
     if (!self) {
         LOG_ERROR("Could not create new surface!");
         return 0;
     }
 
-    memset(self, 0, sizeof(AuraSurfaceData));
+    memset(self, 0, sizeof(NoiaSurfaceData));
 
     return self;
 }
@@ -26,13 +26,13 @@ AuraSurfaceData* aura_surface_data_new()
 //------------------------------------------------------------------------------
 
 /// Deallocate Surface Data.
-void aura_surface_data_free(AuraSurfaceData* self)
+void noia_surface_data_free(NoiaSurfaceData* self)
 {
     if (!self) {
         return;
     }
 
-    memset(self, 0, sizeof(AuraSurfaceData));
+    memset(self, 0, sizeof(NoiaSurfaceData));
     free(self);
 }
 
