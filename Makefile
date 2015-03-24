@@ -126,7 +126,7 @@ build/config.o: Makefile \
                 src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   config.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/config.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/config.o -Isrc -Igen \
 	       -c src/config.c
 
 build/global-objects.o: Makefile \
@@ -138,7 +138,7 @@ build/global-objects.o: Makefile \
                         src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   global-objects.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/global-objects.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/global-objects.o -Isrc -Igen \
 	       -c src/global-objects.c
 
 build/global-functions.o: Makefile \
@@ -162,7 +162,7 @@ build/global-functions.o: Makefile \
                           src/event-loop.h
 	@mkdir -p build
 	@echo "  CC   global-functions.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/global-functions.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/global-functions.o -Isrc -Igen \
 	       -c src/global-functions.c
 
 build/utils-object.o: Makefile \
@@ -172,7 +172,7 @@ build/utils-object.o: Makefile \
                       src/global-types.h
 	@mkdir -p build
 	@echo "  CC   utils-object.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-object.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-object.o -Isrc -Igen \
 	       -c src/utils-object.c
 
 build/utils-chain.o: Makefile \
@@ -182,7 +182,7 @@ build/utils-chain.o: Makefile \
                      src/global-types.h
 	@mkdir -p build
 	@echo "  CC   utils-chain.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-chain.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-chain.o -Isrc -Igen \
 	       -c src/utils-chain.c
 
 build/utils-list.o: Makefile \
@@ -193,7 +193,7 @@ build/utils-list.o: Makefile \
                     src/global-types.h
 	@mkdir -p build
 	@echo "  CC   utils-list.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-list.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-list.o -Isrc -Igen \
 	       -c src/utils-list.c
 
 build/utils-branch.o: Makefile \
@@ -205,7 +205,7 @@ build/utils-branch.o: Makefile \
                       src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   utils-branch.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-branch.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-branch.o -Isrc -Igen \
 	       -c src/utils-branch.c
 
 build/utils-store.o: Makefile \
@@ -216,7 +216,7 @@ build/utils-store.o: Makefile \
                      src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   utils-store.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-store.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-store.o -Isrc -Igen \
 	       -c src/utils-store.c
 
 build/utils-dbus.o: Makefile \
@@ -227,7 +227,7 @@ build/utils-dbus.o: Makefile \
                     src/global-types.h
 	@mkdir -p build
 	@echo "  CC   utils-dbus.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-dbus.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-dbus.o -Isrc -Igen \
 	       -c src/utils-dbus.c \
 	       -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include 
 
@@ -240,7 +240,7 @@ build/utils-keymap.o: Makefile \
                       src/utils-environment.h
 	@mkdir -p build
 	@echo "  CC   utils-keymap.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-keymap.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-keymap.o -Isrc -Igen \
 	       -c src/utils-keymap.c
 
 build/utils-log.o: Makefile \
@@ -254,7 +254,7 @@ build/utils-log.o: Makefile \
                    gen/version.h
 	@mkdir -p build
 	@echo "  CC   utils-log.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-log.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-log.o -Isrc -Igen \
 	       -c src/utils-log.c
 
 build/utils-environment.o: Makefile \
@@ -265,7 +265,7 @@ build/utils-environment.o: Makefile \
                            src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   utils-environment.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/utils-environment.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-environment.o -Isrc -Igen \
 	       -c src/utils-environment.c
 
 build/event-dispatcher.o: Makefile \
@@ -278,7 +278,7 @@ build/event-dispatcher.o: Makefile \
                           src/utils-chain.h
 	@mkdir -p build
 	@echo "  CC   event-dispatcher.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/event-dispatcher.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-dispatcher.o -Isrc -Igen \
 	       -c src/event-dispatcher.c
 
 build/event-timer.o: Makefile \
@@ -289,7 +289,7 @@ build/event-timer.o: Makefile \
                      src/global-types.h
 	@mkdir -p build
 	@echo "  CC   event-timer.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/event-timer.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-timer.o -Isrc -Igen \
 	       -c src/event-timer.c
 
 build/event-signals.o: Makefile \
@@ -306,7 +306,7 @@ build/event-signals.o: Makefile \
                        src/global-objects.h
 	@mkdir -p build
 	@echo "  CC   event-signals.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/event-signals.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-signals.o -Isrc -Igen \
 	       -c src/event-signals.c
 
 build/event-loop.o: Makefile \
@@ -322,7 +322,7 @@ build/event-loop.o: Makefile \
                     src/utils-environment.h
 	@mkdir -p build
 	@echo "  CC   event-loop.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/event-loop.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-loop.o -Isrc -Igen \
 	       -c src/event-loop.c
 
 build/event-task.o: Makefile \
@@ -334,7 +334,7 @@ build/event-task.o: Makefile \
                     src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   event-task.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/event-task.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-task.o -Isrc -Igen \
 	       -c src/event-task.c
 
 build/event-factory.o: Makefile \
@@ -363,7 +363,7 @@ build/event-factory.o: Makefile \
                        src/utils-environment.h
 	@mkdir -p build
 	@echo "  CC   event-factory.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/event-factory.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-factory.o -Isrc -Igen \
 	       -c src/event-factory.c
 
 build/renderer-mmap.o: Makefile \
@@ -385,7 +385,7 @@ build/renderer-mmap.o: Makefile \
                        src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   renderer-mmap.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/renderer-mmap.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/renderer-mmap.o -Isrc -Igen \
 	       -c src/renderer-mmap.c
 
 build/renderer-gl.o: Makefile \
@@ -406,7 +406,7 @@ build/renderer-gl.o: Makefile \
                      src/bind-egl-wayland.h
 	@mkdir -p build
 	@echo "  CC   renderer-gl.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/renderer-gl.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/renderer-gl.o -Isrc -Igen \
 	       -c src/renderer-gl.c \
 	       -I/usr/include/libdrm 
 
@@ -419,7 +419,7 @@ build/device-common.o: Makefile \
                        src/global-types.h
 	@mkdir -p build
 	@echo "  CC   device-common.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/device-common.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-common.o -Isrc -Igen \
 	       -c src/device-common.c
 
 build/device-fb.o: Makefile \
@@ -437,7 +437,7 @@ build/device-fb.o: Makefile \
                    src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   device-fb.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/device-fb.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-fb.o -Isrc -Igen \
 	       -c src/device-fb.c
 
 build/device-drm.o: Makefile \
@@ -456,7 +456,7 @@ build/device-drm.o: Makefile \
                     src/utils-dbus.h
 	@mkdir -p build
 	@echo "  CC   device-drm.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/device-drm.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-drm.o -Isrc -Igen \
 	       -c src/device-drm.c \
 	       -I/usr/include/libdrm 
 
@@ -479,7 +479,7 @@ build/device-evdev.o: Makefile \
                       src/utils-chain.h
 	@mkdir -p build
 	@echo "  CC   device-evdev.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/device-evdev.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-evdev.o -Isrc -Igen \
 	       -c src/device-evdev.c
 
 build/device-udev.o: Makefile \
@@ -494,7 +494,7 @@ build/device-udev.o: Makefile \
                      src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   device-udev.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/device-udev.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-udev.o -Isrc -Igen \
 	       -c src/device-udev.c
 
 build/output.o: Makefile \
@@ -508,7 +508,7 @@ build/output.o: Makefile \
                 src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   output.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/output.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/output.o -Isrc -Igen \
 	       -c src/output.c
 
 build/output-collector.o: Makefile \
@@ -532,7 +532,7 @@ build/output-collector.o: Makefile \
                           src/utils-keymap.h
 	@mkdir -p build
 	@echo "  CC   output-collector.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/output-collector.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/output-collector.o -Isrc -Igen \
 	       -c src/output-collector.c
 
 build/surface-data.o: Makefile \
@@ -549,7 +549,7 @@ build/surface-data.o: Makefile \
                       src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   surface-data.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/surface-data.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/surface-data.o -Isrc -Igen \
 	       -c src/surface-data.c
 
 build/surface-manager.o: Makefile \
@@ -571,7 +571,7 @@ build/surface-manager.o: Makefile \
                          src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   surface-manager.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/surface-manager.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/surface-manager.o -Isrc -Igen \
 	       -c src/surface-manager.c
 
 build/keyboard-functions.o: Makefile \
@@ -595,7 +595,7 @@ build/keyboard-functions.o: Makefile \
                             src/event-task.h
 	@mkdir -p build
 	@echo "  CC   keyboard-functions.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/keyboard-functions.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-functions.o -Isrc -Igen \
 	       -c src/keyboard-functions.c
 
 build/keyboard-binding.o: Makefile \
@@ -608,7 +608,7 @@ build/keyboard-binding.o: Makefile \
                           src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   keyboard-binding.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/keyboard-binding.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-binding.o -Isrc -Igen \
 	       -c src/keyboard-binding.c
 
 build/keyboard-argmand.o: Makefile \
@@ -619,7 +619,7 @@ build/keyboard-argmand.o: Makefile \
                           src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   keyboard-argmand.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/keyboard-argmand.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-argmand.o -Isrc -Igen \
 	       -c src/keyboard-argmand.c
 
 build/keyboard-bindings.o: Makefile \
@@ -635,7 +635,7 @@ build/keyboard-bindings.o: Makefile \
                            src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   keyboard-bindings.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/keyboard-bindings.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-bindings.o -Isrc -Igen \
 	       -c src/keyboard-bindings.c
 
 build/keyboard-mode.o: Makefile \
@@ -649,7 +649,7 @@ build/keyboard-mode.o: Makefile \
                        src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   keyboard-mode.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/keyboard-mode.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-mode.o -Isrc -Igen \
 	       -c src/keyboard-mode.c
 
 build/exhibitor.o: Makefile \
@@ -678,7 +678,7 @@ build/exhibitor.o: Makefile \
                    src/utils-store.h
 	@mkdir -p build
 	@echo "  CC   exhibitor.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/exhibitor.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor.o -Isrc -Igen \
 	       -c src/exhibitor.c
 
 build/exhibitor-display.o: Makefile \
@@ -706,7 +706,7 @@ build/exhibitor-display.o: Makefile \
                            src/utils-store.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-display.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/exhibitor-display.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-display.o -Isrc -Igen \
 	       -c src/exhibitor-display.c
 
 build/exhibitor-compositor.o: Makefile \
@@ -724,7 +724,7 @@ build/exhibitor-compositor.o: Makefile \
                               src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-compositor.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/exhibitor-compositor.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-compositor.o -Isrc -Igen \
 	       -c src/exhibitor-compositor.c
 
 build/exhibitor-frame.o: Makefile \
@@ -745,7 +745,7 @@ build/exhibitor-frame.o: Makefile \
                          src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-frame.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/exhibitor-frame.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-frame.o -Isrc -Igen \
 	       -c src/exhibitor-frame.c
 
 build/exhibitor-strategist.o: Makefile \
@@ -769,7 +769,7 @@ build/exhibitor-strategist.o: Makefile \
                               src/event-signals.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-strategist.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/exhibitor-strategist.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-strategist.o -Isrc -Igen \
 	       -c src/exhibitor-strategist.c
 
 build/exhibitor-pointer.o: Makefile \
@@ -797,7 +797,7 @@ build/exhibitor-pointer.o: Makefile \
                            src/event-signals.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-pointer.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/exhibitor-pointer.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-pointer.o -Isrc -Igen \
 	       -c src/exhibitor-pointer.c
 
 build/wayland-region.o: Makefile \
@@ -808,7 +808,7 @@ build/wayland-region.o: Makefile \
                         src/global-constants.h
 	@mkdir -p build
 	@echo "  CC   wayland-region.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-region.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-region.o -Isrc -Igen \
 	       -c src/wayland-region.c
 
 build/wayland-surface.o: Makefile \
@@ -820,7 +820,7 @@ build/wayland-surface.o: Makefile \
                          src/global-constants.h
 	@mkdir -p build
 	@echo "  CC   wayland-surface.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-surface.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-surface.o -Isrc -Igen \
 	       -c src/wayland-surface.c
 
 build/wayland-output.o: Makefile \
@@ -837,7 +837,7 @@ build/wayland-output.o: Makefile \
                         src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-output.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-output.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-output.o -Isrc -Igen \
 	       -c src/wayland-output.c
 
 build/wayland-cache.o: Makefile \
@@ -854,7 +854,7 @@ build/wayland-cache.o: Makefile \
                        src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-cache.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-cache.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-cache.o -Isrc -Igen \
 	       -c src/wayland-cache.c
 
 build/wayland-state.o: Makefile \
@@ -883,7 +883,7 @@ build/wayland-state.o: Makefile \
                        gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland-state.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-state.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-state.o -Isrc -Igen \
 	       -c src/wayland-state.c
 
 build/wayland.o: Makefile \
@@ -916,7 +916,7 @@ build/wayland.o: Makefile \
                  gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland.o -Isrc -Igen \
 	       -c src/wayland.c
 
 build/wayland-protocol-compositor.o: Makefile \
@@ -945,7 +945,7 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-compositor.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-compositor.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-compositor.o -Isrc -Igen \
 	       -c src/wayland-protocol-compositor.c
 
 build/wayland-protocol-surface.o: Makefile \
@@ -972,7 +972,7 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-surface.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-surface.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-surface.o -Isrc -Igen \
 	       -c src/wayland-protocol-surface.c
 
 build/wayland-protocol-region.o: Makefile \
@@ -990,7 +990,7 @@ build/wayland-protocol-region.o: Makefile \
                                  src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-region.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-region.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-region.o -Isrc -Igen \
 	       -c src/wayland-protocol-region.c
 
 build/wayland-protocol-shell.o: Makefile \
@@ -1014,7 +1014,7 @@ build/wayland-protocol-shell.o: Makefile \
                                 src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-shell.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-shell.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-shell.o -Isrc -Igen \
 	       -c src/wayland-protocol-shell.c
 
 build/wayland-protocol-shell-surface.o: Makefile \
@@ -1026,7 +1026,7 @@ build/wayland-protocol-shell-surface.o: Makefile \
                                         src/global-types.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-shell-surface.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-shell-surface.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-shell-surface.o -Isrc -Igen \
 	       -c src/wayland-protocol-shell-surface.c
 
 build/wayland-protocol-xdg-shell.o: Makefile \
@@ -1051,7 +1051,7 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-xdg-shell.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-xdg-shell.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-xdg-shell.o -Isrc -Igen \
 	       -c src/wayland-protocol-xdg-shell.c
 
 build/wayland-protocol-xdg-surface.o: Makefile \
@@ -1071,14 +1071,14 @@ build/wayland-protocol-xdg-surface.o: Makefile \
                                       gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-xdg-surface.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-xdg-surface.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-xdg-surface.o -Isrc -Igen \
 	       -c src/wayland-protocol-xdg-surface.c
 
 build/xdg-shell-protocol.o: Makefile \
                             gen/xdg-shell-protocol.c
 	@mkdir -p build
 	@echo "  CC   xdg-shell-protocol.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/xdg-shell-protocol.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/xdg-shell-protocol.o -Isrc -Igen \
 	       -c gen/xdg-shell-protocol.c
 
 build/wayland-protocol-output.o: Makefile \
@@ -1094,7 +1094,7 @@ build/wayland-protocol-output.o: Makefile \
                                  src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-output.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-output.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-output.o -Isrc -Igen \
 	       -c src/wayland-protocol-output.c
 
 build/wayland-protocol-seat.o: Makefile \
@@ -1120,7 +1120,7 @@ build/wayland-protocol-seat.o: Makefile \
                                src/utils-keymap.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-seat.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-seat.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-seat.o -Isrc -Igen \
 	       -c src/wayland-protocol-seat.c
 
 build/wayland-protocol-pointer.o: Makefile \
@@ -1140,7 +1140,7 @@ build/wayland-protocol-pointer.o: Makefile \
                                   src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-pointer.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-pointer.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-pointer.o -Isrc -Igen \
 	       -c src/wayland-protocol-pointer.c
 
 build/wayland-protocol-keyboard.o: Makefile \
@@ -1151,7 +1151,7 @@ build/wayland-protocol-keyboard.o: Makefile \
                                    src/global-types.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-keyboard.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/wayland-protocol-keyboard.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-keyboard.o -Isrc -Igen \
 	       -c src/wayland-protocol-keyboard.c
 
 build/bind-egl-wayland.o: Makefile \
@@ -1169,14 +1169,14 @@ build/bind-egl-wayland.o: Makefile \
                           src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   bind-egl-wayland.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/bind-egl-wayland.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/bind-egl-wayland.o -Isrc -Igen \
 	       -c src/bind-egl-wayland.c
 
 build/backend-gtk-res.o: Makefile \
                          gen/backend-gtk-res.c
 	@mkdir -p build
 	@echo "  CC   backend-gtk-res.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/backend-gtk-res.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/backend-gtk-res.o -Isrc -Igen \
 	       -c gen/backend-gtk-res.c \
 	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
@@ -1193,7 +1193,7 @@ build/backend-gtk-win.o: Makefile \
                          gen/version.h
 	@mkdir -p build
 	@echo "  CC   backend-gtk-win.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/backend-gtk-win.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/backend-gtk-win.o -Isrc -Igen \
 	       -c src/backend-gtk-win.c \
 	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
@@ -1209,7 +1209,7 @@ build/backend-gtk-app.o: Makefile \
                          src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   backend-gtk-app.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/backend-gtk-app.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/backend-gtk-app.o -Isrc -Igen \
 	       -c src/backend-gtk-app.c \
 	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
@@ -1232,7 +1232,7 @@ build/backend-gtk.o: Makefile \
                      src/renderer-mmap.h
 	@mkdir -p build
 	@echo "  CC   backend-gtk.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/backend-gtk.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/backend-gtk.o -Isrc -Igen \
 	       -c src/backend-gtk.c \
 	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 
@@ -1261,7 +1261,7 @@ build/metanoia.o: Makefile \
                   src/utils-keymap.h
 	@mkdir -p build
 	@echo "  CC   metanoia.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o build/metanoia.o -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/metanoia.o -Isrc -Igen \
 	       -c src/metanoia.c
 
 checks/check-chain: Makefile \
@@ -1276,7 +1276,7 @@ checks/check-chain: Makefile \
                     src/global-types.h
 	@mkdir -p checks
 	@echo "  CC   check-chain"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o checks/check-chain -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-chain -Isrc -Igen \
 	      tests/test-chain.c src/utils-chain.c
 
 checks/check-list: Makefile \
@@ -1297,7 +1297,7 @@ checks/check-list: Makefile \
                    src/global-types.h
 	@mkdir -p checks
 	@echo "  CC   check-list"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o checks/check-list -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-list -Isrc -Igen \
 	      tests/test-list.c src/utils-chain.c src/utils-list.c
 
 checks/check-branch: Makefile \
@@ -1319,7 +1319,7 @@ checks/check-branch: Makefile \
                      src/utils-log.h
 	@mkdir -p checks
 	@echo "  CC   check-branch"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o checks/check-branch -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-branch -Isrc -Igen \
 	      tests/test-branch.c src/utils-chain.c src/utils-branch.c
 
 checks/check-store: Makefile \
@@ -1339,6 +1339,6 @@ checks/check-store: Makefile \
                     src/utils-log.h
 	@mkdir -p checks
 	@echo "  CC   check-store"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -DDEBUG -g -O0 -o checks/check-store -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-store -Isrc -Igen \
 	      tests/test-store.c src/utils-chain.c src/utils-store.c
 

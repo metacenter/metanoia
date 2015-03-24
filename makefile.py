@@ -15,7 +15,7 @@ m.set_gen_directory('gen')
 m.set_c_compiler('gcc')
 m.set_oflags(['-O3']) # release
 m.set_oflags(['-DDEBUG', '-g', '-O0']) # debug
-m.set_cflags(['-std=gnu11', '-Wall', '-W', '-Wextra', '-Wpedantic'])
+m.set_cflags(['-std=gnu11', '-Wall', '-W', '-Wextra', '-Wpedantic', '-Werror'])
 m.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
 
 #-------------------------------------------------------------------------------
