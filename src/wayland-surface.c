@@ -11,7 +11,7 @@
 
 NoiaWaylandSurface* noia_wayland_surface_new()
 {
-    return calloc(sizeof(NoiaWaylandSurface), 1);
+    return calloc(1, sizeof(NoiaWaylandSurface));
 }
 
 //------------------------------------------------------------------------------

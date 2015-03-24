@@ -54,16 +54,16 @@ NoiaRenderer* noia_backend_gtk_output_initialize(NoiaOutput* output,
 
 //------------------------------------------------------------------------------
 
-int noia_backend_gtk_output_swap_buffers(NoiaOutput* output)
+NoiaResult noia_backend_gtk_output_swap_buffers(NoiaOutput* output)
 {
     NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
     if (!output_gtk) {
         LOG_ERROR("Invalid output!");
-        return -1;
+        return NOIA_RESULT_ERROR;
     }
 
     noia_backend_gtk_app_swap_buffers(output_gtk->num);
-    return 0;
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------

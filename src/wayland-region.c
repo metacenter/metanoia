@@ -11,7 +11,7 @@
 
 NoiaWaylandRegion* noia_wayland_region_new()
 {
-    return calloc(sizeof(NoiaWaylandRegion), 1);
+    return calloc(1, sizeof(NoiaWaylandRegion));
 }
 
 //------------------------------------------------------------------------------

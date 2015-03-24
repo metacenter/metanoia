@@ -10,7 +10,7 @@
 typedef struct NoiaOutput NoiaOutput;
 
 typedef NoiaRenderer* (*NoiaOutputInitRendererFunc) (NoiaOutput*, int, int);
-typedef int (*NoiaOutputSwapFunc) (NoiaOutput*);
+typedef NoiaResult (*NoiaOutputSwapFunc) (NoiaOutput*);
 typedef void (*NoiaOutputFreeFunc) (NoiaOutput*);
 
 struct NoiaOutput {

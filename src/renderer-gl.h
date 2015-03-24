@@ -29,4 +29,3 @@ NoiaRenderer* noia_renderer_gl_create(EGLDisplay egl_display,
 
 #endif // __NOIA_RENDERER_GL_H__
 
-

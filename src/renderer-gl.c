@@ -458,6 +458,7 @@ release_context:
 }
 
 //------------------------------------------------------------------------------
+
 void noia_renderer_gl_free(NoiaRenderer* self)
 {
     // TODO
@@ -472,12 +473,10 @@ NoiaRenderer* noia_renderer_gl_create(EGLDisplay egl_display,
                                       EGLSurface egl_surface,
                                       EGLContext egl_context)
 {
-    NoiaRendererGL* mine = malloc(sizeof(NoiaRendererGL));
+    NoiaRendererGL* mine = calloc(1, sizeof(NoiaRendererGL));
     if (mine == NULL) {
         return NULL;
     }
-
-    memset(mine, 0, sizeof(NoiaRendererGL));
 
     mine->base.initialize = noia_renderer_gl_initialize;
     mine->base.finalize   = noia_renderer_gl_finalize;
