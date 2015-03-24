@@ -9,12 +9,14 @@
 #include <string.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 static const char scRuntimeDirTemplate[] = "/noia-XXXXXX";
 static const char scDataDirTemplate[] = "/noia";
 
-char* noia_data_path = NULL;
-char* noia_runtime_path = NULL;
+char* sNoiaDataPath = NULL;
+char* sNoiaRuntimePath = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -92,24 +94,38 @@ void noia_environment_signal_handler_set_up(void)
 
 //------------------------------------------------------------------------------
 
+void noia_environment_mkdir(char* dir_name)
+{
+    struct stat st;
+    if (stat(dir_name, &st) == -1) {
+        if (mkdir(dir_name, 0700) == -1) {
+            LOG_ERROR("Failed to make directory '%s'! (%m)", dir_name);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
 int noia_environment_data_path_setup(void)
 {
+    // Choose directory
     char* data_path = getenv("XDG_DATA_HOME");
     if (!data_path) {
-        data_path = "/var";
+        data_path = "/tmp";
     }
 
-    noia_data_path = malloc(strlen(data_path) + sizeof(scDataDirTemplate));
-    if (!noia_data_path) {
+    sNoiaDataPath = malloc(strlen(data_path) + sizeof(scDataDirTemplate));
+    if (!sNoiaDataPath) {
         return -1;
     }
 
-    strcpy(noia_data_path, data_path);
-    strcat(noia_data_path, scDataDirTemplate);
+    strcpy(sNoiaDataPath, data_path);
+    strcat(sNoiaDataPath, scDataDirTemplate);
 
-    LOG_INFO1("Data path: '%s'", noia_data_path);
+    LOG_INFO1("Data path: '%s'", sNoiaDataPath);
 
-    // TODO: create subdirectories
+    // Create subdirectories
+    noia_environment_mkdir(sNoiaDataPath);
 
     return 0;
 }
@@ -134,15 +150,15 @@ int noia_environment_runtime_path_setup(void)
     strcpy(noia_runtime_path_template, runtime_path);
     strcat(noia_runtime_path_template, scRuntimeDirTemplate);
 
-    noia_runtime_path = mkdtemp(noia_runtime_path_template);
-    if (noia_runtime_path == NULL) {
+    sNoiaRuntimePath = mkdtemp(noia_runtime_path_template);
+    if (sNoiaRuntimePath == NULL) {
         LOG_WARN1("Failed to create runtime directory (template: %s)",
                   noia_runtime_path_template);
         result = -1;
         goto cleanup;
     }
 
-    LOG_INFO1("Runtime path: '%s'", noia_runtime_path);
+    LOG_INFO1("Runtime path: '%s'", sNoiaRuntimePath);
     return 0;
 
 cleanup:
@@ -178,14 +194,14 @@ void noia_environment_cleanup(void)
 {
     // TODO
 
-    if (noia_runtime_path) {
-        free(noia_runtime_path);
-        noia_runtime_path = NULL;
+    if (sNoiaRuntimePath) {
+        free(sNoiaRuntimePath);
+        sNoiaRuntimePath = NULL;
     }
 
-    if (noia_data_path) {
-        free(noia_data_path);
-        noia_data_path = NULL;
+    if (sNoiaDataPath) {
+        free(sNoiaDataPath);
+        sNoiaDataPath = NULL;
     }
 
     noia_log_finalize();
@@ -201,17 +217,14 @@ int noia_environment_open_file(const char *file_name,
 
     char* base_path;
     switch (path) {
-        case RUNTIME_PATH: base_path = noia_runtime_path; break;
-        case DATA_PATH:    base_path = noia_data_path;    break;
+        case RUNTIME_PATH: base_path = sNoiaRuntimePath; break;
+        case DATA_PATH:    base_path = sNoiaDataPath;    break;
     }
 
     char* file_path = malloc(strlen(base_path) + strlen(file_name) + 2);
     if (!file_path) {
         return -1;
     }
-
-    LOG_DEBUG("Creating a file '%s' in directory '%s'",
-              file_name, base_path);
 
     strcpy(file_path, base_path);
     strcat(file_path, "/");

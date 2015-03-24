@@ -36,7 +36,7 @@ static const char scLogBackTraceEnd[] =
 "----------+---------------------------+\n";
 
 // Log file
-static const char* scConfLogFile = "logs/log";
+static const char* scConfLogFile = "log";
 
 // Log file descriptor
 static int sLogFD = -1;
