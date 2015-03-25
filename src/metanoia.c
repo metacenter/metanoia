@@ -20,9 +20,7 @@ int main()
     noia_environment_set_thread_name(0, "noia:main");
     noia_environment_setup();
     noia_config_apply();
-    if (!noia_settings()->run_in_test_window) {
-        noia_dbus_initalize();
-    }
+    noia_dbus_initalize();
 
     // Prepare event dispatcher
     NoiaEventDispatcher* dispatcher = noia_event_dispatcher_new();

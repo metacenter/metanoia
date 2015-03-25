@@ -26,19 +26,19 @@ static bool sHaveSessionControl = FALSE;
 #define NOIA_DBUS_ASSERT(_ok_, _message_) \
     if (!(_ok_)) { \
         LOG_ERROR(_message_); \
-        return -ENODEV; \
+        return NOIA_RESULT_ERROR; \
     }
 
 #define NOIA_DBUS_ASSERT_MESSAGE(_ok_) \
     if (!(_ok_)) { \
         LOG_ERROR("Failed to initialize DBus message!"); \
-        return -ENOMEM; \
+        return NOIA_RESULT_ERROR; \
     }
 
 #define NOIA_DBUS_ASSERT_ARGUMENTS(_ok_) \
     if (!(_ok_)) { \
         LOG_ERROR("Failed to store DBus message arguments!"); \
-        result = -ENOMEM; \
+        result = NOIA_RESULT_ERROR; \
         goto clear_msg; \
     }
 
@@ -49,7 +49,7 @@ static bool sHaveSessionControl = FALSE;
     } \
     if (!(_ok_)) { \
         LOG_ERROR("DBus Send message failed! (%s)", _message_); \
-        result = -EIO; \
+        result = NOIA_RESULT_ERROR; \
         goto clear_msg; \
     }
 
@@ -60,15 +60,16 @@ static bool sHaveSessionControl = FALSE;
     } \
     if (!(_ok_)) { \
         LOG_ERROR("Failed to get args from DBus reply!"); \
-        result = -ENODEV; \
+        result = NOIA_RESULT_ERROR; \
         goto clear_reply; \
     }
 
 //------------------------------------------------------------------------------
 
-bool noia_dbus_initalize(void)
+NoiaResult noia_dbus_initalize(void)
 {
     DBusError err;
+    NoiaResult result = NOIA_RESULT_SUCCESS;
 
     LOG_INFO1("Initializing DBus...");
 
@@ -77,34 +78,41 @@ bool noia_dbus_initalize(void)
 
     // Connect to the system bus
     sDBusSystemConn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
-    if (dbus_error_is_set(&err)) {
+    if (dbus_error_is_set(&err) || NULL == sDBusSystemConn) {
         LOG_ERROR(err.message);
         dbus_error_free(&err);
-    }
-    if (NULL == sDBusSystemConn) {
-        LOG_ERROR("DBus initialization failed!");
-        return FALSE;
+        result = NOIA_RESULT_ERROR;
+        goto result;
     }
 
     // Get session ID
-    if (noia_dbus_session_get_session_by_pid(getpid(), &scSessionObject)) {
+    result = noia_dbus_session_get_session_by_pid(getpid(), &scSessionObject);
+    if (result == NOIA_RESULT_SUCCESS) {
         LOG_INFO2("Session DBus path is: '%s'", scSessionObject);
     } else {
         LOG_WARN2("Could not get session DBus path!");
         scSessionObject = NULL;
+        goto result;
     }
 
     // Take control over session
-    if (noia_dbus_session_take_control() < 0) {
-        LOG_WARN2("Could not take controll over session!");
-        sHaveSessionControl = FALSE;
-    } else {
+    result = noia_dbus_session_take_control();
+    if (result == NOIA_RESULT_SUCCESS) {
         LOG_INFO2("Taking control over session: SUCCESS");
-        sHaveSessionControl = TRUE;
+        sHaveSessionControl = true;
+    } else {
+        LOG_WARN2("Could not take controll over session!");
+        sHaveSessionControl = false;
+        goto result;
     }
 
-    LOG_INFO1("Initializing DBus: SUCCESS");
-    return TRUE;
+result:
+    if (result == NOIA_RESULT_SUCCESS) {
+        LOG_INFO1("Initializing DBus: SUCCESS");
+    } else {
+        LOG_WARN1("Initializing DBus: FAILURE!");
+    }
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -125,16 +133,17 @@ void noia_dbus_finalize(void)
 
 //------------------------------------------------------------------------------
 
-int noia_dbus_session_get_session_by_pid(int pid, const char** sid_out)
+NoiaResult noia_dbus_session_get_session_by_pid(int pid, const char** sid_out)
 {
     static const char* const cMessageName = "GetSessionByPID";
 
-    bool ok;
-    int result;
-    const char* sid;
     DBusMessage *msg;
     DBusMessage *reply;
     DBusError err;
+
+    bool ok = true;
+    const char* sid = NULL;
+    NoiaResult result = NOIA_RESULT_SUCCESS;
 
     NOIA_DBUS_ASSERT(sDBusSystemConn, scDBusSystemConnErrorMsg);
     dbus_error_init(&err);
@@ -167,7 +176,7 @@ int noia_dbus_session_get_session_by_pid(int pid, const char** sid_out)
     *sid_out = strdup(sid);
 
     // Clear and return
-    result = TRUE;
+    result = NOIA_RESULT_SUCCESS;
     clear_reply: dbus_message_unref(reply);
     clear_msg: dbus_message_unref(msg);
     return result;
@@ -175,7 +184,7 @@ int noia_dbus_session_get_session_by_pid(int pid, const char** sid_out)
 
 //------------------------------------------------------------------------------
 
-int noia_dbus_session_take_control()
+NoiaResult noia_dbus_session_take_control()
 {
     static const char* const cMessageName = "TakeControl";
 
@@ -217,7 +226,7 @@ int noia_dbus_session_take_control()
 
 //------------------------------------------------------------------------------
 
-int noia_dbus_session_release_control()
+NoiaResult noia_dbus_session_release_control()
 {
     static const char* const cMessageName = "ReleaseControl";
 
@@ -252,7 +261,7 @@ int noia_dbus_session_release_control()
 
 //------------------------------------------------------------------------------
 
-int noia_dbus_session_take_device(uint32_t major, uint32_t minor)
+NoiaResult noia_dbus_session_take_device(uint32_t major, uint32_t minor)
 {
     static const char* const cMessageName = "TakeDevice";
 
