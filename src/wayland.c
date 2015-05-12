@@ -10,6 +10,7 @@
 #include "wayland-cache.h"
 #include "wayland-state.h"
 
+#include "config.h"
 #include "utils-log.h"
 #include "utils-environment.h"
 #include "global-objects.h"
@@ -22,9 +23,6 @@
 #include "xdg-shell-server-protocol.h"
 
 //------------------------------------------------------------------------------
-
-/// @todo Make Wayland socket configurable
-static const char* scSocketName = "wayland-0";
 
 static pthread_t wayland_thread;
 static struct wl_display* wayland_display;
@@ -213,9 +211,14 @@ void noia_wayland_initialize(NoiaLoop* this_loop)
     noia_wayland_event_loop_feeder(NULL);
 
     // Add socket
-    if (wl_display_add_socket(wayland_display, scSocketName)) {
-        LOG_ERROR("Failed to add Wayland socket: %s", strerror(errno));
+    if (wl_display_add_socket(wayland_display,
+                              noia_settings()->wayland_display_name)) {
+        LOG_ERROR("Failed to add Wayland socket '%s': %m",
+                  noia_settings()->wayland_display_name);
         return;
+    } else {
+        LOG_WAYL1("Wayland socket name: '%s'",
+                  noia_settings()->wayland_display_name);
     }
 
     // Run wayland display in separate thread

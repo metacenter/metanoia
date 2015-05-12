@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <memory.h>
 
+static const char* scDefaultWaylandDisplayName = "wayland-0";
+
 NoiaKeymap* keymap;
 
 static NoiaSettings sSettings;
@@ -23,13 +25,16 @@ void noia_config_apply()
     keymap = noia_utils_keymap_new();
     noia_utils_keymap_initialize(keymap);
 
-    unsigned int i;
-    for (i=0; i < sizeof(scBindings)/sizeof(NoiaBinding); ++i) {
+    for (unsigned i = 0; i < sizeof(scBindings)/sizeof(NoiaBinding); ++i) {
         noia_keyboard_add_binding(NOIA_NORMAL_MODE, &scBindings[i]);
     }
 
     // Apply evironment variables
     sSettings.run_in_test_window = (getenv("DISPLAY") != NULL);
+    sSettings.wayland_display_name = strdup(getenv("METANOIA_WAYLAND_DISPLAY"));
+    if (sSettings.wayland_display_name == NULL) {
+        sSettings.wayland_display_name = scDefaultWaylandDisplayName;
+    }
 }
 
 //------------------------------------------------------------------------------

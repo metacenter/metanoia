@@ -13,6 +13,7 @@ typedef struct {
 
 typedef struct {
     bool run_in_test_window;
+    const char* wayland_display_name;
 } NoiaSettings;
 
 const NoiaConfig* noia_config();

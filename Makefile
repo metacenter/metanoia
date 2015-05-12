@@ -222,9 +222,9 @@ build/utils-store.o: Makefile \
 build/utils-dbus.o: Makefile \
                     src/utils-dbus.c \
                     src/utils-dbus.h \
-                    src/utils-log.h \
                     src/global-constants.h \
-                    src/global-types.h
+                    src/global-types.h \
+                    src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   utils-dbus.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-dbus.o -Isrc -Igen \
@@ -414,9 +414,9 @@ build/device-common.o: Makefile \
                        src/device-common.c \
                        src/device-common.h \
                        src/utils-dbus.h \
-                       src/utils-log.h \
                        src/global-constants.h \
-                       src/global-types.h
+                       src/global-types.h \
+                       src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   device-common.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-common.o -Isrc -Igen \
@@ -466,9 +466,9 @@ build/device-evdev.o: Makefile \
                       src/event-dispatcher.h \
                       src/device-common.h \
                       src/utils-dbus.h \
-                      src/utils-log.h \
                       src/global-constants.h \
                       src/global-types.h \
+                      src/utils-log.h \
                       src/global-objects.h \
                       src/utils-object.h \
                       src/event-signals.h \
@@ -909,6 +909,8 @@ build/wayland.o: Makefile \
                  src/wayland-state.h \
                  src/output.h \
                  src/renderer.h \
+                 src/config.h \
+                 src/utils-keymap.h \
                  src/utils-log.h \
                  src/utils-environment.h \
                  src/global-objects.h \
