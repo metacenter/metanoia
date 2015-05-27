@@ -88,7 +88,7 @@ NoiaResult noia_list_remove(NoiaList* self, void* data, NoiaCompareFunc compare)
     int found = false;
     Link* link = NULL;
     for (link = self->base.first; link; link = link->next) {
-        found = !compare(data, link->data);
+        found = !compare(link->data, data);
         if (found) {
             break;
         }
