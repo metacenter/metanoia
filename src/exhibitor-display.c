@@ -12,6 +12,7 @@
 
 #include <malloc.h>
 #include <memory.h>
+#include <string.h>
 
 //------------------------------------------------------------------------------
 // PRIVATE
@@ -80,7 +81,8 @@ void* noia_display_thread_loop(void* data)
         return NULL;
     }
 
-    char* name = "noia@";
+    char name[128];
+    snprintf(name, sizeof name, "noia@%s", self->output->unique_name);
     noia_environment_on_enter_new_thread(self->thread, name);
     LOG_INFO1("Threads: starting display loop '%s'", name);
 

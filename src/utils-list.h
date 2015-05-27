@@ -38,7 +38,8 @@ void noia_list_clean(NoiaList* self);
 
 NoiaList* noia_list_subtract(NoiaList* minuend,
                              NoiaList* subtrahent,
-                             NoiaCompareFunc compare);
+                             NoiaCompareFunc compare,
+                             NoiaDuplicateFunc duplicate);
 
 static inline int noia_list_len(NoiaList* self)
 {

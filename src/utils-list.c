@@ -143,17 +143,22 @@ void noia_list_clean(NoiaList* self)
 
 NoiaList* noia_list_subtract(NoiaList* minuend,
                              NoiaList* subtrahent,
-                             NoiaCompareFunc compare)
+                             NoiaCompareFunc compare,
+                             NoiaDuplicateFunc duplicate)
 {
     NoiaList* difference = noia_list_new(minuend->free_data);
 
     FOR_EACH (minuend, mlink) {
-        int found = 0;
+        bool found = false;
         FOR_EACH (subtrahent, slink) {
-            found = !compare(mlink->data, slink->data);
+            found = found || !compare(mlink->data, slink->data);
         }
         if (!found) {
-            noia_list_append(difference, mlink->data);
+            if (duplicate) {
+                noia_list_append(difference, duplicate(mlink->data));
+            } else {
+                noia_list_append(difference, mlink->data);
+            }
         }
     }
 

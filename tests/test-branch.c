@@ -56,7 +56,7 @@ int main()
             NOIA_TEST(should_append_and_prepend_values),
         };
 
-    return noia_test_run("List", test, NOIA_NUM_TESTS(test));
+    return noia_test_run("Branch", test, NOIA_NUM_TESTS(test));
 }
 
 //------------------------------------------------------------------------------

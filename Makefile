@@ -9,7 +9,7 @@ checks: checks/check-chain checks/check-list checks/check-branch checks/check-st
 check: checks
 	@time (for c in checks/check*; do $$c; done)
 memcheck: checks
-	@time (for c in checks/check*; do valgrind --leak-check=full --show-leak-kinds=all $$c; done)
+	@time (for c in checks/check*; do valgrind --leak-check=full --show-leak-kinds=all $$c; echo;done)
 
 
 build/metanoia: Makefile \

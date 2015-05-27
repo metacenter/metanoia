@@ -16,6 +16,9 @@ typedef void (*NoiaFreeFunc) (void*);
 /// Compare function definition
 typedef int (*NoiaCompareFunc) (void*, void*);
 
+/// Duplicate function definition
+typedef void* (*NoiaDuplicateFunc) (void*);
+
 /// Structure to be inherited by all types that want to be stored in NoiaStore
 typedef struct {
     union {

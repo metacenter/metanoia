@@ -134,10 +134,10 @@ void noia_output_collector_update()
     NoiaList* actual_outputs = noia_output_collector_fetch_actual_outputs();
 
     NoiaList* found_outputs = noia_list_subtract(actual_outputs, outputs,
-                                         (NoiaCompareFunc) noia_output_compare);
+                                   (NoiaCompareFunc) noia_output_compare, NULL);
 
     NoiaList* lost_outputs = noia_list_subtract(outputs, actual_outputs,
-                                         (NoiaCompareFunc) noia_output_compare);
+                                   (NoiaCompareFunc) noia_output_compare, NULL);
 
     noia_output_collector_notify_outputs_found(found_outputs);
     noia_output_collector_notify_outputs_lost(lost_outputs);
