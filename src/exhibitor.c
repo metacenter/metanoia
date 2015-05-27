@@ -83,15 +83,18 @@ void noia_exhibitor_on_display_lost(void* data)
 
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
-    LOG_INFO2("Deleting renderer timer");
+    LOG_INFO2("Deleting renderer timer for output '%s'", output->unique_name);
+
     FOR_EACH(exhibitor->displays, link) {
         NoiaDisplay* display = (NoiaDisplay*) link->data;
         if (display && display->output == output) {
             noia_display_stop(display);
-            // TODO: Remove display
             break;
         }
     }
+
+    noia_list_remove(exhibitor->displays, output->unique_name,
+                     (NoiaCompareFunc) noia_display_compare_unique_name);
 }
 
 //------------------------------------------------------------------------------

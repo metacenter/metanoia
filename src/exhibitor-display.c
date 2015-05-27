@@ -171,3 +171,14 @@ void noia_display_command_position(NoiaDisplay* self,
 
 //------------------------------------------------------------------------------
 
+int noia_display_compare_unique_name(NoiaDisplay* self,
+                                     char* unique_name)
+{
+    if (!self || !self->output || !self->output->unique_name) {
+        return -1;
+    }
+    return strcmp(self->output->unique_name, unique_name);
+}
+
+//------------------------------------------------------------------------------
+

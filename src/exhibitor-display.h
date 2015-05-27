@@ -30,5 +30,8 @@ void noia_display_command_position(NoiaDisplay* self,
                                    NoiaArgmandType direction,
                                    int position);
 
+int noia_display_compare_unique_name(NoiaDisplay* self,
+                                     char* unique_name);
+
 #endif // __NOIA_EXHIBITOR_DISPLAY_H__
 
