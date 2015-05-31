@@ -10,7 +10,7 @@
 // TODO: move 'attach' elsewhere
 typedef struct NoiaRenderer NoiaRenderer;
 struct NoiaRenderer {
-    int (*initialize) (NoiaRenderer*);
+    NoiaResult (*initialize) (NoiaRenderer*);
     void (*finalize) (NoiaRenderer*);
     void (*attach) (NoiaRenderer*, NoiaSurfaceId, void*);
     void (*draw) (NoiaRenderer*, NoiaList*, int x, int y, NoiaSurfaceId);

@@ -26,9 +26,9 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-int noia_renderer_mmap_initialize(NOIA_UNUSED NoiaRenderer* self)
+NoiaResult noia_renderer_mmap_initialize(NOIA_UNUSED NoiaRenderer* self)
 {
-    return 1;
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
 
 //------------------------------------------------------------------------------
 
-// NOTE: MMap renderer can not display surfaces passed trouhgt GPU
+/// @note MMap renderer can not display surfaces passed trouhgt GPU
 void noia_renderer_mmap_draw_surfaces(NoiaRendererMMap* mine,
                                       NoiaList* surfaces)
 {

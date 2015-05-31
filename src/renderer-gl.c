@@ -179,9 +179,10 @@ void noia_renderer_gl_attach(NoiaRenderer* self,
 
 //------------------------------------------------------------------------------
 
-int noia_renderer_gl_initialize(NoiaRenderer* self)
+NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
 {
-    int r, result = 0;
+    int r;
+    NoiaResult result = NOIA_RESULT_ERROR;
     NoiaRendererGL* mine;
 
     // TODO: add mutex
@@ -287,7 +288,7 @@ int noia_renderer_gl_initialize(NoiaRenderer* self)
     glBindTexture(GL_TEXTURE_2D, vbo_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    result = 1;
+    result = NOIA_RESULT_SUCCESS;
 
     LOG_INFO1("Initializing GL renderer: SUCCESS");
 
