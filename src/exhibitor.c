@@ -215,11 +215,11 @@ void noia_exhibitor_initialize(NoiaLoop* this_loop)
 
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
-    noia_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
+    noia_event_signal_subscribe(SIGNAL_OUTPUT_FOUND,
                noia_task_create(noia_exhibitor_on_display_found,
                                 this_loop, exhibitor));
 
-    noia_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
+    noia_event_signal_subscribe(SIGNAL_OUTPUT_LOST,
                noia_task_create(noia_exhibitor_on_display_lost,
                                 this_loop, exhibitor));
 

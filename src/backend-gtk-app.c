@@ -45,7 +45,7 @@ void noia_backend_gtk_app_activate(GApplication* app)
     LOG_INFO1("GTK Backend: application activated");
 
     // Inform compositor about new outputs
-    noia_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
+    noia_event_signal_emit(SIGNAL_OUTPUTS_CHANGED, NULL);
 }
 
 //------------------------------------------------------------------------------

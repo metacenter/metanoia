@@ -479,11 +479,13 @@ NoiaRenderer* noia_renderer_gl_create(EGLDisplay egl_display,
         return NULL;
     }
 
-    mine->base.initialize = noia_renderer_gl_initialize;
-    mine->base.finalize   = noia_renderer_gl_finalize;
-    mine->base.attach     = noia_renderer_gl_attach;
-    mine->base.draw       = noia_renderer_gl_draw;
-    mine->base.free       = noia_renderer_gl_free;
+    noia_renderer_initialize(&mine->base,
+                             noia_renderer_gl_initialize,
+                             noia_renderer_gl_finalize,
+                             noia_renderer_gl_attach,
+                             noia_renderer_gl_draw,
+                             NULL,
+                             noia_renderer_gl_free);
 
     mine->egl_display = egl_display;
     mine->egl_surface = egl_surface;

@@ -80,7 +80,7 @@ gboolean noia_backend_gtk_win_on_configure_event
                                            gpointer user_data)
 {
     intptr_t n = (intptr_t) user_data;
-    noia_backend_gtk_group_clear_surface(n);
+    noia_backend_gtk_group_queue_draw(n);
     return TRUE;
 }
 

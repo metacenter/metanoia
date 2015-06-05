@@ -95,7 +95,7 @@ void noia_output_collector_notify_outputs_found(NoiaList* found_outputs)
 
         // notify about new output
         if (output->renderer) {
-            noia_event_signal_emit(SIGNAL_DISPLAY_FOUND, (NoiaObject*) output);
+            noia_event_signal_emit(SIGNAL_OUTPUT_FOUND, (NoiaObject*) output);
         } else {
             LOG_WARN1("Invalid renderer!");
         }
@@ -117,7 +117,7 @@ void noia_output_collector_notify_outputs_lost(NoiaList* lost_outputs)
 
         LOG_INFO1("Removing output '%s'", output->unique_name);
         noia_list_remove(outputs, output, (NoiaCompareFunc)noia_output_compare);
-        noia_event_signal_emit(SIGNAL_DISPLAY_LOST, (NoiaObject*) output);
+        noia_event_signal_emit(SIGNAL_OUTPUT_LOST, (NoiaObject*) output);
     }
 }
 
@@ -149,8 +149,8 @@ void noia_output_collector_update()
 
 //------------------------------------------------------------------------------
 
-/// Handle SIGNAL_DISPLAY_DISCOVERED signal
-void noia_outputs_on_display_discovered(NOIA_UNUSED void* data)
+/// Handle SIGNAL_OUTPUTS_CHANGED signal
+void noia_output_on_change(NOIA_UNUSED void* data)
 {
     noia_output_collector_update();
 }
@@ -177,8 +177,8 @@ void noia_output_collector_initialize(NoiaLoop* this_loop)
     noia_output_collector_update();
 
     // subscribe for signals
-    noia_event_signal_subscribe(SIGNAL_DISPLAY_DISCOVERED,
-         noia_task_create(noia_outputs_on_display_discovered, this_loop, NULL));
+    noia_event_signal_subscribe(SIGNAL_OUTPUTS_CHANGED,
+         noia_task_create(noia_output_on_change, this_loop, NULL));
 
     noia_loop_add_finalizer(this_loop, noia_output_collector_finalize);
 }

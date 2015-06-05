@@ -22,7 +22,7 @@ void noia_quit()
 
 void noia_refresh_displays()
 {
-    noia_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
+    noia_event_signal_emit(SIGNAL_DISPLAYS_CHANGED, NULL);
 }
 
 //------------------------------------------------------------------------------

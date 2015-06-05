@@ -6,16 +6,42 @@
 
 #include "utils-list.h"
 
+typedef struct NoiaRendererStruct NoiaRenderer;
+
+typedef NoiaResult (*NoiaRendererInitializeFunc) (NoiaRenderer*);
+
+typedef void (*NoiaRendererFinalizeFunc) (NoiaRenderer*);
+
+typedef void (*NoiaRendererAttachFunc) (NoiaRenderer*,
+                                        NoiaSurfaceId, void*);
+
+typedef void (*NoiaRendererDrawFunc) (NoiaRenderer*,
+                                      NoiaList*,
+                                      int x, int y,
+                                      NoiaSurfaceId);
+
+typedef void (*NoiaRendererCopyBufferFunc) (NoiaRenderer*, void*);
+
+typedef void (*NoiarendererFreeFunc) (NoiaRenderer*);
+
 // Renderer strategy interface
 // TODO: move 'attach' elsewhere
-typedef struct NoiaRenderer NoiaRenderer;
-struct NoiaRenderer {
-    NoiaResult (*initialize) (NoiaRenderer*);
-    void (*finalize) (NoiaRenderer*);
-    void (*attach) (NoiaRenderer*, NoiaSurfaceId, void*);
-    void (*draw) (NoiaRenderer*, NoiaList*, int x, int y, NoiaSurfaceId);
-    void (*free) (NoiaRenderer*);
+struct NoiaRendererStruct {
+    NoiaRendererInitializeFunc initialize;
+    NoiaRendererFinalizeFunc finalize;
+    NoiaRendererAttachFunc attach;
+    NoiaRendererDrawFunc draw;
+    NoiaRendererCopyBufferFunc copy_buffer;
+    NoiaRendererFinalizeFunc free;
 };
+
+void noia_renderer_initialize(NoiaRenderer* self,
+                              NoiaRendererInitializeFunc initialize,
+                              NoiaRendererFinalizeFunc finalize,
+                              NoiaRendererAttachFunc attach,
+                              NoiaRendererDrawFunc draw,
+                              NoiaRendererCopyBufferFunc copy_buffer,
+                              NoiaRendererFinalizeFunc free);
 
 #endif // __NOIA_RENDERER_H__
 

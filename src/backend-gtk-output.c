@@ -22,23 +22,21 @@ NoiaRenderer* noia_backend_gtk_output_initialize(NoiaOutput* output,
 
     LOG_INFO1("Initializing GTK output...");
 
-    NoiaViewGroup* group =
-                 noia_backend_gtk_group_prepare(output_gtk->num, width, height);
-    if (!group) {
-        LOG_WARN1("Initializing GTK output: no displays");
-        return NULL;
+    noia_backend_gtk_group_prepare(output_gtk->num, width, height);
+
+    output_gtk->stride =
+                       cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
+
+    output->renderer = noia_renderer_mmap_create(output, width, height);
+    for (int i = 0; i < NUM_BUFFERS; ++i) {
+        output_gtk->data[i] = malloc(4 * output_gtk->stride * height);
+        noia_renderer_mmap_set_buffer(output->renderer, i,
+                                      output_gtk->data[i],
+                                      output_gtk->stride);
     }
 
     LOG_INFO1("Initializing GTK output: SUCCESS");
-
-    NoiaRenderer* renderer = noia_renderer_mmap_create(output, width, height);
-    noia_renderer_mmap_set_buffer(renderer, 0,
-                                  group->buffer[0].data,
-                                  group->stride);
-    noia_renderer_mmap_set_buffer(renderer, 1,
-                                  group->buffer[1].data,
-                                  group->stride);
-    return renderer;
+    return output->renderer;
 }
 
 //------------------------------------------------------------------------------
@@ -67,9 +65,16 @@ void noia_backend_gtk_output_free(NoiaOutput* output)
     noia_backend_gtk_group_discard(output_gtk->num);
     if (output->renderer) {
         noia_renderer_mmap_free(output->renderer);
+        output->renderer = NULL;
     }
     if (output->unique_name) {
         free(output->unique_name);
+        output->unique_name = NULL;
+    }
+    for (int i = 0; i < NUM_BUFFERS; ++i) {
+        if (output_gtk->data[i]) {
+            free(output_gtk->data[i]);
+        }
     }
     free(output);
 }
@@ -89,6 +94,7 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
                            noia_backend_gtk_output_free);
 
     output_gtk->num = num;
+
     return output_gtk;
 }
 
@@ -97,20 +103,24 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
 int noia_backend_gtk_get_outputs(NoiaList* outputs)
 {
     NoiaSize resolution;
-    int i = 0, n = 0;
+    int n = 0, c = 0;
     do {
-        resolution = noia_backend_gtk_group_get_resolution(i);
+        resolution = noia_backend_gtk_group_get_resolution(n);
         if (resolution.width > 0 && resolution.height > 0) {
             NoiaOutputGTK* output =
                               noia_backend_gtk_output_new(resolution.width,
-                                                          resolution.height, i);
+                                                          resolution.height, n);
+            if (!noia_backend_gtk_group_get_output(n)) {
+                noia_backend_gtk_group_set_output(n, output);
+            }
+
             noia_list_append(outputs, output);
-            n +=1;
+            c += 1;
         }
-        i += 1;
+        n += 1;
     } while (resolution.width >= 0 && resolution.height >= 0);
 
-    return n;
+    return c;
 }
 
 

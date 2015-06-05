@@ -10,6 +10,10 @@
 #include <malloc.h>
 #include <string.h>
 
+#define NOIA_ASSERT_RENDERER_MMAP(renderer) \
+    NoiaRendererMMap* mine = (NoiaRendererMMap*) self; \
+    if (!mine) { LOG_ERROR("Invalid renderer!"); return; }
+
 //------------------------------------------------------------------------------
 
 typedef struct {
@@ -183,16 +187,23 @@ void noia_renderer_mmap_draw(NoiaRenderer* self,
                              int x, int y,
                              NoiaSurfaceId cursor_sid)
 {
-    NoiaRendererMMap* mine = (NoiaRendererMMap*) self;
-    if (!mine) {
-        LOG_ERROR("Invalid renderer!");
-        return;
-    }
+    NOIA_ASSERT_RENDERER_MMAP(self);
 
     noia_renderer_mmap_draw_bg_image(mine);
     noia_renderer_mmap_draw_surfaces(mine, surfaces);
     noia_renderer_mmap_draw_pointer(mine, x, y, cursor_sid);
     noia_renderer_mmap_swap_buffers(mine);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_renderer_mmap_copy_buffer(NoiaRenderer* self,
+                                    void* dest_data)
+{
+    NOIA_ASSERT_RENDERER_MMAP(self);
+
+    size_t size = mine->buffer[mine->front].stride * mine->height;
+    memcpy(dest_data, mine->buffer[mine->front].data, size);
 }
 
 //------------------------------------------------------------------------------
@@ -216,11 +227,13 @@ NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output,
 
     memset(mine, 0, sizeof(NoiaRendererMMap));
 
-    mine->base.initialize = noia_renderer_mmap_initialize;
-    mine->base.finalize   = noia_renderer_mmap_finalize;
-    mine->base.attach     = NULL; // TODO
-    mine->base.draw       = noia_renderer_mmap_draw;
-    mine->base.free       = noia_renderer_mmap_free;
+    noia_renderer_initialize(&mine->base,
+                             noia_renderer_mmap_initialize,
+                             noia_renderer_mmap_finalize,
+                             NULL, /// @todo Implement attach function
+                             noia_renderer_mmap_draw,
+                             noia_renderer_mmap_copy_buffer,
+                             noia_renderer_mmap_free);
 
     mine->width = width;
     mine->height = height;

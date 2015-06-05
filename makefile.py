@@ -214,6 +214,12 @@ metanoia.add_input(t)
 # RENDERERS
 
 t = m.add_compile_target(
+        output='renderer.o',
+        inputs=['renderer.c'],
+    )
+metanoia.add_input(t)
+
+t = m.add_compile_target(
         output='renderer-mmap.o',
         inputs=['renderer-mmap.c'],
     )

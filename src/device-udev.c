@@ -34,7 +34,7 @@ void noia_udev_handle_device(NoiaEventData* data, struct epoll_event* epev)
               udev_device_get_devtype(dev), udev_device_get_action(dev));
 
     if (strcmp("drm", udev_device_get_subsystem(dev)) == 0) {
-        noia_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
+        noia_event_signal_emit(SIGNAL_DISPLAYS_CHANGED, NULL);
     }
 
     udev_device_unref(dev);

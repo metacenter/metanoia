@@ -24,24 +24,14 @@ void noia_backend_gtk_group_initialize(int n, NoiaSize resolution)
 //------------------------------------------------------------------------------
 
 /// Allocate memory for surfaces and prepare GTK widgets
-NoiaViewGroup* noia_backend_gtk_group_prepare(int n, int width, int height)
+void noia_backend_gtk_group_prepare(int n, int width, int height)
 {
-    group[n].stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
-
-    // Create data and surface
-    for (int i = 0; i < NUM_BUFFERS; ++i) {
-        group[n].buffer[i].data = malloc(4 * group[n].stride * height);
-        group[n].buffer[i].source =
-                    cairo_image_surface_create_for_data(group[n].buffer[i].data,
-                            CAIRO_FORMAT_RGB24, width, height, group[n].stride);
-    }
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
+    group[n].data = malloc(4 * height * stride);
 
     // Clear drawing area
-    noia_backend_gtk_group_clear_surface(n);
     gtk_widget_set_size_request(group[n].gtk.area, width, height);
     gtk_widget_queue_draw_area(group[n].gtk.area, 0, 0, width, height);
-
-    return &group[n];
 }
 
 //------------------------------------------------------------------------------
@@ -66,9 +56,6 @@ void noia_backend_gtk_group_set_enabled(int n, int enabled)
     gtk_image_set_from_icon_name(GTK_IMAGE(group[n].gtk.menu_image),
                             enabled ? "display" : "preferences-desktop-display",
                             GTK_ICON_SIZE_DND);
-
-    // Notify display state changed
-    noia_event_signal_emit(SIGNAL_DISPLAY_DISCOVERED, NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -76,20 +63,19 @@ void noia_backend_gtk_group_set_enabled(int n, int enabled)
 /// Toggle view group
 void noia_backend_gtk_group_toggle_enabled(int n)
 {
+    // Toggle the group
     noia_backend_gtk_group_set_enabled(n, !group[n].enabled);
+
+    // Notify display state changed
+    noia_event_signal_emit(SIGNAL_OUTPUTS_CHANGED, NULL);
 }
 
 //------------------------------------------------------------------------------
 
-/// Clear all the surfaces of output
-void noia_backend_gtk_group_clear_surface(int n)
+/// Check is group view is enabled
+bool noia_backend_gtk_group_is_enabled(int n)
 {
-    for (int i = 0; i < NUM_BUFFERS; ++i) {
-        cairo_t *context = cairo_create(group[n].buffer[i].source);
-        cairo_set_source_rgb(context, 0, 0, 0);
-        cairo_paint(context);
-        cairo_destroy(context);
-    }
+    return group[n].enabled;
 }
 
 //------------------------------------------------------------------------------
@@ -100,16 +86,27 @@ void noia_backend_gtk_group_draw(int n,
                                  cairo_t* context)
 {
     pthread_mutex_lock(&mutex_buffer);
+    NoiaOutputGTK* output_gtk = group[n].output;
+    NoiaRenderer* renderer = output_gtk->base.renderer;
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24,
+                                               output_gtk->base.width);
 
-    cairo_surface_t* source = group[n].buffer[group[n].front].source;
-    if (!source) {
-        return;
+    // Copy  buffer data
+    renderer->copy_buffer(renderer, group[n].data);
+
+    // Draw buffer on GUI
+    cairo_surface_t* source = cairo_image_surface_create_for_data
+                                          (group[n].data,
+                                           CAIRO_FORMAT_RGB24,
+                                           output_gtk->base.width,
+                                           output_gtk->base.height,
+                                           stride);
+    if (source) {
+        cairo_set_source_surface(context, source, 0, 0);
+        cairo_rectangle(context, 0, 0, gtk_widget_get_allocated_width(widget),
+                                       gtk_widget_get_allocated_height(widget));
+        cairo_fill(context);
     }
-
-    cairo_set_source_surface(context, source, 0, 0);
-    cairo_rectangle(context, 0, 0, gtk_widget_get_allocated_width(widget),
-                                   gtk_widget_get_allocated_height(widget));
-    cairo_fill(context);
 
     pthread_mutex_unlock(&mutex_buffer);
 }
@@ -129,11 +126,6 @@ void noia_backend_gtk_group_queue_draw(int n)
 /// Free the buffers of output and GUI data
 void noia_backend_gtk_group_discard(int n)
 {
-    for (int i = 0; i < NUM_BUFFERS; ++i) {
-        free(group[n].buffer[i].data);
-        group[n].buffer[i].data = NULL;
-    }
-
     group[n].gtk.area = NULL;
     group[n].gtk.box = NULL;
     group[n].gtk.menu_image = NULL;
@@ -143,11 +135,8 @@ void noia_backend_gtk_group_discard(int n)
 //------------------------------------------------------------------------------
 
 /// Swap the buffers of output
-void noia_backend_gtk_group_swap_buffers(int n)
+void noia_backend_gtk_group_swap_buffers(NOIA_UNUSED int n)
 {
-    pthread_mutex_lock(&mutex_buffer);
-    group[n].front = (group[n].front + 1) % NUM_BUFFERS;
-    pthread_mutex_unlock(&mutex_buffer);
 }
 
 //------------------------------------------------------------------------------
@@ -195,6 +184,22 @@ void noia_backend_gtk_group_set_gui_data(int n,
     if (resolution_action) {
         group[n].gtk.resolution_action = resolution_action;
     }
+}
+
+//------------------------------------------------------------------------------
+
+/// Set the output object
+NoiaOutputGTK* noia_backend_gtk_group_get_output(int n)
+{
+    return group[n].output;
+}
+
+//------------------------------------------------------------------------------
+
+/// Set the output object
+void noia_backend_gtk_group_set_output(int n, NoiaOutputGTK* output)
+{
+    group[n].output = output;
 }
 
 //------------------------------------------------------------------------------

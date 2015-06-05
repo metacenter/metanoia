@@ -112,7 +112,7 @@ void wayland_pointer_button_handler(void* data)
 
 //------------------------------------------------------------------------------
 
-void wayland_display_found_handler(void* data)
+void wayland_output_found_handler(void* data)
 {
     NoiaOutput* output = (NoiaOutput*) data;
     noia_wayland_state_advertise_output(output);
@@ -121,7 +121,7 @@ void wayland_display_found_handler(void* data)
 
 //------------------------------------------------------------------------------
 
-void wayland_display_lost_handler(void* data)
+void wayland_output_lost_handler(void* data)
 {
     NoiaOutput* output = (NoiaOutput*) data;
     noia_wayland_state_destroy_output(output);
@@ -252,12 +252,12 @@ void noia_wayland_initialize(NoiaLoop* this_loop)
                noia_task_create(wayland_pointer_button_handler,
                                 this_loop, NULL));
 
-    noia_event_signal_subscribe(SIGNAL_DISPLAY_FOUND,
-               noia_task_create(wayland_display_found_handler,
+    noia_event_signal_subscribe(SIGNAL_OUTPUT_FOUND,
+               noia_task_create(wayland_output_found_handler,
                                 this_loop, NULL));
 
-    noia_event_signal_subscribe(SIGNAL_DISPLAY_LOST,
-               noia_task_create(wayland_display_lost_handler,
+    noia_event_signal_subscribe(SIGNAL_OUTPUT_LOST,
+               noia_task_create(wayland_output_lost_handler,
                                 this_loop, NULL));
 
     noia_event_signal_subscribe(SIGNAL_SURFACE_RECONFIGURED,

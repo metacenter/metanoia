@@ -5,22 +5,17 @@
 #define __NOIA_BACKEND_GTK_GROUP_H__
 
 #include "global-types.h"
+#include "backend-gtk-output.h"
 
 #include <gtk/gtk.h>
 
 #define NUM_VIEW_GROUPS 4
 
-#define NUM_BUFFERS 2
 typedef struct {
     int enabled;
+    uint8_t* data;
     NoiaSize resolution;
-
-    int front;
-    int stride;
-    struct {
-        uint8_t* data;
-        cairo_surface_t* source;
-    } buffer[NUM_BUFFERS];
+    NoiaOutputGTK* output;
 
     struct {
         GtkWidget* area;
@@ -32,13 +27,13 @@ typedef struct {
 
 void noia_backend_gtk_group_initialize(int n, NoiaSize resolution);
 
-NoiaViewGroup* noia_backend_gtk_group_prepare(int n, int width, int height);
+void noia_backend_gtk_group_prepare(int n, int width, int height);
 
 void noia_backend_gtk_group_set_enabled(int n, int enabled);
 
-void noia_backend_gtk_group_clear_surface(int n);
-
 void noia_backend_gtk_group_toggle_enabled(int n);
+
+bool noia_backend_gtk_group_is_enabled(int n);
 
 void noia_backend_gtk_group_draw(int n,
                                  GtkWidget* widget,
@@ -59,6 +54,10 @@ void noia_backend_gtk_group_set_gui_data(int n,
                                          GtkWidget* area,
                                          GtkWidget* menu_image,
                                          GAction* resolution_action);
+
+NoiaOutputGTK* noia_backend_gtk_group_get_output(int n);
+
+void noia_backend_gtk_group_set_output(int n, NoiaOutputGTK* output);
 
 #endif // __NOIA_BACKEND_GTK_WIN_H__
 
