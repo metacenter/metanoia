@@ -497,6 +497,20 @@ if with_gtk_support:
     metanoia.add_input(t)
 
     t = m.add_compile_target(
+            output='backend-gtk-output.o',
+            inputs=['backend-gtk-output.c'],
+            pkgs={'gtk+-3.0'}
+        )
+    metanoia.add_input(t)
+
+    t = m.add_compile_target(
+            output='backend-gtk-group.o',
+            inputs=['backend-gtk-group.c'],
+            pkgs={'gtk+-3.0'}
+        )
+    metanoia.add_input(t)
+
+    t = m.add_compile_target(
             output='backend-gtk-win.o',
             inputs=['backend-gtk-win.c'],
             pkgs={'gtk+-3.0'}
