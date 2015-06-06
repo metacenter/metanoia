@@ -51,6 +51,8 @@ void noia_backend_gtk_group_set_enabled(int n, int enabled)
     // Disable/enable actions
     g_simple_action_set_enabled
                     (G_SIMPLE_ACTION(group[n].gtk.resolution_action), !enabled);
+    g_simple_action_set_enabled
+                    (G_SIMPLE_ACTION(group[n].gtk.method_action), !enabled);
 
     // Change menu button image
     gtk_image_set_from_icon_name(GTK_IMAGE(group[n].gtk.menu_image),
@@ -130,6 +132,7 @@ void noia_backend_gtk_group_discard(int n)
     group[n].gtk.box = NULL;
     group[n].gtk.menu_image = NULL;
     group[n].gtk.resolution_action = NULL;
+    group[n].gtk.method_action = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -165,12 +168,29 @@ void noia_backend_gtk_group_set_resolution(int n, NoiaSize resolution)
 
 //------------------------------------------------------------------------------
 
+/// Get method of output
+NoiaOutputMehod noia_backend_gtk_group_get_method(int n)
+{
+    return group[n].method;
+}
+
+//------------------------------------------------------------------------------
+
+/// Set output method of output
+void noia_backend_gtk_group_set_method(int n, NoiaOutputMehod method)
+{
+    group[n].method = method;
+}
+
+//------------------------------------------------------------------------------
+
 /// Set widgets and actions (ignore if null passed).
 void noia_backend_gtk_group_set_gui_data(int n,
                                          GtkWidget* box,
                                          GtkWidget* area,
                                          GtkWidget* menu_image,
-                                         GAction* resolution_action)
+                                         GAction* resolution_action,
+                                         GAction* method_action)
 {
     if (box) {
         group[n].gtk.box = box;
@@ -183,6 +203,9 @@ void noia_backend_gtk_group_set_gui_data(int n,
     }
     if (resolution_action) {
         group[n].gtk.resolution_action = resolution_action;
+    }
+    if (method_action) {
+        group[n].gtk.method_action = method_action;
     }
 }
 

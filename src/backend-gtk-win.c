@@ -9,6 +9,7 @@
 #include "event-signals.h"
 #include "version.h"
 
+#include <malloc.h>
 #include <gtk/gtk.h>
 
 #define NUM_STARTUP_DISPLAYS 1
@@ -19,10 +20,14 @@ static const gchar* scMainGuiResPath = "/org/metanoia/res/backend-gtk-main.ui";
 static const gchar* scMenuGuiResPath = "/org/metanoia/res/backend-gtk-menu.ui";
 static const gchar* scAreaGuiResPath = "/org/metanoia/res/backend-gtk-area.ui";
 
-NoiaSize resolution[] = {
+static const NoiaSize scResolution[] = {
         { 600, 400},
         { 800, 600},
         {1000, 800},
+    };
+
+static const char* scMethodName[NOIA_OUTPUT_METHOD_NUM] = {
+        "Plain", "OpenGL"
     };
 
 //------------------------------------------------------------------------------
@@ -127,6 +132,24 @@ void noia_backend_gtk_win_on_resolution_change(GSimpleAction* action,
 }
 
 //------------------------------------------------------------------------------
+
+/// Handle output method change event
+void noia_backend_gtk_win_on_method_change(GSimpleAction* action,
+                                           NOIA_UNUSED GParamSpec* pspec,
+                                           gpointer user_data)
+{
+    intptr_t n = (intptr_t) user_data;
+    GVariant* variant;
+    g_object_get(action, "state", &variant, NULL);
+    NoiaOutputMehod method = g_variant_get_int32(variant);
+
+    noia_backend_gtk_group_set_method(n, method);
+
+    LOG_INFO1("GTK backend: output method of display '%d' changed to '%s'",
+              n, scMethodName[method]);
+}
+
+//------------------------------------------------------------------------------
 // BUILDING
 
 /// Build menu for menu button
@@ -139,6 +162,8 @@ GtkWidget* noia_backend_gtk_build_menu_button(GActionMap* action_map,
     GVariant* item_variant;
     GMenuItem* item;
     GAction* action;
+    GAction* resolution_action;
+    GAction* method_action;
 
     intptr_t l = n;
     GtkBuilder* builder = gtk_builder_new_from_resource(scMenuGuiResPath);
@@ -163,6 +188,9 @@ GtkWidget* noia_backend_gtk_build_menu_button(GActionMap* action_map,
                      G_CALLBACK(noia_backend_gtk_win_on_output_activation),
                      (gpointer) l);
 
+    free(name);
+    free(win_name);
+
     // Add 'resolution' section
     GMenu* resolution_section = g_menu_new();
     g_menu_append_section(menu, "Resolution", G_MENU_MODEL(resolution_section));
@@ -171,32 +199,69 @@ GtkWidget* noia_backend_gtk_build_menu_button(GActionMap* action_map,
     name = g_strdup_printf("resolution%d", n);
     win_name = g_strdup_printf("win.%s", name);
 
-    action_variant = noia_backend_gtk_win_pack_resolution_variant
-                                               (resolution[DEFAULT_RESOLUTION]);
-    action = G_ACTION(g_simple_action_new_stateful(name,
-                           g_variant_get_type(action_variant), action_variant));
-
-    for (unsigned int j = 0; j < sizeof(resolution)/sizeof(NoiaSize); ++j)
-    {
-        gchar* label = g_strdup_printf("%4d x %4d", resolution[j].width,
-                                                    resolution[j].height);
-
+    for (unsigned int i = 0; i < sizeof(scResolution)/sizeof(NoiaSize); ++i) {
+        const gchar* label = g_strdup_printf("%4d x %4d",
+                                             scResolution[i].width,
+                                             scResolution[i].height);
         item_variant =
-                    noia_backend_gtk_win_pack_resolution_variant(resolution[j]);
+                  noia_backend_gtk_win_pack_resolution_variant(scResolution[i]);
 
         item = g_menu_item_new(label, win_name);
         g_menu_item_set_action_and_target_value(item, win_name, item_variant);
         g_menu_append_item(resolution_section, item);
     }
 
-    g_action_map_add_action(action_map, action);
-    g_signal_connect(action, "notify::state",
+    action_variant = noia_backend_gtk_win_pack_resolution_variant
+                                             (scResolution[DEFAULT_RESOLUTION]);
+    resolution_action = G_ACTION(g_simple_action_new_stateful(name,
+                           g_variant_get_type(action_variant), action_variant));
+
+    g_action_map_add_action(action_map, resolution_action);
+    g_signal_connect(resolution_action, "notify::state",
                      G_CALLBACK(noia_backend_gtk_win_on_resolution_change),
                      (gpointer) l);
 
-    g_simple_action_set_state(G_SIMPLE_ACTION(action), action_variant);
+    g_simple_action_set_state(G_SIMPLE_ACTION(resolution_action),
+                              action_variant);
 
-    noia_backend_gtk_group_set_gui_data(n, NULL, NULL, image, action);
+    free(name);
+    free(win_name);
+
+    // Add 'method' section
+    GMenu* method_section = g_menu_new();
+    g_menu_append_section(menu, "Display method", G_MENU_MODEL(method_section));
+
+    // Add 'method' menu items and actions
+    name = g_strdup_printf("method%d", n);
+    win_name = g_strdup_printf("win.%s", name);
+
+    for (unsigned int i = 0; i < NOIA_OUTPUT_METHOD_NUM; ++i) {
+        const gchar* label = scMethodName[i];
+        item_variant = g_variant_new_int32(i);
+
+        item = g_menu_item_new(label, win_name);
+        g_menu_item_set_action_and_target_value(item, win_name, item_variant);
+        g_menu_append_item(method_section, item);
+    }
+
+    action_variant = g_variant_new_int32(NOIA_OUTPUT_METHOD_MMAP);
+    method_action = G_ACTION(g_simple_action_new_stateful(name,
+                           g_variant_get_type(action_variant), action_variant));
+
+    g_action_map_add_action(action_map, method_action);
+    g_signal_connect(method_action, "notify::state",
+                     G_CALLBACK(noia_backend_gtk_win_on_method_change),
+                     (gpointer) l);
+
+    g_simple_action_set_state(G_SIMPLE_ACTION(method_action), action_variant);
+
+    free(name);
+    free(win_name);
+
+    // Store needed GUI items
+    noia_backend_gtk_group_set_gui_data(n, NULL, NULL, image,
+                                        resolution_action,
+                                        method_action);
 
     return button;
 }
@@ -219,7 +284,7 @@ GtkWidget* noia_backend_gtk_build_output_area(int n)
                      G_CALLBACK(noia_backend_gtk_win_on_configure_event),
                      (gpointer) l);
 
-    noia_backend_gtk_group_set_gui_data(n, box, area, NULL, NULL);
+    noia_backend_gtk_group_set_gui_data(n, box, area, NULL, NULL, NULL);
     return box;
 }
 
@@ -258,7 +323,7 @@ static void noia_backend_gtk_win_init(NoiaWin* win)
                     "Build: " __TIME__ " " __DATE__ "; Version: " NOIA_VERSION);
     // Build UI
     for (int n = 0; n < NUM_VIEW_GROUPS; ++n) {
-        noia_backend_gtk_group_initialize(n, resolution[DEFAULT_RESOLUTION]);
+        noia_backend_gtk_group_initialize(n, scResolution[DEFAULT_RESOLUTION]);
 
         GtkWidget* button =
                        noia_backend_gtk_build_menu_button(G_ACTION_MAP(win), n);

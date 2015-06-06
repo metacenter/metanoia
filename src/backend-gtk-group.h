@@ -11,10 +11,17 @@
 
 #define NUM_VIEW_GROUPS 4
 
+typedef enum {
+    NOIA_OUTPUT_METHOD_MMAP,
+    NOIA_OUTPUT_METHOD_GL,
+    NOIA_OUTPUT_METHOD_NUM,
+} NoiaOutputMehod;
+
 typedef struct {
     int enabled;
     uint8_t* data;
     NoiaSize resolution;
+    NoiaOutputMehod method;
     NoiaOutputGTK* output;
 
     struct {
@@ -22,6 +29,7 @@ typedef struct {
         GtkWidget* box;
         GtkWidget* menu_image;
         GAction* resolution_action;
+        GAction* method_action;
     } gtk;
 } NoiaViewGroup;
 
@@ -49,11 +57,16 @@ NoiaSize noia_backend_gtk_group_get_resolution(int n);
 
 void noia_backend_gtk_group_set_resolution(int n, NoiaSize resolution);
 
+NoiaOutputMehod noia_backend_gtk_group_get_method(int n);
+
+void noia_backend_gtk_group_set_method(int n, NoiaOutputMehod method);
+
 void noia_backend_gtk_group_set_gui_data(int n,
                                          GtkWidget* box,
                                          GtkWidget* area,
                                          GtkWidget* menu_image,
-                                         GAction* resolution_action);
+                                         GAction* resolution_action,
+                                         GAction* method_action);
 
 NoiaOutputGTK* noia_backend_gtk_group_get_output(int n);
 
