@@ -4,6 +4,7 @@
 #include "backend-gtk-output.h"
 #include "backend-gtk-group.h"
 #include "renderer-mmap.h"
+#include "renderer-gl.h"
 #include "utils-log.h"
 
 #include <malloc.h>
@@ -11,8 +12,8 @@
 
 //------------------------------------------------------------------------------
 
-NoiaRenderer* noia_backend_gtk_output_initialize(NoiaOutput* output,
-                                                 int width, int height)
+NoiaRenderer* noia_backend_gtk_output_mmap_initialize(NoiaOutput* output,
+                                                      int width, int height)
 {
     NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
     if (!output_gtk) {
@@ -20,7 +21,7 @@ NoiaRenderer* noia_backend_gtk_output_initialize(NoiaOutput* output,
         return NULL;
     }
 
-    LOG_INFO1("Initializing GTK output...");
+    LOG_INFO1("Initializing GTK plain output...");
 
     noia_backend_gtk_group_prepare(output_gtk->num, width, height);
 
@@ -35,21 +36,49 @@ NoiaRenderer* noia_backend_gtk_output_initialize(NoiaOutput* output,
                                       output_gtk->stride);
     }
 
-    LOG_INFO1("Initializing GTK output: SUCCESS");
+    LOG_INFO1("Initializing GTK plain output: %s",
+              output->renderer ? "SUCCESS" : "FAILURE");
     return output->renderer;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_backend_gtk_output_swap_buffers(NoiaOutput* output)
+NoiaRenderer* noia_backend_gtk_output_gl_initialize(NoiaOutput* output,
+                                                    int width, int height)
 {
     NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
     if (!output_gtk) {
-        LOG_ERROR("Invalid output!");
-        return NOIA_RESULT_ERROR;
+        LOG_ERROR("Invalid GTK output!");
+        return NULL;
     }
 
-    noia_backend_gtk_group_swap_buffers(output_gtk->num);
+    LOG_INFO1("Initializing GTK GL output...");
+
+    // Prepare GUI
+    noia_backend_gtk_group_prepare(output_gtk->num, width, height);
+
+    // Initialize EGL
+    NoiaEGLBundle bundle;
+    NoiaResult result = noia_gl_create_offscreen_egl_bundle(output->width,
+                                                            output->height,
+                                                            &bundle);
+    if (result != NOIA_RESULT_SUCCESS) {
+        LOG_ERROR("Failed to create offscreen EGL bundle!");
+        return NULL;
+    }
+
+    // Create renderer
+    output->renderer = noia_renderer_gl_create(bundle);
+
+    LOG_INFO1("Initializing GTK GL output: %s",
+              output->renderer ? "SUCCESS" : "FAILURE");
+    return output->renderer;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaResult noia_backend_gtk_output_swap_buffers(NOIA_UNUSED NoiaOutput* output)
+{
     return NOIA_RESULT_SUCCESS;
 }
 
@@ -86,12 +115,27 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
     NoiaOutputGTK* output_gtk = malloc(sizeof(NoiaOutputGTK));
     memset(output_gtk, 0, sizeof(NoiaOutputGTK));
 
-    noia_output_initialize(&output_gtk->base,
-                           width, height,
-                           g_strdup_printf("GTK-output-%d", num),
-                           noia_backend_gtk_output_initialize,
-                           noia_backend_gtk_output_swap_buffers,
-                           noia_backend_gtk_output_free);
+    NoiaOutputMehod method = noia_backend_gtk_group_get_method(num);
+    switch (method) {
+        case NOIA_OUTPUT_METHOD_GL:
+            noia_output_initialize(&output_gtk->base,
+                                   width, height,
+                                   g_strdup_printf("GTK-output-gl-%d", num),
+                                   noia_backend_gtk_output_gl_initialize,
+                                   noia_backend_gtk_output_swap_buffers,
+                                   noia_backend_gtk_output_free);
+        break;
+
+        case NOIA_OUTPUT_METHOD_MMAP:
+        default:
+            noia_output_initialize(&output_gtk->base,
+                                   width, height,
+                                   g_strdup_printf("GTK-output-plain-%d", num),
+                                   noia_backend_gtk_output_mmap_initialize,
+                                   noia_backend_gtk_output_swap_buffers,
+                                   noia_backend_gtk_output_free);
+        break;
+    }
 
     output_gtk->num = num;
 

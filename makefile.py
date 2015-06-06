@@ -153,6 +153,13 @@ t = m.add_compile_target(
 metanoia.add_input(t)
 
 t = m.add_compile_target(
+        output='utils-gl.o',
+        inputs=['utils-gl.c'],
+        pkgs={'gl', 'egl'}
+    )
+metanoia.add_input(t)
+
+t = m.add_compile_target(
         output='utils-keymap.o',
         inputs=['utils-keymap.c'],
         pkgs={'xkbcommon'}

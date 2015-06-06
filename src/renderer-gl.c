@@ -11,14 +11,18 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include <GL/gl.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
 
 // TODO: remove
 #include "bind-egl-wayland.h"
 
 //------------------------------------------------------------------------------
+
+pthread_mutex_t mutex_renderer_gl = PTHREAD_MUTEX_INITIALIZER;
 
 /// @todo Move global variables to OutputGL struct
 GLuint program;
@@ -30,104 +34,6 @@ GLuint vbo_texcoords;
 GLuint vbo_texture;
 
 void* xxxx_resource = NULL;
-
-//------------------------------------------------------------------------------
-
-char* shader_source_read(const char* filename)
-{
-    FILE* input = fopen(filename, "rb");
-    if(!input) {
-        return NULL;
-    }
-
-    if (fseek(input, 0, SEEK_END) == -1) {
-        return NULL;
-    }
-    long size = ftell(input);
-    if (size == -1) {
-        return NULL;
-    }
-
-    if (fseek(input, 0, SEEK_SET) == -1) {
-        return NULL;
-    }
-
-    char* content = malloc(size + 1);
-    if (content == NULL) {
-        return NULL;
-    }
-
-    fread(content, 1, size, input);
-    if (ferror(input)) {
-        free(content);
-        return NULL;
-    }
-
-    fclose(input);
-    content[size] = '\0';
-    return content;
-}
-
-//------------------------------------------------------------------------------
-
-void print_log(GLuint object)
-{
-    GLint log_length = 0;
-    if (glIsShader(object)) {
-        glGetShaderiv(object, GL_INFO_LOG_LENGTH, &log_length);
-    } else if (glIsProgram(object)) {
-        glGetProgramiv(object, GL_INFO_LOG_LENGTH, &log_length);
-    } else {
-        LOG_ERROR("GL: Not a shader or a program");
-        return;
-    }
-
-    char* log = malloc(log_length);
-    if (glIsShader(object)) {
-        glGetShaderInfoLog(object, log_length, NULL, log);
-    } else if (glIsProgram(object)) {
-        glGetProgramInfoLog(object, log_length, NULL, log);
-    }
-
-    LOG_ERROR("GL: %s", log);
-    free(log);
-}
-
-//------------------------------------------------------------------------------
-
-GLuint create_shader(const char* filename, GLenum type)
-{
-    GLchar* source = shader_source_read(filename);
-    if (source == NULL) {
-        LOG_ERROR("Error opening %s: ", filename);
-        return 0;
-    }
-
-    GLuint res = glCreateShader(type);
-    const GLchar* sources[2] = {
-#ifdef GL_ES_VERSION_2_0
-        "#version 100\n"
-        "#define GLES2\n",
-#else
-        "#version 120\n",
-#endif
-        source };
-
-    glShaderSource(res, 2, sources, NULL);
-    free(source);
-
-    glCompileShader(res);
-
-    GLint compile_ok = GL_FALSE;
-    glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
-    if (compile_ok == GL_FALSE) {
-        print_log(res);
-        glDeleteShader(res);
-        return 0;
-    }
-
-    return res;
-}
 
 //------------------------------------------------------------------------------
 
@@ -144,7 +50,7 @@ void noia_renderer_gl_attach(NoiaRenderer* self,
     NoiaRendererGL* mine = (NoiaRendererGL*) self;
 
     GLint format;
-    int ret = mine->query_buffer(mine->egl_display, resource,
+    int ret = mine->query_buffer(mine->egl.display, resource,
                                  EGL_TEXTURE_FORMAT, &format);
     LOG_DEBUG("FORMAT: %d %d %d", format, ret, EGL_TEXTURE_RGBA);
 
@@ -157,7 +63,7 @@ void noia_renderer_gl_attach(NoiaRenderer* self,
     //glBindTexture(GL_TEXTURE_2D, surface->buffer.texture);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    surface->buffer.image = mine->create_image(mine->egl_display,
+    surface->buffer.image = mine->create_image(mine->egl.display,
                                                EGL_NO_CONTEXT,
                                                EGL_WAYLAND_BUFFER_WL,
                                                resource,
@@ -183,20 +89,28 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
 {
     int r;
     NoiaResult result = NOIA_RESULT_ERROR;
-    NoiaRendererGL* mine;
 
-    // TODO: add mutex
+    pthread_mutex_lock(&mutex_renderer_gl);
     LOG_INFO1("Initializing GL renderer...");
 
-    if (!self) {
+    NoiaRendererGL* mine = (NoiaRendererGL*) self;
+    if (!mine) {
         LOG_ERROR("Wrong renderer!");
+        pthread_mutex_unlock(&mutex_renderer_gl);
         return result;
     }
-    mine = (NoiaRendererGL*) self;
+
+    /// @note Context can be used only in thread it was created.
+    /// All subsecqient call to this renderer instance
+    /// must be done in the same thread as call to this function.
+    mine->egl.context = noia_gl_copy_context(mine->egl.display,
+                                             mine->egl.config,
+                                             mine->egl.context,
+                                             scDefaultContextAttribs);
 
     // Setup EGL extensions
     const char* extensions =
-            (const char *) eglQueryString(mine->egl_display, EGL_EXTENSIONS);
+            (const char *) eglQueryString(mine->egl.display, EGL_EXTENSIONS);
     if (!extensions) {
         LOG_WARN1("Retrieving EGL extension string failed!");
     } else if (strstr(extensions, "EGL_WL_bind_wayland_display")) {
@@ -214,25 +128,26 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
     }
 
     // Connect the context to the surface
-    r = eglMakeCurrent(mine->egl_display, mine->egl_surface,
-                       mine->egl_surface, mine->egl_context);
+    r = eglMakeCurrent(mine->egl.display, mine->egl.surface,
+                       mine->egl.surface, mine->egl.context);
     if (r == EGL_FALSE) {
-        LOG_ERROR("Failed to make context current! (%d)", eglGetError());
+        LOG_ERROR("Failed to make context current! (0x%x)", eglGetError());
+        pthread_mutex_unlock(&mutex_renderer_gl);
         return result;
     }
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("EGL framebuffer incomplete! (%d)", eglGetError());
+        LOG_ERROR("EGL framebuffer incomplete! (0x%x)", eglGetError());
         goto clear_context;
     }
 
-    // Create shaders // TODO: use different paths
+/*    // Create shaders // TODO: use different paths
     LOG_INFO2("Compiling vertex shader");
-    GLuint vs = create_shader("src/shader-vertex.glsl", GL_VERTEX_SHADER);
+    GLuint vs = noia_gl_create_shader("src/shader-vertex.glsl", GL_VERTEX_SHADER);
     if (vs == 0) goto clear_context;
 
     LOG_INFO2("Compiling fragment shader");
-    GLuint fs = create_shader("src/shader-fragment.glsl", GL_FRAGMENT_SHADER);
+    GLuint fs = noia_gl_create_shader("src/shader-fragment.glsl", GL_FRAGMENT_SHADER);
     if (fs == 0) goto clear_context;
 
     // Create program
@@ -253,12 +168,12 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
     glLinkProgram(program);
     glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
     if (!link_ok) {
-        print_log(program);
+        noia_gl_print_log(program);
         goto clear_context;
     }
-
+*/
     // Creating vertex buffer
-    GLfloat vertices[] = {
+    /*GLfloat vertices[] = {
              0.5,  0.5,
              0.5, -0.5,
             -0.5,  0.5,
@@ -286,23 +201,24 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
     // Creating texture buffer
     glGenTextures(1, &vbo_texture);
     glBindTexture(GL_TEXTURE_2D, vbo_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);*/
 
     result = NOIA_RESULT_SUCCESS;
 
     LOG_INFO1("Initializing GL renderer: SUCCESS");
 
     // TODO: signal
-    noia_bind_egl_wayland(mine);
+    //noia_bind_egl_wayland(mine);
 
 clear_context:
     // Release current context
-    r = eglMakeCurrent(mine->egl_display, EGL_NO_SURFACE,
+    r = eglMakeCurrent(mine->egl.display, EGL_NO_SURFACE,
                        EGL_NO_SURFACE, EGL_NO_CONTEXT);
     if (r == EGL_FALSE) {
         LOG_DEBUG("Failed to release current context! (%d)", eglGetError());
     }
 
+    pthread_mutex_unlock(&mutex_renderer_gl);
     return result;
 }
 
@@ -316,28 +232,27 @@ void noia_renderer_gl_finalize(NOIA_UNUSED NoiaRenderer* self)
 //------------------------------------------------------------------------------
 
 void noia_renderer_gl_draw(NoiaRenderer* self,
-                           NoiaList* surfaces,
+                           NOIA_UNUSED NoiaList* surfaces,
                            NOIA_UNUSED int x,
                            NOIA_UNUSED int y,
                            NOIA_UNUSED NoiaSurfaceId sid)
 {
     int r;
-    NoiaRendererGL* mine;
 
-    // TODO: add mutex
-    LOG_DEBUG(">>>>");
-
-    if (!self) {
+    NoiaRendererGL* mine = (NoiaRendererGL*) self;
+    if (!mine) {
         LOG_ERROR("Wrong renderer!");
         return;
     }
-    mine = (NoiaRendererGL*) self;
+
+    pthread_mutex_lock(&mutex_renderer_gl);
 
     // Connect the context to the surface
-    r = eglMakeCurrent(mine->egl_display, mine->egl_surface,
-                       mine->egl_surface, mine->egl_context);
+    r = eglMakeCurrent(mine->egl.display, mine->egl.surface,
+                       mine->egl.surface, mine->egl.context);
     if (r == EGL_FALSE) {
         LOG_ERROR("Failed to make context current! (0x%x)", eglGetError());
+        pthread_mutex_unlock(&mutex_renderer_gl);
         return;
     }
 
@@ -346,10 +261,10 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
         goto release_context;
     }
 
-    glClearColor(0.75, 0.25, 0.0, 1.0);
+    glClearColor(1.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (surfaces == NULL) {
+/*    if (surfaces == NULL) {
         LOG_ERROR("Wrong surfaces!");
         goto release_context;
     }
@@ -380,14 +295,14 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
                data);
     } else {
         LOG_DEBUG("*** A 0x%x 0x%x", glGetError(), eglGetError());
-        /*EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
+        //EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
 
-        glActiveTexture(GL_TEXTURE0);
-        surface->buffer.image = mine->create_image(mine->egl_display,
-                                                   mine->egl_context,
-                                                   EGL_WAYLAND_BUFFER_WL,
-                                                   xxxx_resource,
-                                                   attribs);*/
+        //glActiveTexture(GL_TEXTURE0);
+        //surface->buffer.image = mine->create_image(mine->egl_display,
+        //                                           mine->egl_context,
+        //                                           EGL_WAYLAND_BUFFER_WL,
+        //                                           xxxx_resource,
+        //                                           attribs);
 
         mine->query_buffer(mine->egl_display, xxxx_resource,
                            EGL_WIDTH, &surface->buffer.width);
@@ -443,19 +358,44 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glDisableVertexAttribArray(attribute_coord2d);
-    glDisableVertexAttribArray(attribute_texcoord);
+    glDisableVertexAttribArray(attribute_texcoord);*/
 
-    eglSwapBuffers(mine->egl_display, mine->egl_surface);
+    //eglSwapBuffers(mine->egl.display, mine->egl.surface);
 
 release_context:
     // Release current context
-    r = eglMakeCurrent(mine->egl_display, EGL_NO_SURFACE,
+    r = eglMakeCurrent(mine->egl.display, EGL_NO_SURFACE,
                        EGL_NO_SURFACE, EGL_NO_CONTEXT);
     if (r == EGL_FALSE) {
         LOG_DEBUG("Failed to release current context! (0x%x)", eglGetError());
     }
 
-    LOG_DEBUG("<<<<");
+    pthread_mutex_unlock(&mutex_renderer_gl);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
+                                  int x, int y,
+                                  int w, int h,
+                                  uint8_t* dest_data)
+{
+    NoiaRendererGL* mine = (NoiaRendererGL*) self;
+    if (!mine) {
+        LOG_ERROR("Wrong renderer!");
+        return;
+    }
+
+    pthread_mutex_lock(&mutex_renderer_gl);
+
+    NoiaResult result = noia_gl_make_current(&mine->egl);
+    if (result == NOIA_RESULT_SUCCESS) {
+        glReadBuffer(GL_FRONT);
+        glReadPixels(x, y, w, h, GL_BGRA, GL_UNSIGNED_BYTE, dest_data);
+    }
+
+    noia_gl_release_current(&mine->egl);
+    pthread_mutex_unlock(&mutex_renderer_gl);
 }
 
 //------------------------------------------------------------------------------
@@ -470,9 +410,7 @@ void noia_renderer_gl_free(NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
-NoiaRenderer* noia_renderer_gl_create(EGLDisplay egl_display,
-                                      EGLSurface egl_surface,
-                                      EGLContext egl_context)
+NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle egl)
 {
     NoiaRendererGL* mine = calloc(1, sizeof(NoiaRendererGL));
     if (mine == NULL) {
@@ -484,12 +422,13 @@ NoiaRenderer* noia_renderer_gl_create(EGLDisplay egl_display,
                              noia_renderer_gl_finalize,
                              noia_renderer_gl_attach,
                              noia_renderer_gl_draw,
-                             NULL,
+                             noia_renderer_gl_copy_buffer,
                              noia_renderer_gl_free);
 
-    mine->egl_display = egl_display;
-    mine->egl_surface = egl_surface;
-    mine->egl_context = egl_context;
+    mine->egl.display = egl.display;
+    mine->egl.surface = egl.surface;
+    mine->egl.config  = egl.config;
+    mine->egl.context = egl.context;
 
     mine->bind_display   = NULL;
     mine->unbind_display = NULL;

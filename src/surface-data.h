@@ -8,8 +8,8 @@
 #include "utils-store.h"
 #include "exhibitor-compositor.h"
 
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 

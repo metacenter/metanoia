@@ -14,7 +14,7 @@ void noia_bind_egl_wayland(NoiaRendererGL* renderer)
         return;
     }
 
-    if(!renderer->bind_display(renderer->egl_display, get_wayland_display())) {
+    if(!renderer->bind_display(renderer->egl.display, get_wayland_display())) {
         LOG_ERROR("Could not bing EGL to Wayland! (%d)", eglGetError());
     } else {
         LOG_INFO2("Binding EGL to Wayland: SUCCESS");

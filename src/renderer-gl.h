@@ -5,15 +5,14 @@
 #define __NOIA_RENDERER_GL_H__
 
 #include "renderer.h"
+#include "utils-gl.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
 typedef struct {
     NoiaRenderer base;
-    EGLDisplay egl_display;
-    EGLSurface egl_surface;
-    EGLContext egl_context;
+    NoiaEGLBundle egl;
 
     PFNEGLBINDWAYLANDDISPLAYWL   bind_display;
     PFNEGLUNBINDWAYLANDDISPLAYWL unbind_display;
@@ -23,9 +22,7 @@ typedef struct {
     int has_wayland_support;
 } NoiaRendererGL;
 
-NoiaRenderer* noia_renderer_gl_create(EGLDisplay egl_display,
-                                      EGLSurface egl_surface,
-                                      EGLContext egl_context);
+NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle egl);
 
 #endif // __NOIA_RENDERER_GL_H__
 

@@ -20,7 +20,10 @@ typedef void (*NoiaRendererDrawFunc) (NoiaRenderer*,
                                       int x, int y,
                                       NoiaSurfaceId);
 
-typedef void (*NoiaRendererCopyBufferFunc) (NoiaRenderer*, void*);
+typedef void (*NoiaRendererCopyBufferFunc) (NoiaRenderer*,
+                                            int x, int y,
+                                            int w, int h,
+                                            uint8_t*);
 
 typedef void (*NoiarendererFreeFunc) (NoiaRenderer*);
 

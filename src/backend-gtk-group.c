@@ -4,6 +4,7 @@
 #include "backend-gtk-group.h"
 
 #include "event-signals.h"
+#include "utils-log.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -87,22 +88,26 @@ void noia_backend_gtk_group_draw(int n,
                                  GtkWidget* widget,
                                  cairo_t* context)
 {
-    pthread_mutex_lock(&mutex_buffer);
     NoiaOutputGTK* output_gtk = group[n].output;
     NoiaRenderer* renderer = output_gtk->base.renderer;
-    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24,
-                                               output_gtk->base.width);
+    int width = output_gtk->base.width;
+    int height = output_gtk->base.height;
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
+    if (!renderer) {
+        LOG_WARN1("GTK backend: invalid renderer!");
+        return;
+    }
 
-    // Copy  buffer data
-    renderer->copy_buffer(renderer, group[n].data);
+    pthread_mutex_lock(&mutex_buffer);
+
+    // Copy buffer data
+    renderer->copy_buffer(renderer, 0, 0, width, height, group[n].data);
 
     // Draw buffer on GUI
     cairo_surface_t* source = cairo_image_surface_create_for_data
                                           (group[n].data,
                                            CAIRO_FORMAT_RGB24,
-                                           output_gtk->base.width,
-                                           output_gtk->base.height,
-                                           stride);
+                                           width, height, stride);
     if (source) {
         cairo_set_source_surface(context, source, 0, 0);
         cairo_rectangle(context, 0, 0, gtk_widget_get_allocated_width(widget),
@@ -133,13 +138,6 @@ void noia_backend_gtk_group_discard(int n)
     group[n].gtk.menu_image = NULL;
     group[n].gtk.resolution_action = NULL;
     group[n].gtk.method_action = NULL;
-}
-
-//------------------------------------------------------------------------------
-
-/// Swap the buffers of output
-void noia_backend_gtk_group_swap_buffers(NOIA_UNUSED int n)
-{
 }
 
 //------------------------------------------------------------------------------

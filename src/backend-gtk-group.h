@@ -51,8 +51,6 @@ void noia_backend_gtk_group_queue_draw(int n);
 
 void noia_backend_gtk_group_discard(int n);
 
-void noia_backend_gtk_group_swap_buffers(int n);
-
 NoiaSize noia_backend_gtk_group_get_resolution(int n);
 
 void noia_backend_gtk_group_set_resolution(int n, NoiaSize resolution);

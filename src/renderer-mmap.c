@@ -198,7 +198,9 @@ void noia_renderer_mmap_draw(NoiaRenderer* self,
 //------------------------------------------------------------------------------
 
 void noia_renderer_mmap_copy_buffer(NoiaRenderer* self,
-                                    void* dest_data)
+                                    NOIA_UNUSED int x, NOIA_UNUSED int y,
+                                    NOIA_UNUSED int w, NOIA_UNUSED int h,
+                                    uint8_t* dest_data)
 {
     NOIA_ASSERT_RENDERER_MMAP(self);
 
