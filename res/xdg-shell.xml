@@ -45,9 +45,17 @@
 	they implement using static_assert to ensure the protocol and
 	implementation versions match.
       </description>
-      <entry name="current" value="3" summary="Always the latest version"/>
+      <entry name="current" value="4" summary="Always the latest version"/>
     </enum>
 
+    <enum name="error">
+      <entry name="role" value="0" summary="given wl_surface has another role"/>
+    </enum>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy xdg_shell">
+      </description>
+    </request>
 
     <request name="use_unstable_version">
       <description summary="enable use of this unstable version">
@@ -64,6 +72,9 @@
       <description summary="create a shell surface from a surface">
 	Create a shell surface for an existing surface.
 
+	This request gives the surface the role of xdg_surface. If the
+	surface already has another role, it raises a protocol error.
+
 	Only one shell or popup surface can be associated with a given
 	surface.
       </description>
@@ -75,6 +86,9 @@
       <description summary="create a shell surface from a surface">
 	Create a popup surface for an existing surface.
 
+	This request gives the surface the role of xdg_popup. If the
+	surface already has another role, it raises a protocol error.
+
 	Only one shell or popup surface can be associated with a given
 	surface.
       </description>
@@ -85,7 +99,6 @@
       <arg name="serial" type="uint" summary="serial of the implicit grab on the pointer"/>
       <arg name="x" type="int"/>
       <arg name="y" type="int"/>
-      <arg name="flags" type="uint"/>
     </request>
 
     <event name="ping">
@@ -143,7 +156,7 @@
 	unmapped if the parent is unmapped too. They should not appear
 	on task bars and alt+tab.
       </description>
-      <arg name="parent" type="object" interface="wl_surface" allow-null="true"/>
+      <arg name="parent" type="object" interface="xdg_surface" allow-null="true"/>
     </request>
 
     <request name="set_title">
@@ -390,6 +403,14 @@
       xdg_popup surfaces are always transient for another surface.
     </description>
 
+    <enum name="error">
+      <description summary="xdg_popup error values">
+	These errors can be emitted in response to xdg_popup requests.
+      </description>
+      <entry name="not_the_topmost_popup" value="0" summary="The client tried to map or destroy a non-topmost popup"/>
+      <entry name="invalid_parent" value="1" summary="The client specified an invalid parent surface"/>
+    </enum>
+
     <request name="destroy" type="destructor">
       <description summary="remove xdg_surface interface">
 	The xdg_surface interface is removed from the wl_surface object
@@ -406,7 +427,6 @@
 	that is, when the users clicks a surface that doesn't belong
 	to the client owning the popup surface.
       </description>
-      <arg name="serial" type="uint" summary="serial of the implicit grab on the pointer"/>
     </event>
 
   </interface>

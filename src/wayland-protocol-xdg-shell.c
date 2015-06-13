@@ -26,6 +26,14 @@ void noia_wayland_xdg_shell_unbind(NOIA_UNUSED struct wl_resource* resource)
 
 //------------------------------------------------------------------------------
 
+void noia_wayland_xdg_destroy(NOIA_UNUSED struct wl_client* client,
+                              struct wl_resource* resource)
+{
+    wl_resource_destroy(resource);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_wayland_xdg_use_unstable_version
                                       (NOIA_UNUSED struct wl_client* client,
                                        NOIA_UNUSED struct wl_resource* resource,
@@ -74,12 +82,11 @@ void noia_wayland_xdg_get_xdg_popup
                                NOIA_UNUSED struct wl_resource* seat_resource,
                                uint32_t serial,
                                int32_t x,
-                               int32_t y,
-                               uint32_t flags)
+                               int32_t y)
 {
     LOG_NYIMP("Wayland: XDG popup "
-              "(id: %d, serial: %d, x: %d, y: %d, flags: %d)",
-              id, serial, x, y, flags);
+              "(id: %d, serial: %d, x: %d, y: %d)",
+              id, serial, x, y);
 }
 
 //------------------------------------------------------------------------------
@@ -94,6 +101,7 @@ void noia_wayland_xdg_pong(NOIA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 static const struct xdg_shell_interface xdg_shell_implementation = {
+        noia_wayland_xdg_destroy,
         noia_wayland_xdg_use_unstable_version,
         noia_wayland_xdg_get_xdg_surface,
         noia_wayland_xdg_get_xdg_popup,
