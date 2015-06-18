@@ -1,23 +1,20 @@
 // file: renderer-gl.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-// TODO add credits
+/// @todo add credits
 
 #include "renderer-gl.h"
 
 #include "surface-manager.h"
 #include "utils-log.h"
 
+#include <GL/gl.h>
+
 #include <malloc.h>
-#include <stdio.h>
 #include <string.h>
 #include <pthread.h>
 
-#include <GL/gl.h>
-#include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
-
-// TODO: remove
+/// @todo remove
 #include "bind-egl-wayland.h"
 
 //------------------------------------------------------------------------------
@@ -26,17 +23,18 @@ pthread_mutex_t mutex_renderer_gl = PTHREAD_MUTEX_INITIALIZER;
 
 /// @todo Move global variables to OutputGL struct
 GLuint program;
-GLint attribute_coord2d;
-GLint attribute_texcoord;
-GLint uniform_texture;
+GLint location_vertices;
+GLint location_texture;
+GLint location_screen_size;
 GLuint vbo_vertices;
-GLuint vbo_texcoords;
-GLuint vbo_texture;
+GLuint vbo_texture[2];
 
+/// @todo Store resources properly
 void* xxxx_resource = NULL;
 
 //------------------------------------------------------------------------------
 
+/// @todo Finnish.
 void noia_renderer_gl_attach(NoiaRenderer* self,
                              NoiaSurfaceId surfaceId,
                              void* resource)
@@ -85,9 +83,9 @@ void noia_renderer_gl_attach(NoiaRenderer* self,
 
 //------------------------------------------------------------------------------
 
+/// Initialize GL renderer.
 NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
 {
-    int r;
     NoiaResult result = NOIA_RESULT_ERROR;
 
     pthread_mutex_lock(&mutex_renderer_gl);
@@ -101,7 +99,7 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
     }
 
     /// @note Context can be used only in thread it was created.
-    /// All subsecqient call to this renderer instance
+    /// All subsequent calls to this renderer instance
     /// must be done in the same thread as call to this function.
     mine->egl.context = noia_gl_copy_context(mine->egl.display,
                                              mine->egl.config,
@@ -114,109 +112,61 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
     if (!extensions) {
         LOG_WARN1("Retrieving EGL extension string failed!");
     } else if (strstr(extensions, "EGL_WL_bind_wayland_display")) {
-        /*mine->bind_display =
-                    (void*) eglGetProcAddress("eglBindWaylandDisplayWL");
-        mine->unbind_display =
-                    (void*) eglGetProcAddress("eglUnbindWaylandDisplayWL");
-        mine->create_image =
-                    (void*) eglGetProcAddress("eglCreateImageKHR");
-        mine->destroy_image =
-                    (void*) eglGetProcAddress("eglDestroyImageKHR");
-        mine->query_buffer =
-                    (void*) eglGetProcAddress("eglQueryWaylandBufferWL");*/
-        mine->has_wayland_support = 1;
+        /// @todo Wayland support in GL renderer
+        //mine->bind_display =
+        //            (void*) eglGetProcAddress("eglBindWaylandDisplayWL");
+        //mine->unbind_display =
+        //            (void*) eglGetProcAddress("eglUnbindWaylandDisplayWL");
+        //mine->create_image =
+        //            (void*) eglGetProcAddress("eglCreateImageKHR");
+        //mine->destroy_image =
+        //            (void*) eglGetProcAddress("eglDestroyImageKHR");
+        //mine->query_buffer =
+        //            (void*) eglGetProcAddress("eglQueryWaylandBufferWL");*/
+        //mine->has_wayland_support = 1;
     }
 
-    // Connect the context to the surface
-    r = eglMakeCurrent(mine->egl.display, mine->egl.surface,
-                       mine->egl.surface, mine->egl.context);
-    if (r == EGL_FALSE) {
-        LOG_ERROR("Failed to make context current! (0x%x)", eglGetError());
-        pthread_mutex_unlock(&mutex_renderer_gl);
-        return result;
-    }
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("EGL framebuffer incomplete! (0x%x)", eglGetError());
+    // Make context current
+    if (noia_gl_make_current(&mine->egl) != NOIA_RESULT_SUCCESS) {
         goto clear_context;
     }
 
-/*    // Create shaders // TODO: use different paths
-    LOG_INFO2("Compiling vertex shader");
-    GLuint vs = noia_gl_create_shader("src/shader-vertex.glsl", GL_VERTEX_SHADER);
-    if (vs == 0) goto clear_context;
-
-    LOG_INFO2("Compiling fragment shader");
-    GLuint fs = noia_gl_create_shader("src/shader-fragment.glsl", GL_FRAGMENT_SHADER);
-    if (fs == 0) goto clear_context;
-
-    // Create program
-    GLint link_ok = GL_FALSE;
-    program = glCreateProgram();
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-
-    attribute_coord2d = 1;
-    glBindAttribLocation(program, attribute_coord2d, "coord2d");
-
-    attribute_texcoord = 2;
-    glBindAttribLocation(program, attribute_texcoord, "texcoord");
-
-    uniform_texture = 3;
-    glBindAttribLocation(program, uniform_texture, "texture");
-
-    glLinkProgram(program);
-    glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
-    if (!link_ok) {
-        noia_gl_print_log(program);
+    // Compile shaders and link program
+    program = noia_gl_prepare_shaders_and_program();
+    location_vertices = noia_gl_get_attrib_location(program, "vertices");
+    location_texture = noia_gl_get_uniform_location(program, "texture");
+    location_screen_size = noia_gl_get_uniform_location(program, "screen_size");
+    if (program == scInvalidGLObject
+    ||  location_vertices == scInvalidGLLocation
+    ||  location_texture == scInvalidGLLocation
+    ||  location_screen_size == scInvalidGLLocation) {
         goto clear_context;
     }
-*/
-    // Creating vertex buffer
-    /*GLfloat vertices[] = {
-             0.5,  0.5,
-             0.5, -0.5,
-            -0.5,  0.5,
-             0.5, -0.5,
-            -0.5,  0.5,
-            -0.5, -0.5
-    };
+
+    // Generate vertex buffer object
     glGenBuffers(1, &vbo_vertices);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Creating vertex buffer
-    GLfloat texcoords[] = {
-             1.0,  1.0,
-             1.0,  0.0,
-             0.0,  1.0,
-             1.0,  0.0,
-             0.0,  1.0,
-             0.0,  0.0
-    };
-    glGenBuffers(1, &vbo_texcoords);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_texcoords);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords), texcoords, GL_STATIC_DRAW);
+    // Create texture buffer
+    glGenTextures(2, vbo_texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, vbo_texture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, vbo_texture[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    // Creating texture buffer
-    glGenTextures(1, &vbo_texture);
-    glBindTexture(GL_TEXTURE_2D, vbo_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);*/
+    // Swap buffers
+    eglSwapBuffers(mine->egl.display, mine->egl.surface);
 
+    // Clean up and return
     result = NOIA_RESULT_SUCCESS;
 
-    LOG_INFO1("Initializing GL renderer: SUCCESS");
-
-    // TODO: signal
-    //noia_bind_egl_wayland(mine);
-
 clear_context:
+
     // Release current context
-    r = eglMakeCurrent(mine->egl.display, EGL_NO_SURFACE,
-                       EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    if (r == EGL_FALSE) {
-        LOG_DEBUG("Failed to release current context! (%d)", eglGetError());
-    }
+    noia_gl_release_current(&mine->egl);
 
     pthread_mutex_unlock(&mutex_renderer_gl);
     return result;
@@ -224,6 +174,8 @@ clear_context:
 
 //------------------------------------------------------------------------------
 
+/// Finalize GL renderer.
+/// @todo Finnish.
 void noia_renderer_gl_finalize(NOIA_UNUSED NoiaRenderer* self)
 {
     return;
@@ -231,14 +183,163 @@ void noia_renderer_gl_finalize(NOIA_UNUSED NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
-void noia_renderer_gl_draw(NoiaRenderer* self,
-                           NOIA_UNUSED NoiaList* surfaces,
-                           NOIA_UNUSED int x,
-                           NOIA_UNUSED int y,
-                           NOIA_UNUSED NoiaSurfaceId sid)
+/// Setup GL environment.
+/// This is subroutine of noia_renderer_gl_draw
+void noia_renderer_gl_prepare_view(NOIA_UNUSED NoiaRendererGL* mine)
 {
-    int r;
+    /// @todo remove
+    static double d = 0.05;
+    static double c = 0.00;
+    if (c+d > 1 || c+d < 0) {
+        d = -d;
+    }
+    c += d;
 
+    glUseProgram(program);
+    glClearColor(c, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUniform2i(location_screen_size, mine->width, mine->height);
+}
+
+//------------------------------------------------------------------------------
+
+/// Draw background image.
+/// This is subroutine of noia_renderer_gl_draw
+void noia_renderer_gl_draw_bg_image(NOIA_UNUSED NoiaRendererGL* mine)
+{
+}
+
+//------------------------------------------------------------------------------
+
+/// Load textures to memory and save vertices coordinates for given surface.
+/// This is subroutine of noia_renderer_gl_draw_surface
+void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaSurfaceId sid,
+                                                        int i,
+                                                        GLfloat* vertices)
+{
+    NoiaSurfaceData* surface = noia_surface_get(sid);
+    if (!surface) {
+        return;
+    }
+
+    uint8_t* data = surface->buffer.data;
+    int width = surface->buffer.width;
+    int height = surface->buffer.height;
+
+    if (data != NULL) {
+        glActiveTexture(i==0 ? GL_TEXTURE0:GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, vbo_texture[i]);
+        glTexImage2D(GL_TEXTURE_2D,    // target
+                     0,                // level, 0 = base, no minimap,
+                     GL_RGBA,          // internalformat
+                     width,            // width
+                     height,           // height
+                     0,                // border, always 0 in OpenGL ES
+                     GL_RGBA,          // format
+                     GL_UNSIGNED_BYTE, // type
+                     data);
+    }
+
+    vertices[ 0] = 0;      vertices[ 1] = 0;
+    vertices[ 2] = width;  vertices[ 3] = 0;
+    vertices[ 4] = 0;      vertices[ 5] = height;
+    vertices[ 6] = width;  vertices[ 7] = height;
+    vertices[ 8] = width;  vertices[ 9] = 0;
+    vertices[10] = 0;      vertices[11] = height;
+}
+
+//------------------------------------------------------------------------------
+
+/// Draw all the surfaces
+/// This is subroutine of noia_renderer_gl_draw
+/// @see noia_renderer_gl_load_texture_and_prepare_vertices
+void noia_renderer_gl_draw_surfaces(NOIA_UNUSED NoiaRendererGL* mine,
+                                    NoiaList* surfaces)
+{
+    if (surfaces == NULL || noia_list_len(surfaces) == 0) {
+        LOG_WARN4("GL renderer: no surfaces!");
+        return;
+    }
+
+    // Prepare vertices positions and upload textures
+    size_t vertices_size = 12 * noia_list_len(surfaces) * sizeof(GLfloat);
+    GLfloat* vertices = malloc(vertices_size);
+
+    /// @todo Upload textures only if realy needed
+    unsigned i = 0;
+    FOR_EACH (surfaces, link) {
+        noia_renderer_gl_load_texture_and_prepare_vertices
+                               ((NoiaSurfaceId) link->data, i, &vertices[12*i]);
+        ++i;
+    }
+
+    // Upload positions to vertex buffer object
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
+    glEnableVertexAttribArray(location_vertices);
+    glVertexAttribPointer(location_vertices, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_DYNAMIC_DRAW);
+
+    // Redraw everything
+    i = 0;
+    FOR_EACH (surfaces, link) {
+        glUniform1i(location_texture, i);
+        glDrawArrays(GL_TRIANGLES, 6*i, 6);
+        ++i;
+    }
+
+    // Release resources
+    glDisableVertexAttribArray(location_vertices);
+    free(vertices);
+}
+
+//------------------------------------------------------------------------------
+
+/// Draw pointer.
+/// @param x, y - position of hot point
+/// @param cursor_sid - surface ID of cursor
+/// This is subroutine of noia_renderer_gl_draw
+void noia_renderer_gl_draw_pointer(NOIA_UNUSED NoiaRendererGL* mine,
+                                   NOIA_UNUSED int x, NOIA_UNUSED int y,
+                                   NOIA_UNUSED NoiaSurfaceId cursor_sid)
+{
+}
+
+//------------------------------------------------------------------------------
+
+/// Swap buffers.
+/// This is subroutine of noia_renderer_gl_draw
+void noia_renderer_gl_swap_buffers(NoiaRendererGL* mine)
+{
+    eglSwapBuffers(mine->egl.display, mine->egl.surface);
+}
+
+//------------------------------------------------------------------------------
+
+/// Finalize drawing.
+/// Undind framebuffer and release context.
+/// This is subroutine of noia_renderer_gl_draw
+void noia_renderer_gl_release_view(NoiaRendererGL* mine)
+{
+    // Ubind framebuffer and program
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glUseProgram(0);
+
+    // Release current context
+    noia_gl_release_current(&mine->egl);
+}
+
+//------------------------------------------------------------------------------
+
+/// Draw whole the scene
+/// @see noia_renderer_gl_prepare_view, noia_renderer_gl_draw_bg_image,
+///      noia_renderer_gl_draw_surfaces, noia_renderer_gl_draw_pointer,
+///      noia_renderer_gl_swap_buffers, noia_renderer_gl_release_view
+void noia_renderer_gl_draw(NoiaRenderer* self,
+                           NoiaList* surfaces,
+                           int x, int y,
+                           NoiaSurfaceId cursor_sid)
+{
     NoiaRendererGL* mine = (NoiaRendererGL*) self;
     if (!mine) {
         LOG_ERROR("Wrong renderer!");
@@ -247,137 +348,27 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
 
     pthread_mutex_lock(&mutex_renderer_gl);
 
-    // Connect the context to the surface
-    r = eglMakeCurrent(mine->egl.display, mine->egl.surface,
-                       mine->egl.surface, mine->egl.context);
-    if (r == EGL_FALSE) {
-        LOG_ERROR("Failed to make context current! (0x%x)", eglGetError());
-        pthread_mutex_unlock(&mutex_renderer_gl);
-        return;
+    // Make context current and perform the actual drawing
+    if (noia_gl_make_current(&mine->egl) == NOIA_RESULT_SUCCESS) {
+        noia_renderer_gl_prepare_view(mine);
+        noia_renderer_gl_draw_bg_image(mine);
+        noia_renderer_gl_draw_surfaces(mine, surfaces);
+        noia_renderer_gl_draw_pointer(mine, x, y, cursor_sid);
+        noia_renderer_gl_swap_buffers(mine);
     }
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("EGL framebuffer incomplete! (0x%x)", eglGetError());
-        goto release_context;
-    }
-
-    glClearColor(1.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-/*    if (surfaces == NULL) {
-        LOG_ERROR("Wrong surfaces!");
-        goto release_context;
-    }
-
-    Link* link = noia_list_first(surfaces);
-    //for (link = surfaces->first; link; link = link->next) {
-        NoiaSurfaceData* surface = noia_surface_get((NoiaSurfaceId) link->data);
-        uint8_t* data = surface->buffer.data;
-        int width = surface->buffer.width;
-        int height = surface->buffer.height;
-    //}
-
-    glUseProgram(program);
-
-    if (data != NULL) {
-        LOG_DEBUG("*** A %p %d %d", data, width, height);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, vbo_texture);
-        //glUniform1i(uniform_texture, 1);
-        glTexImage2D(GL_TEXTURE_2D, // target
-               0,  // level, 0 = base, no minimap,
-               GL_RGBA, // internalformat
-               width,  // width
-               height,  // height
-               0,  // border, always 0 in OpenGL ES
-               GL_RGBA,  // format
-               GL_UNSIGNED_BYTE, // type
-               data);
-    } else {
-        LOG_DEBUG("*** A 0x%x 0x%x", glGetError(), eglGetError());
-        //EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
-
-        //glActiveTexture(GL_TEXTURE0);
-        //surface->buffer.image = mine->create_image(mine->egl_display,
-        //                                           mine->egl_context,
-        //                                           EGL_WAYLAND_BUFFER_WL,
-        //                                           xxxx_resource,
-        //                                           attribs);
-
-        mine->query_buffer(mine->egl_display, xxxx_resource,
-                           EGL_WIDTH, &surface->buffer.width);
-        mine->query_buffer(mine->egl_display, xxxx_resource,
-                           EGL_HEIGHT, &surface->buffer.height);
-
-        LOG_DEBUG("SIZE: %d x %d", surface->buffer.width, surface->buffer.height);
-
-        if (surface->buffer.image == EGL_NO_IMAGE_KHR) {
-            LOG_DEBUG("KHR: %d", eglGetError());
-            LOG_WARN1("Could not create KHR image!");
-        }
-
-        //PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d =
-        //    (void*) eglGetProcAddress("glEGLImageTargetTexture2DOES");
-
-        GLuint tid;
-        glGenTextures(1, &tid);
-        //glActiveTexture(GL_TEXTURE0);
-
-        glBindTexture(GL_TEXTURE_2D, tid);
-        LOG_DEBUG("*** S 0x%x 0x%x", glGetError(), eglGetError());
-        //glUniform1i(uniform_texture, 0);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        //image_target_texture_2d(GL_TEXTURE_2D, surface->buffer.image);
-        LOG_DEBUG("*** Z 0x%x 0x%x", glGetError(), eglGetError());
-    }
-
-    glEnableVertexAttribArray(attribute_coord2d);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
-    glVertexAttribPointer(
-            attribute_coord2d, // attribute
-            2,                 // number of elements per vertex, here
-            GL_FLOAT,          // the type of each element
-            GL_FALSE,          // take our values as-is
-            0,                 // no extra data between each position
-            0                  // offset of first element
-         );
-
-    glEnableVertexAttribArray(attribute_texcoord);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_texcoords);
-    glVertexAttribPointer(
-            attribute_texcoord, // attribute
-            2,                  // number of elements per vertex, here (x,y)
-            GL_FLOAT,           // the type of each element
-            GL_FALSE,           // take our values as-is
-            0,                  // no extra data between each position
-            0                   // offset of first element
-        );
-
-    glDrawElements(GL_TRIANGLES, 2, GL_UNSIGNED_SHORT, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    glDisableVertexAttribArray(attribute_coord2d);
-    glDisableVertexAttribArray(attribute_texcoord);*/
-
-    //eglSwapBuffers(mine->egl.display, mine->egl.surface);
-
-release_context:
-    // Release current context
-    r = eglMakeCurrent(mine->egl.display, EGL_NO_SURFACE,
-                       EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    if (r == EGL_FALSE) {
-        LOG_DEBUG("Failed to release current context! (0x%x)", eglGetError());
-    }
+    noia_renderer_gl_release_view(mine);
 
     pthread_mutex_unlock(&mutex_renderer_gl);
 }
 
 //------------------------------------------------------------------------------
 
+/// Copy specified frament of front buffer to given destination
+/// @param x, y, w, h - describe size and position of coppied fragment
+/// @param dest_data - is destination of coppied data
 void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
-                                  int x, int y,
-                                  int w, int h,
+                                  int x, int y, int w, int h,
                                   uint8_t* dest_data)
 {
     NoiaRendererGL* mine = (NoiaRendererGL*) self;
@@ -388,21 +379,22 @@ void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
 
     pthread_mutex_lock(&mutex_renderer_gl);
 
-    NoiaResult result = noia_gl_make_current(&mine->egl);
-    if (result == NOIA_RESULT_SUCCESS) {
+    if (noia_gl_make_current(&mine->egl) == NOIA_RESULT_SUCCESS) {
         glReadBuffer(GL_FRONT);
         glReadPixels(x, y, w, h, GL_BGRA, GL_UNSIGNED_BYTE, dest_data);
     }
 
     noia_gl_release_current(&mine->egl);
+
     pthread_mutex_unlock(&mutex_renderer_gl);
 }
 
 //------------------------------------------------------------------------------
 
+/// GL renderer destructor
 void noia_renderer_gl_free(NoiaRenderer* self)
 {
-    // TODO
+    /// @todo  Finnish destructor
     if (self) {
         free(self);
     }
@@ -410,7 +402,9 @@ void noia_renderer_gl_free(NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
-NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle egl)
+/// GL renderer constructor
+NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
+                                      int width, int height)
 {
     NoiaRendererGL* mine = calloc(1, sizeof(NoiaRendererGL));
     if (mine == NULL) {
@@ -425,10 +419,13 @@ NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle egl)
                              noia_renderer_gl_copy_buffer,
                              noia_renderer_gl_free);
 
-    mine->egl.display = egl.display;
-    mine->egl.surface = egl.surface;
-    mine->egl.config  = egl.config;
-    mine->egl.context = egl.context;
+    mine->egl.display = egl->display;
+    mine->egl.surface = egl->surface;
+    mine->egl.config  = egl->config;
+    mine->egl.context = egl->context;
+
+    mine->width = width;
+    mine->height = height;
 
     mine->bind_display   = NULL;
     mine->unbind_display = NULL;

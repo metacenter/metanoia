@@ -15,7 +15,7 @@
 // 4 - frequent, not important
 // 5 - not important, but worth logging
 #define LEVEL_ERROR "ERROR"
-#define LEVEL_NYIMP "NYIMP"
+#define LEVEL_NYIMP 0
 #define LEVEL_DEBUG "DEBUG"
 #define LEVEL_WARN1 "WARN1"
 #define LEVEL_INFO1 "INFO1"

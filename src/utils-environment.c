@@ -47,6 +47,9 @@ void noia_environment_set_thread_name(pthread_t thread, char* name)
     if (!thread) {
         thread = pthread_self();
     }
+    if (strlen(name) > 15) {
+        LOG_WARN1("Thread name '%s' is too long!", name);
+    }
     pthread_setname_np(thread, name);
 }
 

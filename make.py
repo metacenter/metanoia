@@ -210,7 +210,10 @@ class Make:
                    '\t@time (for c in checks/check*; do $$c; done)\n'
                    'memcheck: checks\n'
                    '\t@time (for c in checks/check*; do valgrind '
-                   '--leak-check=full --show-leak-kinds=all $$c; echo;done)\n\n'
+                   '--leak-check=full --show-leak-kinds=all $$c; echo;done)\n'
+                   'cppcheck:\n\tcppcheck --enable=all --template='
+                   '"[{{severity}}] {{file}} ({{line}}): {{id}} - {{message}}" '
+                   '--suppress=incorrectStringBooleanError .\n\n'
                    .format(' '.join(self.checks)))
 
             for t in self.targets:

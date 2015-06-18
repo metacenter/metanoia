@@ -7,6 +7,8 @@
 #include "global-types.h"
 #include "backend-gtk-output.h"
 
+#include "utils-gl.h"
+
 #include <gtk/gtk.h>
 
 #define NUM_VIEW_GROUPS 4
@@ -31,11 +33,12 @@ typedef struct {
         GAction* resolution_action;
         GAction* method_action;
     } gtk;
+    NoiaEGLBundle egl;
 } NoiaViewGroup;
 
 void noia_backend_gtk_group_initialize(int n, NoiaSize resolution);
 
-void noia_backend_gtk_group_prepare(int n, int width, int height);
+NoiaEGLBundle* noia_backend_gtk_group_prepare(int n, int width, int height);
 
 void noia_backend_gtk_group_set_enabled(int n, int enabled);
 

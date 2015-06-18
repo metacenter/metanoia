@@ -1,7 +1,7 @@
 // file: device-drm.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-// TODO: cleanup headers
+/// @todo Cleanup headers
 #include "device-drm.h"
 #include "utils-log.h"
 #include "renderer-mmap.h"
@@ -14,9 +14,6 @@
 #include <xf86drmMode.h>
 #include <sys/mman.h>
 
-#include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
-#include <EGL/egl.h>
 #include <gbm.h>
 
 #include "utils-dbus.h"
@@ -196,14 +193,11 @@ NoiaRenderer* noia_drm_create_dumb_buffers(NoiaOutputDRM* output_drm)
 
 NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
 {
-    /*int r; // TODO EGLint ?
+    int r; // TODO EGLint ?
     uint32_t fb_id;
     uint32_t width, height, stride, handle;
-    EGLint major, minor, n;
-    EGLDisplay egl_display;
-    EGLConfig  egl_config;
-    EGLContext egl_context;
-    EGLSurface egl_surface;
+    //EGLint major, minor, n;
+    NoiaEGLBundle egl;
     struct gbm_device*  gbm_device;
     struct gbm_surface* gbm_surface;
     struct gbm_bo*      gbm_bo;
@@ -227,7 +221,7 @@ NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
     LOG_INFO1("Creating GBM and initializing EGL...");
 
     // Find mode // TODO
-    mode = &output_drm->connector->modes[0];
+    mode = &output_drm->mode;
 
     // Create GBM device and surface
     gbm_device = gbm_create_device(output_drm->fd);
@@ -243,44 +237,52 @@ NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
 
 
     // Initialize EGL
-    egl_display = eglGetDisplay((EGLNativeDisplayType) gbm_device);
+    /*egl.display = eglGetDisplay((EGLNativeDisplayType) gbm_device);
 
-    if (!eglInitialize(egl_display, &major, &minor)) {
+    if (!eglInitialize(egl.display, &major, &minor)) {
         LOG_ERROR("Failed to initialize EGL display!");
         return NULL;
     }
 
-    LOG_DATA2("EGL Version: '%s'", eglQueryString(egl_display, EGL_VERSION));
-    LOG_DATA2("EGL Vendor:  '%s'", eglQueryString(egl_display, EGL_VENDOR));
+    LOG_INFO2("EGL Version: '%s'", eglQueryString(egl.display, EGL_VERSION));
+    LOG_INFO2("EGL Vendor:  '%s'", eglQueryString(egl.display, EGL_VENDOR));
 
     if (!eglBindAPI(EGL_OPENGL_ES_API)) {
         LOG_ERROR("Failed to bind api EGL_OPENGL_ES_API!");
         return NULL;
     }
 
-    r = eglChooseConfig(egl_display, config_attribs, &egl_config, 1, &n);
+    r = eglChooseConfig(egl.display, config_attribs, &egl.config, 1, &n);
     if (!r || n != 1) {
         LOG_ERROR("Failed to choose EGL config (r: %d, n: %d)", r, n);
         return NULL;
     }
 
-    egl_context = eglCreateContext(egl_display, egl_config,
+    egl.context = eglCreateContext(egl.display, egl.config,
                                    EGL_NO_CONTEXT, context_attribs);
-    if (egl_context == NULL) {
+    if (egl.context == NULL) {
         LOG_ERROR("Failed to create RGL context!");
+        return NULL;
+    }*/
+
+    NoiaResult result = noia_gl_initialize(&egl, (EGLNativeDisplayType) gbm_device,
+                                           config_attribs,
+                                           context_attribs);
+    if (result != NOIA_RESULT_SUCCESS) {
         return NULL;
     }
 
-    egl_surface = eglCreateWindowSurface(egl_display, egl_config,
+
+    egl.surface = eglCreateWindowSurface(egl.display, egl.config,
                                          (EGLNativeWindowType) gbm_surface,
                                          NULL);
-    if (egl_surface == EGL_NO_SURFACE) {
+    if (egl.surface == EGL_NO_SURFACE) {
         LOG_ERROR("Failed to create EGL surface!");
         return NULL;
     }
 
     // Connect the context to the surface
-    r = eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
+    r = eglMakeCurrent(egl.display, egl.surface, egl.surface, egl.context);
     if (r == EGL_FALSE) {
         LOG_DEBUG("Failed to make EGL context current!");
         return NULL;
@@ -292,7 +294,7 @@ NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
     }
 
     // Create GBM BO
-    eglSwapBuffers(egl_display, egl_surface);
+    eglSwapBuffers(egl.display, egl.surface);
 
     // TODO change to gbm_bo_create
     gbm_bo = gbm_surface_lock_front_buffer(gbm_surface);
@@ -315,9 +317,9 @@ NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
 
     // Set mode
     r = drmModeSetCrtc(output_drm->fd,
-                       output_drm->crtc,
+                       output_drm->crtc_id,
                        fb_id, 0, 0,
-                       &output_drm->connector->connector_id,
+                       &output_drm->connector_id,
                        1, mode);
     if (r) {
         LOG_ERROR("failed to set mode: %m");
@@ -328,10 +330,10 @@ NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
 
     glClearColor(0.0, 0.25, 0.5, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-    eglSwapBuffers(egl_display, egl_surface);
+    eglSwapBuffers(egl.display, egl.surface);
 
     // Release context
-    r = eglMakeCurrent(egl_display, EGL_NO_SURFACE,
+    r = eglMakeCurrent(egl.display, EGL_NO_SURFACE,
                        EGL_NO_SURFACE, EGL_NO_CONTEXT);
     if (r == EGL_FALSE) {
         LOG_ERROR("Failed to release EGL context! (%d)", eglGetError());
@@ -339,10 +341,10 @@ NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
 
     LOG_INFO1("Creating GBM and initializing EGL: SUCCESS");
 
-    return noia_renderer_gl_create(egl_display, egl_surface, egl_context);
+    return noia_renderer_gl_create(&egl, width, height);
 
 clear_fb:
-    drmModeRmFB(output_drm->fd, fb_id);*/
+    drmModeRmFB(output_drm->fd, fb_id);
     return NULL;
 }
 
@@ -360,7 +362,7 @@ NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
         return NULL;
     }
 
-    //renderer = initialize_egl_with_gbm(output_drm);
+    renderer = initialize_egl_with_gbm(output_drm);
     if (renderer == NULL) {
         renderer = noia_drm_create_dumb_buffers(output_drm);
     }

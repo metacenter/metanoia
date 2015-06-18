@@ -244,7 +244,8 @@ GtkWidget* noia_backend_gtk_build_menu_button(GActionMap* action_map,
         g_menu_append_item(method_section, item);
     }
 
-    action_variant = g_variant_new_int32(NOIA_OUTPUT_METHOD_MMAP);
+
+    action_variant = g_variant_new_int32(noia_backend_gtk_group_get_method(n));
     method_action = G_ACTION(g_simple_action_new_stateful(name,
                            g_variant_get_type(action_variant), action_variant));
 

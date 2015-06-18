@@ -55,20 +55,20 @@ NoiaRenderer* noia_backend_gtk_output_gl_initialize(NoiaOutput* output,
     LOG_INFO1("Initializing GTK GL output...");
 
     // Prepare GUI
+    NoiaEGLBundle* bundle =
     noia_backend_gtk_group_prepare(output_gtk->num, width, height);
 
     // Initialize EGL
-    NoiaEGLBundle bundle;
     NoiaResult result = noia_gl_create_offscreen_egl_bundle(output->width,
                                                             output->height,
-                                                            &bundle);
+                                                            bundle);
     if (result != NOIA_RESULT_SUCCESS) {
         LOG_ERROR("Failed to create offscreen EGL bundle!");
         return NULL;
     }
 
     // Create renderer
-    output->renderer = noia_renderer_gl_create(bundle);
+    output->renderer = noia_renderer_gl_create(bundle, width, height);
 
     LOG_INFO1("Initializing GTK GL output: %s",
               output->renderer ? "SUCCESS" : "FAILURE");
@@ -120,7 +120,7 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
         case NOIA_OUTPUT_METHOD_GL:
             noia_output_initialize(&output_gtk->base,
                                    width, height,
-                                   g_strdup_printf("GTK-output-gl-%d", num),
+                                   g_strdup_printf("GTKgl-%d", num),
                                    noia_backend_gtk_output_gl_initialize,
                                    noia_backend_gtk_output_swap_buffers,
                                    noia_backend_gtk_output_free);
@@ -130,7 +130,7 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
         default:
             noia_output_initialize(&output_gtk->base,
                                    width, height,
-                                   g_strdup_printf("GTK-output-plain-%d", num),
+                                   g_strdup_printf("GTKplain-%d", num),
                                    noia_backend_gtk_output_mmap_initialize,
                                    noia_backend_gtk_output_swap_buffers,
                                    noia_backend_gtk_output_free);

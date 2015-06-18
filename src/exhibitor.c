@@ -8,6 +8,7 @@
 #include "utils-log.h"
 #include "event-signals.h"
 #include "global-objects.h"
+#include "global-functions.h"
 #include "surface-manager.h"
 
 #include <malloc.h>
@@ -67,8 +68,11 @@ void noia_exhibitor_on_display_found(void* data)
     }
 
     LOG_INFO1("Adding new renderer!");
-    output->renderer->initialize(output->renderer);
-    noia_exhibitor_create_new_display(output);
+    if (output->renderer->initialize(output->renderer) == NOIA_RESULT_SUCCESS) {
+        noia_exhibitor_create_new_display(output);
+    } else {
+        noia_quit();
+    }
 }
 
 //------------------------------------------------------------------------------

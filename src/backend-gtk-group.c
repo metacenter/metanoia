@@ -20,12 +20,14 @@ void noia_backend_gtk_group_initialize(int n, NoiaSize resolution)
 {
     memset(&group[n], 0, sizeof(NoiaViewGroup));
     noia_backend_gtk_group_set_resolution(n, resolution);
+    group[n].method = (n % 2 == 0) ? NOIA_OUTPUT_METHOD_MMAP
+                                   : NOIA_OUTPUT_METHOD_GL;
 }
 
 //------------------------------------------------------------------------------
 
 /// Allocate memory for surfaces and prepare GTK widgets
-void noia_backend_gtk_group_prepare(int n, int width, int height)
+NoiaEGLBundle* noia_backend_gtk_group_prepare(int n, int width, int height)
 {
     int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
     group[n].data = malloc(4 * height * stride);
@@ -33,6 +35,7 @@ void noia_backend_gtk_group_prepare(int n, int width, int height)
     // Clear drawing area
     gtk_widget_set_size_request(group[n].gtk.area, width, height);
     gtk_widget_queue_draw_area(group[n].gtk.area, 0, 0, width, height);
+    return &group[n].egl;
 }
 
 //------------------------------------------------------------------------------

@@ -161,7 +161,7 @@ void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
 
 void noia_renderer_mmap_swap_buffers(NoiaRendererMMap* mine)
 {
-    int ok = 1;
+    bool ok = true;
     int new_front = mine->front ^ 1;
 
     // Check if second buffer was provided

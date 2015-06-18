@@ -5,7 +5,6 @@
 #define __NOIA_DEVICE_DRM_H__
 
 #include "output.h"
-#include "utils-list.h"
 
 int noia_drm_update_devices(NoiaList* outputs);
 

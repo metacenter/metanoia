@@ -27,8 +27,8 @@ typedef void (*NoiaRendererCopyBufferFunc) (NoiaRenderer*,
 
 typedef void (*NoiarendererFreeFunc) (NoiaRenderer*);
 
-// Renderer strategy interface
-// TODO: move 'attach' elsewhere
+/// Renderer strategy interface.
+/// @todo Move 'attach' elsewhere.
 struct NoiaRendererStruct {
     NoiaRendererInitializeFunc initialize;
     NoiaRendererFinalizeFunc finalize;

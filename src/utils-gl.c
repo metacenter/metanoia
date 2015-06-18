@@ -14,8 +14,11 @@
 /// Log current GL and EGL error
 void noia_gl_log_status()
 {
-    LOG_DEBUG("Error status - GL: 0x%x, EGL: 0x%x",
-              glGetError(), eglGetError());
+    GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    bool framebufferComplete = (framebufferStatus == GL_FRAMEBUFFER_COMPLETE);
+
+    LOG_DEBUG("Status - GL: 0x%x, EGL: 0x%x, framebuffer: %scomplete",
+              glGetError(), eglGetError(), framebufferComplete ? "" : "NOT ");
 }
 
 //------------------------------------------------------------------------------
@@ -52,7 +55,7 @@ char* noia_gl_read_shader_source(const char* filename)
     // Open file
     FILE* input = fopen(filename, "rb");
     if(!input) {
-        LOG_ERROR("GL: Could not open file '%s', filename");
+        LOG_ERROR("GL: Could not open file '%s'", filename);
         return NULL;
     }
 
@@ -89,7 +92,7 @@ char* noia_gl_read_shader_source(const char* filename)
 
 //------------------------------------------------------------------------------
 
-// Create and compile shader
+/// Create and compile shader
 GLuint noia_gl_create_shader(const char* filename, GLenum type)
 {
     GLchar* source = noia_gl_read_shader_source(filename);
@@ -125,15 +128,15 @@ GLuint noia_gl_prepare_shaders_and_program()
     LOG_INFO2("Compiling vertex shader");
     GLuint vertex_shader = noia_gl_create_shader("src/shader-vertex.glsl",
                                                  GL_VERTEX_SHADER);
-    if (vertex_shader == 0) {
-        return 0;
+    if (vertex_shader == scInvalidGLObject) {
+        return scInvalidGLObject;
     }
 
     LOG_INFO2("Compiling fragment shader");
     GLuint fragment_shader = noia_gl_create_shader("src/shader-fragment.glsl",
                                                    GL_FRAGMENT_SHADER);
-    if (fragment_shader == 0) {
-        return 0;
+    if (fragment_shader == scInvalidGLObject) {
+        return scInvalidGLObject;
     }
 
     // Create and link program
@@ -146,10 +149,10 @@ GLuint noia_gl_prepare_shaders_and_program()
 
     glLinkProgram(shader_program);
     glGetProgramiv(shader_program, GL_LINK_STATUS, &link_ok);
-    if (!link_ok) {
+    if (!link_ok || shader_program == scInvalidGLObject) {
         noia_gl_print_log(shader_program);
         glDeleteProgram(shader_program);
-        return 0;
+        return scInvalidGLObject;
     }
 
     LOG_INFO2("Shader program created successfuly");
@@ -158,22 +161,42 @@ GLuint noia_gl_prepare_shaders_and_program()
 
 //------------------------------------------------------------------------------
 
-/// Create EGL display, context and offscreen surface
-NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
-                                               EGLint height,
-                                               NoiaEGLBundle* egl)
+/// Get location attribute variable in linked program
+GLint noia_gl_get_attrib_location(GLuint program, const char* name)
+{
+    GLint location = glGetAttribLocation(program, name);
+    if (location == scInvalidGLLocation) {
+        LOG_ERROR("Could not find attrib location of '%s'!", name);
+        return scInvalidGLLocation;
+    }
+    return location;
+}
+
+//------------------------------------------------------------------------------
+
+/// Get location of uniform variable in linked program
+GLint noia_gl_get_uniform_location(GLuint program, const char* name)
+{
+    GLint location = glGetUniformLocation(program, name);
+    if (location == scInvalidGLLocation) {
+        LOG_ERROR("Could not find attrib location of '%s'!", name);
+        return scInvalidGLLocation;
+    }
+    return location;
+}
+
+//------------------------------------------------------------------------------
+
+/// Create EGL display, configuration and context
+NoiaResult noia_gl_initialize(NoiaEGLBundle* egl,
+                              NativeDisplayType native_display_type,
+                              const EGLint config_attribs[],
+                              const EGLint context_attribs[])
 {
     EGLint major, minor, r, n;
-    const EGLint surface_attribs[] = {
-             EGL_WIDTH, width,
-             EGL_HEIGHT, height,
-             EGL_NONE
-        };
-
-    LOG_INFO1("Creating offscreen EGL bundle...");
 
     // Create default display
-    egl->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    egl->display = eglGetDisplay(native_display_type);
     if (egl->display == EGL_NO_DISPLAY) {
         LOG_ERROR("EGL: Failed to get EGL display!");
         return NOIA_RESULT_ERROR;
@@ -195,8 +218,7 @@ NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
     }
 
     // Choose config
-    r = eglChooseConfig(egl->display, scOffscreenConfigAttribs,
-                        &egl->config, 1, &n);
+    r = eglChooseConfig(egl->display, config_attribs, &egl->config, 1, &n);
     if (!r || n != 1) {
         LOG_ERROR("EGL: Failed to choose config! (r: %d, n: %d)", r, n);
         return NOIA_RESULT_ERROR;
@@ -204,10 +226,39 @@ NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
 
     // Create context
     egl->context = eglCreateContext(egl->display, egl->config,
-                                    EGL_NO_CONTEXT, scDefaultContextAttribs);
+                                    EGL_NO_CONTEXT, context_attribs);
     if (egl->context == EGL_NO_CONTEXT) {
         LOG_ERROR("EGL: Failed to create context!");
         return NOIA_RESULT_ERROR;
+    }
+
+    return NOIA_RESULT_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Create EGL display, configuration, context and offscreen surface
+NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
+                                               EGLint height,
+                                               NoiaEGLBundle* egl)
+{
+    const EGLint surface_attribs[] = {
+             EGL_WIDTH, width,
+             EGL_HEIGHT, height,
+             EGL_TEXTURE_FORMAT, EGL_TEXTURE_RGBA,
+             EGL_TEXTURE_TARGET, EGL_TEXTURE_2D,
+             EGL_LARGEST_PBUFFER, EGL_TRUE,
+             EGL_NONE
+        };
+
+    LOG_INFO1("Creating offscreen EGL bundle...");
+
+    // Initialize EGL
+    NoiaResult result = noia_gl_initialize(egl, EGL_DEFAULT_DISPLAY,
+                                           scOffscreenConfigAttribs,
+                                           scDefaultContextAttribs);
+    if (result != NOIA_RESULT_SUCCESS) {
+        return result;
     }
 
     // Create surface
@@ -225,6 +276,7 @@ NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
 
 //------------------------------------------------------------------------------
 
+/// Copy the EGL context to use it in current thread
 EGLContext noia_gl_copy_context(EGLDisplay egl_display,
                                 EGLConfig  egl_config,
                                 EGLContext egl_context,
@@ -244,6 +296,7 @@ EGLContext noia_gl_copy_context(EGLDisplay egl_display,
 
 //------------------------------------------------------------------------------
 
+/// Make context current and check framebuffer completeness
 NoiaResult noia_gl_make_current(NoiaEGLBundle* egl)
 {
     // Make context current
@@ -265,6 +318,7 @@ NoiaResult noia_gl_make_current(NoiaEGLBundle* egl)
 
 //------------------------------------------------------------------------------
 
+/// Release the current context
 NoiaResult noia_gl_release_current(NoiaEGLBundle* egl)
 {
     EGLint r = eglMakeCurrent(egl->display, EGL_NO_SURFACE,
