@@ -736,9 +736,7 @@ build/exhibitor-display.o: Makefile \
                            src/event-signals.h \
                            src/surface-manager.h \
                            src/surface-data.h \
-                           src/utils-store.h \
-                           src/renderer-gl.h \
-                           src/utils-gl.h
+                           src/utils-store.h
 	@mkdir -p build
 	@echo "  CC   exhibitor-display.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-display.o -Isrc -Igen \

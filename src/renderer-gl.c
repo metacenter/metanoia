@@ -84,6 +84,10 @@ void noia_renderer_gl_attach(NoiaRenderer* self,
 //------------------------------------------------------------------------------
 
 /// Initialize GL renderer.
+///
+/// @note Context can be used only in thread it was created.
+/// All subsequent calls to this renderer instance
+/// must be done in the same thread as call to this function.
 NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
 {
     NoiaResult result = NOIA_RESULT_ERROR;
@@ -97,14 +101,6 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
         pthread_mutex_unlock(&mutex_renderer_gl);
         return result;
     }
-
-    /// @note Context can be used only in thread it was created.
-    /// All subsequent calls to this renderer instance
-    /// must be done in the same thread as call to this function.
-    mine->egl.context = noia_gl_copy_context(mine->egl.display,
-                                             mine->egl.config,
-                                             mine->egl.context,
-                                             scDefaultContextAttribs);
 
     // Setup EGL extensions
     const char* extensions =
@@ -157,9 +153,6 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    // Swap buffers
-    eglSwapBuffers(mine->egl.display, mine->egl.surface);
-
     // Clean up and return
     result = NOIA_RESULT_SUCCESS;
 
@@ -195,10 +188,10 @@ void noia_renderer_gl_prepare_view(NOIA_UNUSED NoiaRendererGL* mine)
     }
     c += d;
 
-    glUseProgram(program);
-    glClearColor(c, 1.0, 1.0, 1.0);
+    glClearColor(c, 0.25, 0.5, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glUseProgram(program);
     glUniform2i(location_screen_size, mine->width, mine->height);
 }
 
@@ -307,15 +300,6 @@ void noia_renderer_gl_draw_pointer(NOIA_UNUSED NoiaRendererGL* mine,
 
 //------------------------------------------------------------------------------
 
-/// Swap buffers.
-/// This is subroutine of noia_renderer_gl_draw
-void noia_renderer_gl_swap_buffers(NoiaRendererGL* mine)
-{
-    eglSwapBuffers(mine->egl.display, mine->egl.surface);
-}
-
-//------------------------------------------------------------------------------
-
 /// Finalize drawing.
 /// Undind framebuffer and release context.
 /// This is subroutine of noia_renderer_gl_draw
@@ -330,11 +314,12 @@ void noia_renderer_gl_release_view(NoiaRendererGL* mine)
 }
 
 //------------------------------------------------------------------------------
+void noia_renderer_gl_swap_buffers(NoiaRenderer* self);
 
 /// Draw whole the scene
 /// @see noia_renderer_gl_prepare_view, noia_renderer_gl_draw_bg_image,
 ///      noia_renderer_gl_draw_surfaces, noia_renderer_gl_draw_pointer,
-///      noia_renderer_gl_swap_buffers, noia_renderer_gl_release_view
+///      noia_renderer_gl_release_view
 void noia_renderer_gl_draw(NoiaRenderer* self,
                            NoiaList* surfaces,
                            int x, int y,
@@ -354,10 +339,31 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
         noia_renderer_gl_draw_bg_image(mine);
         noia_renderer_gl_draw_surfaces(mine, surfaces);
         noia_renderer_gl_draw_pointer(mine, x, y, cursor_sid);
-        noia_renderer_gl_swap_buffers(mine);
     }
 
     noia_renderer_gl_release_view(mine);
+
+    pthread_mutex_unlock(&mutex_renderer_gl);
+}
+
+//------------------------------------------------------------------------------
+
+/// Swap buffers.
+void noia_renderer_gl_swap_buffers(NoiaRenderer* self)
+{
+    NoiaRendererGL* mine = (NoiaRendererGL*) self;
+    if (!mine) {
+        LOG_ERROR("Wrong renderer!");
+        return;
+    }
+
+    pthread_mutex_lock(&mutex_renderer_gl);
+
+    if (noia_gl_make_current(&mine->egl) == NOIA_RESULT_SUCCESS) {
+        eglSwapBuffers(mine->egl.display, mine->egl.surface);
+    }
+
+    noia_gl_release_current(&mine->egl);
 
     pthread_mutex_unlock(&mutex_renderer_gl);
 }
@@ -416,6 +422,7 @@ NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
                              noia_renderer_gl_finalize,
                              noia_renderer_gl_attach,
                              noia_renderer_gl_draw,
+                             noia_renderer_gl_swap_buffers,
                              noia_renderer_gl_copy_buffer,
                              noia_renderer_gl_free);
 

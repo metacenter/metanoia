@@ -92,7 +92,7 @@ NoiaOutputFB* noia_devfb_output_new(int width, int height, char* id, int fd)
                            width, height,
                            strdup(id),
                            noia_devfb_output_initialize,
-                           NULL,
+                           NULL, NULL,
                            noia_devfb_output_free);
     output_fb->fd = fd;
     return output_fb;

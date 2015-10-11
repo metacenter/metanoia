@@ -17,7 +17,8 @@ NoiaResult noia_output_initialize(NoiaOutput* self,
                                   int height,
                                   char* unique_name,
                                   NoiaOutputInitRendererFunc initialize,
-                                  NoiaOutputSwapFunc swap_buffers,
+                                  NoiaOutputBeginDrawingFunc begin_drawing,
+                                  NoiaOutputEndDrawingFunc end_drawing,
                                   NoiaOutputFreeFunc free)
 {
     if (!self) {
@@ -33,8 +34,19 @@ NoiaResult noia_output_initialize(NoiaOutput* self,
     self->global_position.y = 0;
     self->renderer = NULL;
     self->initialize = initialize;
-    self->swap_buffers = swap_buffers;
+    self->begin_drawing = begin_drawing;
+    self->end_drawing = end_drawing;
     return NOIA_RESULT_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Initialize the renderer.
+/// This function should be called in thread in which the rendering will be
+/// performed.
+NoiaResult noia_output_initialize_rendering(NoiaOutput* output)
+{
+    return output->renderer->initialize(output->renderer);
 }
 
 //------------------------------------------------------------------------------

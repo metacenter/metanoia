@@ -20,6 +20,8 @@ typedef void (*NoiaRendererDrawFunc) (NoiaRenderer*,
                                       int x, int y,
                                       NoiaSurfaceId);
 
+typedef void (*NoiaRendererSwapBuffersFunc) (NoiaRenderer*);
+
 typedef void (*NoiaRendererCopyBufferFunc) (NoiaRenderer*,
                                             int x, int y,
                                             int w, int h,
@@ -34,6 +36,7 @@ struct NoiaRendererStruct {
     NoiaRendererFinalizeFunc finalize;
     NoiaRendererAttachFunc attach;
     NoiaRendererDrawFunc draw;
+    NoiaRendererSwapBuffersFunc swap_buffers;
     NoiaRendererCopyBufferFunc copy_buffer;
     NoiaRendererFinalizeFunc free;
 };
@@ -43,6 +46,7 @@ void noia_renderer_initialize(NoiaRenderer* self,
                               NoiaRendererFinalizeFunc finalize,
                               NoiaRendererAttachFunc attach,
                               NoiaRendererDrawFunc draw,
+                              NoiaRendererSwapBuffersFunc swap_buffers,
                               NoiaRendererCopyBufferFunc copy_buffer,
                               NoiaRendererFinalizeFunc free);
 

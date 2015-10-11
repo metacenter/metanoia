@@ -159,29 +159,6 @@ void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
 
 //------------------------------------------------------------------------------
 
-void noia_renderer_mmap_swap_buffers(NoiaRendererMMap* mine)
-{
-    bool ok = true;
-    int new_front = mine->front ^ 1;
-
-    // Check if second buffer was provided
-    if (!mine->buffer[new_front].data) {
-        return;
-    }
-
-    // Swap buffer on device
-    if (mine->output && mine->output->swap_buffers) {
-        ok = (mine->output->swap_buffers(mine->output) == 0);
-    }
-
-    // Swap buffer
-    if (ok) {
-        mine->front = new_front;
-    }
-}
-
-//------------------------------------------------------------------------------
-
 void noia_renderer_mmap_draw(NoiaRenderer* self,
                              NoiaList* surfaces,
                              int x, int y,
@@ -192,7 +169,23 @@ void noia_renderer_mmap_draw(NoiaRenderer* self,
     noia_renderer_mmap_draw_bg_image(mine);
     noia_renderer_mmap_draw_surfaces(mine, surfaces);
     noia_renderer_mmap_draw_pointer(mine, x, y, cursor_sid);
-    noia_renderer_mmap_swap_buffers(mine);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_renderer_mmap_swap_buffers(NoiaRenderer* self)
+{
+    NOIA_ASSERT_RENDERER_MMAP(self);
+
+    int new_front = mine->front ^ 1;
+
+    // Check if second buffer was provided
+    if (!mine->buffer[new_front].data) {
+        return;
+    }
+
+    // Swap buffer
+    mine->front = new_front;
 }
 
 //------------------------------------------------------------------------------
@@ -234,6 +227,7 @@ NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output,
                              noia_renderer_mmap_finalize,
                              NULL, /// @todo Implement attach function
                              noia_renderer_mmap_draw,
+                             noia_renderer_mmap_swap_buffers,
                              noia_renderer_mmap_copy_buffer,
                              noia_renderer_mmap_free);
 

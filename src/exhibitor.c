@@ -62,17 +62,8 @@ void noia_exhibitor_on_display_found(void* data)
         LOG_ERROR("Invalid output!");
         return;
     }
-    if (!output->renderer) {
-        LOG_ERROR("Invalid renderer!");
-        return;
-    }
 
-    LOG_INFO1("Adding new renderer!");
-    if (output->renderer->initialize(output->renderer) == NOIA_RESULT_SUCCESS) {
-        noia_exhibitor_create_new_display(output);
-    } else {
-        noia_quit();
-    }
+    noia_exhibitor_create_new_display(output);
 }
 
 //------------------------------------------------------------------------------

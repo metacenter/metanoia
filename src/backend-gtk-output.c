@@ -77,13 +77,6 @@ NoiaRenderer* noia_backend_gtk_output_gl_initialize(NoiaOutput* output,
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_backend_gtk_output_swap_buffers(NOIA_UNUSED NoiaOutput* output)
-{
-    return NOIA_RESULT_SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
 void noia_backend_gtk_output_free(NoiaOutput* output)
 {
     NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
@@ -122,7 +115,7 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
                                    width, height,
                                    g_strdup_printf("GTKgl-%d", num),
                                    noia_backend_gtk_output_gl_initialize,
-                                   noia_backend_gtk_output_swap_buffers,
+                                   NULL, NULL,
                                    noia_backend_gtk_output_free);
         break;
 
@@ -132,7 +125,7 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
                                    width, height,
                                    g_strdup_printf("GTKplain-%d", num),
                                    noia_backend_gtk_output_mmap_initialize,
-                                   noia_backend_gtk_output_swap_buffers,
+                                   NULL, NULL,
                                    noia_backend_gtk_output_free);
         break;
     }

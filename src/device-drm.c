@@ -1,33 +1,33 @@
 // file: device-drm.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-/// @todo Cleanup headers
 #include "device-drm.h"
 #include "utils-log.h"
 #include "renderer-mmap.h"
 #include "renderer-gl.h"
 
-#include <errno.h>
-#include <string.h>
-
+#include <sys/mman.h>
+#include <gbm.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
-#include <sys/mman.h>
 
-#include <gbm.h>
-
-#include "utils-dbus.h"
 #include <malloc.h>
-#include <libudev.h>
 #include <unistd.h>
 #include <string.h>
-#include <linux/input.h>
 #include <pthread.h>
 
 //------------------------------------------------------------------------------
 
 #define INVALID_CRTC_ID 0
+#define INVALID_FB_ID 0
 
+/// Data type used to bind DRM frame buffer information to GBM buffer object.
+typedef struct {
+    uint32_t fb;
+} NoiaGBMBundle;
+
+/// DRM subtype of Output
+/// @see NoiaOutput
 typedef struct {
     NoiaOutput base;
     int fd;
@@ -35,17 +35,19 @@ typedef struct {
     uint32_t crtc_id;
     uint32_t connector_id;
     uint32_t fb[2];
+    struct gbm_surface* gbm_surface;
+    struct gbm_bo* gbm_bo;
     drmModeModeInfo mode;
 } NoiaOutputDRM;
 
-static int fd = -1;
-
 //------------------------------------------------------------------------------
 
+/// Names of kernel modules to look up.
 static const char* scModuleName[] = {
         "i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "msm", NULL
     };
 
+/// Connector state dictionary
 static const char* scConnectorStateName[] = {
         "NONE", "connected", "disconnected", "Unknown", NULL
     };
@@ -54,6 +56,7 @@ pthread_mutex_t drm_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //------------------------------------------------------------------------------
 
+/// Translate connector type to human-readable name.
 char* noia_drm_get_connector_name(uint32_t connector_type)
 {
     static const char* scConnectorTypeName[] = {
@@ -72,6 +75,7 @@ char* noia_drm_get_connector_name(uint32_t connector_type)
 
 //------------------------------------------------------------------------------
 
+/// Log detailed information about devices.
 void noia_drm_log(int drm_fd, drmModeRes* resources)
 {
     // Log CRTC info
@@ -84,7 +88,7 @@ void noia_drm_log(int drm_fd, drmModeRes* resources)
         drmModeFreeCrtc(crtc);
     }
 
-    // Log enocoder info
+    // Log encoder info
     for (int i = 0; i < resources->count_encoders; ++i) {
         drmModeEncoderPtr encoder =
                               drmModeGetEncoder(drm_fd, resources->encoders[i]);
@@ -96,7 +100,7 @@ void noia_drm_log(int drm_fd, drmModeRes* resources)
         drmModeFreeEncoder(encoder);
     }
 
-    // Log framebuffer info
+    // Log frame buffer info
     for (int i = 0; i < resources->count_fbs; ++i) {
         drmModeFBPtr fb = drmModeGetFB(drm_fd, resources->fbs[i]);
         if (fb) {
@@ -108,8 +112,130 @@ void noia_drm_log(int drm_fd, drmModeRes* resources)
 }
 
 //------------------------------------------------------------------------------
+// GBM
+
+/// Create DRM frame buffer for use with GBM.
+/// @see NoiaGBMBundle
+NoiaGBMBundle* noia_drm_gbm_create(int drm_fd, struct gbm_bo* bo)
+{
+    NoiaGBMBundle* bundle = malloc(sizeof(NoiaGBMBundle));
+    if (!bundle) {
+        return NULL;
+    }
+
+    uint32_t width  = gbm_bo_get_width(bo);
+    uint32_t height = gbm_bo_get_height(bo);
+    uint32_t stride = gbm_bo_get_stride(bo);
+    uint32_t handle = gbm_bo_get_handle(bo).u32;
+
+    int r = drmModeAddFB(drm_fd, width, height, 24, 32,
+                         stride, handle, &bundle->fb);
+    if (r) {
+        LOG_ERROR("Failed to create DRM framebuffer: %m");
+        return NULL;
+    }
+
+    return bundle;
+}
+
+//------------------------------------------------------------------------------
+
+/// Destructor
+void noia_drm_gbm_destroy(NoiaGBMBundle* bundle)
+{
+    if (bundle) {
+        free(bundle);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+/// GBM user data destruction notification handler.
+void noia_drm_gbm_destroy_event(struct gbm_bo *bo, NOIA_UNUSED void *data)
+{
+    LOG_INFO2("Destroing GBM buffer object!");
+    NoiaGBMBundle* bundle = gbm_bo_get_user_data(bo);
+    if (bundle) {
+        noia_drm_gbm_destroy(bundle);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+/// Lock GBM surface and create new frame buffer if needed.
+uint32_t noia_drm_gbm_lock_surface(NoiaOutputDRM* output_drm)
+{
+    if (!output_drm->gbm_surface) {
+        LOG_ERROR("Invalid GBM surface!");
+        return INVALID_FB_ID;
+    }
+
+    struct gbm_bo* bo = gbm_surface_lock_front_buffer(output_drm->gbm_surface);
+    if (!bo) {
+        LOG_ERROR("Could not lock GBM front buffer!");
+    } else {
+        output_drm->gbm_bo = bo;
+    }
+
+    NoiaGBMBundle* bundle = gbm_bo_get_user_data(output_drm->gbm_bo);
+    if (!bundle) {
+        bundle = noia_drm_gbm_create(output_drm->fd, output_drm->gbm_bo);
+        gbm_bo_set_user_data(output_drm->gbm_bo, bundle,
+                             noia_drm_gbm_destroy_event);
+    }
+
+    return bundle->fb;
+}
+
+//------------------------------------------------------------------------------
+
+/// Prepare GL render for use with GBM buffers.
+NoiaRenderer* noia_drm_initialize_egl(NoiaOutputDRM* output_drm)
+{
+    NoiaEGLBundle egl;
+    struct gbm_device* gbm_device;
+
+    LOG_INFO1("Creating GBM and initializing EGL...");
+
+    // Find mode // TODO
+    int width  = output_drm->mode.hdisplay;
+    int height = output_drm->mode.vdisplay;
+
+    // Create GBM device and surface
+    gbm_device = gbm_create_device(output_drm->fd);
+    if (!gbm_device) {
+        LOG_ERROR("Failed to create GBM device!");
+        return NULL;
+    }
+
+    output_drm->gbm_surface =
+                  gbm_surface_create(gbm_device,
+                                     width, height,
+                                     GBM_FORMAT_XRGB8888,
+                                     GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+    if (!output_drm->gbm_surface) {
+        LOG_ERROR("Failed to create GBM surface!");
+        return NULL;
+    }
+
+    // Initiate EGL
+    NoiaResult result = noia_gl_create_onscreen_egl_bundle
+                                 ((EGLNativeDisplayType) gbm_device,
+                                  (EGLNativeWindowType) output_drm->gbm_surface,
+                                   &egl);
+    if (result != NOIA_RESULT_SUCCESS) {
+        return NULL;
+    }
+
+    LOG_INFO1("Creating GBM and initializing EGL: SUCCESS");
+
+    return noia_renderer_gl_create(&egl, width, height);
+}
+
+//------------------------------------------------------------------------------
 // DUMB BUFFERS
 
+/// Create single DRM dumb buffer for use with renderer.
 NoiaResult noia_drm_create_dumb_buffer(NoiaOutputDRM* output_drm,
                                        NoiaRenderer* renderer,
                                        int num)
@@ -177,6 +303,7 @@ clear_db:
 
 //------------------------------------------------------------------------------
 
+/// Prepare MMap render for use with DRM dumb buffers.
 NoiaRenderer* noia_drm_create_dumb_buffers(NoiaOutputDRM* output_drm)
 {
     NoiaRenderer* renderer = noia_renderer_mmap_create((NoiaOutput*) output_drm,
@@ -189,168 +316,11 @@ NoiaRenderer* noia_drm_create_dumb_buffers(NoiaOutputDRM* output_drm)
 }
 
 //------------------------------------------------------------------------------
-// EGL
-
-NoiaRenderer* initialize_egl_with_gbm(NOIA_UNUSED NoiaOutputDRM* output_drm)
-{
-    int r; // TODO EGLint ?
-    uint32_t fb_id;
-    uint32_t width, height, stride, handle;
-    //EGLint major, minor, n;
-    NoiaEGLBundle egl;
-    struct gbm_device*  gbm_device;
-    struct gbm_surface* gbm_surface;
-    struct gbm_bo*      gbm_bo;
-    drmModeModeInfo* mode;
-
-    static const EGLint context_attribs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            EGL_NONE
-        };
-
-    static const EGLint config_attribs[] = {
-            EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
-            EGL_RED_SIZE,        1,
-            EGL_GREEN_SIZE,      1,
-            EGL_BLUE_SIZE,       1,
-            EGL_ALPHA_SIZE,      0,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL_NONE
-        };
-
-    LOG_INFO1("Creating GBM and initializing EGL...");
-
-    // Find mode // TODO
-    mode = &output_drm->mode;
-
-    // Create GBM device and surface
-    gbm_device = gbm_create_device(output_drm->fd);
-
-    gbm_surface = gbm_surface_create(gbm_device,
-                                     mode->hdisplay, mode->vdisplay,
-                                     GBM_FORMAT_XRGB8888,
-                                     GBM_BO_USE_SCANOUT|GBM_BO_USE_RENDERING);
-    if (!gbm_surface) {
-        LOG_ERROR("Failed to create GBM surface!");
-        return NULL;
-    }
-
-
-    // Initialize EGL
-    /*egl.display = eglGetDisplay((EGLNativeDisplayType) gbm_device);
-
-    if (!eglInitialize(egl.display, &major, &minor)) {
-        LOG_ERROR("Failed to initialize EGL display!");
-        return NULL;
-    }
-
-    LOG_INFO2("EGL Version: '%s'", eglQueryString(egl.display, EGL_VERSION));
-    LOG_INFO2("EGL Vendor:  '%s'", eglQueryString(egl.display, EGL_VENDOR));
-
-    if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-        LOG_ERROR("Failed to bind api EGL_OPENGL_ES_API!");
-        return NULL;
-    }
-
-    r = eglChooseConfig(egl.display, config_attribs, &egl.config, 1, &n);
-    if (!r || n != 1) {
-        LOG_ERROR("Failed to choose EGL config (r: %d, n: %d)", r, n);
-        return NULL;
-    }
-
-    egl.context = eglCreateContext(egl.display, egl.config,
-                                   EGL_NO_CONTEXT, context_attribs);
-    if (egl.context == NULL) {
-        LOG_ERROR("Failed to create RGL context!");
-        return NULL;
-    }*/
-
-    NoiaResult result = noia_gl_initialize(&egl, (EGLNativeDisplayType) gbm_device,
-                                           config_attribs,
-                                           context_attribs);
-    if (result != NOIA_RESULT_SUCCESS) {
-        return NULL;
-    }
-
-
-    egl.surface = eglCreateWindowSurface(egl.display, egl.config,
-                                         (EGLNativeWindowType) gbm_surface,
-                                         NULL);
-    if (egl.surface == EGL_NO_SURFACE) {
-        LOG_ERROR("Failed to create EGL surface!");
-        return NULL;
-    }
-
-    // Connect the context to the surface
-    r = eglMakeCurrent(egl.display, egl.surface, egl.surface, egl.context);
-    if (r == EGL_FALSE) {
-        LOG_DEBUG("Failed to make EGL context current!");
-        return NULL;
-    }
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("Something went wrong during EGL initialization!");
-        return NULL;
-    }
-
-    // Create GBM BO
-    eglSwapBuffers(egl.display, egl.surface);
-
-    // TODO change to gbm_bo_create
-    gbm_bo = gbm_surface_lock_front_buffer(gbm_surface);
-    if (!gbm_bo) {
-        LOG_ERROR("Could not lock GBM front buffer!");
-        return NULL;
-    }
-
-    width = gbm_bo_get_width(gbm_bo);
-    height = gbm_bo_get_height(gbm_bo);
-    stride = gbm_bo_get_stride(gbm_bo);
-    handle = gbm_bo_get_handle(gbm_bo).u32;
-
-    r = drmModeAddFB(output_drm->fd, width, height,
-                     24, 32, stride, handle, &fb_id);
-    if (r) {
-        LOG_ERROR("Failed to create DRM framebuffer: %m");
-        return NULL;
-    }
-
-    // Set mode
-    r = drmModeSetCrtc(output_drm->fd,
-                       output_drm->crtc_id,
-                       fb_id, 0, 0,
-                       &output_drm->connector_id,
-                       1, mode);
-    if (r) {
-        LOG_ERROR("failed to set mode: %m");
-        goto clear_fb;
-    }
-
-    gbm_surface_release_buffer(gbm_surface, gbm_bo); // TODO: remove?
-
-    glClearColor(0.0, 0.25, 0.5, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    eglSwapBuffers(egl.display, egl.surface);
-
-    // Release context
-    r = eglMakeCurrent(egl.display, EGL_NO_SURFACE,
-                       EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    if (r == EGL_FALSE) {
-        LOG_ERROR("Failed to release EGL context! (%d)", eglGetError());
-    }
-
-    LOG_INFO1("Creating GBM and initializing EGL: SUCCESS");
-
-    return noia_renderer_gl_create(&egl, width, height);
-
-clear_fb:
-    drmModeRmFB(output_drm->fd, fb_id);
-    return NULL;
-}
-
-//------------------------------------------------------------------------------
 // OUTPUT
 
+/// Prepare output for rendering.
+/// Depending on hardware create renderer for drawing with GL or on DRM dumb
+/// buffers.
 NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
                                          NOIA_UNUSED int width,
                                          NOIA_UNUSED int height)
@@ -362,31 +332,14 @@ NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
         return NULL;
     }
 
-    renderer = initialize_egl_with_gbm(output_drm);
+    renderer = noia_drm_initialize_egl(output_drm);
     if (renderer == NULL) {
         renderer = noia_drm_create_dumb_buffers(output_drm);
     }
+
     if (renderer == NULL) {
         LOG_ERROR("DRM failed!");
         return NULL;
-    }
-
-    // Set mode
-    int r = drmModeSetCrtc(output_drm->fd,
-                           output_drm->crtc_id,
-                           output_drm->fb[0], 0, 0,
-                           &output_drm->connector_id, 1,
-                           &output_drm->mode);
-    if (r) {
-        LOG_ERROR("Failed to set mode for connector "
-                  "(id: %u, crtc_id: %u, fb0: %u, fb1: %u, error: '%m')",
-                  output_drm->connector_id, output_drm->crtc_id,
-                  output_drm->fb[0], output_drm->fb[1]);
-    } else {
-        LOG_INFO2("Set mode for connector "
-                  "(id: %u, crtc_id: %u, fb0: %u, fb1: %u)",
-                  output_drm->connector_id, output_drm->crtc_id,
-                  output_drm->fb[0], output_drm->fb[1]);
     }
 
     return renderer;
@@ -394,7 +347,37 @@ NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_drm_output_swap_buffers(NoiaOutput* output)
+/// Swap buffers.
+/// This function is used only for dumb buffers.
+/// @see noia_drm_output_end_drawing, noia_drm_gbm_lock_surface
+uint32_t noia_drm_output_swap_buffers(NoiaOutputDRM* output_drm)
+{
+    output_drm->front = output_drm->front ^ 1;
+    return output_drm->fb[output_drm->front];
+}
+
+//------------------------------------------------------------------------------
+
+/// Release GBM buffer locked with `noia_drm_gbm_lock_surface`.
+/// @see noia_drm_gbm_lock_surface
+NoiaResult noia_drm_output_begin_drawing(NoiaOutput* output)
+{
+    NoiaOutputDRM* output_drm = (NoiaOutputDRM*) output;
+    if (!output_drm) {
+        return NOIA_RESULT_ERROR;
+    }
+
+    if (output_drm->gbm_surface && output_drm->gbm_bo) {
+        gbm_surface_release_buffer(output_drm->gbm_surface, output_drm->gbm_bo);
+    }
+
+    return NOIA_RESULT_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// End drawing - swap buffers and set mode.
+NoiaResult noia_drm_output_end_drawing(NoiaOutput* output)
 {
     pthread_mutex_lock(&drm_mutex);
     NoiaResult result = NOIA_RESULT_SUCCESS;
@@ -405,11 +388,13 @@ NoiaResult noia_drm_output_swap_buffers(NoiaOutput* output)
         goto unlock;
     }
 
-    int new_front = output_drm->front ^ 1;
+    int32_t fb = output_drm->gbm_surface
+               ? noia_drm_gbm_lock_surface(output_drm)
+               : noia_drm_output_swap_buffers(output_drm);
 
     int r = drmModeSetCrtc(output_drm->fd,
                            output_drm->crtc_id,
-                           output_drm->fb[new_front], 0, 0,
+                           fb, 0, 0,
                            &output_drm->connector_id, 1,
                            &output_drm->mode);
     if (r) {
@@ -420,8 +405,6 @@ NoiaResult noia_drm_output_swap_buffers(NoiaOutput* output)
         goto unlock;
     }
 
-    output_drm->front = new_front;
-
 unlock:
     pthread_mutex_unlock(&drm_mutex);
     return result;
@@ -429,6 +412,7 @@ unlock:
 
 //------------------------------------------------------------------------------
 
+/// DRM Output destructor.
 void noia_drm_output_free(NoiaOutput* output)
 {
     if (!output) {
@@ -443,6 +427,7 @@ void noia_drm_output_free(NoiaOutput* output)
 
 //------------------------------------------------------------------------------
 
+/// DRM output constructor.
 NoiaOutputDRM* noia_drm_output_new(int width,
                                    int height,
                                    char* connector_name,
@@ -460,7 +445,8 @@ NoiaOutputDRM* noia_drm_output_new(int width,
                            width, height,
                            connector_name ? strdup(connector_name) : "",
                            noia_drm_output_initialize,
-                           noia_drm_output_swap_buffers,
+                           noia_drm_output_begin_drawing,
+                           noia_drm_output_end_drawing,
                            noia_drm_output_free);
 
     output_drm->fd = drm_fd;
@@ -470,6 +456,8 @@ NoiaOutputDRM* noia_drm_output_new(int width,
     output_drm->fb[0] = -1;
     output_drm->fb[1] = -1;
     output_drm->mode = mode;
+    output_drm->gbm_surface = NULL;
+    output_drm->gbm_bo = NULL;
 
     return output_drm;
 }
@@ -477,6 +465,7 @@ NoiaOutputDRM* noia_drm_output_new(int width,
 //------------------------------------------------------------------------------
 // DEVICE
 
+/// This function check if CRTC with id `crtc_id` is already in use.
 bool noia_drm_is_crtc_in_use(NoiaList* drm_outputs, uint32_t crtc_id)
 {
     int is_in_use = false;
@@ -492,6 +481,7 @@ bool noia_drm_is_crtc_in_use(NoiaList* drm_outputs, uint32_t crtc_id)
 
 //------------------------------------------------------------------------------
 
+/// This function matches CRTC to given connector.
 uint32_t noia_drm_find_crtc(int drm_fd,
                             drmModeRes* resources,
                             drmModeConnector* connector,
@@ -539,6 +529,7 @@ uint32_t noia_drm_find_crtc(int drm_fd,
 
 //------------------------------------------------------------------------------
 
+/// Construct Output instance for work with given connector.
 NoiaOutputDRM* noia_drm_update_connector(int drm_fd,
                                          drmModeRes* resources,
                                          drmModeConnector* connector,
@@ -587,10 +578,16 @@ NoiaOutputDRM* noia_drm_update_connector(int drm_fd,
 
 //------------------------------------------------------------------------------
 
+/// Scan devices and return list of available Outputs.
+/// @param[out] outputs - list out the outputs
+/// @return number of outputs found.
+/// @see noia_output_collector_fetch_actual_outputs,
+///      noia_devfb_setup_framebuffer
 int noia_drm_update_devices(NoiaList* outputs)
 {
     pthread_mutex_lock(&drm_mutex);
 
+    int fd = -1;
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
     NoiaList* drm_outputs = noia_list_new(NULL);
@@ -626,7 +623,7 @@ int noia_drm_update_devices(NoiaList* outputs)
     // Try to set master
     int ret = drmSetMaster(fd);
     if (ret == -1) {
-        LOG_ERROR("Set Master: %m");
+        LOG_WARN1("Set Master: %m");
     }
 
     // Get resources

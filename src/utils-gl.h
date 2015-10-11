@@ -72,6 +72,10 @@ NoiaResult noia_gl_initialize(NoiaEGLBundle* egl,
                               const EGLint config_attribs[],
                               const EGLint context_attribs[]);
 
+NoiaResult noia_gl_create_onscreen_egl_bundle(EGLNativeDisplayType display,
+                                              EGLNativeWindowType window,
+                                              NoiaEGLBundle* egl);
+
 NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
                                                EGLint height,
                                                NoiaEGLBundle* egl);

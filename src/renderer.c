@@ -8,14 +8,16 @@ void noia_renderer_initialize(NoiaRenderer* self,
                               NoiaRendererFinalizeFunc finalize,
                               NoiaRendererAttachFunc attach,
                               NoiaRendererDrawFunc draw,
+                              NoiaRendererSwapBuffersFunc swap_buffers,
                               NoiaRendererCopyBufferFunc copy_buffer,
                               NoiaRendererFinalizeFunc free)
 {
-    self->initialize  = initialize;
-    self->finalize    = finalize;
-    self->attach      = attach;
-    self->copy_buffer = copy_buffer;
-    self->draw        = draw;
-    self->free        = free;
+    self->initialize   = initialize;
+    self->finalize     = finalize;
+    self->attach       = attach;
+    self->draw         = draw;
+    self->swap_buffers = swap_buffers;
+    self->copy_buffer  = copy_buffer;
+    self->free         = free;
 }
 

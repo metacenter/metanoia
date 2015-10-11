@@ -10,7 +10,8 @@
 typedef struct NoiaOutput NoiaOutput;
 
 typedef NoiaRenderer* (*NoiaOutputInitRendererFunc) (NoiaOutput*, int, int);
-typedef NoiaResult (*NoiaOutputSwapFunc) (NoiaOutput*);
+typedef NoiaResult (*NoiaOutputBeginDrawingFunc) (NoiaOutput*);
+typedef NoiaResult (*NoiaOutputEndDrawingFunc) (NoiaOutput*);
 typedef void (*NoiaOutputFreeFunc) (NoiaOutput*);
 
 struct NoiaOutput {
@@ -22,7 +23,8 @@ struct NoiaOutput {
     NoiaPosition global_position;
     NoiaRenderer* renderer;
     NoiaOutputInitRendererFunc initialize;
-    NoiaOutputSwapFunc swap_buffers;
+    NoiaOutputBeginDrawingFunc begin_drawing;
+    NoiaOutputEndDrawingFunc end_drawing;
 };
 
 NoiaResult noia_output_initialize(NoiaOutput* self,
@@ -30,8 +32,11 @@ NoiaResult noia_output_initialize(NoiaOutput* self,
                                   int height,
                                   char* unique_name,
                                   NoiaOutputInitRendererFunc initialize,
-                                  NoiaOutputSwapFunc swap_buffers,
+                                  NoiaOutputBeginDrawingFunc begin_drawing,
+                                  NoiaOutputEndDrawingFunc end_drawing,
                                   NoiaOutputFreeFunc free);
+
+NoiaResult noia_output_initialize_rendering(NoiaOutput* output);
 
 int noia_output_compare(NoiaOutput* first, NoiaOutput* second);
 

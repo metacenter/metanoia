@@ -17,34 +17,24 @@
 //------------------------------------------------------------------------------
 // PRIVATE
 
-int noia_display_is_valid(NoiaDisplay* self)
+bool noia_display_is_valid(NoiaDisplay* self)
 {
     if (!self) {
-        LOG_ERROR("Invalid risplay!");
-        return 0;
+        LOG_ERROR("Invalid display!");
+        return false;
     }
 
     if (!self->compositor) {
         LOG_ERROR("No current compositor!");
-        return 0;
+        return false;
     }
 
     if (!self->output) {
         LOG_ERROR("Invalid output!");
-        return 0;
+        return false;
     }
 
-    if (!self->output->renderer) {
-        LOG_ERROR("Invalid renderer!");
-        return 0;
-    }
-
-    if (!self->output->renderer->draw) {
-        LOG_ERROR("Wrong renderer implementation!");
-        return 0;
-    }
-
-    return 1;
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -58,6 +48,18 @@ void noia_display_redraw_all(NoiaDisplay* self)
 
     self->output->renderer->draw(self->output->renderer, visible_surfaces,
                                 pos.x, pos.y, noia_exhibitor_pointer_get_sid());
+
+    if (self->output->begin_drawing) {
+        self->output->begin_drawing(self->output);
+    }
+
+    if (self->output->renderer->swap_buffers) {
+        self->output->renderer->swap_buffers(self->output->renderer);
+    }
+
+    if (self->output->end_drawing) {
+        self->output->end_drawing(self->output);
+    }
 
     noia_exhibitor_pointer_update_hover_state(visible_surfaces);
 
@@ -86,12 +88,23 @@ void* noia_display_thread_loop(void* data)
     noia_environment_on_enter_new_thread(self->thread, name);
     LOG_INFO1("Threads: starting display loop '%s'", name);
 
-    self->run = 1;
-    while (self->run) {
-        noia_surface_lock();
-        noia_display_redraw_all(self);
-        noia_surface_unlock();
-        noia_event_timer_nanosleep(100 * 1000000);
+    LOG_INFO1("Initializing output '%s'", self->output->unique_name);
+    self->output->renderer = self->output->initialize(self->output,
+                                                      self->output->width,
+                                                      self->output->height);
+
+    NoiaResult result = noia_output_initialize_rendering(self->output);
+    if (result == NOIA_RESULT_SUCCESS) {
+        LOG_INFO1("Initialized new renderer!");
+        self->run = true;
+        while (self->run) {
+            noia_surface_lock();
+            noia_display_redraw_all(self);
+            noia_surface_unlock();
+            noia_event_timer_nanosleep(100 * 1000000);
+        }
+    } else {
+        LOG_ERROR("Initializing new renderer failed!");
     }
 
     LOG_INFO1("Threads: stopped display loop '%s'", name);

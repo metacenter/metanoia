@@ -237,7 +237,36 @@ NoiaResult noia_gl_initialize(NoiaEGLBundle* egl,
 
 //------------------------------------------------------------------------------
 
-/// Create EGL display, configuration, context and offscreen surface
+/// Create EGL display, configuration, context and on-screen surface
+NoiaResult noia_gl_create_onscreen_egl_bundle(EGLNativeDisplayType display,
+                                              EGLNativeWindowType window,
+                                              NoiaEGLBundle* egl)
+{
+    LOG_INFO1("Creating on-screen EGL bundle...");
+
+    // Initialize EGL
+    NoiaResult result = noia_gl_initialize(egl, display,
+                                           scDefaultConfigAttribs,
+                                           scDefaultContextAttribs);
+    if (result != NOIA_RESULT_SUCCESS) {
+        return result;
+    }
+
+    // Create surface
+    egl->surface = eglCreateWindowSurface(egl->display, egl->config,
+                                          window, NULL);
+    if (egl->surface == EGL_NO_SURFACE) {
+        LOG_ERROR("EGL: Failed to create surface!");
+        return NOIA_RESULT_ERROR;
+    }
+
+    LOG_INFO1("Creating on-screen EGL bundle: SUCCESS");
+    return NOIA_RESULT_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Create EGL display, configuration, context and off-screen surface
 NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
                                                EGLint height,
                                                NoiaEGLBundle* egl)
@@ -251,7 +280,7 @@ NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
              EGL_NONE
         };
 
-    LOG_INFO1("Creating offscreen EGL bundle...");
+    LOG_INFO1("Creating off-screen EGL bundle...");
 
     // Initialize EGL
     NoiaResult result = noia_gl_initialize(egl, EGL_DEFAULT_DISPLAY,
@@ -270,7 +299,7 @@ NoiaResult noia_gl_create_offscreen_egl_bundle(EGLint width,
         return NOIA_RESULT_ERROR;
     }
 
-    LOG_INFO1("Creating offscreen EGL bundle: SUCCESS");
+    LOG_INFO1("Creating off-screen EGL bundle: SUCCESS");
     return NOIA_RESULT_SUCCESS;
 }
 

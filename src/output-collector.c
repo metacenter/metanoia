@@ -82,23 +82,12 @@ void noia_output_collector_notify_outputs_found(NoiaList* found_outputs)
             continue;
         }
 
-        // assign position to output
+        // Assign position to output
         output->global_position = noia_output_collector_allocate_position();
-
-        // initialize output (create renderer)
-        LOG_INFO1("Initializing output '%s'", output->unique_name);
-        output->renderer =
-                      output->initialize(output, output->width, output->height);
-
-        // store the output
         noia_list_append(outputs, output);
 
-        // notify about new output
-        if (output->renderer) {
-            noia_event_signal_emit(SIGNAL_OUTPUT_FOUND, (NoiaObject*) output);
-        } else {
-            LOG_WARN1("Invalid renderer!");
-        }
+        // Notify about new output
+        noia_event_signal_emit(SIGNAL_OUTPUT_FOUND, (NoiaObject*) output);
     }
 }
 
