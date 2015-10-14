@@ -11,7 +11,7 @@
 #include "surface-manager.h"
 #include "config.h"
 
-int main()
+int main(int argc, char** argv)
 {
     NoiaTask* task;
     NoiaEventData* event_data;
@@ -19,7 +19,7 @@ int main()
     // Initialization
     noia_environment_set_thread_name(0, "noia:main");
     noia_environment_setup();
-    noia_config_apply();
+    noia_config_apply(argc, argv);
     noia_dbus_initalize();
 
     // Prepare event dispatcher

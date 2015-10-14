@@ -13,13 +13,15 @@ typedef struct {
 
 typedef struct {
     bool run_in_test_window;
+    bool use_gl;
+    bool use_drm;
     const char* wayland_display_name;
 } NoiaSettings;
 
 const NoiaConfig* noia_config();
 const NoiaSettings* noia_settings();
 
-void noia_config_apply();
+void noia_config_apply(int argc, char** argv);
 void noia_config_finalize();
 
 NoiaKeymap* noia_config_get_keymap();

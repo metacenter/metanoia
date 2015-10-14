@@ -54,7 +54,9 @@ NoiaList* noia_output_collector_fetch_actual_outputs()
     NoiaList* actual_outputs = noia_list_new(NULL);
 
     if (!noia_settings()->run_in_test_window) {
-        num = noia_drm_update_devices(actual_outputs);
+        if (noia_settings()->use_drm) {
+            num = noia_drm_update_devices(actual_outputs);
+        }
         if (num < 1) {
             num = noia_devfb_setup_framebuffer(actual_outputs);
         }

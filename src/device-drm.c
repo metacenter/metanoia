@@ -5,6 +5,7 @@
 #include "utils-log.h"
 #include "renderer-mmap.h"
 #include "renderer-gl.h"
+#include "config.h"
 
 #include <sys/mman.h>
 #include <gbm.h>
@@ -319,8 +320,8 @@ NoiaRenderer* noia_drm_create_dumb_buffers(NoiaOutputDRM* output_drm)
 // OUTPUT
 
 /// Prepare output for rendering.
-/// Depending on hardware create renderer for drawing with GL or on DRM dumb
-/// buffers.
+/// Depending on hardware and settings create renderer for drawing with GL
+/// or on DRM dumb buffers.
 NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
                                          NOIA_UNUSED int width,
                                          NOIA_UNUSED int height)
@@ -332,7 +333,10 @@ NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
         return NULL;
     }
 
-    renderer = noia_drm_initialize_egl(output_drm);
+    if (noia_settings()->use_gl) {
+        renderer = noia_drm_initialize_egl(output_drm);
+    }
+
     if (renderer == NULL) {
         renderer = noia_drm_create_dumb_buffers(output_drm);
     }
