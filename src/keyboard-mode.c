@@ -82,7 +82,7 @@ void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding)
         return;
     }
 
-    LOG_INFO2("Created binding (code: %d, modifiers: %d)",
+    LOG_INFO3("Created binding (code: %d, modifiers: %d)",
               binding->code, binding->modifiers);
 }
 

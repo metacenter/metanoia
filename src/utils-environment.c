@@ -125,8 +125,6 @@ int noia_environment_data_path_setup(void)
     strcpy(sNoiaDataPath, data_path);
     strcat(sNoiaDataPath, scDataDirTemplate);
 
-    LOG_INFO1("Data path: '%s'", sNoiaDataPath);
-
     // Create subdirectories
     noia_environment_mkdir(sNoiaDataPath);
 
@@ -161,7 +159,6 @@ int noia_environment_runtime_path_setup(void)
         goto cleanup;
     }
 
-    LOG_INFO1("Runtime path: '%s'", sNoiaRuntimePath);
     return 0;
 
 cleanup:
@@ -188,6 +185,9 @@ int noia_environment_setup(void)
     if (result1 < 0 || result2 < 0) {
         return -1;
     }
+
+    LOG_INFO1("Data path: '%s'", sNoiaDataPath);
+    LOG_INFO1("Runtime path: '%s'", sNoiaRuntimePath);
     return 0;
 }
 
