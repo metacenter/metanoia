@@ -113,13 +113,9 @@ void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
     int fd;
     uint32_t flags;
     char name[256];
-    const char* syspath;
-    const char* sysname;
-    const char* devnode;
     const char* propname;
     struct stat st;
     struct udev* udev;
-    struct udev_device* dev;
     struct udev_enumerate* enumerate;
     struct udev_list_entry* dev_list_entry;
     struct udev_list_entry* prop_list_entry;
@@ -142,10 +138,10 @@ void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
          dev_list_entry != NULL;
          dev_list_entry = udev_list_entry_get_next(dev_list_entry))
     {
-        syspath = udev_list_entry_get_name(dev_list_entry);
-        dev     = udev_device_new_from_syspath(udev, syspath);
-        sysname = udev_device_get_sysname(dev);
-        devnode = udev_device_get_devnode(dev);
+        const char* syspath = udev_list_entry_get_name(dev_list_entry);
+        struct udev_device* dev = udev_device_new_from_syspath(udev, syspath);
+        const char* sysname = udev_device_get_sysname(dev);
+        const char* devnode = udev_device_get_devnode(dev);
 
         // Is it input device?
         if (strncmp("event", sysname, 5) != 0) {

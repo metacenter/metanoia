@@ -41,7 +41,7 @@ void noia_config_parse_arguments(int argc, char** argv)
     struct argp_option options[] = {
             { "no-gl",  'g', 0, 0, "do not use gl for drawing", 0},
             { "no-drm", 'd', 0, 0, "do not use DRM do device lookup", 0},
-            { NULL }
+            { NULL, '\0', 0, 0, NULL, 0 }
         };
     struct argp argp = {options, noia_config_parse_option,
                         NULL, NULL, NULL, NULL, NULL};

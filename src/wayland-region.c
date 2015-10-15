@@ -43,12 +43,10 @@ void noia_wayland_region_inflate(NoiaWaylandRegion* self,
                                  int x, int y,
                                  int width, int height)
 {
-    int diff = 0;
-
     if (noia_wayland_region_is_valid(self)) {
         NoiaWaylandRegion old = *self;
 
-        diff = old.pos.x - x;
+        int diff = old.pos.x - x;
         if (diff > 0) {
             self->size.width += diff;
             self->pos.x = x;

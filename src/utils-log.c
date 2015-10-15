@@ -122,7 +122,7 @@ void noia_log(const char* log_level,
 /// Print backtrace.
 void noia_print_backtrace(void)
 {
-    size_t size, i, n;
+    size_t size;
     void *array[128];
     char buff[128];
     Dl_info info;
@@ -135,11 +135,11 @@ void noia_print_backtrace(void)
 
     size = backtrace(array, sizeof(array));
 
-    for (i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         dladdr(array[i], &info);
-        n = snprintf(buff, sizeof buff, "%015lx | %-45s | %s\n",
-                     (long) array[i], info.dli_fname,
-                     info.dli_sname ? info.dli_sname : "---");
+        size_t n = snprintf(buff, sizeof buff, "%015lx | %-45s | %s\n",
+                            (long) array[i], info.dli_fname,
+                            info.dli_sname ? info.dli_sname : "---");
         write(sLogFD, buff, n);
     }
 

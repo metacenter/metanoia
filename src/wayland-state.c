@@ -155,7 +155,6 @@ void noia_wayland_state_add_keyboard_resource(struct wl_resource* rc)
 
 void noia_wayland_state_keyboard_focus_update(NoiaSurfaceId new_sid)
 {
-    NoiaList* resources = NULL;
     struct wl_resource* new_resource = NULL;
     struct wl_client* new_client = NULL;
     struct wl_resource* old_resource = NULL;
@@ -185,7 +184,8 @@ void noia_wayland_state_keyboard_focus_update(NoiaSurfaceId new_sid)
         // Send 'leave' and 'enter' event to all clients' keyboard objects
         struct wl_array array;
         wl_array_init(&array);
-        resources = noia_wayland_cache_get_resources(NOIA_RESOURCE_KEYBOARD);
+        NoiaList* resources =
+                       noia_wayland_cache_get_resources(NOIA_RESOURCE_KEYBOARD);
         FOR_EACH (resources, link) {
             struct wl_resource* rc = link->data;
             struct wl_client* rc_client = wl_resource_get_client(rc);
@@ -210,7 +210,6 @@ void noia_wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
 {
     struct wl_resource* resource = NULL;
     struct wl_client* focused_client = NULL;
-    NoiaList* resources = NULL;
 
     pthread_mutex_lock(&sStateMutex);
 
@@ -229,7 +228,8 @@ void noia_wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
 
     if (resource && focused_client) {
         int serial = wl_display_next_serial(sState.display);
-        resources = noia_wayland_cache_get_resources(NOIA_RESOURCE_KEYBOARD);
+        NoiaList* resources =
+                       noia_wayland_cache_get_resources(NOIA_RESOURCE_KEYBOARD);
         FOR_EACH (resources, link) {
             struct wl_resource* rc = link->data;
             if (focused_client == wl_resource_get_client(rc)) {

@@ -61,26 +61,31 @@ char* noia_gl_read_shader_source(const char* filename)
 
     // Determine file size
     if (fseek(input, 0, SEEK_END) == -1) {
+        fclose(input);
         return NULL;
     }
     long size = ftell(input);
     if (size == -1) {
+        fclose(input);
         return NULL;
     }
 
     if (fseek(input, 0, SEEK_SET) == -1) {
+        fclose(input);
         return NULL;
     }
 
     // Allocate memory for contents
     char* content = malloc(size + 1);
     if (content == NULL) {
+        fclose(input);
         return NULL;
     }
 
     // Read in source
     fread(content, 1, size, input);
     if (ferror(input)) {
+        fclose(input);
         free(content);
         return NULL;
     }

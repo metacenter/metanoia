@@ -11,7 +11,7 @@ check: checks
 memcheck: checks
 	@time (for c in checks/check*; do valgrind --leak-check=full --show-leak-kinds=all $$c; echo;done)
 cppcheck:
-	cppcheck --enable=all --template="[{severity}] {file} ({line}): {id} - {message}" --suppress=incorrectStringBooleanError .
+	cppcheck -q --enable=all --template="[{severity}] {file} ({line}): {id} - {message}" --suppress=incorrectStringBooleanError .
 
 
 build/metanoia: Makefile \
@@ -263,11 +263,9 @@ build/utils-keymap.o: Makefile \
 
 build/utils-log.o: Makefile \
                    src/utils-log.c \
-                   src/config.h \
-                   src/utils-keymap.h \
+                   src/utils-log.h \
                    src/global-constants.h \
                    src/global-types.h \
-                   src/utils-log.h \
                    src/utils-environment.h \
                    gen/version.h
 	@mkdir -p build
@@ -485,7 +483,8 @@ build/device-drm.o: Makefile \
                     src/renderer-mmap.h \
                     src/renderer-gl.h \
                     src/utils-gl.h \
-                    src/utils-dbus.h
+                    src/config.h \
+                    src/utils-keymap.h
 	@mkdir -p build
 	@echo "  CC   device-drm.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-drm.o -Isrc -Igen \

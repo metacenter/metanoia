@@ -211,7 +211,7 @@ class Make:
                    'memcheck: checks\n'
                    '\t@time (for c in checks/check*; do valgrind '
                    '--leak-check=full --show-leak-kinds=all $$c; echo;done)\n'
-                   'cppcheck:\n\tcppcheck --enable=all --template='
+                   'cppcheck:\n\tcppcheck -q --enable=all --template='
                    '"[{{severity}}] {{file}} ({{line}}): {{id}} - {{message}}" '
                    '--suppress=incorrectStringBooleanError .\n\n'
                    .format(' '.join(self.checks)))

@@ -132,9 +132,6 @@ int noia_event_dispatcher_add_event_source(NoiaEventDispatcher* self,
 
 void noia_event_dispatcher_start(NoiaEventDispatcher* self)
 {
-    int r;
-    struct epoll_event event;
-
     if (!self) {
         return;
     }
@@ -144,7 +141,8 @@ void noia_event_dispatcher_start(NoiaEventDispatcher* self)
     self->run = 1;
     while (self->run) {
         LOG_EVNT4("Waiting for events...");
-        r = epoll_wait(self->epfd, &event, 1, -1);
+        struct epoll_event event;
+        int r = epoll_wait(self->epfd, &event, 1, -1);
         if (r > 0) {
             NoiaEventData* data = event.data.ptr;
             if (data) {

@@ -591,6 +591,7 @@ int noia_drm_update_devices(NoiaList* outputs)
 {
     pthread_mutex_lock(&drm_mutex);
 
+    int num = 0;
     int fd = -1;
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
@@ -602,7 +603,7 @@ int noia_drm_update_devices(NoiaList* outputs)
     /// @todo: try all devices, there may be more than one connected
     if (fd < 0) {
         unsigned int i;
-        for (i = 0; i < sizeof(scModuleName); ++i) {
+        for (i = 0; scModuleName[i]; ++i) {
             fd = drmOpen(scModuleName[i], NULL);
             if (fd > 0) {
                 break;
@@ -651,7 +652,7 @@ int noia_drm_update_devices(NoiaList* outputs)
         drmModeFreeConnector(connector);
     }
 
-    int num = noia_list_len(drm_outputs);
+    num = noia_list_len(drm_outputs);
     FOR_EACH (drm_outputs, link) {
         noia_list_append(outputs, link->data);
     }
