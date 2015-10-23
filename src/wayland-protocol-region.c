@@ -7,15 +7,20 @@
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_region_destroy(NOIA_UNUSED struct wl_client* client,
-                                 NOIA_UNUSED struct wl_resource* resource)
+/// @todo: Wayland protocol: destroy region.
+void noia_wayland_region_destroy(struct wl_client* client NOIA_UNUSED,
+                                 struct wl_resource* resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland: region destroy");
+    NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(resource);
+    LOG_NYIMP("Wayland: region destroy (rid: %d)", rid);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_region_add(NOIA_UNUSED struct wl_client* client,
+/// Wayland protocol: add a square to a region.
+/// Here concept is simplified.
+/// @see wayland-region.h
+void noia_wayland_region_add(struct wl_client* client NOIA_UNUSED,
                              struct wl_resource* resource,
                              int32_t x,
                              int32_t y,
@@ -33,8 +38,10 @@ void noia_wayland_region_add(NOIA_UNUSED struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_region_subtract(NOIA_UNUSED struct wl_client* client,
-                                  NOIA_UNUSED struct wl_resource* resource,
+/// @todo Wayland protocol: subtract a square from a region.
+/// @see wayland-region.h
+void noia_wayland_region_subtract(struct wl_client* client NOIA_UNUSED,
+                                  struct wl_resource* resource NOIA_UNUSED,
                                   int32_t x,
                                   int32_t y,
                                   int32_t width,

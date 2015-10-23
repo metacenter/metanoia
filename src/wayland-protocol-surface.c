@@ -12,7 +12,7 @@
 
 /// Handle destruction of frame resource.
 /// Currently nothing to do here.
-void noia_wayland_surface_frame_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_surface_frame_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_WAYL5("Wayland: unbind surface frame");
 }
@@ -20,8 +20,8 @@ void noia_wayland_surface_frame_unbind(NOIA_UNUSED struct wl_resource* resource)
 //------------------------------------------------------------------------------
 
 /// Wayland protocol: destroy surface.
-void noia_wayland_surface_destroy(NOIA_UNUSED struct wl_client* client,
-                                  NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_surface_destroy(struct wl_client* client NOIA_UNUSED,
+                                  struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: surface destroy");
 }
@@ -29,7 +29,7 @@ void noia_wayland_surface_destroy(NOIA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 /// Wayland protocol: attach surface.
-void noia_wayland_surface_attach(NOIA_UNUSED struct wl_client* client,
+void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
                                  struct wl_resource* resource,
                                  struct wl_resource* buffer_resource,
                                  int32_t sx, int32_t sy)
@@ -65,12 +65,12 @@ void noia_wayland_surface_attach(NOIA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 /// @todo: Wayland protocol: damage surface.
-void noia_wayland_surface_damage(NOIA_UNUSED struct wl_client* client,
-                                 NOIA_UNUSED struct wl_resource* resource,
+void noia_wayland_surface_damage(struct wl_client* client NOIA_UNUSED,
+                                 struct wl_resource* resource NOIA_UNUSED,
                                  int32_t x, int32_t y,
                                  int32_t width, int32_t height)
 {
-    LOG_NYIMP("Wayland: surface damage (x: %d, y: %d, w: %d, h: %d)",
+    LOG_WAYL3("Wayland: surface damage (x: %d, y: %d, w: %d, h: %d)",
               x, y, width, height);
 }
 
@@ -103,16 +103,29 @@ void noia_wayland_surface_frame(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-/// Wayland protocol: setsurface opaque region.
+/// #todo: Wayland protocol: setsurface opaque region.
 void noia_wayland_surface_set_opaque_region
-                               (NOIA_UNUSED struct wl_client* client,
-                                NOIA_UNUSED struct wl_resource* resource,
-                                NOIA_UNUSED struct wl_resource* region_resource)
+                                          (struct wl_client* client NOIA_UNUSED,
+                                           struct wl_resource* resource,
+                                           struct wl_resource* region_resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
 
     LOG_NYIMP("Wayland: set opaque region (sid: %d, rid: %d)", sid, rid);
+}
+
+//------------------------------------------------------------------------------
+
+/// Wayland protocol: set surface input region.
+void noia_wayland_surface_set_input_region(struct wl_client* client NOIA_UNUSED,
+                                           struct wl_resource* resource,
+                                           struct wl_resource* region_resource)
+{
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
+
+    LOG_WAYL2("Wayland: set input region (sid: %d, rid: %d)", sid, rid);
 
     NoiaWaylandRegion* region = noia_wayland_cache_find_region(rid);
     if (region) {
@@ -123,21 +136,10 @@ void noia_wayland_surface_set_opaque_region
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: set surface input region.
-void noia_wayland_surface_set_input_region
-                               (NOIA_UNUSED struct wl_client* client,
-                                NOIA_UNUSED struct wl_resource* resource,
-                                NOIA_UNUSED struct wl_resource* region_resource)
-{
-    LOG_NYIMP("Wayland: set input region");
-}
-
-//------------------------------------------------------------------------------
-
 /// @todo: Wayland protocol: commit surface.
 /// Client tells compositor that all request were sent and the surface is now
 /// ready to draw.
-void noia_wayland_surface_commit(NOIA_UNUSED struct wl_client* client,
+void noia_wayland_surface_commit(struct wl_client* client NOIA_UNUSED,
                                  struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
@@ -151,8 +153,8 @@ void noia_wayland_surface_commit(NOIA_UNUSED struct wl_client* client,
 
 /// @todo: Wayland protocol: set surface buffer transform.
 void noia_wayland_surface_set_buffer_transform
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
+                                      (struct wl_client* client NOIA_UNUSED,
+                                       struct wl_resource* resource NOIA_UNUSED,
                                        int32_t transform)
 {
     LOG_NYIMP("Wayland: set buffer transform (transform: %d)", transform);
@@ -162,8 +164,8 @@ void noia_wayland_surface_set_buffer_transform
 
 /// @todo: Wayland protocol: set surface buffer scale.
 void noia_wayland_surface_set_buffer_scale
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
+                                      (struct wl_client* client NOIA_UNUSED,
+                                       struct wl_resource* resource NOIA_UNUSED,
                                        int32_t scale)
 {
     LOG_NYIMP("Wayland: set buffer scale (scale: %d)", scale);

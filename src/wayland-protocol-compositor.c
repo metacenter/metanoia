@@ -13,20 +13,24 @@
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_compositor_unbind(NOIA_UNUSED struct wl_resource* resource)
+/// @todo: Handle destruction of compositor resource.
+void noia_wayland_compositor_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind compositor");
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_region_unbind(NOIA_UNUSED struct wl_resource* resource)
+/// @todo: Handle destruction of region resource.
+void noia_wayland_region_unbind(struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: unbind region");
+    NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(resource);
+    LOG_NYIMP("Wayland: unbind region (rid: %d)", rid);
 }
 
 //------------------------------------------------------------------------------
 
+/// Handle destruction of surface resource.
 void noia_wayland_surface_unbind(struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
@@ -37,14 +41,13 @@ void noia_wayland_surface_unbind(struct wl_resource* resource)
 
 //------------------------------------------------------------------------------
 
+/// Wayland protocol: create new surface.
 void noia_wayland_create_surface(struct wl_client* client,
                                  struct wl_resource* resource,
                                  uint32_t id)
 {
     struct wl_resource* rc;
     NoiaSurfaceId new_sid;
-
-    LOG_WAYL2("Wayland: create surface (id: %d)", id);
 
     rc = wl_resource_create(client, &wl_surface_interface,
                             wl_resource_get_version(resource), id);
@@ -54,6 +57,8 @@ void noia_wayland_create_surface(struct wl_client* client,
     }
 
     new_sid = noia_surface_create();
+    LOG_WAYL2("Wayland: create surface (id: %d, sid: %d)", id, new_sid);
+
     noia_wayland_state_add_surface(new_sid, rc);
 
     wl_resource_set_implementation(rc, &surface_implementation,
@@ -62,13 +67,13 @@ void noia_wayland_create_surface(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
+/// Wayland protocol: Create new region.
+/// @see wayland-region.h
 void noia_wayland_create_region(struct wl_client* client,
                                 struct wl_resource* resource,
                                 uint32_t id)
 {
     struct wl_resource* rc;
-
-    LOG_WAYL2("Wayland: create region (id: %d)", id);
 
     rc = wl_resource_create(client, &wl_region_interface,
                             wl_resource_get_version(resource), id);
@@ -77,10 +82,11 @@ void noia_wayland_create_region(struct wl_client* client,
         return;
     }
 
-    NoiaItemId rid = noia_wayland_cache_create_region();
+    NoiaItemId new_rid = noia_wayland_cache_create_region();
+    LOG_WAYL2("Wayland: create region (id: %d, rid: %d)", id, new_rid);
 
     wl_resource_set_implementation(rc, &region_implementation,
-                                   (void*) rid, noia_wayland_region_unbind);
+                                   (void*) new_rid, noia_wayland_region_unbind);
 }
 
 //------------------------------------------------------------------------------
@@ -92,8 +98,9 @@ const struct wl_compositor_interface compositor_implementation = {
 
 //------------------------------------------------------------------------------
 
+/// Wayland protocol: Handle request for interface to compositor object.
 void noia_wayland_compositor_bind(struct wl_client* client,
-                                  NOIA_UNUSED void* data,
+                                  void* data NOIA_UNUSED,
                                   uint32_t version,
                                   uint32_t id)
 {
