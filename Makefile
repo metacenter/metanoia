@@ -7,9 +7,9 @@ clean:
 
 checks: checks/check-chain checks/check-list checks/check-branch checks/check-store
 check: checks
-	@time (for c in checks/check*; do $$c; done)
+	@time (echo; for c in checks/check*; do $$c; done)
 memcheck: checks
-	@time (for c in checks/check*; do valgrind --leak-check=full --show-leak-kinds=all $$c; echo;done)
+	@time (echo; for c in checks/check*; do valgrind --leak-check=full --show-leak-kinds=all --log-file=valgrind.log $$c -q; if ! cat valgrind.log | grep "All heap blocks were freed -- no leaks are possible"; then cat valgrind.log; fi; echo; done)
 cppcheck:
 	cppcheck -q --enable=all --template="[{severity}] {file} ({line}): {id} - {message}" --suppress=incorrectStringBooleanError .
 

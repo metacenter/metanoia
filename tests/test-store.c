@@ -176,8 +176,10 @@ NoiaTestResult should_correctly_delete_data_for_str()
 
 //------------------------------------------------------------------------------
 
-int main()
+int main(int argc, char** argv)
 {
+    NOIA_INIT_TESTS();
+
     NoiaTest test[] = {
             NOIA_TEST(should_correctly_store_data_for_id),
             NOIA_TEST(should_correctly_delete_data_for_id),

@@ -103,7 +103,7 @@ NoiaBranch* noia_branch_find(NoiaBranch* self,
         return NULL;
     }
 
-    if (compare(self, data) == 0) {
+    if (compare(self->base.data, data) == 0) {
         return self;
     }
 

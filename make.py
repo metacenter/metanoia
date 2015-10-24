@@ -207,10 +207,14 @@ class Make:
                              .format(self.builddir, self.gendir, self.checkdir))
             if len(self.checks):
                 wr('checks: {0}\ncheck: checks\n'
-                   '\t@time (for c in checks/check*; do $$c; done)\n'
+                   '\t@time (echo; for c in checks/check*; do $$c; done)\n'
                    'memcheck: checks\n'
-                   '\t@time (for c in checks/check*; do valgrind '
-                   '--leak-check=full --show-leak-kinds=all $$c; echo;done)\n'
+                   '\t@time (echo; for c in checks/check*; do valgrind '
+                   '--leak-check=full --show-leak-kinds=all '
+                   '--log-file=valgrind.log $$c -q; '
+                   'if ! cat valgrind.log | grep "All heap blocks were freed --'
+                   ' no leaks are possible"; then cat valgrind.log; fi; '
+                   'echo; done)\n'
                    'cppcheck:\n\tcppcheck -q --enable=all --template='
                    '"[{{severity}}] {{file}} ({{line}}): {{id}} - {{message}}" '
                    '--suppress=incorrectStringBooleanError .\n\n'
