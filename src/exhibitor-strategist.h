@@ -17,7 +17,8 @@ typedef struct {
     NoiaStrategistOnSurfaceDestroyedFunc on_surface_destroyed;
 } NoiaStrategist;
 
-NoiaStrategist* noia_strategist_create();
-void noia_strategist_destroy(NoiaStrategist* self);
+NoiaStrategist* noia_strategist_new();
+void noia_strategist_free(NoiaStrategist* self);
 
 #endif // __NOIA_EXHIBITOR_STRATEGIST_H__
+

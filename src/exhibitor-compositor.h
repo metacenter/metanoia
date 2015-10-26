@@ -5,11 +5,9 @@
 #define __NOIA_EXHIBITOR_COMPOSITOR_H__
 
 #include "exhibitor-frame.h"
-#include "utils-list.h"
 
 typedef struct {
-    NoiaList* groups;
-    NoiaFrame* frame;
+    NoiaFrame* root;
     NoiaFrame* selection;
 } NoiaCompositor;
 
@@ -17,13 +15,17 @@ NoiaCompositor* noia_compositor_new();
 
 void noia_compositor_free(NoiaCompositor* self);
 
-NoiaList* noia_compositor_get_visible_surfaces(NoiaCompositor* self);
+NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
+                                                unsigned width,
+                                                unsigned height);
 
 bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 
 void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 
 void noia_compositor_pop_surface(NoiaCompositor* self, NoiaSurfaceId sid);
+
+void noia_compositor_command_anchorize(NoiaCompositor* self);
 
 void noia_compositor_command_position(NoiaCompositor* self,
                                       NoiaArgmandType type,

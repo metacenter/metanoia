@@ -67,6 +67,12 @@ void noia_log(const char*, // log level
               const char*, // format
               ...);        // log content
 
+void noia_log_begin(char* string);
+void noia_log_end();
+
+void noia_log_print(const char*, // format,
+                    ...);        // log content
+
 void noia_print_backtrace(void);
 
 int noia_log_get_miliseconds(void);

@@ -24,13 +24,13 @@ bool noia_display_is_valid(NoiaDisplay* self)
         return false;
     }
 
-    if (!self->compositor) {
-        LOG_ERROR("No current compositor!");
+    if (!self->output) {
+        LOG_ERROR("Invalid output!");
         return false;
     }
 
-    if (!self->output) {
-        LOG_ERROR("Invalid output!");
+    if (!self->workspace) {
+        LOG_ERROR("Invalid workspace!");
         return false;
     }
 
@@ -41,8 +41,8 @@ bool noia_display_is_valid(NoiaDisplay* self)
 
 void noia_display_redraw_all(NoiaDisplay* self)
 {
-    NoiaList* visible_surfaces =
-                         noia_compositor_get_visible_surfaces(self->compositor);
+    NoiaList* visible_surfaces = noia_list_new(NULL);
+    noia_frame_to_list(self->workspace, visible_surfaces);
 
     NoiaPosition pos = noia_exhibitor_pointer_get_position();
 
@@ -114,7 +114,7 @@ void* noia_display_thread_loop(void* data)
 //------------------------------------------------------------------------------
 // PUBLIC
 
-NoiaDisplay* noia_display_new(NoiaOutput* output)
+NoiaDisplay* noia_display_new(NoiaOutput* output, NoiaFrame* workspace)
 {
     NoiaDisplay* self = malloc(sizeof(NoiaDisplay));
     if (!self) {
@@ -123,9 +123,7 @@ NoiaDisplay* noia_display_new(NoiaOutput* output)
     }
 
     self->output = output;
-    self->compositor = noia_compositor_new();
-    self->compositors = noia_list_new((NoiaFreeFunc) noia_compositor_free);
-    noia_list_append(self->compositors, self->compositor);
+    self->workspace = workspace;
     return self;
 }
 
@@ -143,7 +141,6 @@ void noia_display_free(NoiaDisplay* self)
     }
 
     noia_object_unref((NoiaObject*) self->output);
-    noia_list_free(self->compositors);
 
     memset(self, 0, sizeof(NoiaDisplay));
     free(self);
@@ -167,19 +164,8 @@ void noia_display_stop(NoiaDisplay* self)
     if (!self) {
         return;
     }
-    self->run = 0;
+    self->run = false;
     pthread_join(self->thread, NULL);
-}
-
-//------------------------------------------------------------------------------
-
-void noia_display_command_position(NoiaDisplay* self,
-                                   NoiaArgmandType type,
-                                   NoiaArgmandType direction,
-                                   int position)
-{
-    noia_compositor_command_position(self->compositor,
-                                     type, direction, position);
 }
 
 //------------------------------------------------------------------------------

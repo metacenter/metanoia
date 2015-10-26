@@ -4,10 +4,18 @@
 #include "exhibitor-frame.h"
 #include "utils-log.h"
 #include "surface-manager.h"
+/// @todo: remove event signals from exhibitor frame
 #include "event-signals.h"
 
 #include <malloc.h>
 #include <memory.h>
+
+//------------------------------------------------------------------------------
+
+static inline NoiaFrameParams* noia_frame_get_params(NoiaFrame* self)
+{
+    return self->base.data;
+}
 
 //------------------------------------------------------------------------------
 
@@ -40,7 +48,7 @@ void noia_frame_params_free(NoiaFrameParams* params)
 
 //------------------------------------------------------------------------------
 
-NoiaFrame* noia_frame_new()
+NoiaFrame* noia_frame_create(NoiaPosition position, NoiaSize size)
 {
     NoiaFrame* self = noia_branch_new();
 
@@ -54,14 +62,26 @@ NoiaFrame* noia_frame_new()
     memset(params, 0, sizeof(NoiaFrameParams));
     params->type = NOIA_FRAME_TYPE_NONE;
     params->sid = scInvalidSurfaceId;
+    params->pos = position;
+    params->size = size;
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaFrameParams* noia_frame_get_params(NoiaFrame* self)
+NoiaFrame* noia_frame_create_child(NoiaFrame* self, NoiaFrameType type)
 {
-    return self->base.data;
+    NoiaFrameParams* params = noia_frame_get_params(self);
+    if (!(params->type & NOIA_FRAME_TYPE_STACKED)) {
+        return NULL;
+    }
+
+    NoiaFrame* frame = noia_frame_create(params->pos, params->size);
+    noia_frame_set_type(frame, type);
+
+    noia_frame_append(self, frame);
+
+    return frame;
 }
 
 //------------------------------------------------------------------------------
@@ -77,14 +97,36 @@ void noia_frame_free(NoiaFrame* self)
 
 //------------------------------------------------------------------------------
 
+void noia_frame_init_as_workspace(NoiaFrame* self)
+{
+    NoiaFrameParams* params = noia_frame_get_params(self);
+    params->type = NOIA_FRAME_TYPE_WORKSPACE;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaFrame* noia_frame_resize_find_helper(NoiaFrame* frame,
                                          NoiaFrameType type)
 {
-    if (noia_frame_get_params(frame)->type == NOIA_FRAME_TYPE_FLOATING
-    ||  noia_frame_get_params(frame->trunk)->type == type) {
+    if (noia_frame_get_params(frame)->type & NOIA_FRAME_TYPE_FLOATING
+    ||  noia_frame_get_params(frame->trunk)->type & type) {
         return frame;
     }
     return noia_frame_resize_find_helper(frame->trunk, type);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_frame_to_list(NoiaFrame* self, NoiaList* surfaces)
+{
+    FOR_EACH_TWIG(self, twig) {
+        NoiaFrameParams* params = noia_frame_get_params(twig);
+        if (params->sid != scInvalidSurfaceId) {
+            noia_list_append(surfaces, (void*) params->sid);
+        } else {
+            noia_frame_to_list(twig, surfaces);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -115,16 +157,63 @@ void noia_frame_set_type(NoiaFrame* self, NoiaFrameType type)
 
 //------------------------------------------------------------------------------
 
+void noia_frame_set_size(NoiaFrame* self, NoiaSize size)
+{
+    NoiaFrameParams* params = noia_frame_get_params(self);
+    params->size = size;
+    noia_surface_set_desired_size(params->sid, size);
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type)
+{
+    return !!(noia_frame_get_params(self)->type & type);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_frame_append(NoiaFrame* self, NoiaFrame* other)
+{
+    if (noia_frame_get_params(self)->sid == scInvalidSurfaceId) {
+        noia_branch_append(self, other);
+    } else {
+        noia_branch_append(self->trunk, other);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other)
+{
+    if (noia_frame_get_params(self)->sid == scInvalidSurfaceId) {
+        noia_branch_prepend(self, other);
+    } else {
+        noia_branch_prepend(self->trunk, other);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target)
+{
+    NoiaResult result = NOIA_RESULT_SUCCESS;
+    NOIA_TRY {
+        result = noia_frame_remove_self(self);
+        NOIA_ASSERT_RESULT(result);
+
+        noia_frame_prepend(target, self);
+        noia_frame_set_size(self, noia_frame_get_params(target)->size);
+    }
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
 void noia_frame_move_with_contents(NoiaFrame* self,
                                    NoiaPosition vector)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
-
-    // If frame is floating, update its position
-    if (params->type == NOIA_FRAME_TYPE_FLOATING) {
-        params->floating_position.x += vector.x;
-        params->floating_position.y += vector.y;
-    }
 
     // Update surfaces position
     NoiaSurfaceData* surface = noia_surface_get(params->sid);
@@ -150,7 +239,8 @@ void noia_frame_move(NoiaFrame* self,
     }
 
     NoiaFrameParams* params = noia_frame_get_params(self);
-    if (params->type != NOIA_FRAME_TYPE_FLOATING) {
+    if (!(params->type & NOIA_FRAME_TYPE_FLOATING)
+      || (params->type & NOIA_FRAME_TYPE_FIXED)) {
         return;
     }
 
@@ -173,9 +263,9 @@ void noia_frame_move(NoiaFrame* self,
 
 //------------------------------------------------------------------------------
 
-void noia_frame_reconfigure(NOIA_UNUSED NoiaFrame* self,
-                            NOIA_UNUSED NoiaArgmandType direction,
-                            NOIA_UNUSED int magnitude)
+void noia_frame_reconfigure(NoiaFrame* self,
+                            NoiaArgmandType direction,
+                            int magnitude)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
     if (params->sid != scInvalidSurfaceId) {
@@ -209,6 +299,9 @@ void noia_frame_resize_floating(NoiaFrame* self,
                                 int magnitude)
 {
     noia_frame_reconfigure(self, direction, magnitude);
+    if (direction == NOIA_ARGMAND_W || direction == NOIA_ARGMAND_N) {
+        noia_frame_move(self, direction, magnitude);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -264,7 +357,7 @@ void noia_frame_resize(NoiaFrame* self,
 
     // Resize using proper algorithm
     NoiaFrameParams* params =  noia_frame_get_params(resizee);
-    if (params->type == NOIA_FRAME_TYPE_FLOATING) {
+    if (params->type & NOIA_FRAME_TYPE_FLOATING) {
         noia_frame_resize_floating(resizee, direction, magnitude);
     } else if (params->type != NOIA_FRAME_TYPE_NONE) {
         noia_frame_resize_anchored(resizee, direction, magnitude);
@@ -294,7 +387,7 @@ void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop)
         return;
     }
 
-    if (noia_frame_get_params(pop->trunk)->type == NOIA_FRAME_TYPE_STACKED) {
+    if (noia_frame_get_params(pop->trunk)->type & NOIA_FRAME_TYPE_STACKED) {
         NoiaBranch* trunk = pop->trunk;
         noia_branch_remove(trunk, pop);
         noia_branch_append(trunk, pop);
@@ -320,6 +413,39 @@ NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid)
 {
     return noia_branch_find(self, (void*) sid,
                            (NoiaBranchCompare) noia_frame_compare_sid);
+}
+
+//------------------------------------------------------------------------------
+
+static inline void noia_frame_log_internal(NoiaFrame* self, unsigned level)
+{
+    NoiaFrameParams* params = noia_frame_get_params(self);
+
+    if (level == 0) {
+        noia_log_begin("FRAMES");
+    }
+
+    for (unsigned i = 0; i < level; ++i) {
+        noia_log_print("    ");
+    }
+
+    noia_log_print("NoiaFrame(type='0x%x', sid='%d', len='%d')\n",
+                   params->type, params->sid, chain_len(self->twigs));
+
+    FOR_EACH_TWIG(self, twig) {
+        noia_frame_log_internal(twig, level+1);
+    }
+
+    if (level == 0) {
+        noia_log_end();
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void noia_frame_log(NoiaFrame* self)
+{
+    noia_frame_log_internal(self, 0);
 }
 
 //------------------------------------------------------------------------------

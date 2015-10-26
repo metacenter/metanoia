@@ -23,24 +23,26 @@ typedef struct {
     EGLImageKHR image;
 } NoiaDrawBuffer;
 
-typedef struct {
-    NoiaCompositor* compositor;
-} NoiaSurfaceGroup;
-
 /// Container for all data related to single surface.
 typedef struct {
+    /// Make this data structure storable in NoiaStore
     NoiaItem base;
+
     /// Position on screen
     NoiaPosition position;
+
     /// Offset used to move coordinate system of surface
     NoiaPosition offset;
+
     /// Size desired by compositor
     NoiaSize desired_size;
+
     /// Size requested by client
     NoiaSize requested_size;
+
     /// Data required for draw
     NoiaDrawBuffer buffer;
-    NoiaSurfaceGroup group;
+
     bool is_toplevel;
 } NoiaSurfaceData;
 

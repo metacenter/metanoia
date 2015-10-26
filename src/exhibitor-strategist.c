@@ -12,15 +12,15 @@
 //------------------------------------------------------------------------------
 
 void noia_strategist_on_surface_ready(NoiaExhibitor* exhibitor,
-                                        NoiaSurfaceId sid)
+                                      NoiaSurfaceId sid)
 {
-    if (!exhibitor || !exhibitor->display || !exhibitor->display->compositor) {
+    if (!exhibitor || !exhibitor->compositor) {
         LOG_ERROR("Invalid Exhibitor!");
         return;
     }
 
     // Put surface on current workspace on current display
-    if (noia_compositor_manage_surface(exhibitor->display->compositor, sid)) {
+    if (noia_compositor_manage_surface(exhibitor->compositor, sid)) {
         noia_list_append(exhibitor->surface_history, (void*) sid);
     }
 
@@ -40,7 +40,7 @@ void noia_strategist_on_surface_destroyed(NOIA_UNUSED NoiaExhibitor* exhibitor,
 
 //------------------------------------------------------------------------------
 
-NoiaStrategist* noia_strategist_create()
+NoiaStrategist* noia_strategist_new()
 {
     NoiaStrategist* self = malloc(sizeof(NoiaStrategist));
     if (!self) {
@@ -57,7 +57,7 @@ NoiaStrategist* noia_strategist_create()
 
 //------------------------------------------------------------------------------
 
-void noia_strategist_destroy(NoiaStrategist* self)
+void noia_strategist_free(NoiaStrategist* self)
 {
     if (!self) {
         return;
@@ -68,3 +68,4 @@ void noia_strategist_destroy(NoiaStrategist* self)
 }
 
 //------------------------------------------------------------------------------
+

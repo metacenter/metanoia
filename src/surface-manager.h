@@ -25,6 +25,9 @@ void noia_surface_show(NoiaSurfaceId sid);
 
 void noia_surface_set_offset(NoiaSurfaceId sid, NoiaPosition offset);
 
+void noia_surface_set_desired_size(NoiaSurfaceId sid,
+                                   NoiaSize size);
+
 void noia_surface_set_requested_size(NoiaSurfaceId sid,
                                      NoiaSize size);
 

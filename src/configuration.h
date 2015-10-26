@@ -25,6 +25,7 @@ static const NoiaBinding scBindings[] = {
         {KEY_F,     0, {noia_put_focus}},
         {KEY_M,     0, {noia_put_move}},
         {KEY_R,     0, {noia_put_resize}},
+        {KEY_A,     0, {noia_anchorize}},
         {KEY_RIGHT, 0, {noia_right}},
         {KEY_LEFT,  0, {noia_left}},
         {KEY_UP,    0, {noia_up}},

@@ -7,6 +7,8 @@
 #include "global-types.h"
 
 #define NOIA_UNUSED __attribute__((unused))
+#define NOIA_TRY switch(0) default:
+#define NOIA_ASSERT_RESULT(RESULT) { if (RESULT != NOIA_RESULT_SUCCESS) break; }
 
 /// Invalid value for NoiaItemId
 static const NoiaItemId scInvalidItemId = 0;

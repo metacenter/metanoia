@@ -7,6 +7,7 @@
 
 #include <execinfo.h>
 #include <malloc.h>
+#include <string.h>
 #include <stdarg.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -23,12 +24,9 @@ static const char scLogWelcomeText[] =
 static const char scLogGoodByeText[] =
 "**************************************************"
 "*******************************************\n";
-static const char scLogBackTraceBegin[] =
-"----------------+-------+-----------------+--BACKTRACE"
-"----------+---------------------------+\n";
-static const char scLogBackTraceEnd[] =
+static const char scLogDelimiter[] =
 "----------------+-------+-----------------+------+----"
-"----------+---------------------------+\n";
+"--------------------------------------+\n";
 
 /// Log file name
 static const char* scConfLogFile = "log";
@@ -54,7 +52,7 @@ void noia_log_initialize(void)
         LOG_ERROR("Log file could not be opened!");
     }
 
-    write(sLogFD, scLogWelcomeText, sizeof scLogWelcomeText - 1);
+    write(sLogFD, scLogWelcomeText, sizeof(scLogWelcomeText) - 1);
     LOG_INFO1("Build: " __TIME__ " " __DATE__ "; Version: " NOIA_VERSION);
 }
 
@@ -64,7 +62,7 @@ void noia_log_initialize(void)
 void noia_log_finalize(void)
 {
     LOG_INFO1("Closing log file. Bye!");
-    write(sLogFD, scLogGoodByeText, sizeof scLogGoodByeText - 1);
+    write(sLogFD, scLogGoodByeText, sizeof(scLogGoodByeText) - 1);
     close(sLogFD);
     sLogFD = NOIA_DEFAULT_LOG_FD;
 }
@@ -78,7 +76,7 @@ void noia_log(const char* log_level,
               const char* format,
               ...)
 {
-    int n;
+    size_t n;
     char buff[128];
     char thread_name[16];
     struct timeval tv;
@@ -95,7 +93,7 @@ void noia_log(const char* log_level,
     pthread_getname_np(pthread_self(), thread_name, sizeof(thread_name));
 
     // Fill buffer
-    n = snprintf(buff, sizeof buff,
+    n = snprintf(buff, sizeof(buff),
                 "%02d:%02d:%02d.%06d | %-5s | %-15s | %4d | %-40s%s",
                 tm->tm_hour, tm->tm_min, tm->tm_sec, (int) tv.tv_usec,
                 log_level, thread_name, line, file, scLogEnd);
@@ -106,7 +104,7 @@ void noia_log(const char* log_level,
     // Fill buffer
     va_list argptr;
     va_start(argptr, format);
-    n = vsnprintf(buff, sizeof buff, format, argptr);
+    n = vsnprintf(buff, sizeof(buff), format, argptr);
     va_end(argptr);
 
     // Print text
@@ -119,6 +117,56 @@ void noia_log(const char* log_level,
 
 //------------------------------------------------------------------------------
 
+/// Prints log delimiter.
+void noia_log_print_delimiter(char* string)
+{
+    int string_len = strlen(string);
+    int delimiter_len = strlen(scLogDelimiter);
+    int begining_len = (delimiter_len - string_len) / 2;
+    int end_pos = begining_len + string_len;
+
+    write(sLogFD, scLogDelimiter, begining_len);
+    write(sLogFD, string, string_len);
+    write(sLogFD, scLogDelimiter + end_pos, delimiter_len - end_pos);
+}
+
+//------------------------------------------------------------------------------
+
+/// Lock mutex and print the log header.
+void noia_log_begin(char* string)
+{
+    pthread_mutex_lock(&mutex);
+    noia_log_print_delimiter(string);
+}
+
+//------------------------------------------------------------------------------
+
+/// Unlock mutex and print the log footer.
+void noia_log_end()
+{
+    noia_log_print_delimiter("");
+    pthread_mutex_unlock(&mutex);
+}
+
+//------------------------------------------------------------------------------
+
+/// Prints single simple line without additional info.
+/// @note This function must be used between `noia_log_begin` and
+/// `noia_log_end` to avoid printing in the same time from many threads.
+void noia_log_print(const char* format, ...)
+{
+    char buff[128];
+
+    va_list argptr;
+    va_start(argptr, format);
+    size_t n = vsnprintf(buff, sizeof(buff), format, argptr);
+    va_end(argptr);
+
+    write(sLogFD, buff, n);
+}
+
+//------------------------------------------------------------------------------
+
 /// Print backtrace.
 void noia_print_backtrace(void)
 {
@@ -127,26 +175,19 @@ void noia_print_backtrace(void)
     char buff[128];
     Dl_info info;
 
-    // Lock Mutex
-    pthread_mutex_lock(&mutex);
-
-    // Print backtrace
-    write(sLogFD, scLogBackTraceBegin, sizeof(scLogBackTraceBegin) - 1);
+    noia_log_begin("BACKTRACE");
 
     size = backtrace(array, sizeof(array));
 
     for (size_t i = 0; i < size; i++) {
         dladdr(array[i], &info);
-        size_t n = snprintf(buff, sizeof buff, "%015lx | %-45s | %s\n",
+        size_t n = snprintf(buff, sizeof(buff), "%015lx | %-45s | %s\n",
                             (long) array[i], info.dli_fname,
                             info.dli_sname ? info.dli_sname : "---");
         write(sLogFD, buff, n);
     }
 
-    write(sLogFD, scLogBackTraceEnd, sizeof(scLogBackTraceEnd) - 1);
-
-    // Unlock Mutex
-    pthread_mutex_unlock(&mutex);
+    noia_log_end();
 }
 
 //------------------------------------------------------------------------------

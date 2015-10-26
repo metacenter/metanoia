@@ -13,22 +13,16 @@
 
 typedef struct {
     NoiaOutput* output;
-    NoiaList* compositors;
-    NoiaCompositor* compositor;
+    NoiaFrame* workspace;
     bool run;
     pthread_t thread;
 } NoiaDisplay;
 
-NoiaDisplay* noia_display_new(NoiaOutput* output);
+NoiaDisplay* noia_display_new(NoiaOutput* output, NoiaFrame* workspace);
 void noia_display_free(NoiaDisplay* self);
 
 int noia_display_start(NoiaDisplay* self);
 void noia_display_stop(NoiaDisplay* self);
-
-void noia_display_command_position(NoiaDisplay* self,
-                                   NoiaArgmandType type,
-                                   NoiaArgmandType direction,
-                                   int position);
 
 int noia_display_compare_unique_name(NoiaDisplay* self,
                                      char* unique_name);

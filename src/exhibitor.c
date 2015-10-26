@@ -31,9 +31,10 @@ NoiaExhibitor* noia_exhibitor_get_instance()
 
     exhibitor.surface_history = noia_list_new(NULL);
     exhibitor.displays = noia_list_new((NoiaFreeFunc) noia_display_free);
+    exhibitor.compositor = noia_compositor_new();
 
     exhibitor.priv = malloc(sizeof(NoiaExhibitorPriv));
-    exhibitor.priv->strategist = noia_strategist_create();
+    exhibitor.priv->strategist = noia_strategist_new();
 
     return &exhibitor;
 }
@@ -43,14 +44,16 @@ NoiaExhibitor* noia_exhibitor_get_instance()
 void noia_exhibitor_create_new_display(NoiaOutput* output)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-    NoiaDisplay* display = noia_display_new(output);
+
+    NoiaFrame* workspace =
+                    noia_compositor_create_new_workspace(exhibitor->compositor,
+                                                         output->width,
+                                                         output->height);
+
+    NoiaDisplay* display = noia_display_new(output, workspace);
 
     noia_list_append(exhibitor->displays, display);
     noia_display_start(display);
-
-    if (!exhibitor->display) {
-        exhibitor->display = display;
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -78,7 +81,7 @@ void noia_exhibitor_on_display_lost(void* data)
 
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
-    LOG_INFO2("Deleting renderer timer for output '%s'", output->unique_name);
+    LOG_INFO2("Stopping rendering thread for output '%s'", output->unique_name);
 
     FOR_EACH(exhibitor->displays, link) {
         NoiaDisplay* display = (NoiaDisplay*) link->data;
@@ -117,7 +120,7 @@ void noia_exhibitor_on_surface_destroyed(void* data)
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
     exhibitor->priv->strategist->on_surface_destroyed(exhibitor, sid);
 
-    noia_compositor_unmanage_surface(exhibitor->display->compositor, sid);
+    noia_compositor_unmanage_surface(exhibitor->compositor, sid);
 
     noia_list_remove(exhibitor->surface_history, (void*) sid,
                     (NoiaCompareFunc) noia_surface_compare);
@@ -128,14 +131,12 @@ void noia_exhibitor_on_surface_destroyed(void* data)
 void noia_exhibitor_pop_surface(NoiaSurfaceId sid)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+
     noia_list_remove(exhibitor->surface_history,
                     (void*) sid, (NoiaCompareFunc) noia_surface_compare);
     noia_list_append(exhibitor->surface_history, (void*) sid);
 
-    NoiaSurfaceData* surface = noia_surface_get(sid);
-    if (surface) {
-        noia_compositor_pop_surface(surface->group.compositor, sid);
-    }
+    noia_compositor_pop_surface(exhibitor->compositor, sid);
 }
 
 //------------------------------------------------------------------------------
@@ -173,13 +174,21 @@ void noia_exhibitor_command_position(NoiaArgmandType type,
                                      int magnitude)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-    noia_display_command_position(exhibitor->display,
-                                  type, direction, magnitude);
+    noia_compositor_command_position(exhibitor->compositor,
+                                     type, direction, magnitude);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_finalize(NOIA_UNUSED void* data)
+void noia_exhibitor_command_anchorize()
+{
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+    noia_compositor_command_anchorize(exhibitor->compositor);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_finalize(void* data NOIA_UNUSED)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
@@ -190,10 +199,11 @@ void noia_exhibitor_finalize(NOIA_UNUSED void* data)
         noia_display_stop(display);
     }
 
-    noia_strategist_destroy(exhibitor->priv->strategist);
+    noia_strategist_free(exhibitor->priv->strategist);
     memset(exhibitor->priv, 0, sizeof(NoiaExhibitorPriv));
     free(exhibitor->priv);
 
+    noia_compositor_free(exhibitor->compositor);
     noia_list_free(exhibitor->displays);
     noia_list_free(exhibitor->surface_history);
     memset(exhibitor, 0, sizeof(NoiaExhibitor));

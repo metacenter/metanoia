@@ -17,6 +17,8 @@ void noia_put_resize(NoiaList* stack);
 void noia_put_number(NoiaList* stack, int code,
                      uint32_t modifiers, NoiaKeyState state);
 
+void noia_anchorize(NoiaList* stack);
+
 void noia_right(NoiaList* stack);
 
 void noia_left(NoiaList* stack);

@@ -69,6 +69,14 @@ void noia_put_number(NoiaList* stack, int code,
 
 //------------------------------------------------------------------------------
 
+void noia_anchorize(NoiaList* stack)
+{
+    noia_list_clean(stack);
+    noia_exhibitor_command_anchorize();
+}
+
+//------------------------------------------------------------------------------
+
 static inline void noia_position_change(NoiaList* stack,
                                         NoiaArgmandType direction)
 {

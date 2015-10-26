@@ -93,14 +93,16 @@ void noia_exhibitor_pointer_on_motion_reset()
 
 //------------------------------------------------------------------------------
 
+/// @todo Implement pointer borders
 void noia_exhibitor_pointer_on_motion_x(void* data)
 {
     int abs_value = noia_int_unref_get((NoiaIntObject*) data);
     if (last_abs.x != INVALID_POINTER_VALUE) {
         position.x += abs_value - last_abs.x;
 
-        NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-        int max = exhibitor->display->output->width - 1;
+//        NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+//        int max = exhibitor->display->output->width - 1;
+        int max = 400;
 
         if (position.x < 0) {
             position.x = 0;
@@ -120,8 +122,9 @@ void noia_exhibitor_pointer_on_motion_y(void* data)
     if (last_abs.y != INVALID_POINTER_VALUE) {
         position.y += abs_value - last_abs.y;
 
-        NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-        int max = exhibitor->display->output->height - 1;
+//        NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+//        int max = exhibitor->display->output->height - 1;
+        int max = 400;
 
         if (position.y < 0) {
             position.y = 0;
