@@ -12,8 +12,7 @@
 typedef struct {
     NoiaRenderer base;
     NoiaEGLBundle egl;
-    int width;
-    int height;
+    NoiaSize size;
 
     PFNEGLBINDWAYLANDDISPLAYWL   bind_display;
     PFNEGLUNBINDWAYLANDDISPLAYWL unbind_display;
@@ -23,8 +22,7 @@ typedef struct {
     int has_wayland_support;
 } NoiaRendererGL;
 
-NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
-                                      int width, int height);
+NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl, NoiaSize size);
 
 #endif // __NOIA_RENDERER_GL_H__
 

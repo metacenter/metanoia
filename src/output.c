@@ -13,8 +13,7 @@
 /// @param swap_buffers - buffer swapper (back-end specific)
 /// @param free - free method (back-end specific)
 NoiaResult noia_output_initialize(NoiaOutput* self,
-                                  int width,
-                                  int height,
+                                  NoiaSize size,
                                   char* unique_name,
                                   NoiaOutputInitRendererFunc initialize,
                                   NoiaOutputBeginDrawingFunc begin_drawing,
@@ -27,11 +26,10 @@ NoiaResult noia_output_initialize(NoiaOutput* self,
 
     noia_object_initialize(&self->base, (NoiaFreeFunc) free);
     noia_object_ref(&self->base);
-    self->width = width;
-    self->height = height;
+    self->area.pos.x = 0;
+    self->area.pos.y = 0;
+    self->area.size = size;
     self->unique_name = unique_name;
-    self->global_position.x = 0;
-    self->global_position.y = 0;
     self->renderer = NULL;
     self->initialize = initialize;
     self->begin_drawing = begin_drawing;

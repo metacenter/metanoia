@@ -5,6 +5,7 @@
 #include "backend-gtk-group.h"
 #include "renderer-mmap.h"
 #include "renderer-gl.h"
+#include "utils-list.h"
 #include "utils-log.h"
 
 #include <malloc.h>
@@ -13,7 +14,7 @@
 //------------------------------------------------------------------------------
 
 NoiaRenderer* noia_backend_gtk_output_mmap_initialize(NoiaOutput* output,
-                                                      int width, int height)
+                                                      NoiaSize size)
 {
     NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
     if (!output_gtk) {
@@ -23,14 +24,14 @@ NoiaRenderer* noia_backend_gtk_output_mmap_initialize(NoiaOutput* output,
 
     LOG_INFO1("Initializing GTK plain output...");
 
-    noia_backend_gtk_group_prepare(output_gtk->num, width, height);
+    noia_backend_gtk_group_prepare(output_gtk->num, size);
 
     output_gtk->stride =
-                       cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
+                  cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, size.width);
 
-    output->renderer = noia_renderer_mmap_create(output, width, height);
+    output->renderer = noia_renderer_mmap_create(output);
     for (int i = 0; i < NUM_BUFFERS; ++i) {
-        output_gtk->data[i] = malloc(4 * output_gtk->stride * height);
+        output_gtk->data[i] = malloc(4 * output_gtk->stride * size.height);
         noia_renderer_mmap_set_buffer(output->renderer, i,
                                       output_gtk->data[i],
                                       output_gtk->stride);
@@ -44,7 +45,7 @@ NoiaRenderer* noia_backend_gtk_output_mmap_initialize(NoiaOutput* output,
 //------------------------------------------------------------------------------
 
 NoiaRenderer* noia_backend_gtk_output_gl_initialize(NoiaOutput* output,
-                                                    int width, int height)
+                                                    NoiaSize size)
 {
     NoiaOutputGTK* output_gtk = (NoiaOutputGTK*) output;
     if (!output_gtk) {
@@ -56,19 +57,20 @@ NoiaRenderer* noia_backend_gtk_output_gl_initialize(NoiaOutput* output,
 
     // Prepare GUI
     NoiaEGLBundle* bundle =
-    noia_backend_gtk_group_prepare(output_gtk->num, width, height);
+    noia_backend_gtk_group_prepare(output_gtk->num, size);
 
     // Initialize EGL
-    NoiaResult result = noia_gl_create_offscreen_egl_bundle(output->width,
-                                                            output->height,
-                                                            bundle);
+    NoiaResult result =
+                   noia_gl_create_offscreen_egl_bundle(output->area.size.width,
+                                                       output->area.size.height,
+                                                       bundle);
     if (result != NOIA_RESULT_SUCCESS) {
         LOG_ERROR("Failed to create offscreen EGL bundle!");
         return NULL;
     }
 
     // Create renderer
-    output->renderer = noia_renderer_gl_create(bundle, width, height);
+    output->renderer = noia_renderer_gl_create(bundle, size);
 
     LOG_INFO1("Initializing GTK GL output: %s",
               output->renderer ? "SUCCESS" : "FAILURE");
@@ -103,7 +105,7 @@ void noia_backend_gtk_output_free(NoiaOutput* output)
 
 //------------------------------------------------------------------------------
 
-NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
+NoiaOutputGTK* noia_backend_gtk_output_new(NoiaSize size, int num)
 {
     NoiaOutputGTK* output_gtk = malloc(sizeof(NoiaOutputGTK));
     memset(output_gtk, 0, sizeof(NoiaOutputGTK));
@@ -112,7 +114,7 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
     switch (method) {
         case NOIA_OUTPUT_METHOD_GL:
             noia_output_initialize(&output_gtk->base,
-                                   width, height,
+                                   size,
                                    g_strdup_printf("GTKgl-%d", num),
                                    noia_backend_gtk_output_gl_initialize,
                                    NULL, NULL,
@@ -122,7 +124,7 @@ NoiaOutputGTK* noia_backend_gtk_output_new(int width, int height, int num)
         case NOIA_OUTPUT_METHOD_MMAP:
         default:
             noia_output_initialize(&output_gtk->base,
-                                   width, height,
+                                   size,
                                    g_strdup_printf("GTKplain-%d", num),
                                    noia_backend_gtk_output_mmap_initialize,
                                    NULL, NULL,
@@ -144,9 +146,7 @@ int noia_backend_gtk_get_outputs(NoiaList* outputs)
     do {
         resolution = noia_backend_gtk_group_get_resolution(n);
         if (resolution.width > 0 && resolution.height > 0) {
-            NoiaOutputGTK* output =
-                              noia_backend_gtk_output_new(resolution.width,
-                                                          resolution.height, n);
+            NoiaOutputGTK* output = noia_backend_gtk_output_new(resolution, n);
             if (!noia_backend_gtk_group_get_output(n)) {
                 noia_backend_gtk_group_set_output(n, output);
             }

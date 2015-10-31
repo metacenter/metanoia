@@ -30,8 +30,7 @@ typedef struct {
 
 /// Initialize render for draw to framebuffer.
 /// Frame buffer does not directly support double buffering.
-NoiaRenderer* noia_devfb_output_initialize(NoiaOutput* output,
-                                           int width, int height)
+NoiaRenderer* noia_devfb_output_initialize(NoiaOutput* output, NoiaSize size)
 {
     struct fb_fix_screeninfo fixed_info;
     uint8_t* buffer;
@@ -50,7 +49,7 @@ NoiaRenderer* noia_devfb_output_initialize(NoiaOutput* output,
 
     // Map framebuffer
     /// @todo set framebuffer resolution
-    buflen = height * fixed_info.line_length;
+    buflen = size.height * fixed_info.line_length;
     buffer = mmap(NULL, buflen, PROT_READ | PROT_WRITE,
                   MAP_SHARED, output_fb->fd, 0);
     if (buffer == MAP_FAILED) {
@@ -59,7 +58,7 @@ NoiaRenderer* noia_devfb_output_initialize(NoiaOutput* output,
     }
 
     // Prepare renderer
-    NoiaRenderer* renderer = noia_renderer_mmap_create(output, width, height);
+    NoiaRenderer* renderer = noia_renderer_mmap_create(output);
     noia_renderer_mmap_set_buffer(renderer, 0, buffer, fixed_info.line_length);
     noia_renderer_mmap_set_buffer(renderer, 1, buffer, fixed_info.line_length);
     return renderer;
@@ -83,13 +82,13 @@ void noia_devfb_output_free(NoiaOutput* output)
 //------------------------------------------------------------------------------
 
 /// Allocate memory for framebuffer object.
-NoiaOutputFB* noia_devfb_output_new(int width, int height, char* id, int fd)
+NoiaOutputFB* noia_devfb_output_new(NoiaSize size, char* id, int fd)
 {
     NoiaOutputFB* output_fb = malloc(sizeof(NoiaOutputFB));
     memset(output_fb, 0, sizeof(NoiaOutputFB));
 
     noia_output_initialize(&output_fb->base,
-                           width, height,
+                           size,
                            strdup(id),
                            noia_devfb_output_initialize,
                            NULL, NULL,
@@ -124,9 +123,8 @@ int noia_devfb_setup_framebuffer(NoiaList* outputs)
               screen_info.xres_virtual, screen_info.yres_virtual,
               fixed_info.line_length);
 
-    NoiaOutputFB* output = noia_devfb_output_new(screen_info.xres_virtual,
-                                                 screen_info.yres_virtual,
-                                                 fixed_info.id, fd);
+    NoiaSize size = {screen_info.xres_virtual, screen_info.yres_virtual};
+    NoiaOutputFB* output = noia_devfb_output_new(size, fixed_info.id, fd);
     noia_list_append(outputs, output);
 
     return 1;

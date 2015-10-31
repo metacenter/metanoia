@@ -39,15 +39,39 @@ bool noia_display_is_valid(NoiaDisplay* self)
 
 //------------------------------------------------------------------------------
 
+void noia_display_setup_layover_context(NoiaDisplay* self,
+                                        NoiaLayoverContext* context)
+{
+    memset(context, 0, sizeof(NoiaLayoverContext));
+
+    // Setup pointer position and surface id
+    NoiaPosition position = noia_exhibitor_pointer_get_global_position();
+    if (noia_position_is_inside(position, self->output->area)) {
+        context->pointer.pos.x = position.x - self->output->area.pos.x;
+        context->pointer.pos.y = position.y - self->output->area.pos.y;
+        context->pointer.sid = noia_exhibitor_pointer_get_sid();
+    } else {
+        context->pointer.pos.x = INT_MIN;
+        context->pointer.pos.y = INT_MIN;
+        context->pointer.sid = scInvalidSurfaceId;
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void noia_display_redraw_all(NoiaDisplay* self)
 {
-    NoiaList* visible_surfaces = noia_list_new(NULL);
-    noia_frame_to_list(self->workspace, visible_surfaces);
+    noia_frame_to_array(self->workspace, self->visible_surfaces);
 
-    NoiaPosition pos = noia_exhibitor_pointer_get_position();
+    noia_exhibitor_pointer_update_hover_state(self->output,
+                                              self->visible_surfaces);
 
-    self->output->renderer->draw(self->output->renderer, visible_surfaces,
-                                pos.x, pos.y, noia_exhibitor_pointer_get_sid());
+    NoiaLayoverContext layover_context;
+    noia_display_setup_layover_context(self, &layover_context);
+
+    self->output->renderer->draw(self->output->renderer,
+                                 self->visible_surfaces,
+                                 &layover_context);
 
     if (self->output->begin_drawing) {
         self->output->begin_drawing(self->output);
@@ -61,17 +85,13 @@ void noia_display_redraw_all(NoiaDisplay* self)
         self->output->end_drawing(self->output);
     }
 
-    noia_exhibitor_pointer_update_hover_state(visible_surfaces);
-
-    // TODO: pass as list
-    if (visible_surfaces) {
-        FOR_EACH (visible_surfaces, link) {
-            NoiaSurfaceId sid = (NoiaSurfaceId) link->data;
-            noia_event_signal_emit_int(SIGNAL_SCREEN_REFRESH, sid);
-        }
+    unsigned i;
+    NoiaSurfaceContext* context;
+    NOIA_ITERATE_POOL(self->visible_surfaces, i, context) {
+        noia_event_signal_emit_int(SIGNAL_SCREEN_REFRESH, context->sid);
     }
 
-    noia_list_free(visible_surfaces);
+    noia_pool_release(self->visible_surfaces);
 }
 
 //------------------------------------------------------------------------------
@@ -83,15 +103,14 @@ void* noia_display_thread_loop(void* data)
         return NULL;
     }
 
-    char name[128];
-    snprintf(name, sizeof name, "noia@%s", self->output->unique_name);
+    char name[32];
+    snprintf(name, sizeof(name), "noia@%s", self->output->unique_name);
     noia_environment_on_enter_new_thread(self->thread, name);
     LOG_INFO1("Threads: starting display loop '%s'", name);
 
     LOG_INFO1("Initializing output '%s'", self->output->unique_name);
     self->output->renderer = self->output->initialize(self->output,
-                                                      self->output->width,
-                                                      self->output->height);
+                                                      self->output->area.size);
 
     NoiaResult result = noia_output_initialize_rendering(self->output);
     if (result == NOIA_RESULT_SUCCESS) {
@@ -124,6 +143,7 @@ NoiaDisplay* noia_display_new(NoiaOutput* output, NoiaFrame* workspace)
 
     self->output = output;
     self->workspace = workspace;
+    self->visible_surfaces = noia_pool_create(8, sizeof(NoiaSurfaceContext));
     return self;
 }
 
@@ -140,6 +160,7 @@ void noia_display_free(NoiaDisplay* self)
         return;
     }
 
+    noia_pool_destroy(self->visible_surfaces);
     noia_object_unref((NoiaObject*) self->output);
 
     memset(self, 0, sizeof(NoiaDisplay));

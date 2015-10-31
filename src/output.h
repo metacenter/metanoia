@@ -9,7 +9,7 @@
 
 typedef struct NoiaOutput NoiaOutput;
 
-typedef NoiaRenderer* (*NoiaOutputInitRendererFunc) (NoiaOutput*, int, int);
+typedef NoiaRenderer* (*NoiaOutputInitRendererFunc) (NoiaOutput*, NoiaSize);
 typedef NoiaResult (*NoiaOutputBeginDrawingFunc) (NoiaOutput*);
 typedef NoiaResult (*NoiaOutputEndDrawingFunc) (NoiaOutput*);
 typedef void (*NoiaOutputFreeFunc) (NoiaOutput*);
@@ -17,10 +17,8 @@ typedef void (*NoiaOutputFreeFunc) (NoiaOutput*);
 struct NoiaOutput {
     // TODO: keep list of available modes instead of just width and height
     NoiaObject base;
-    int width;
-    int height;
     char* unique_name;
-    NoiaPosition global_position;
+    NoiaArea area;
     NoiaRenderer* renderer;
     NoiaOutputInitRendererFunc initialize;
     NoiaOutputBeginDrawingFunc begin_drawing;
@@ -28,8 +26,7 @@ struct NoiaOutput {
 };
 
 NoiaResult noia_output_initialize(NoiaOutput* self,
-                                  int width,
-                                  int height,
+                                  NoiaSize size,
                                   char* unique_name,
                                   NoiaOutputInitRendererFunc initialize,
                                   NoiaOutputBeginDrawingFunc begin_drawing,

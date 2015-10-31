@@ -28,9 +28,6 @@ typedef struct {
     /// Make this data structure storable in NoiaStore
     NoiaItem base;
 
-    /// Position on screen
-    NoiaPosition position;
-
     /// Offset used to move coordinate system of surface
     NoiaPosition offset;
 

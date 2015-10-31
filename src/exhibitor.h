@@ -24,6 +24,8 @@ void noia_exhibitor_initialize(NoiaLoop* this_loop);
 
 NoiaExhibitor* noia_exhibitor_get_instance();
 
+NoiaList* noia_exhibitor_get_displays();
+
 void noia_exhibitor_pop_history_surface(int position);
 
 void noia_exhibitor_command_anchorize();

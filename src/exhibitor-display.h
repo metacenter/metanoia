@@ -14,6 +14,7 @@
 typedef struct {
     NoiaOutput* output;
     NoiaFrame* workspace;
+    NoiaPool* visible_surfaces;
     bool run;
     pthread_t thread;
 } NoiaDisplay;

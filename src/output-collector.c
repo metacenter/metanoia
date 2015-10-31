@@ -30,10 +30,10 @@ NoiaPosition noia_output_collector_allocate_position()
     NoiaPosition result = {INT_MIN, INT_MIN};
     FOR_EACH (outputs, link) {
         NoiaOutput* output = (NoiaOutput*) link->data;
-        int x = output->global_position.x + output->width;
+        int x = output->area.pos.x + output->area.size.width;
         if (x > result.x) {
-            result.x = x;
-            result.y = output->global_position.y;
+            result.x = x + 10;
+            result.y = output->area.pos.y;
         }
     }
 
@@ -85,7 +85,7 @@ void noia_output_collector_notify_outputs_found(NoiaList* found_outputs)
         }
 
         // Assign position to output
-        output->global_position = noia_output_collector_allocate_position();
+        output->area.pos = noia_output_collector_allocate_position();
         noia_list_append(outputs, output);
 
         // Notify about new output

@@ -199,8 +199,7 @@ NoiaRenderer* noia_drm_initialize_egl(NoiaOutputDRM* output_drm)
     LOG_INFO1("Creating GBM and initializing EGL...");
 
     // Find mode // TODO
-    int width  = output_drm->mode.hdisplay;
-    int height = output_drm->mode.vdisplay;
+    NoiaSize size = {output_drm->mode.hdisplay, output_drm->mode.vdisplay};
 
     // Create GBM device and surface
     gbm_device = gbm_create_device(output_drm->fd);
@@ -211,7 +210,7 @@ NoiaRenderer* noia_drm_initialize_egl(NoiaOutputDRM* output_drm)
 
     output_drm->gbm_surface =
                   gbm_surface_create(gbm_device,
-                                     width, height,
+                                     size.width, size.height,
                                      GBM_FORMAT_XRGB8888,
                                      GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     if (!output_drm->gbm_surface) {
@@ -230,7 +229,7 @@ NoiaRenderer* noia_drm_initialize_egl(NoiaOutputDRM* output_drm)
 
     LOG_INFO1("Creating GBM and initializing EGL: SUCCESS");
 
-    return noia_renderer_gl_create(&egl, width, height);
+    return noia_renderer_gl_create(&egl, size);
 }
 
 //------------------------------------------------------------------------------
@@ -307,9 +306,7 @@ clear_db:
 /// Prepare MMap render for use with DRM dumb buffers.
 NoiaRenderer* noia_drm_create_dumb_buffers(NoiaOutputDRM* output_drm)
 {
-    NoiaRenderer* renderer = noia_renderer_mmap_create((NoiaOutput*) output_drm,
-                                                       output_drm->base.width,
-                                                       output_drm->base.height);
+    NoiaRenderer* renderer = noia_renderer_mmap_create(&output_drm->base);
     noia_drm_create_dumb_buffer(output_drm, renderer, 0);
     noia_drm_create_dumb_buffer(output_drm, renderer, 1);
 
@@ -323,8 +320,7 @@ NoiaRenderer* noia_drm_create_dumb_buffers(NoiaOutputDRM* output_drm)
 /// Depending on hardware and settings create renderer for drawing with GL
 /// or on DRM dumb buffers.
 NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
-                                         NOIA_UNUSED int width,
-                                         NOIA_UNUSED int height)
+                                         NoiaSize size NOIA_UNUSED)
 {
     NoiaRenderer* renderer = NULL;
 
@@ -432,8 +428,7 @@ void noia_drm_output_free(NoiaOutput* output)
 //------------------------------------------------------------------------------
 
 /// DRM output constructor.
-NoiaOutputDRM* noia_drm_output_new(int width,
-                                   int height,
+NoiaOutputDRM* noia_drm_output_new(NoiaSize size,
                                    char* connector_name,
                                    int drm_fd,
                                    uint32_t crtc_id,
@@ -446,7 +441,7 @@ NoiaOutputDRM* noia_drm_output_new(int width,
     }
 
     noia_output_initialize(&output_drm->base,
-                           width, height,
+                           size,
                            connector_name ? strdup(connector_name) : "",
                            noia_drm_output_initialize,
                            noia_drm_output_begin_drawing,
@@ -569,9 +564,10 @@ NoiaOutputDRM* noia_drm_update_connector(int drm_fd,
     LOG_INFO2("Updating connector (CRTC: %u)", crtc_id);
 
     // Create output
+    NoiaSize size = {connector->modes[0].hdisplay,
+                     connector->modes[0].vdisplay};
     NoiaOutputDRM* output =
-     noia_drm_output_new(connector->modes[0].hdisplay,
-                         connector->modes[0].vdisplay,
+     noia_drm_output_new(size,
                          noia_drm_get_connector_name(connector->connector_type),
                          drm_fd,
                          crtc_id,

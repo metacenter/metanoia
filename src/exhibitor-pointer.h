@@ -6,15 +6,18 @@
 
 #include "event-loop.h"
 #include "global-types.h"
-#include "utils-list.h"
+#include "utils-pool.h"
+
+#include "output.h"
 
 void noia_exhibitor_pointer_initialize(NoiaLoop* this_loop, void* data);
 
-NoiaPosition noia_exhibitor_pointer_get_position();
+NoiaPosition noia_exhibitor_pointer_get_global_position();
 
 NoiaSurfaceId noia_exhibitor_pointer_get_sid();
 
-void noia_exhibitor_pointer_update_hover_state(NoiaList* visible_surfaces);
+void noia_exhibitor_pointer_update_hover_state(NoiaOutput* output,
+                                               NoiaPool* visible_surfaces);
 
 #endif // __NOIA_EXHIBITOR_POINTER_H__
 

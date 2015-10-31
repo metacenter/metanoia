@@ -4,7 +4,8 @@
 #ifndef __NOIA_RENDERER_H__
 #define __NOIA_RENDERER_H__
 
-#include "utils-list.h"
+#include "utils-pool.h"
+#include "global-constants.h"
 
 typedef struct NoiaRendererStruct NoiaRenderer;
 
@@ -16,9 +17,8 @@ typedef void (*NoiaRendererAttachFunc) (NoiaRenderer*,
                                         NoiaSurfaceId, void*);
 
 typedef void (*NoiaRendererDrawFunc) (NoiaRenderer*,
-                                      NoiaList*,
-                                      int x, int y,
-                                      NoiaSurfaceId);
+                                      NoiaPool*,
+                                      NoiaLayoverContext*);
 
 typedef void (*NoiaRendererSwapBuffersFunc) (NoiaRenderer*);
 

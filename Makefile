@@ -16,6 +16,7 @@ cppcheck:
 
 build/metanoia: Makefile \
                 build/config.o \
+                build/global-types.o \
                 build/global-objects.o \
                 build/global-functions.o \
                 build/utils-object.o \
@@ -87,7 +88,7 @@ build/metanoia: Makefile \
 	@mkdir -p build
 	@echo "  LD   metanoia"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/metanoia \
-	       build/config.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-argmand.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk-res.o build/backend-gtk-output.o build/backend-gtk-group.o build/backend-gtk-win.o build/backend-gtk-app.o build/backend-gtk.o build/metanoia.o \
+	       build/config.o build/global-types.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-argmand.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk-res.o build/backend-gtk-output.o build/backend-gtk-group.o build/backend-gtk-win.o build/backend-gtk-app.o build/backend-gtk.o build/metanoia.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -ldrm -ludev -lwayland-server -lxkbcommon
 
 gen/xdg-shell-server-protocol.h: Makefile \
@@ -136,6 +137,14 @@ build/config.o: Makefile \
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/config.o -Isrc -Igen \
 	       -c src/config.c
 
+build/global-types.o: Makefile \
+                      src/global-types.c \
+                      src/global-types.h
+	@mkdir -p build
+	@echo "  CC   global-types.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/global-types.o -Isrc -Igen \
+	       -c src/global-types.c
+
 build/global-objects.o: Makefile \
                         src/global-objects.c \
                         src/global-objects.h \
@@ -164,6 +173,7 @@ build/global-functions.o: Makefile \
                           src/utils-branch.h \
                           src/utils-chain.h \
                           src/utils-list.h \
+                          src/utils-pool.h \
                           src/output.h \
                           src/renderer.h \
                           src/event-loop.h
@@ -377,6 +387,7 @@ build/event-factory.o: Makefile \
                        src/event-loop.h \
                        src/output.h \
                        src/renderer.h \
+                       src/utils-pool.h \
                        src/utils-list.h \
                        src/utils-chain.h \
                        src/output-collector.h \
@@ -395,8 +406,7 @@ build/event-factory.o: Makefile \
 build/renderer.o: Makefile \
                   src/renderer.c \
                   src/renderer.h \
-                  src/utils-list.h \
-                  src/utils-chain.h \
+                  src/utils-pool.h \
                   src/global-constants.h \
                   src/global-types.h
 	@mkdir -p build
@@ -409,8 +419,7 @@ build/renderer-mmap.o: Makefile \
                        src/renderer-mmap.h \
                        src/output.h \
                        src/renderer.h \
-                       src/utils-list.h \
-                       src/utils-chain.h \
+                       src/utils-pool.h \
                        src/global-constants.h \
                        src/global-types.h \
                        src/utils-object.h \
@@ -420,6 +429,8 @@ build/renderer-mmap.o: Makefile \
                        src/exhibitor-compositor.h \
                        src/exhibitor-frame.h \
                        src/utils-branch.h \
+                       src/utils-chain.h \
+                       src/utils-list.h \
                        src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   renderer-mmap.o"
@@ -430,8 +441,7 @@ build/renderer-gl.o: Makefile \
                      src/renderer-gl.c \
                      src/renderer-gl.h \
                      src/renderer.h \
-                     src/utils-list.h \
-                     src/utils-chain.h \
+                     src/utils-pool.h \
                      src/global-constants.h \
                      src/global-types.h \
                      src/utils-gl.h \
@@ -441,6 +451,8 @@ build/renderer-gl.o: Makefile \
                      src/exhibitor-compositor.h \
                      src/exhibitor-frame.h \
                      src/utils-branch.h \
+                     src/utils-chain.h \
+                     src/utils-list.h \
                      src/utils-log.h \
                      src/bind-egl-wayland.h
 	@mkdir -p build
@@ -466,11 +478,12 @@ build/device-fb.o: Makefile \
                    src/device-fb.h \
                    src/output.h \
                    src/renderer.h \
-                   src/utils-list.h \
-                   src/utils-chain.h \
+                   src/utils-pool.h \
                    src/global-constants.h \
                    src/global-types.h \
                    src/utils-object.h \
+                   src/utils-list.h \
+                   src/utils-chain.h \
                    src/device-common.h \
                    src/renderer-mmap.h \
                    src/utils-log.h
@@ -482,15 +495,16 @@ build/device-fb.o: Makefile \
 build/device-drm.o: Makefile \
                     src/device-drm.c \
                     src/device-drm.h \
-                    src/output.h \
-                    src/renderer.h \
                     src/utils-list.h \
                     src/utils-chain.h \
                     src/global-constants.h \
                     src/global-types.h \
-                    src/utils-object.h \
                     src/utils-log.h \
                     src/renderer-mmap.h \
+                    src/output.h \
+                    src/renderer.h \
+                    src/utils-pool.h \
+                    src/utils-object.h \
                     src/renderer-gl.h \
                     src/utils-gl.h \
                     src/config.h \
@@ -542,8 +556,7 @@ build/output.o: Makefile \
                 src/output.c \
                 src/output.h \
                 src/renderer.h \
-                src/utils-list.h \
-                src/utils-chain.h \
+                src/utils-pool.h \
                 src/global-constants.h \
                 src/global-types.h \
                 src/utils-object.h
@@ -565,9 +578,10 @@ build/output-collector.o: Makefile \
                           src/utils-list.h \
                           src/utils-chain.h \
                           src/device-drm.h \
+                          src/device-fb.h \
                           src/output.h \
                           src/renderer.h \
-                          src/device-fb.h \
+                          src/utils-pool.h \
                           src/backend-gtk.h \
                           src/config.h \
                           src/utils-keymap.h
@@ -587,6 +601,7 @@ build/surface-data.o: Makefile \
                       src/utils-branch.h \
                       src/utils-chain.h \
                       src/utils-list.h \
+                      src/utils-pool.h \
                       src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   surface-data.o"
@@ -605,6 +620,7 @@ build/surface-manager.o: Makefile \
                          src/utils-branch.h \
                          src/utils-chain.h \
                          src/utils-list.h \
+                         src/utils-pool.h \
                          src/utils-log.h \
                          src/event-timer.h \
                          src/event-signals.h \
@@ -629,6 +645,7 @@ build/keyboard-functions.o: Makefile \
                             src/exhibitor-compositor.h \
                             src/exhibitor-frame.h \
                             src/utils-branch.h \
+                            src/utils-pool.h \
                             src/output.h \
                             src/renderer.h \
                             src/utils-object.h \
@@ -704,6 +721,7 @@ build/exhibitor.o: Makefile \
                    src/global-constants.h \
                    src/global-types.h \
                    src/utils-list.h \
+                   src/utils-pool.h \
                    src/output.h \
                    src/renderer.h \
                    src/utils-object.h \
@@ -733,6 +751,7 @@ build/exhibitor-display.o: Makefile \
                            src/global-constants.h \
                            src/global-types.h \
                            src/utils-list.h \
+                           src/utils-pool.h \
                            src/output.h \
                            src/renderer.h \
                            src/utils-object.h \
@@ -760,6 +779,7 @@ build/exhibitor-compositor.o: Makefile \
                               src/global-constants.h \
                               src/global-types.h \
                               src/utils-list.h \
+                              src/utils-pool.h \
                               src/surface-manager.h \
                               src/surface-data.h \
                               src/utils-store.h \
@@ -777,6 +797,7 @@ build/exhibitor-frame.o: Makefile \
                          src/global-constants.h \
                          src/global-types.h \
                          src/utils-list.h \
+                         src/utils-pool.h \
                          src/utils-log.h \
                          src/surface-manager.h \
                          src/surface-data.h \
@@ -802,6 +823,7 @@ build/exhibitor-strategist.o: Makefile \
                               src/global-constants.h \
                               src/global-types.h \
                               src/utils-list.h \
+                              src/utils-pool.h \
                               src/output.h \
                               src/renderer.h \
                               src/utils-object.h \
@@ -822,15 +844,16 @@ build/exhibitor-pointer.o: Makefile \
                            src/utils-object.h \
                            src/global-constants.h \
                            src/global-types.h \
-                           src/utils-list.h \
-                           src/utils-chain.h \
+                           src/utils-pool.h \
+                           src/output.h \
+                           src/renderer.h \
                            src/exhibitor.h \
                            src/exhibitor-display.h \
                            src/exhibitor-compositor.h \
                            src/exhibitor-frame.h \
                            src/utils-branch.h \
-                           src/output.h \
-                           src/renderer.h \
+                           src/utils-chain.h \
+                           src/utils-list.h \
                            src/surface-manager.h \
                            src/surface-data.h \
                            src/utils-store.h \
@@ -873,8 +896,7 @@ build/wayland-output.o: Makefile \
                         src/global-types.h \
                         src/output.h \
                         src/renderer.h \
-                        src/utils-list.h \
-                        src/utils-chain.h \
+                        src/utils-pool.h \
                         src/utils-object.h \
                         src/utils-log.h
 	@mkdir -p build
@@ -907,14 +929,15 @@ build/wayland-state.o: Makefile \
                        src/global-types.h \
                        src/output.h \
                        src/renderer.h \
-                       src/utils-list.h \
-                       src/utils-chain.h \
+                       src/utils-pool.h \
                        src/utils-object.h \
                        src/wayland-surface.h \
                        src/wayland-types.h \
                        src/wayland-output.h \
                        src/wayland-cache.h \
                        src/wayland-region.h \
+                       src/utils-list.h \
+                       src/utils-chain.h \
                        src/wayland-protocol-output.h \
                        src/surface-manager.h \
                        src/surface-data.h \
@@ -951,6 +974,7 @@ build/wayland.o: Makefile \
                  src/wayland-state.h \
                  src/output.h \
                  src/renderer.h \
+                 src/utils-pool.h \
                  src/config.h \
                  src/utils-keymap.h \
                  src/utils-log.h \
@@ -980,6 +1004,7 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/wayland-state.h \
                                      src/output.h \
                                      src/renderer.h \
+                                     src/utils-pool.h \
                                      src/utils-object.h \
                                      src/surface-manager.h \
                                      src/surface-data.h \
@@ -1007,6 +1032,7 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/wayland-state.h \
                                   src/output.h \
                                   src/renderer.h \
+                                  src/utils-pool.h \
                                   src/utils-object.h \
                                   src/surface-manager.h \
                                   src/surface-data.h \
@@ -1055,6 +1081,7 @@ build/wayland-protocol-shell.o: Makefile \
                                 src/exhibitor-compositor.h \
                                 src/exhibitor-frame.h \
                                 src/utils-branch.h \
+                                src/utils-pool.h \
                                 src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-shell.o"
@@ -1091,6 +1118,7 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/exhibitor-compositor.h \
                                     src/exhibitor-frame.h \
                                     src/utils-branch.h \
+                                    src/utils-pool.h \
                                     src/utils-log.h \
                                     gen/xdg-shell-server-protocol.h
 	@mkdir -p build
@@ -1112,6 +1140,7 @@ build/wayland-protocol-xdg-surface.o: Makefile \
                                       src/utils-branch.h \
                                       src/utils-chain.h \
                                       src/utils-list.h \
+                                      src/utils-pool.h \
                                       gen/xdg-shell-server-protocol.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-xdg-surface.o"
@@ -1133,8 +1162,7 @@ build/wayland-protocol-output.o: Makefile \
                                  src/global-types.h \
                                  src/output.h \
                                  src/renderer.h \
-                                 src/utils-list.h \
-                                 src/utils-chain.h \
+                                 src/utils-pool.h \
                                  src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   wayland-protocol-output.o"
@@ -1158,6 +1186,7 @@ build/wayland-protocol-seat.o: Makefile \
                                src/wayland-state.h \
                                src/output.h \
                                src/renderer.h \
+                               src/utils-pool.h \
                                src/utils-object.h \
                                src/utils-log.h \
                                src/config.h \
@@ -1176,8 +1205,7 @@ build/wayland-protocol-pointer.o: Makefile \
                                   src/global-types.h \
                                   src/output.h \
                                   src/renderer.h \
-                                  src/utils-list.h \
-                                  src/utils-chain.h \
+                                  src/utils-pool.h \
                                   src/utils-object.h \
                                   src/wayland-surface.h \
                                   src/wayland-types.h \
@@ -1202,8 +1230,7 @@ build/bind-egl-wayland.o: Makefile \
                           src/bind-egl-wayland.c \
                           src/renderer-gl.h \
                           src/renderer.h \
-                          src/utils-list.h \
-                          src/utils-chain.h \
+                          src/utils-pool.h \
                           src/global-constants.h \
                           src/global-types.h \
                           src/utils-gl.h \
@@ -1230,8 +1257,7 @@ build/backend-gtk-output.o: Makefile \
                             src/backend-gtk-output.h \
                             src/output.h \
                             src/renderer.h \
-                            src/utils-list.h \
-                            src/utils-chain.h \
+                            src/utils-pool.h \
                             src/global-constants.h \
                             src/global-types.h \
                             src/utils-object.h \
@@ -1239,6 +1265,8 @@ build/backend-gtk-output.o: Makefile \
                             src/utils-gl.h \
                             src/renderer-mmap.h \
                             src/renderer-gl.h \
+                            src/utils-list.h \
+                            src/utils-chain.h \
                             src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   backend-gtk-output.o"
@@ -1253,8 +1281,7 @@ build/backend-gtk-group.o: Makefile \
                            src/backend-gtk-output.h \
                            src/output.h \
                            src/renderer.h \
-                           src/utils-list.h \
-                           src/utils-chain.h \
+                           src/utils-pool.h \
                            src/global-constants.h \
                            src/utils-object.h \
                            src/utils-gl.h \
@@ -1276,8 +1303,7 @@ build/backend-gtk-win.o: Makefile \
                          src/backend-gtk-output.h \
                          src/output.h \
                          src/renderer.h \
-                         src/utils-list.h \
-                         src/utils-chain.h \
+                         src/utils-pool.h \
                          src/global-constants.h \
                          src/utils-object.h \
                          src/utils-gl.h \
@@ -1317,6 +1343,7 @@ build/backend-gtk.o: Makefile \
                      src/global-types.h \
                      src/output.h \
                      src/renderer.h \
+                     src/utils-pool.h \
                      src/utils-list.h \
                      src/utils-chain.h \
                      src/backend-gtk-app.h \
@@ -1350,6 +1377,7 @@ build/metanoia.o: Makefile \
                   src/utils-branch.h \
                   src/utils-chain.h \
                   src/utils-list.h \
+                  src/utils-pool.h \
                   src/config.h \
                   src/utils-keymap.h
 	@mkdir -p build

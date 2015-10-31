@@ -6,9 +6,7 @@
 
 #include "output.h"
 
-NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output,
-                                        int width,
-                                        int height);
+NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output);
 
 void noia_renderer_mmap_set_buffer(NoiaRenderer* self,
                                    int num,

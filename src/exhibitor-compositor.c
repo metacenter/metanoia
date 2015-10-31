@@ -43,15 +43,13 @@ void noia_compositor_free(NoiaCompositor* self)
 //------------------------------------------------------------------------------
 
 NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
-                                                unsigned width,
-                                                unsigned height)
+                                                NoiaSize size)
 {
     if (!self) {
         return NULL;
     }
 
     NoiaPosition pos = {0, 0};
-    NoiaSize size = {width, height};
     NoiaFrame* workspace = noia_frame_create(pos, size);
     noia_frame_init_as_workspace(workspace);
     noia_frame_append(self->root, workspace);

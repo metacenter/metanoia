@@ -1,7 +1,8 @@
 // file: renderer-gl.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-/// @todo add credits
+/// @todo Add credits
+/// @todo Add assertions like in mmap renderer
 
 #include "renderer-gl.h"
 
@@ -192,7 +193,7 @@ void noia_renderer_gl_prepare_view(NOIA_UNUSED NoiaRendererGL* mine)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(program);
-    glUniform2i(location_screen_size, mine->width, mine->height);
+    glUniform2i(location_screen_size, mine->size.width, mine->size.height);
 }
 
 //------------------------------------------------------------------------------
@@ -248,23 +249,24 @@ void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaSurfaceId sid,
 /// This is subroutine of noia_renderer_gl_draw
 /// @see noia_renderer_gl_load_texture_and_prepare_vertices
 void noia_renderer_gl_draw_surfaces(NOIA_UNUSED NoiaRendererGL* mine,
-                                    NoiaList* surfaces)
+                                    NoiaPool* surfaces)
 {
-    if (surfaces == NULL || noia_list_len(surfaces) == 0) {
+    if (surfaces == NULL || noia_pool_get_size(surfaces) == 0) {
         LOG_WARN4("GL renderer: no surfaces!");
         return;
     }
 
     // Prepare vertices positions and upload textures
-    size_t vertices_size = 12 * noia_list_len(surfaces) * sizeof(GLfloat);
+    size_t vertices_size = 12 * noia_pool_get_size(surfaces) * sizeof(GLfloat);
+    /// @todo Do not malloc here.
     GLfloat* vertices = malloc(vertices_size);
 
     /// @todo Upload textures only if realy needed
     unsigned i = 0;
-    FOR_EACH (surfaces, link) {
+    NoiaSurfaceContext* context;
+    NOIA_ITERATE_POOL(surfaces, i, context) {
         noia_renderer_gl_load_texture_and_prepare_vertices
-                               ((NoiaSurfaceId) link->data, i, &vertices[12*i]);
-        ++i;
+                                             (context->sid, i, &vertices[12*i]);
     }
 
     // Upload positions to vertex buffer object
@@ -274,11 +276,9 @@ void noia_renderer_gl_draw_surfaces(NOIA_UNUSED NoiaRendererGL* mine,
     glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_DYNAMIC_DRAW);
 
     // Redraw everything
-    i = 0;
-    FOR_EACH (surfaces, link) {
+    for (i = 0; i < noia_pool_get_size(surfaces); ++i) {
         glUniform1i(location_texture, i);
         glDrawArrays(GL_TRIANGLES, 6*i, 6);
-        ++i;
     }
 
     // Release resources
@@ -321,15 +321,11 @@ void noia_renderer_gl_swap_buffers(NoiaRenderer* self);
 ///      noia_renderer_gl_draw_surfaces, noia_renderer_gl_draw_pointer,
 ///      noia_renderer_gl_release_view
 void noia_renderer_gl_draw(NoiaRenderer* self,
-                           NoiaList* surfaces,
-                           int x, int y,
-                           NoiaSurfaceId cursor_sid)
+                           NoiaPool* surfaces,
+                           NoiaLayoverContext* context)
 {
     NoiaRendererGL* mine = (NoiaRendererGL*) self;
-    if (!mine) {
-        LOG_ERROR("Wrong renderer!");
-        return;
-    }
+    assert(mine); assert(surfaces); assert(context);
 
     pthread_mutex_lock(&mutex_renderer_gl);
 
@@ -338,7 +334,10 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
         noia_renderer_gl_prepare_view(mine);
         noia_renderer_gl_draw_bg_image(mine);
         noia_renderer_gl_draw_surfaces(mine, surfaces);
-        noia_renderer_gl_draw_pointer(mine, x, y, cursor_sid);
+        noia_renderer_gl_draw_pointer(mine,
+                                      context->pointer.pos.x,
+                                      context->pointer.pos.y,
+                                      context->pointer.sid);
     }
 
     noia_renderer_gl_release_view(mine);
@@ -410,7 +409,7 @@ void noia_renderer_gl_free(NoiaRenderer* self)
 
 /// GL renderer constructor
 NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
-                                      int width, int height)
+                                      NoiaSize size)
 {
     NoiaRendererGL* mine = calloc(1, sizeof(NoiaRendererGL));
     if (mine == NULL) {
@@ -431,8 +430,7 @@ NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
     mine->egl.config  = egl->config;
     mine->egl.context = egl->context;
 
-    mine->width = width;
-    mine->height = height;
+    mine->size = size;
 
     mine->bind_display   = NULL;
     mine->unbind_display = NULL;

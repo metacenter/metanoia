@@ -50,6 +50,12 @@ typedef struct {
     int height;
 } NoiaSize;
 
+/// Type defining 2D area
+typedef struct {
+    NoiaPosition pos;
+    NoiaSize size;
+} NoiaArea;
+
 /// Key event data
 typedef struct {
     unsigned time;
@@ -63,6 +69,20 @@ typedef struct {
     int code;
     bool value;
 } NoiaButtonData;
+
+/// Data needed by Renderer to draw surface
+typedef struct {
+    NoiaSurfaceId sid;
+    NoiaPosition pos;
+} NoiaSurfaceContext;
+
+/// Data needed by Renderer to draw layover
+typedef struct NoiaLayoverContextStruct {
+    NoiaSurfaceContext pointer;
+} NoiaLayoverContext;
+
+bool noia_position_is_inside(NoiaPosition pos, NoiaArea area);
+NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area);
 
 #endif // __NOIA_GLOBAL_TYPES_H__
 

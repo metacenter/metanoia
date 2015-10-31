@@ -16,8 +16,7 @@ NoiaCompositor* noia_compositor_new();
 void noia_compositor_free(NoiaCompositor* self);
 
 NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
-                                                unsigned width,
-                                                unsigned height);
+                                                NoiaSize size);
 
 bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 

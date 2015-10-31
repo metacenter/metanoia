@@ -20,21 +20,22 @@ void noia_backend_gtk_group_initialize(int n, NoiaSize resolution)
 {
     memset(&group[n], 0, sizeof(NoiaViewGroup));
     noia_backend_gtk_group_set_resolution(n, resolution);
-    group[n].method = (n % 2 == 0) ? NOIA_OUTPUT_METHOD_MMAP
-                                   : NOIA_OUTPUT_METHOD_GL;
+    group[n].method = ((n+1) % 3 != 0) ? NOIA_OUTPUT_METHOD_MMAP
+                                       : NOIA_OUTPUT_METHOD_GL;
 }
 
 //------------------------------------------------------------------------------
 
 /// Allocate memory for surfaces and prepare GTK widgets
-NoiaEGLBundle* noia_backend_gtk_group_prepare(int n, int width, int height)
+NoiaEGLBundle* noia_backend_gtk_group_prepare(int n, NoiaSize size)
 {
-    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
-    group[n].data = malloc(4 * height * stride);
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, size.width);
+    group[n].data = malloc(4 * size.height * stride);
 
     // Clear drawing area
-    gtk_widget_set_size_request(group[n].gtk.area, width, height);
-    gtk_widget_queue_draw_area(group[n].gtk.area, 0, 0, width, height);
+    gtk_widget_set_size_request(group[n].gtk.area, size.width, size.height);
+    gtk_widget_queue_draw_area(group[n].gtk.area, 0, 0,
+                               size.width, size.height);
     return &group[n].egl;
 }
 
@@ -93,8 +94,8 @@ void noia_backend_gtk_group_draw(int n,
 {
     NoiaOutputGTK* output_gtk = group[n].output;
     NoiaRenderer* renderer = output_gtk->base.renderer;
-    int width = output_gtk->base.width;
-    int height = output_gtk->base.height;
+    int width = output_gtk->base.area.size.width;
+    int height = output_gtk->base.area.size.height;
     int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
     if (!renderer) {
         LOG_WARN1("GTK backend: invalid renderer!");

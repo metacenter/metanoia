@@ -7,10 +7,10 @@
 #include "utils-chain.h"
 
 #define FOR_EACH(LIST,LINK) \
-    for (Link* LINK = ((Chain*) LIST)->first; LINK; LINK = LINK->next)
+    for (Link* LINK = LIST->base.first; LINK; LINK = LINK->next)
 
 #define FOR_EACH_REVERSE(LIST,LINK) \
-    for (Link* LINK = ((Chain*) LIST)->last; LINK; LINK = LINK->prev)
+    for (Link* LINK = LIST->base.last; LINK; LINK = LINK->prev)
 
 typedef struct {
     Chain base;

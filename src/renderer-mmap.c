@@ -11,15 +11,13 @@
 #include <string.h>
 
 #define NOIA_ASSERT_RENDERER_MMAP(renderer) \
-    NoiaRendererMMap* mine = (NoiaRendererMMap*) self; \
-    if (!mine) { LOG_ERROR("Invalid renderer!"); return; }
+    NoiaRendererMMap* mine = (NoiaRendererMMap*) self; assert(mine);
 
 //------------------------------------------------------------------------------
 
 typedef struct {
     NoiaRenderer base;
-    int height;
-    int width;
+    NoiaSize size;
     int front;
     struct {
         int stride;
@@ -48,8 +46,8 @@ void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine)
 {
     int current_buffer = mine->front ^ 1;
     uint8_t* D = mine->buffer[current_buffer].data;
-    int W = mine->width;
-    int H = mine->height;
+    int W = mine->size.width;
+    int H = mine->size.height;
     int S = mine->buffer[current_buffer].stride;
 
     int x, y;
@@ -78,21 +76,24 @@ void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine)
 //------------------------------------------------------------------------------
 
 void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
-                                     NoiaSurfaceId sid)
+                                     NoiaSurfaceContext* context)
 {
-    NoiaSurfaceData* surface = noia_surface_get(sid);
+    assert(mine);
+    assert(context);
+
+    NoiaSurfaceData* surface = noia_surface_get(context->sid);
     if (!surface) {
         return;
     }
 
     int current_buffer = mine->front ^ 1;
     uint8_t* D = mine->buffer[current_buffer].data;
-    int W = mine->width;
-    int H = mine->height;
+    int W = mine->size.width;
+    int H = mine->size.height;
     int S = mine->buffer[current_buffer].stride;
 
-    int pos_x = surface->position.x - surface->offset.x;
-    int pos_y = surface->position.y - surface->offset.y;
+    int pos_x = context->pos.x - surface->offset.x;
+    int pos_y = context->pos.y - surface->offset.y;
 
     uint8_t* d = surface->buffer.data;
     int s = surface->buffer.stride;
@@ -119,27 +120,28 @@ void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
 
 /// @note MMap renderer can not display surfaces passed trouhgt GPU
 void noia_renderer_mmap_draw_surfaces(NoiaRendererMMap* mine,
-                                      NoiaList* surfaces)
+                                      NoiaPool* surfaces)
 {
     if (surfaces == NULL) {
         LOG_WARN4("MMap renderer: no surfaces!");
         return;
     }
 
-    FOR_EACH (surfaces, link) {
-        noia_renderer_mmap_draw_surface(mine, (NoiaSurfaceId) link->data);
+    unsigned i;
+    NoiaSurfaceContext* context;
+    NOIA_ITERATE_POOL(surfaces, i, context) {
+        noia_renderer_mmap_draw_surface(mine, context);
     }
 }
 
 //------------------------------------------------------------------------------
 
 void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
-                                     int X, int Y,
-                                     NOIA_UNUSED NoiaSurfaceId cursor_sid)
+                                     NoiaSurfaceContext* context)
 {
-    if (cursor_sid != scInvalidSurfaceId) {
-        noia_renderer_mmap_draw_surface(mine, cursor_sid);
-    } else {
+    if (context->sid != scInvalidSurfaceId) {
+        noia_renderer_mmap_draw_surface(mine, context);
+    } else if (context->pos.x > INT_MIN && context->pos.y > INT_MIN) {
         int x, y, w = 15, h = 15;
         int current_buffer = mine->front ^ 1;
         int S = mine->buffer[current_buffer].stride;
@@ -147,7 +149,7 @@ void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
         float a = 0.8, A = (1.0-a);
         for (y = 0; y < h; ++y) {
             for (x = 0; x < w; ++x) {
-                int P = S * (Y + y) + 4 * (X + x);
+                int P = S * (context->pos.y + y) + 4 * (context->pos.x + x);
                 D[P+0] = (int) (a*255.0 + A*D[P+0]);
                 D[P+1] = (int) (a*255.0 + A*D[P+1]);
                 D[P+2] = (int) (a*255.0 + A*D[P+2]);
@@ -160,15 +162,15 @@ void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
 //------------------------------------------------------------------------------
 
 void noia_renderer_mmap_draw(NoiaRenderer* self,
-                             NoiaList* surfaces,
-                             int x, int y,
-                             NoiaSurfaceId cursor_sid)
+                             NoiaPool* surfaces,
+                             NoiaLayoverContext* context)
 {
     NOIA_ASSERT_RENDERER_MMAP(self);
+    assert(surfaces); assert(context);
 
     noia_renderer_mmap_draw_bg_image(mine);
     noia_renderer_mmap_draw_surfaces(mine, surfaces);
-    noia_renderer_mmap_draw_pointer(mine, x, y, cursor_sid);
+    noia_renderer_mmap_draw_pointer(mine, &context->pointer);
 }
 
 //------------------------------------------------------------------------------
@@ -197,7 +199,7 @@ void noia_renderer_mmap_copy_buffer(NoiaRenderer* self,
 {
     NOIA_ASSERT_RENDERER_MMAP(self);
 
-    size_t size = mine->buffer[mine->front].stride * mine->height;
+    size_t size = mine->buffer[mine->front].stride * mine->size.height;
     memcpy(dest_data, mine->buffer[mine->front].data, size);
 }
 
@@ -212,8 +214,7 @@ void noia_renderer_mmap_free(NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
-NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output,
-                                        int width, int height)
+NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output)
 {
     NoiaRendererMMap* mine = malloc(sizeof(NoiaRendererMMap));
     if (!mine) {
@@ -231,13 +232,12 @@ NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output,
                              noia_renderer_mmap_copy_buffer,
                              noia_renderer_mmap_free);
 
-    mine->width = width;
-    mine->height = height;
     mine->front = 0;
+    mine->size = output->area.size;
     mine->buffer[0].data = NULL;
-    mine->buffer[0].stride = width;
+    mine->buffer[0].stride = output->area.size.width;
     mine->buffer[1].data = NULL;
-    mine->buffer[1].stride = width;
+    mine->buffer[1].stride = output->area.size.width;
     mine->output = output;
 
     return (NoiaRenderer*) mine;

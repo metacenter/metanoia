@@ -12,7 +12,7 @@
 #include <malloc.h>
 #include <gtk/gtk.h>
 
-#define NUM_STARTUP_DISPLAYS 1
+#define NUM_STARTUP_DISPLAYS 2
 #define DEFAULT_RESOLUTION 1
 #define DRAW_TIMEOUT 40
 

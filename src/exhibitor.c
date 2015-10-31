@@ -47,8 +47,7 @@ void noia_exhibitor_create_new_display(NoiaOutput* output)
 
     NoiaFrame* workspace =
                     noia_compositor_create_new_workspace(exhibitor->compositor,
-                                                         output->width,
-                                                         output->height);
+                                                         output->area.size);
 
     NoiaDisplay* display = noia_display_new(output, workspace);
 
@@ -124,6 +123,14 @@ void noia_exhibitor_on_surface_destroyed(void* data)
 
     noia_list_remove(exhibitor->surface_history, (void*) sid,
                     (NoiaCompareFunc) noia_surface_compare);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaList* noia_exhibitor_get_displays()
+{
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+    return exhibitor->displays;
 }
 
 //------------------------------------------------------------------------------

@@ -38,7 +38,7 @@ typedef struct {
 
 void noia_backend_gtk_group_initialize(int n, NoiaSize resolution);
 
-NoiaEGLBundle* noia_backend_gtk_group_prepare(int n, int width, int height);
+NoiaEGLBundle* noia_backend_gtk_group_prepare(int n, NoiaSize size);
 
 void noia_backend_gtk_group_set_enabled(int n, int enabled);
 

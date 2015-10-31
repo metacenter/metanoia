@@ -6,6 +6,7 @@
 
 #include "utils-branch.h"
 #include "utils-list.h"
+#include "utils-pool.h"
 
 typedef enum {
     NOIA_FRAME_TYPE_NONE       = 0x00,
@@ -37,7 +38,7 @@ void noia_frame_free(NoiaFrame* self);
 
 void noia_frame_init_as_workspace(NoiaFrame* self);
 
-void noia_frame_to_list(NoiaFrame* self, NoiaList* surfaces);
+void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces);
 
 void noia_frame_set_surface(NoiaFrame* self, NoiaSurfaceId sid);
 void noia_frame_set_type(NoiaFrame* self, NoiaFrameType type);

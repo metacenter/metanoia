@@ -101,6 +101,12 @@ metanoia.add_input(t)
 # GLOBALS
 
 t = m.add_compile_target(
+        output='global-types.o',
+        inputs=['global-types.c'],
+    )
+metanoia.add_input(t)
+
+t = m.add_compile_target(
         output='global-objects.o',
         inputs=['global-objects.c'],
     )
