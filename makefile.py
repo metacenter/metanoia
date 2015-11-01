@@ -13,7 +13,7 @@ m.set_resource_directory('res')
 m.set_gen_directory('gen')
 
 m.set_c_compiler('gcc')
-m.set_oflags(['-O3']) # release
+m.set_oflags(['-DNDEBUG', '-O3']) # release
 m.set_oflags(['-DDEBUG', '-g', '-O0']) # debug
 m.set_cflags(['-std=gnu11', '-Wall', '-W', '-Wextra', '-Wpedantic', '-Werror'])
 m.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
@@ -118,6 +118,12 @@ metanoia.add_input(t)
 t = m.add_compile_target(
         output='utils-object.o',
         inputs=['utils-object.c'],
+    )
+metanoia.add_input(t)
+
+t = m.add_compile_target(
+        output='utils-pool.o',
+        inputs=['utils-pool.c'],
     )
 metanoia.add_input(t)
 
@@ -562,6 +568,10 @@ metanoia.add_input(t)
 
 #-------------------------------------------------------------------------------
 # TESTS
+
+m.add_test(output='check-pool',
+           inputs=['test-pool.c'],
+           deps=['utils-pool.c'])
 
 m.add_test(output='check-chain',
            inputs=['test-chain.c'],

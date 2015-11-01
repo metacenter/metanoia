@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define NOIA_INIT_TESTS() noia_test_init(argc, argv)
 
@@ -23,8 +24,29 @@
         NOIA_TEST_PRINTF("\n"); \
     }
 
+#define ASSERT_POOL_SIZE(POOL, ARRAY_SIZE, SIZE) { \
+    NOIA_ASSERT(ARRAY_SIZE == noia_pool_get_size(POOL), \
+                "Number of elements should be '%lu' (is '%u')", \
+                ARRAY_SIZE, noia_pool_get_size(POOL)); \
+    NOIA_ASSERT(SIZE == noia_pool_get_alocation_size(POOL), \
+                "Number of allocated elements should be '%u' (is '%u')", \
+                SIZE, noia_pool_get_alocation_size(POOL)); } \
+
+#define ASSERT_POOL(POOL, ARRAY, TYPE, SIZE) { \
+    ASSERT_POOL_SIZE(POOL, ARRAY_LEN(ARRAY), SIZE) \
+    for (unsigned i = 0; i < ARRAY_LEN(ARRAY); ++i) { \
+        TYPE* ptr = noia_pool_get(POOL, i); \
+        NOIA_ASSERT(ARRAY[i] == *ptr, \
+                    "Element should be '%d' (is '%d')", \
+                    ARRAY[i], *ptr); }}
+
+#define FILL_POOL(POOL, ARRAY, TYPE) { \
+    for (unsigned i = 0; i < ARRAY_LEN(ARRAY); ++i) { \
+        TYPE* ptr = noia_pool_add(POOL); \
+        *ptr = ARRAY[i]; }};
+
 #define ASSERT_CHAIN(CHAIN, ARRAY) { \
-    int i = 0, len = ARRAY_LEN(ARRAY, char*); \
+    int i = 0, len = ARRAY_LEN(ARRAY); \
     NOIA_ASSERT(len == chain_len(CHAIN), \
                 "Stored chain length should be %d (is %d)", \
                 len, chain_len(CHAIN)); \
@@ -39,7 +61,7 @@
                     array_data, chain_data); }}
 
 #define ASSERT_LIST(LIST, ARRAY) { \
-    int i = 0, len = ARRAY_LEN(ARRAY, char*); \
+    int i = 0, len = ARRAY_LEN(ARRAY); \
     NOIA_ASSERT(len == noia_list_len(LIST), \
                 "Stored list length should be %d (is %d)", \
                 len, noia_list_len(LIST)); \
@@ -61,7 +83,7 @@
     ASSERT_CHAIN(BRANCH->twigs, ARRAY);
 
 #define NOIA_TEST(test) {#test,test}
-#define ARRAY_LEN(a,t) (sizeof(a)/sizeof(t))
+#define ARRAY_LEN(a) (sizeof(a)/sizeof(*a))
 #define NOIA_NUM_TESTS(array) (sizeof(array)/(sizeof(NoiaTest)))
 
 static bool sQuiet = false;

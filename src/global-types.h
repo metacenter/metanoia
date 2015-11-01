@@ -6,6 +6,11 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
+
+/// @todo Move to global-macros.h
+#include <assert.h>
+#define NOIA_TRY switch(0) default:
 
 /// Id for NoiaItem
 typedef uintptr_t NoiaItemId;
