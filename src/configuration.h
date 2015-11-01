@@ -16,10 +16,10 @@ static const NoiaConfig scConfig = {
 
 static const NoiaBinding scBindings[] = {
         // general
-        {KEY_ESC,  NOIA_KEY_CTRL | NOIA_KEY_ALT,  {noia_quit}},
-        {KEY_F1,   NOIA_KEY_CTRL | NOIA_KEY_ALT,  {noia_refresh_displays}},
-        {KEY_TAB,  NOIA_KEY_ALT,                  {noia_cicle_history_forward}},
-        {KEY_TAB,  NOIA_KEY_ALT | NOIA_KEY_SHIFT, {noia_cicle_history_back}},
+        {KEY_ESC,  NOIA_KEY_CTRL|NOIA_KEY_ALT,   {noia_quit}},
+        {KEY_F1,   NOIA_KEY_CTRL|NOIA_KEY_ALT,   {noia_refresh_displays}},
+        {KEY_TAB,  NOIA_KEY_META,                {noia_cicle_history_forward}},
+        {KEY_TAB,  NOIA_KEY_META|NOIA_KEY_SHIFT, {noia_cicle_history_back}},
         // stack
         {KEY_ESC,   0, {noia_clean_stack}},
         {KEY_F,     0, {noia_put_focus}},

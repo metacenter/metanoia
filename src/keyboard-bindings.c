@@ -117,6 +117,13 @@ bool noia_keyboard_catch_key(int code, NoiaKeyState state)
                         ? modifiers |  NOIA_KEY_ALT
                         : modifiers & ~NOIA_KEY_ALT;
             return 0;
+
+        case KEY_LEFTMETA:
+        case KEY_RIGHTMETA:
+            modifiers = state
+                        ? modifiers |  NOIA_KEY_META
+                        : modifiers & ~NOIA_KEY_META;
+            return 0;
     }
 
     if (state == NOIA_KEY_RELEASED) {

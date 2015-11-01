@@ -26,6 +26,7 @@ typedef enum {
     NOIA_KEY_CTRL  = 0x0001,
     NOIA_KEY_SHIFT = 0x0002,
     NOIA_KEY_ALT   = 0x0004,
+    NOIA_KEY_META  = 0x0008,
 } NoiaKeyModifierFlag;
 
 /// Enumerate key binding modes.
