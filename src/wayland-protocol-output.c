@@ -39,7 +39,7 @@ void noia_wayland_output_bind(struct wl_client* client,
 
     wl_resource_set_implementation(rc, NULL, NULL, noia_wayland_output_unbind);
 
-    /// @todo Pass more realistic data ot wl_output_send_geometry
+    /// @todo Pass more realistic data to wl_output_send_geometry
     wl_output_send_geometry(rc, 0, 0,
                             output->area.size.width, output->area.size.height,
                             0,
@@ -50,7 +50,7 @@ void noia_wayland_output_bind(struct wl_client* client,
         wl_output_send_scale(rc, 1);
     }
 
-    /// @todo Pass more realistic data ot wl_output_send_mode
+    /// @todo Pass more realistic data to wl_output_send_mode
     wl_output_send_mode(rc, 0, output->area.size.width,
                                output->area.size.height, 60);
 

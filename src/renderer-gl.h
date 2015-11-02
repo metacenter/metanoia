@@ -8,6 +8,7 @@
 #include "utils-gl.h"
 
 /// Implementation of rendering strategy for GL backend.
+/// @todo Move to renderer-gl.c
 /// @see NoiaRenderer, NoiaRendererMMap
 typedef struct {
     NoiaRenderer base;

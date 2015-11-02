@@ -9,7 +9,6 @@
 
 //------------------------------------------------------------------------------
 
-/// Allocate Surface Data
 NoiaSurfaceData* noia_surface_data_new()
 {
     NoiaSurfaceData* self = malloc(sizeof(NoiaSurfaceData));
@@ -25,7 +24,6 @@ NoiaSurfaceData* noia_surface_data_new()
 
 //------------------------------------------------------------------------------
 
-/// Deallocate Surface Data.
 void noia_surface_data_free(NoiaSurfaceData* self)
 {
     if (!self) {

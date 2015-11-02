@@ -7,11 +7,6 @@
 
 //------------------------------------------------------------------------------
 
-/// Initialize NoiaOutput.
-/// @param unique_name - a string that uniquely specifies an output
-/// @param initialize - renderer constructor (back-end specific)
-/// @param swap_buffers - buffer swapper (back-end specific)
-/// @param free - free method (back-end specific)
 NoiaResult noia_output_initialize(NoiaOutput* self,
                                   NoiaSize size,
                                   char* unique_name,
@@ -39,9 +34,6 @@ NoiaResult noia_output_initialize(NoiaOutput* self,
 
 //------------------------------------------------------------------------------
 
-/// Initialize the renderer.
-/// This function should be called in thread in which the rendering will be
-/// performed.
 NoiaResult noia_output_initialize_rendering(NoiaOutput* output)
 {
     return output->renderer->initialize(output->renderer);
@@ -49,8 +41,6 @@ NoiaResult noia_output_initialize_rendering(NoiaOutput* output)
 
 //------------------------------------------------------------------------------
 
-/// Compare two outputs.
-/// @return `0` if identical.
 int noia_output_compare(NoiaOutput* first, NoiaOutput* second)
 {
     return strcmp(first->unique_name, second->unique_name);

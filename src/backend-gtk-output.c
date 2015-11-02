@@ -88,7 +88,7 @@ void noia_backend_gtk_output_free(NoiaOutput* output)
 
     noia_backend_gtk_group_discard(output_gtk->num);
     if (output->renderer) {
-        noia_renderer_mmap_free(output->renderer);
+        output->renderer->free(output->renderer);
         output->renderer = NULL;
     }
     if (output->unique_name) {

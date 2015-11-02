@@ -6,6 +6,7 @@
 
 #include "global-types.h"
 
+/// @todo Move to global-macros.h
 #define NOIA_UNUSED __attribute__((unused))
 #define NOIA_ASSERT_RESULT(RESULT) { if (RESULT != NOIA_RESULT_SUCCESS) break; }
 

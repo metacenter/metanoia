@@ -143,6 +143,7 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
     // Generate vertex buffer object
     glGenBuffers(1, &vbo_vertices);
 
+    /// @todo Implement support for more textures.
     // Create texture buffer
     glGenTextures(2, vbo_texture);
     glActiveTexture(GL_TEXTURE0);
@@ -169,7 +170,7 @@ clear_context:
 //------------------------------------------------------------------------------
 
 /// Finalize GL renderer.
-/// @todo Finnish.
+/// @todo Finnish this function.
 void noia_renderer_gl_finalize(NOIA_UNUSED NoiaRenderer* self)
 {
     return;
@@ -178,7 +179,8 @@ void noia_renderer_gl_finalize(NOIA_UNUSED NoiaRenderer* self)
 //------------------------------------------------------------------------------
 
 /// Setup GL environment.
-/// This is subroutine of noia_renderer_gl_draw
+/// This is subroutine of `noia_renderer_gl_draw`.
+/// @see noia_renderer_gl_draw
 void noia_renderer_gl_prepare_view(NOIA_UNUSED NoiaRendererGL* mine)
 {
     /// @todo remove
@@ -199,7 +201,8 @@ void noia_renderer_gl_prepare_view(NOIA_UNUSED NoiaRendererGL* mine)
 //------------------------------------------------------------------------------
 
 /// Draw background image.
-/// This is subroutine of noia_renderer_gl_draw
+/// This is subroutine of `noia_renderer_gl_draw`.
+/// @see noia_renderer_gl_draw
 void noia_renderer_gl_draw_bg_image(NOIA_UNUSED NoiaRendererGL* mine)
 {
 }
@@ -207,7 +210,8 @@ void noia_renderer_gl_draw_bg_image(NOIA_UNUSED NoiaRendererGL* mine)
 //------------------------------------------------------------------------------
 
 /// Load textures to memory and save vertices coordinates for given surface.
-/// This is subroutine of noia_renderer_gl_draw_surface
+/// This is subroutine of `noia_renderer_gl_draw`.
+/// @see noia_renderer_gl_draw
 void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaSurfaceId sid,
                                                         int i,
                                                         GLfloat* vertices)
@@ -245,9 +249,10 @@ void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaSurfaceId sid,
 
 //------------------------------------------------------------------------------
 
-/// Draw all the surfaces
-/// This is subroutine of noia_renderer_gl_draw
-/// @see noia_renderer_gl_load_texture_and_prepare_vertices
+/// Draw all the surfaces.
+/// This is subroutine of `noia_renderer_gl_draw`.
+/// @see noia_renderer_gl_draw
+///      noia_renderer_gl_load_texture_and_prepare_vertices
 void noia_renderer_gl_draw_surfaces(NOIA_UNUSED NoiaRendererGL* mine,
                                     NoiaPool* surfaces)
 {
@@ -289,9 +294,10 @@ void noia_renderer_gl_draw_surfaces(NOIA_UNUSED NoiaRendererGL* mine,
 //------------------------------------------------------------------------------
 
 /// Draw pointer.
+/// This is subroutine of `noia_renderer_gl_draw`
 /// @param x, y - position of hot point
 /// @param cursor_sid - surface ID of cursor
-/// This is subroutine of noia_renderer_gl_draw
+/// @see noia_renderer_gl_draw
 void noia_renderer_gl_draw_pointer(NOIA_UNUSED NoiaRendererGL* mine,
                                    NOIA_UNUSED int x, NOIA_UNUSED int y,
                                    NOIA_UNUSED NoiaSurfaceId cursor_sid)
@@ -302,7 +308,8 @@ void noia_renderer_gl_draw_pointer(NOIA_UNUSED NoiaRendererGL* mine,
 
 /// Finalize drawing.
 /// Undind framebuffer and release context.
-/// This is subroutine of noia_renderer_gl_draw
+/// This is subroutine of `noia_renderer_gl_draw`
+/// @see noia_renderer_gl_draw
 void noia_renderer_gl_release_view(NoiaRendererGL* mine)
 {
     // Ubind framebuffer and program
@@ -314,9 +321,8 @@ void noia_renderer_gl_release_view(NoiaRendererGL* mine)
 }
 
 //------------------------------------------------------------------------------
-void noia_renderer_gl_swap_buffers(NoiaRenderer* self);
 
-/// Draw whole the scene
+/// Draw whole the scene.
 /// @see noia_renderer_gl_prepare_view, noia_renderer_gl_draw_bg_image,
 ///      noia_renderer_gl_draw_surfaces, noia_renderer_gl_draw_pointer,
 ///      noia_renderer_gl_release_view
@@ -369,8 +375,8 @@ void noia_renderer_gl_swap_buffers(NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
-/// Copy specified frament of front buffer to given destination
-/// @param x, y, w, h - describe size and position of coppied fragment
+/// Copy specified frament of front buffer to given destination.
+/// @param x, y, w, h - describe size and position of copied fragment
 /// @param dest_data - is destination of coppied data
 void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
                                   int x, int y, int w, int h,
@@ -396,7 +402,7 @@ void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
 
 //------------------------------------------------------------------------------
 
-/// GL renderer destructor
+/// GL renderer destructor.
 void noia_renderer_gl_free(NoiaRenderer* self)
 {
     /// @todo  Finnish destructor
@@ -407,7 +413,7 @@ void noia_renderer_gl_free(NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
-/// GL renderer constructor
+/// GL renderer constructor.
 NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
                                       NoiaSize size)
 {

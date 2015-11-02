@@ -94,15 +94,11 @@ void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-/// Pop up a surface if covered with others.
-///
 /// Here `noia_frame_find_with_sid` is used. Pointer to Frame could also be
 /// stored in SurfaceData for faster access, but this would require carrying
 /// about this pointer this other operation (e.g. jumps) which also would
 /// require additional computations. Pop is done very rarely and we do not have
 /// overwhelming number of surfaces, so searching is justified here.
-///
-/// @see noia_frame_find_with_sid
 void noia_compositor_pop_surface(NoiaCompositor* self,
                                  NoiaSurfaceId sid)
 {
@@ -113,7 +109,6 @@ void noia_compositor_pop_surface(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
-/// Anchorizes the surface.
 void noia_compositor_command_anchorize(NoiaCompositor* self)
 {
     NOIA_TRY {

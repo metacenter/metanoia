@@ -10,14 +10,18 @@
 
 #include "output.h"
 
-void noia_exhibitor_pointer_initialize(NoiaLoop* this_loop, void* data);
-
+/// Return cursor position in global coordinates.
 NoiaPosition noia_exhibitor_pointer_get_global_position();
 
+/// Return the surface ID of the current surface.
 NoiaSurfaceId noia_exhibitor_pointer_get_sid();
 
+/// Find surface the pointer is over given an array of visible surfaces.
 void noia_exhibitor_pointer_update_hover_state(NoiaOutput* output,
                                                NoiaPool* visible_surfaces);
+
+/// Subscribe for events.
+void noia_exhibitor_pointer_initialize(NoiaLoop* this_loop, void* data);
 
 #endif // __NOIA_EXHIBITOR_POINTER_H__
 

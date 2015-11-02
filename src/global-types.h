@@ -81,7 +81,11 @@ typedef struct NoiaLayoverContextStruct {
     NoiaSurfaceContext pointer;
 } NoiaLayoverContext;
 
-bool noia_position_is_inside(NoiaPosition pos, NoiaArea area);
+/// Check if point `position` is inside area `area`.
+bool noia_position_is_inside(NoiaPosition position, NoiaArea area);
+
+/// If point `position` is outside area `area` return a point inside area `area`
+/// that is the colosest to point `position`.
 NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area);
 
 #endif // __NOIA_GLOBAL_TYPES_H__

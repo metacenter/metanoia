@@ -16,31 +16,15 @@
 
 //------------------------------------------------------------------------------
 
+/// @see NoiaExhibitor
 struct NoiaExhibitorPriv {
     NoiaStrategist* strategist;
 };
 
 //------------------------------------------------------------------------------
+// PRIVATE
 
-NoiaExhibitor* noia_exhibitor_get_instance()
-{
-    static NoiaExhibitor exhibitor;
-    if (exhibitor.priv) {
-        return &exhibitor;
-    }
-
-    exhibitor.surface_history = noia_list_new(NULL);
-    exhibitor.displays = noia_list_new((NoiaFreeFunc) noia_display_free);
-    exhibitor.compositor = noia_compositor_new();
-
-    exhibitor.priv = malloc(sizeof(NoiaExhibitorPriv));
-    exhibitor.priv->strategist = noia_strategist_new();
-
-    return &exhibitor;
-}
-
-//------------------------------------------------------------------------------
-
+/// Create and start new display.
 void noia_exhibitor_create_new_display(NoiaOutput* output)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
@@ -57,6 +41,21 @@ void noia_exhibitor_create_new_display(NoiaOutput* output)
 
 //------------------------------------------------------------------------------
 
+/// Pop up the surface with given ID.
+void noia_exhibitor_pop_surface(NoiaSurfaceId sid)
+{
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+
+    noia_list_remove(exhibitor->surface_history,
+                    (void*) sid, (NoiaCompareFunc) noia_surface_compare);
+    noia_list_append(exhibitor->surface_history, (void*) sid);
+
+    noia_compositor_pop_surface(exhibitor->compositor, sid);
+}
+
+//------------------------------------------------------------------------------
+
+/// Handle display found notification.
 void noia_exhibitor_on_display_found(void* data)
 {
     NoiaOutput* output = (NoiaOutput*) data;
@@ -70,6 +69,7 @@ void noia_exhibitor_on_display_found(void* data)
 
 //------------------------------------------------------------------------------
 
+/// Handle display lost notification.
 void noia_exhibitor_on_display_lost(void* data)
 {
     NoiaOutput* output = (NoiaOutput*) data;
@@ -96,6 +96,7 @@ void noia_exhibitor_on_display_lost(void* data)
 
 //------------------------------------------------------------------------------
 
+/// Handle creation of new surface notification.
 void noia_exhibitor_on_surface_ready(void* data)
 {
     NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
@@ -109,6 +110,7 @@ void noia_exhibitor_on_surface_ready(void* data)
 
 //------------------------------------------------------------------------------
 
+/// Handle creation of surface destruction notification.
 void noia_exhibitor_on_surface_destroyed(void* data)
 {
     NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
@@ -127,23 +129,54 @@ void noia_exhibitor_on_surface_destroyed(void* data)
 
 //------------------------------------------------------------------------------
 
-NoiaList* noia_exhibitor_get_displays()
+/// Finalize the loop - realise resources.
+void noia_exhibitor_finalize(void* data NOIA_UNUSED)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-    return exhibitor->displays;
+
+    noia_event_signal_unsubscribe(exhibitor);
+
+    FOR_EACH (exhibitor->displays, link) {
+        NoiaDisplay* display = (NoiaDisplay*) link->data;
+        noia_display_stop(display);
+    }
+
+    noia_strategist_free(exhibitor->priv->strategist);
+    memset(exhibitor->priv, 0, sizeof(NoiaExhibitorPriv));
+    free(exhibitor->priv);
+
+    noia_compositor_free(exhibitor->compositor);
+    noia_list_free(exhibitor->displays);
+    noia_list_free(exhibitor->surface_history);
+    memset(exhibitor, 0, sizeof(NoiaExhibitor));
+}
+
+//------------------------------------------------------------------------------
+// PUBLIC
+
+NoiaExhibitor* noia_exhibitor_get_instance()
+{
+    static NoiaExhibitor exhibitor;
+    if (exhibitor.priv) {
+        return &exhibitor;
+    }
+
+    exhibitor.surface_history = noia_list_new(NULL);
+    exhibitor.displays = noia_list_new((NoiaFreeFunc) noia_display_free);
+    exhibitor.compositor = noia_compositor_new();
+
+    exhibitor.priv = malloc(sizeof(NoiaExhibitorPriv));
+    exhibitor.priv->strategist = noia_strategist_new();
+
+    return &exhibitor;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_pop_surface(NoiaSurfaceId sid)
+NoiaList* noia_exhibitor_get_displays()
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-
-    noia_list_remove(exhibitor->surface_history,
-                    (void*) sid, (NoiaCompareFunc) noia_surface_compare);
-    noia_list_append(exhibitor->surface_history, (void*) sid);
-
-    noia_compositor_pop_surface(exhibitor->compositor, sid);
+    return exhibitor->displays;
 }
 
 //------------------------------------------------------------------------------
@@ -176,17 +209,6 @@ void noia_exhibitor_pop_history_surface(int position)
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_command_position(NoiaArgmandType type,
-                                     NoiaArgmandType direction,
-                                     int magnitude)
-{
-    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-    noia_compositor_command_position(exhibitor->compositor,
-                                     type, direction, magnitude);
-}
-
-//------------------------------------------------------------------------------
-
 void noia_exhibitor_command_anchorize()
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
@@ -195,25 +217,13 @@ void noia_exhibitor_command_anchorize()
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_finalize(void* data NOIA_UNUSED)
+void noia_exhibitor_command_position(NoiaArgmandType type,
+                                     NoiaArgmandType direction,
+                                     int magnitude)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-
-    noia_event_signal_unsubscribe(exhibitor);
-
-    FOR_EACH (exhibitor->displays, link) {
-        NoiaDisplay* display = (NoiaDisplay*) link->data;
-        noia_display_stop(display);
-    }
-
-    noia_strategist_free(exhibitor->priv->strategist);
-    memset(exhibitor->priv, 0, sizeof(NoiaExhibitorPriv));
-    free(exhibitor->priv);
-
-    noia_compositor_free(exhibitor->compositor);
-    noia_list_free(exhibitor->displays);
-    noia_list_free(exhibitor->surface_history);
-    memset(exhibitor, 0, sizeof(NoiaExhibitor));
+    noia_compositor_command_position(exhibitor->compositor,
+                                     type, direction, magnitude);
 }
 
 //------------------------------------------------------------------------------

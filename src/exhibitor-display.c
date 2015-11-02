@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 // PRIVATE
 
+/// Check validity of the display.
 bool noia_display_is_valid(NoiaDisplay* self)
 {
     if (!self) {
@@ -39,6 +40,7 @@ bool noia_display_is_valid(NoiaDisplay* self)
 
 //------------------------------------------------------------------------------
 
+/// Prepare rendering context for drawing layover (currently only pointer).
 void noia_display_setup_layover_context(NoiaDisplay* self,
                                         NoiaLayoverContext* context)
 {
@@ -59,6 +61,8 @@ void noia_display_setup_layover_context(NoiaDisplay* self,
 
 //------------------------------------------------------------------------------
 
+/// Prepare context for drawing the whole scene and pass it to the renderer.
+/// @todo Is order of calling renderer method for GL renderer correct?
 void noia_display_redraw_all(NoiaDisplay* self)
 {
     noia_frame_to_array(self->workspace, self->visible_surfaces);
@@ -96,6 +100,8 @@ void noia_display_redraw_all(NoiaDisplay* self)
 
 //------------------------------------------------------------------------------
 
+/// Main loop of the display thread.
+/// @todo Extend output to provide information about v-blanks.
 void* noia_display_thread_loop(void* data)
 {
     NoiaDisplay* self = (NoiaDisplay*) data;

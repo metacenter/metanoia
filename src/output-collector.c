@@ -17,7 +17,7 @@
 
 /// List of all currently available outputs.
 /// @todo This should not be a global variable.
-NoiaList* outputs = 0;
+NoiaList* outputs = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -140,7 +140,7 @@ void noia_output_collector_update()
 
 //------------------------------------------------------------------------------
 
-/// Handle SIGNAL_OUTPUTS_CHANGED signal
+/// Handle SIGNAL_OUTPUTS_CHANGED signal.
 void noia_output_on_change(NOIA_UNUSED void* data)
 {
     noia_output_collector_update();
@@ -148,6 +148,7 @@ void noia_output_on_change(NOIA_UNUSED void* data)
 
 //------------------------------------------------------------------------------
 
+/// Finalize loop.
 void noia_output_collector_finalize(NOIA_UNUSED void* data)
 {
     noia_list_free(outputs);
@@ -155,7 +156,7 @@ void noia_output_collector_finalize(NOIA_UNUSED void* data)
 
 //------------------------------------------------------------------------------
 
-/// Initialize Output Collector
+/// Initialize Output Collector.
 void noia_output_collector_initialize(NoiaLoop* this_loop)
 {
     if (!this_loop) {

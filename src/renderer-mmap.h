@@ -13,7 +13,5 @@ void noia_renderer_mmap_set_buffer(NoiaRenderer* self,
                                    uint8_t* data,
                                    int stride);
 
-void noia_renderer_mmap_free(NoiaRenderer* self);
-
 #endif // __NOIA_RENDERER_MMAP_H__
 

@@ -6,26 +6,40 @@
 
 #include "exhibitor-frame.h"
 
+/// NoiaCompositor manages surfaces and decides which ones should be drawn on
+/// which output.
 typedef struct {
     NoiaFrame* root;
     NoiaFrame* selection;
 } NoiaCompositor;
 
+/// Compositor constructor.
 NoiaCompositor* noia_compositor_new();
 
+/// Compositor destructor.
 void noia_compositor_free(NoiaCompositor* self);
 
+/// Creates new frame, places it in proper place in frame tree and initializes
+/// is as a workspace.
 NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
                                                 NoiaSize size);
 
+/// Handles creation of new surface.
 bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 
+/// Handles destruction of surface.
 void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 
+/// Pop up a surface if covered with others.
+/// @see noia_frame_find_with_sid
 void noia_compositor_pop_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 
+/// Anchorizes the currently selected frame.
 void noia_compositor_command_anchorize(NoiaCompositor* self);
 
+/// Moves, jumps, resizes, changes order of currently selected frame basing on
+/// given Argmand.
+/// @see NoiaArgmandType
 void noia_compositor_command_position(NoiaCompositor* self,
                                       NoiaArgmandType type,
                                       NoiaArgmandType direction,

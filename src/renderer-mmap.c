@@ -15,6 +15,8 @@
 
 //------------------------------------------------------------------------------
 
+/// Implementation of rendering strategy for drawing on memory buffer.
+/// @see NoiaRenderer, NoiaRendererMMap
 typedef struct {
     NoiaRenderer base;
     NoiaSize size;
@@ -28,6 +30,10 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
+/// Initialize MMap renderer.
+/// Dummy function, no initialization needed, everything is done during
+/// construction.
+/// @see noia_renderer_mmap_set_buffer
 NoiaResult noia_renderer_mmap_initialize(NOIA_UNUSED NoiaRenderer* self)
 {
     return NOIA_RESULT_SUCCESS;
@@ -35,6 +41,8 @@ NoiaResult noia_renderer_mmap_initialize(NOIA_UNUSED NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
+/// Finalize Mmap renderer.
+/// Dummy function, nothing to be done.
 void noia_renderer_mmap_finalize(NOIA_UNUSED NoiaRenderer* self)
 {
     return;
@@ -42,6 +50,9 @@ void noia_renderer_mmap_finalize(NOIA_UNUSED NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
+/// Draw background image.
+/// This is subroutine of `noia_renderer_mmap_draw`.
+/// @see noia_renderer_mmap_draw
 void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine)
 {
     int current_buffer = mine->front ^ 1;
@@ -75,6 +86,9 @@ void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine)
 
 //------------------------------------------------------------------------------
 
+/// Draw one surface.
+/// This is subroutine of `noia_renderer_mmap_draw_surfaces`.
+/// @see noia_renderer_mmap_draw_surfaces
 void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
                                      NoiaSurfaceContext* context)
 {
@@ -118,7 +132,10 @@ void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
 
 //------------------------------------------------------------------------------
 
-/// @note MMap renderer can not display surfaces passed trouhgt GPU
+/// Draw all the surfaces.
+/// This is subroutine of `noia_renderer_mmap_draw`.
+/// @note MMap renderer can not display surfaces passed trouhgt GPU.
+/// @see noia_renderer_mmap_draw noia_renderer_mmap_draw_surface
 void noia_renderer_mmap_draw_surfaces(NoiaRendererMMap* mine,
                                       NoiaPool* surfaces)
 {
@@ -136,6 +153,9 @@ void noia_renderer_mmap_draw_surfaces(NoiaRendererMMap* mine,
 
 //------------------------------------------------------------------------------
 
+/// Draw pointer.
+/// This is subroutine of `noia_renderer_mmap_draw`.
+/// @see noia_renderer_mmap_draw, noia_renderer_mmap_draw_surface
 void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
                                      NoiaSurfaceContext* context)
 {
@@ -161,6 +181,10 @@ void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
 
 //------------------------------------------------------------------------------
 
+/// Draw whole the scene.
+/// @see noia_renderer_gl_draw_bg_image, noia_renderer_gl_draw_surfaces,
+///      noia_renderer_gl_draw_pointer
+
 void noia_renderer_mmap_draw(NoiaRenderer* self,
                              NoiaPool* surfaces,
                              NoiaLayoverContext* context)
@@ -175,6 +199,7 @@ void noia_renderer_mmap_draw(NoiaRenderer* self,
 
 //------------------------------------------------------------------------------
 
+/// Swap buffers.
 void noia_renderer_mmap_swap_buffers(NoiaRenderer* self)
 {
     NOIA_ASSERT_RENDERER_MMAP(self);
@@ -192,6 +217,9 @@ void noia_renderer_mmap_swap_buffers(NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
+/// Copy specified frament of front buffer to given destination.
+/// @param x, y, w, h - describe size and position of copied fragment
+/// @param dest_data - is destination of coppied data
 void noia_renderer_mmap_copy_buffer(NoiaRenderer* self,
                                     NOIA_UNUSED int x, NOIA_UNUSED int y,
                                     NOIA_UNUSED int w, NOIA_UNUSED int h,
@@ -205,6 +233,7 @@ void noia_renderer_mmap_copy_buffer(NoiaRenderer* self,
 
 //------------------------------------------------------------------------------
 
+/// MMap renderer destructor.
 void noia_renderer_mmap_free(NoiaRenderer* self)
 {
     if (self) {
@@ -214,6 +243,7 @@ void noia_renderer_mmap_free(NoiaRenderer* self)
 
 //------------------------------------------------------------------------------
 
+/// MMap renderer constructor.
 NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output)
 {
     NoiaRendererMMap* mine = malloc(sizeof(NoiaRendererMMap));
@@ -245,6 +275,11 @@ NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output)
 
 //------------------------------------------------------------------------------
 
+/// Set buffer.
+/// No more than two buffers are supported.
+/// @param num - number of th buffer
+/// @param data - pointer to memory used as buffer
+/// @param stride - stride of the buffer
 void noia_renderer_mmap_set_buffer(NoiaRenderer* self,
                                    int num,
                                    uint8_t* data,

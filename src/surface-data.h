@@ -25,26 +25,28 @@ typedef struct {
 
 /// Container for all data related to single surface.
 typedef struct {
-    /// Make this data structure storable in NoiaStore
+    /// Make this data structure storable in NoiaStore.
     NoiaItem base;
 
-    /// Offset used to move coordinate system of surface
+    /// Offset used to move coordinate system of surface.
     NoiaPosition offset;
 
-    /// Size desired by compositor
+    /// Size desired by compositor.
     NoiaSize desired_size;
 
-    /// Size requested by client
+    /// Size requested by client.
     NoiaSize requested_size;
 
-    /// Data required for draw
+    /// Data required for draw.
     NoiaDrawBuffer buffer;
 
     bool is_toplevel;
 } NoiaSurfaceData;
 
+/// Allocate Surface Data.
 NoiaSurfaceData* noia_surface_data_new();
 
+/// Deallocate Surface Data.
 void noia_surface_data_free(NoiaSurfaceData* self);
 
 #endif // __NOIA_SURFACE_DATA_H__

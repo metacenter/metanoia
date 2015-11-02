@@ -119,6 +119,7 @@ void* noia_pool_get(NoiaPool* self, unsigned index)
 
 //------------------------------------------------------------------------------
 
+/// @todo Do not free memory if array size will not change.
 void noia_pool_release(NoiaPool* self)
 {
     if (self->pool_size > 1) {

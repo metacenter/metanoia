@@ -100,6 +100,7 @@ NoiaOutputFB* noia_devfb_output_new(NoiaSize size, char* id, int fd)
 //------------------------------------------------------------------------------
 
 /// Get info about framebuffer and create Output for use with it.
+/// @todo Use NoiaResult
 int noia_devfb_setup_framebuffer(NoiaList* outputs)
 {
     struct fb_var_screeninfo screen_info;

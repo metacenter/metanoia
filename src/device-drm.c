@@ -198,7 +198,7 @@ NoiaRenderer* noia_drm_initialize_egl(NoiaOutputDRM* output_drm)
 
     LOG_INFO1("Creating GBM and initializing EGL...");
 
-    // Find mode // TODO
+    /// @todo Find mode
     NoiaSize size = {output_drm->mode.hdisplay, output_drm->mode.vdisplay};
 
     // Create GBM device and surface
