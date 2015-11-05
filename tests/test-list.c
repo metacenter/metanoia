@@ -1,7 +1,7 @@
 // file: tests-list.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "../src/utils-list.h"
+#include "utils-list.h"
 #include "tests-suit.h"
 
 #include <malloc.h>

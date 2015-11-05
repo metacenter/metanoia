@@ -14,15 +14,13 @@
 NoiaCompositor* noia_compositor_new()
 {
     NoiaCompositor* self = malloc(sizeof(NoiaCompositor));
-    if (!self) {
-        LOG_ERROR("Could not create new compositor!");
-        return self;
-    }
+    assert(self);
 
     NoiaPosition pos = {0, 0};
     NoiaSize size = {-1, -1};
-    self->root = noia_frame_create(pos, size);
-    noia_frame_set_type(self->root, NOIA_FRAME_TYPE_STACKED);
+    self->root = noia_frame_new();
+    noia_frame_configure(self->root, NOIA_FRAME_TYPE_STACKED,
+                         scInvalidSurfaceId, pos, size);
     return self;
 }
 
@@ -49,9 +47,8 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
         return NULL;
     }
 
-    NoiaPosition pos = {0, 0};
-    NoiaFrame* workspace = noia_frame_create(pos, size);
-    noia_frame_init_as_workspace(workspace);
+    NoiaFrame* workspace = noia_frame_new();
+    noia_frame_configure_as_workspace(workspace, size);
     noia_frame_append(self->root, workspace);
 
     /// @todo This should be configurable
@@ -69,10 +66,9 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     }
 
     /// @todo Frame type, size and position should be configurable.
-    NoiaPosition pos = {0, 0};
-    NoiaFrame* frame = noia_frame_create(pos, surface->requested_size);
-    noia_frame_set_type(frame, NOIA_FRAME_TYPE_FLOATING);
-    noia_frame_set_surface(frame, sid);
+    NoiaFrame* frame = noia_frame_new();
+    noia_frame_configure(frame, NOIA_FRAME_TYPE_FLOATING, sid,
+                         (NoiaPosition) {0,0}, surface->requested_size);
 
     noia_frame_append(self->selection, frame);
     /// @todo This should be configurable

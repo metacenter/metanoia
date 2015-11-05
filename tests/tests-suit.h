@@ -4,6 +4,9 @@
 #ifndef __NOIA_TESTS_SUIT_H__
 #define __NOIA_TESTS_SUIT_H__
 
+/// @file
+/// @todo Add NOIA prefixes.
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -45,14 +48,17 @@
         TYPE* ptr = noia_pool_add(POOL); \
         *ptr = ARRAY[i]; }};
 
+#define NOIA_ASSERT_CHAIN_LEN(CHAIN, LEN) \
+    NOIA_ASSERT(LEN == chain_recalculate_length(CHAIN), \
+                "Calculated chain length should be %d (is %d)", \
+                LEN, chain_recalculate_length(CHAIN));
+
 #define ASSERT_CHAIN(CHAIN, ARRAY) { \
     int i = 0, len = ARRAY_LEN(ARRAY); \
     NOIA_ASSERT(len == chain_len(CHAIN), \
                 "Stored chain length should be %d (is %d)", \
                 len, chain_len(CHAIN)); \
-    NOIA_ASSERT(len == chain_len(CHAIN), \
-                "Calculated chain length should be %d (is %d)", \
-                len, chain_recalculate_length(CHAIN)); \
+    NOIA_ASSERT_CHAIN_LEN(CHAIN, len); \
     for (Link* link = CHAIN->first; link; link = link->next, ++i) { \
         char* chain_data = link->data; \
         char* array_data = ARRAY[i]; \
@@ -75,11 +81,14 @@
                     "List data should be '%s' (is '%s')", \
                     array_data, list_data); }}
 
-#define ASSERT_BRANCH(BRANCH, TRUNK, ARRAY) \
-    NOIA_ASSERT(BRANCH != NULL, "Branch should not be NULL"); \
+#define NOIA_ASSERT_TRUNK(BRANCH, TRUNK) \
     NOIA_ASSERT(BRANCH->trunk == TRUNK, \
                 "Trunk should be '%p', (is '%p')", \
                 (void*) BRANCH->trunk, (void*) TRUNK); \
+
+#define ASSERT_BRANCH(BRANCH, TRUNK, ARRAY) \
+    NOIA_ASSERT(BRANCH != NULL, "Branch should not be NULL"); \
+    NOIA_ASSERT_TRUNK(BRANCH, TRUNK); \
     ASSERT_CHAIN(BRANCH->twigs, ARRAY);
 
 #define NOIA_TEST(test) {#test,test}
@@ -107,18 +116,22 @@ void noia_test_init(int argc, char** argv)
 
 int noia_test_run(const char* suit_name, NoiaTest* test, int N)
 {
+    int result = 0;
     printf("Run test suit '%s'\n\n", suit_name);
     for(int n = 0; n < N; ++n) {
         NOIA_TEST_PRINTF("Run test %d - '%s'\n", n+1, test[n].name);
-        NoiaTestResult result = test[n].check();
-        if (result != NOIA_TEST_SUCCESS) {
-            printf("\nFAILURE\n\n");
-            return 1;
+        NoiaTestResult check = test[n].check();
+        if (check != NOIA_TEST_SUCCESS) {
+            result = 1;
         }
         NOIA_TEST_PRINTF("\n");
     }
-    printf("SUCCESS\n\n");
-    return 0;
+    if (result) {
+        printf("FAILURE\n\n");
+    } else {
+        printf("SUCCESS\n\n");
+    }
+    return result;
 }
 
 #endif // __NOIA_TESTS_SUIT_H__

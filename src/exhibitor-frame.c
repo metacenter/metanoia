@@ -56,6 +56,20 @@ void noia_frame_params_free(NoiaFrameParams* params)
 
 //------------------------------------------------------------------------------
 
+/// Set surface ID.
+void noia_frame_set_surface(NoiaFrame* self, NoiaSurfaceId sid)
+{
+    noia_frame_get_params(self)->sid = sid;
+
+    // Resize to requested size
+    if (sid != scInvalidSurfaceId) {
+        NoiaSize size = {INT_MIN, INT_MIN};
+        noia_surface_set_desired_size(sid, size);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 /// Set frame size.
 /// @todo Remove?
 void noia_frame_set_size(NoiaFrame* self, NoiaSize size)
@@ -86,26 +100,15 @@ void noia_frame_reconfigure(NoiaFrame* self,
                             int magnitude)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
-    if (params->sid != scInvalidSurfaceId) {
-        NoiaSurfaceData* surface = noia_surface_get(params->sid);
-        if (surface) {
-            if (direction == NOIA_ARGMAND_N || direction == NOIA_ARGMAND_S) {
-                if (surface->desired_size.height == 0) {
-                    surface->desired_size.height =
-                                                 surface->requested_size.height;
-                }
-                surface->desired_size.height += magnitude;
-            }
-            if (direction == NOIA_ARGMAND_E || direction == NOIA_ARGMAND_W) {
-                if (surface->desired_size.width == 0) {
-                    surface->desired_size.width = surface->requested_size.width;
-                }
-                surface->desired_size.width += magnitude;
-            }
-            noia_event_signal_emit_int(SIGNAL_SURFACE_RECONFIGURED,params->sid);
-        }
+
+    if (direction == NOIA_ARGMAND_N || direction == NOIA_ARGMAND_S) {
+        params->size.height += magnitude;
+    }
+    if (direction == NOIA_ARGMAND_E || direction == NOIA_ARGMAND_W) {
+        params->size.width += magnitude;
     }
 
+    noia_surface_set_desired_size(params->sid, params->size);
 
     /// @todo Implement noia_frame_reconfigure for twigs.
 }
@@ -200,22 +203,38 @@ static inline void noia_frame_log_internal(NoiaFrame* self, unsigned level)
 //------------------------------------------------------------------------------
 // PUBLIC
 
-NoiaFrame* noia_frame_create(NoiaPosition position, NoiaSize size)
+bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
+                                          NoiaFrameParams* p2)
+{
+    if (!p1 || !p2) {
+        return false;
+    }
+
+    return p1->type        == p2->type
+        && p1->sid         == p2->sid
+        && p1->pos.x       == p2->pos.x
+        && p1->pos.y       == p2->pos.y
+        && p1->size.width  == p2->size.width
+        && p1->size.height == p2->size.height;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_frame_new()
 {
     NoiaFrame* self = noia_branch_new();
 
     self->base.data = malloc(sizeof(NoiaFrameParams));
-    if (!self->base.data) {
-        LOG_ERROR("Memory allocation failed!");
-        return NULL;
-    }
+    assert(self->base.data);
 
     NoiaFrameParams* params = self->base.data;
     memset(params, 0, sizeof(NoiaFrameParams));
     params->type = NOIA_FRAME_TYPE_NONE;
     params->sid = scInvalidSurfaceId;
-    params->pos = position;
-    params->size = size;
+    params->pos.x = 0;
+    params->pos.y = 0;
+    params->size.width = 0;
+    params->size.height = 0;
     return self;
 }
 
@@ -228,9 +247,9 @@ NoiaFrame* noia_frame_create_child(NoiaFrame* self, NoiaFrameType type)
         return NULL;
     }
 
-    NoiaFrame* frame = noia_frame_create(params->pos, params->size);
-    noia_frame_set_type(frame, type);
-
+    NoiaFrame* frame = noia_frame_new();
+    noia_frame_configure(frame, type, scInvalidSurfaceId,
+                         params->pos, params->size);
     noia_frame_append(self, frame);
 
     return frame;
@@ -249,10 +268,26 @@ void noia_frame_free(NoiaFrame* self)
 
 //------------------------------------------------------------------------------
 
-void noia_frame_init_as_workspace(NoiaFrame* self)
+void noia_frame_configure(NoiaFrame* self,
+                          NoiaFrameType type,
+                          NoiaSurfaceId sid,
+                          NoiaPosition pos,
+                          NoiaSize size)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
-    params->type = NOIA_FRAME_TYPE_WORKSPACE;
+    params->type = type;
+    params->pos = pos;
+    params->size = size;
+    noia_frame_set_surface(self, sid);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_frame_configure_as_workspace(NoiaFrame* self,
+                                       NoiaSize size)
+{
+    noia_frame_configure(self, NOIA_FRAME_TYPE_WORKSPACE,
+                         scInvalidSurfaceId, (NoiaPosition) {0,0}, size);
 }
 
 //------------------------------------------------------------------------------
@@ -269,32 +304,6 @@ void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces)
             noia_frame_to_array(twig, surfaces);
         }
     }
-}
-
-//------------------------------------------------------------------------------
-
-void noia_frame_set_surface(NoiaFrame* self, NoiaSurfaceId sid)
-{
-    noia_frame_get_params(self)->sid = sid;
-    NoiaSurfaceData* surface = noia_surface_get(sid);
-    if (!surface) {
-        return;
-    }
-
-    // Reconfiguration
-    if (surface->requested_size.width  != surface->desired_size.width
-    ||  surface->requested_size.height != surface->desired_size.height) {
-        surface->desired_size.width  = surface->requested_size.width;
-        surface->desired_size.height = surface->requested_size.height;
-        noia_event_signal_emit_int(SIGNAL_SURFACE_RECONFIGURED, sid);
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void noia_frame_set_type(NoiaFrame* self, NoiaFrameType type)
-{
-    noia_frame_get_params(self)->type = type;
 }
 
 //------------------------------------------------------------------------------

@@ -595,6 +595,12 @@ m.add_test(output='check-store',
            inputs=['test-store.c'],
            deps=['utils-chain.c', 'utils-store.c'])
 
+m.add_test(output='check-frame',
+           inputs=['test-frame.c', 'fake-utils-log.c',
+                   'mock-surface-manager.c'],
+           deps=['utils-chain.c', 'utils-branch.c', 'utils-store.c',
+                 'utils-pool.c', 'exhibitor-frame.c'])
+
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':

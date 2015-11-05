@@ -132,6 +132,11 @@ void noia_surface_set_offset(NoiaSurfaceId sid, NoiaPosition offset)
 void noia_surface_set_desired_size(NoiaSurfaceId sid, NoiaSize size)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+
+    if (size.width < 0 || size.height < 0) {
+        size = surface->requested_size;
+    }
+
     if (surface->desired_size.width != size.width
     ||  surface->desired_size.height != size.height) {
         surface->desired_size = size;

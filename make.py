@@ -164,19 +164,19 @@ class Make:
                 command = t.generator.get_command(t.output, t.inputs)
                 wr('\t@{0}'.format(command), end='')
 
-            def wr_gen_target(t, additional_deps=list()):
+            def wr_gen_target(t, additional_deps=set()):
                 padding = (len(t.output) + 2) * ' '
-                dependences = list()
-                dependences.extend(t.inputs)
-                dependences.extend(t.deps)
-                dependences.extend(additional_deps)
+                dependences = set()
+                dependences.update(t.inputs)
+                dependences.update(t.deps)
+                dependences.update(additional_deps)
                 wr('{0}: Makefile'.format(t.output), end='')
-                for d in dependences:
+                for d in sorted(dependences):
                     wr(' \\\n{0}{1}'.format(padding, d), end='')
 
             def wr_compile_target(t):
                 bare_command = ['gcc', '-MM', '-MT', t.output, '-Igen', '-Isrc']
-                dep_result = list()
+                dep_result = set()
                 inputs = list()
                 inputs.extend(t.inputs)
                 inputs.extend(t.deps)
@@ -184,8 +184,8 @@ class Make:
                     command = list(bare_command)
                     command.append(inp)
                     dep_str = get_command_output(command)
-                    dep_list = [s for s in dep_str.split(' ')[2:] if len(s) > 4]
-                    dep_result.extend(dep_list)
+                    dep_list = {s for s in dep_str.split(' ')[2:] if len(s) > 4}
+                    dep_result.update(dep_list)
                 wr_gen_target(t, dep_result)
 
             def wr_test_command(t):
@@ -214,7 +214,7 @@ class Make:
                    '--log-file=valgrind.log $$c -q; '
                    'if ! cat valgrind.log | grep "All heap blocks were freed --'
                    ' no leaks are possible"; then cat valgrind.log; fi; '
-                   'echo; done)\n'
+                   'rm -f valgrind.log; echo; done)\n'
                    'cppcheck:\n\tcppcheck -q --enable=all --template='
                    '"[{{severity}}] {{file}} ({{line}}): {{id}} - {{message}}" '
                    '--suppress=incorrectStringBooleanError .\n\n'

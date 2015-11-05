@@ -46,8 +46,13 @@ typedef struct {
     NoiaSize size;
 } NoiaFrameParams;
 
+/// Compare frame parameters.
+/// @return True if parameters are equivalent, else false.
+bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
+                                          NoiaFrameParams* p2);
+
 /// Create new frame.
-NoiaFrame* noia_frame_create(NoiaPosition position, NoiaSize size);
+NoiaFrame* noia_frame_new();
 
 /// Create new frame with the same position and size as `self`, attach to `self`
 /// and set new type.
@@ -57,18 +62,20 @@ NoiaFrame* noia_frame_create_child(NoiaFrame* self, NoiaFrameType type);
 /// Frame destructor.
 void noia_frame_free(NoiaFrame* self);
 
+/// Configure frame parameters.
+void noia_frame_configure(NoiaFrame* self,
+                          NoiaFrameType type,
+                          NoiaSurfaceId sid,
+                          NoiaPosition pos,
+                          NoiaSize size);
+
 /// Configure frame to be a workspace.
-void noia_frame_init_as_workspace(NoiaFrame* self);
+void noia_frame_configure_as_workspace(NoiaFrame* self,
+                                       NoiaSize size);
 
 /// Append self and all children surface context to array `surfaces`.
 /// @see noia_display_redraw_all
 void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces);
-
-/// Set surface ID.
-void noia_frame_set_surface(NoiaFrame* self, NoiaSurfaceId sid);
-
-/// Set surface type.
-void noia_frame_set_type(NoiaFrame* self, NoiaFrameType type);
 
 /// Check if frame has compatible type.
 bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type);
