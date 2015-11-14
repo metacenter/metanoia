@@ -23,7 +23,7 @@ void noia_environment_set_thread_name(pthread_t, char*);
 
 void noia_environment_on_enter_new_thread(pthread_t, char*);
 
-int noia_environment_setup(void);
+int noia_environment_setup(const char* log_filename);
 
 void noia_environment_cleanup(void);
 

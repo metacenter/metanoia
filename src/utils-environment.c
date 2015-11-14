@@ -72,9 +72,10 @@ void noia_environment_async_signal_handler(int sig,
         case SIGINT:
         case SIGTERM:
         case SIGSEGV:
+        case SIGABRT:
             LOG_INFO1("Signal '%d' received asynchronously", sig);
             noia_print_backtrace();
-            abort();
+            exit(1);
         default:
             LOG_INFO2("Unhandled signal: '%d'", sig);
     }
@@ -94,6 +95,7 @@ void noia_environment_signal_handler_set_up(void)
     sigaction(SIGINT,  &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGSEGV, &sa, NULL);
+    sigaction(SIGABRT, &sa, NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -169,7 +171,7 @@ cleanup:
 
 //------------------------------------------------------------------------------
 
-int noia_environment_setup(void)
+int noia_environment_setup(const char* log_filename)
 {
     // Set up async signal handler
     noia_environment_signal_handler_set_up();
@@ -178,7 +180,7 @@ int noia_environment_setup(void)
     int result1 = noia_environment_data_path_setup();
 
     // Open log file
-    noia_log_initialize();
+    noia_log_initialize(log_filename);
 
     // Create temporary $XDG_RUNTIME_DIR/noia-XXXXXX directory
     int result2 = noia_environment_runtime_path_setup();
@@ -196,8 +198,6 @@ int noia_environment_setup(void)
 
 void noia_environment_cleanup(void)
 {
-    // TODO
-
     if (sNoiaRuntimePath) {
         free(sNoiaRuntimePath);
         sNoiaRuntimePath = NULL;

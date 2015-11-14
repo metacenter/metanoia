@@ -117,6 +117,7 @@ class Make:
     #---------------------------------------------------------------------------
 
     def run_makefile(self, args):
+        ## @todo Build targets in order of adding.
         with open('Makefile', 'w') as mf:
             def get_command_output(args):
                 try:
@@ -175,6 +176,7 @@ class Make:
                     wr(' \\\n{0}{1}'.format(padding, d), end='')
 
             def wr_compile_target(t):
+                ## @todo Check if file exists
                 bare_command = ['gcc', '-MM', '-MT', t.output, '-Igen', '-Isrc']
                 dep_result = set()
                 inputs = list()

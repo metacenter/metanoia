@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 
     // Initialization
     noia_environment_set_thread_name(0, "noia:main");
-    noia_environment_setup();
+    noia_environment_setup("log");
     noia_config_apply(argc, argv);
     noia_dbus_initalize();
 

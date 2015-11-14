@@ -29,6 +29,11 @@ metanoia = m.add_link_target(
         include_in_all=True,
     )
 
+metanoiactl_gtk = m.add_link_target(
+        output='metanoiactl-gtk',
+        include_in_all=True,
+    )
+
 #-------------------------------------------------------------------------------
 # GENERATORS
 
@@ -106,10 +111,24 @@ target_gtk_resources = m.add_generated_target(
               'backend-gtk-area.ui'],
     )
 
+target_gtk_resources = m.add_generated_target(
+        generator=glcr,
+        output='controller-gtk-res.c',
+        inputs=['metanoiactl.gresource.xml'],
+        deps=['metanoiactl-gtk-main.ui'],
+    )
+
 version_file = m.add_generated_target(
         generator=vgen,
         output='version.h',
         deps=['force']
+    )
+
+#-------------------------------------------------------------------------------
+
+target_screenshooter_protocol = m.add_compile_target(
+        output='screenshooter-protocol.o',
+        deps=['screenshooter-protocol.c'],
     )
 
 #-------------------------------------------------------------------------------
@@ -202,17 +221,17 @@ t = m.add_compile_target(
     )
 metanoia.add_input(t)
 
-t = m.add_compile_target(
+target_utils_log = m.add_compile_target(
         output='utils-log.o',
         inputs=['utils-log.c'],
     )
-metanoia.add_input(t)
+metanoia.add_input(target_utils_log)
 
-t = m.add_compile_target(
+target_utils_environment = m.add_compile_target(
         output='utils-environment.o',
         inputs=['utils-environment.c'],
     )
-metanoia.add_input(t)
+metanoia.add_input(target_utils_environment)
 
 #-------------------------------------------------------------------------------
 # EVENTS
@@ -603,6 +622,69 @@ t = m.add_compile_target(
         inputs=['metanoia.c']
     )
 metanoia.add_input(t)
+
+#-------------------------------------------------------------------------------
+# METANOIACTL
+
+t = m.add_compile_target(
+        output='controller-defs.o',
+        inputs=['controller-defs.c'],
+        pkgs={'glib-2.0'},
+    )
+metanoiactl_gtk.add_input(t)
+
+t = m.add_compile_target(
+        output='controller-output.o',
+        inputs=['controller-output.c'],
+        pkgs={'glib-2.0'},
+    )
+metanoiactl_gtk.add_input(t)
+
+t = m.add_compile_target(
+        output='controller-gtk-res.o',
+        deps=['controller-gtk-res.c'],
+        pkgs={'gtk+-3.0'},
+    )
+metanoiactl_gtk.add_input(t)
+
+t = m.add_compile_target(
+        output='controller-gtk-display.o',
+        inputs=['controller-gtk-display.c'],
+        pkgs={'gtk+-3.0'},
+    )
+metanoiactl_gtk.add_input(t)
+
+t = m.add_compile_target(
+        output='controller-gtk-win.o',
+        inputs=['controller-gtk-win.c'],
+        pkgs={'gtk+-3.0'},
+    )
+metanoiactl_gtk.add_input(t)
+
+t = m.add_compile_target(
+        output='controller-gtk-app.o',
+        inputs=['controller-gtk-app.c'],
+        pkgs={'gtk+-3.0'},
+    )
+metanoiactl_gtk.add_input(t)
+
+t = m.add_compile_target(
+        output='controller-wayland.o',
+        inputs=['controller-wayland.c'],
+        pkgs={'wayland-client', 'glib-2.0'},
+    )
+metanoiactl_gtk.add_input(t)
+
+t = m.add_compile_target(
+        output='metanoiactl-gtk.o',
+        inputs=['metanoiactl-gtk.c'],
+        pkgs={'gtk+-3.0'},
+    )
+metanoiactl_gtk.add_input(t)
+
+metanoiactl_gtk.add_input(target_utils_log)
+metanoiactl_gtk.add_input(target_utils_environment)
+metanoiactl_gtk.add_input(target_screenshooter_protocol)
 
 #-------------------------------------------------------------------------------
 # TESTS

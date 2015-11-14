@@ -58,7 +58,7 @@
 #define LOG_EVNT4(...) _LOG_(EVNT4, __VA_ARGS__)
 #define LOG_WAYL5(...) _LOG_(WAYL5, __VA_ARGS__)
 
-void noia_log_initialize(void);
+void noia_log_initialize(const char* filename);
 void noia_log_finalize(void);
 
 void noia_log(const char*, // log level

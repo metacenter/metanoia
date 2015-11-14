@@ -28,9 +28,6 @@ static const char scLogDelimiter[] =
 "----------------+-------+-----------------+------+----"
 "--------------------------------------+\n";
 
-/// Log file name
-static const char* scConfLogFile = "log";
-
 /// Default log file deacriptor - stdout
 #define NOIA_DEFAULT_LOG_FD 1
 
@@ -43,13 +40,15 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 //------------------------------------------------------------------------------
 
 /// Inialize logging - open the file and write welcome message.
-void noia_log_initialize(void)
+void noia_log_initialize(const char* filename)
 {
-    setbuf(stdout, NULL);
-    sLogFD = noia_environment_open_file(scConfLogFile, 0, DATA_PATH);
-    if (sLogFD == -1) {
-        sLogFD = NOIA_DEFAULT_LOG_FD;
-        LOG_ERROR("Log file could not be opened!");
+    if (filename && strlen(filename) > 0) {
+        setbuf(stdout, NULL);
+        sLogFD = noia_environment_open_file(filename, 0, DATA_PATH);
+        if (sLogFD == -1) {
+            sLogFD = NOIA_DEFAULT_LOG_FD;
+            LOG_ERROR("Log file could not be opened!");
+        }
     }
 
     write(sLogFD, scLogWelcomeText, sizeof(scLogWelcomeText) - 1);
@@ -61,9 +60,14 @@ void noia_log_initialize(void)
 /// Finalize logging - close file.
 void noia_log_finalize(void)
 {
-    LOG_INFO1("Closing log file. Bye!");
-    write(sLogFD, scLogGoodByeText, sizeof(scLogGoodByeText) - 1);
-    close(sLogFD);
+    if (sLogFD > 1) {
+        LOG_INFO1("Closing log file. Bye!");
+        write(sLogFD, scLogGoodByeText, sizeof(scLogGoodByeText) - 1);
+        close(sLogFD);
+    } else {
+        LOG_INFO1("Bye!");
+        write(sLogFD, scLogGoodByeText, sizeof(scLogGoodByeText) - 1);
+    }
     sLogFD = NOIA_DEFAULT_LOG_FD;
 }
 
