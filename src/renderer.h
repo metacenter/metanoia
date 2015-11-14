@@ -26,9 +26,9 @@ typedef void (*NoiaRendererDrawFunc) (NoiaRenderer*,
 typedef void (*NoiaRendererSwapBuffersFunc) (NoiaRenderer*);
 
 typedef void (*NoiaRendererCopyBufferFunc) (NoiaRenderer*,
-                                            int x, int y,
-                                            int w, int h,
-                                            uint8_t*);
+                                            NoiaArea area,
+                                            uint8_t*,
+                                            unsigned stride);
 
 typedef void (*NoiarendererFreeFunc) (NoiaRenderer*);
 

@@ -381,12 +381,18 @@ void noia_renderer_gl_swap_buffers(NoiaRenderer* self)
 /// @param x, y, w, h - describe size and position of copied fragment
 /// @param dest_data - is destination of coppied data
 void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
-                                  int x, int y, int w, int h,
-                                  uint8_t* dest_data)
+                                  NoiaArea area,
+                                  uint8_t* dest_data,
+                                  unsigned stride)
 {
     NoiaRendererGL* mine = (NoiaRendererGL*) self;
     if (!mine) {
         LOG_ERROR("Wrong renderer!");
+        return;
+    }
+    if ((int) stride != 4*area.size.width) {
+        LOG_ERROR("Target buffer is malformed! {stride='%u', width='%u'}",
+                  stride, area.size.width);
         return;
     }
 
@@ -394,7 +400,8 @@ void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
 
     if (noia_gl_make_current(&mine->egl) == NOIA_RESULT_SUCCESS) {
         glReadBuffer(GL_FRONT);
-        glReadPixels(x, y, w, h, GL_BGRA, GL_UNSIGNED_BYTE, dest_data);
+        glReadPixels(area.pos.x, area.pos.y, area.size.width, area.size.height,
+                     GL_BGRA, GL_UNSIGNED_BYTE, dest_data);
     }
 
     noia_gl_release_current(&mine->egl);

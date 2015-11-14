@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "output.h"
+#include "global-macros.h"
 
 #include <string.h>
 
@@ -44,6 +45,21 @@ NoiaResult noia_output_initialize_rendering(NoiaOutput* output)
 int noia_output_compare(NoiaOutput* first, NoiaOutput* second)
 {
     return strcmp(first->unique_name, second->unique_name);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_output_take_screenshot(NoiaOutput* output,
+                                 NoiaArea area,
+                                 uint8_t* data,
+                                 unsigned stride)
+{
+    assert(data);
+    assert(output);
+    assert(output->renderer);
+    assert(output->renderer->copy_buffer);
+
+    output->renderer->copy_buffer(output->renderer, area, data, stride);
 }
 
 //------------------------------------------------------------------------------

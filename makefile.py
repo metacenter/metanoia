@@ -33,14 +33,20 @@ metanoia = m.add_link_target(
 # GENERATORS
 
 wsshg = make.Generator(
-        command_body='wayland-scanner server-header',
-        command_args=' < "{inputs}" > "{output}"',
+        command_body='wayland-scanner',
+        command_args='server-header "{inputs}" "{output}"',
+    )
+m.add_generator(wsshg)
+
+wschg = make.Generator(
+        command_body='wayland-scanner',
+        command_args='client-header "{inputs}" "{output}"',
     )
 m.add_generator(wsshg)
 
 wscg = make.Generator(
-        command_body='wayland-scanner code',
-        command_args=' < "{inputs}" > "{output}"',
+        command_body='wayland-scanner',
+        command_args='code "{inputs}" "{output}"',
     )
 m.add_generator(wscg)
 
@@ -61,7 +67,7 @@ vgen = make.Generator(
 #-------------------------------------------------------------------------------
 # RESOUCES
 
-target_xdg_shell_protocol = m.add_generated_target(
+target_xdg_shell_server_protocol = m.add_generated_target(
         generator=wsshg,
         output='xdg-shell-server-protocol.h',
         inputs=['xdg-shell.xml'],
@@ -71,6 +77,24 @@ target_xdg_shell_protocol_code = m.add_generated_target(
         generator=wscg,
         output='xdg-shell-protocol.c',
         inputs=['xdg-shell.xml'],
+    )
+
+target_screenshoter_server_protocol = m.add_generated_target(
+        generator=wsshg,
+        output='screenshooter-server-protocol.h',
+        inputs=['screenshooter.xml'],
+    )
+
+target_screenshoter_client_protocol = m.add_generated_target(
+        generator=wschg,
+        output='screenshooter-client-protocol.h',
+        inputs=['screenshooter.xml'],
+    )
+
+target_screenshooter_protocol_code = m.add_generated_target(
+        generator=wscg,
+        output='screenshooter-protocol.c',
+        inputs=['screenshooter.xml'],
     )
 
 target_gtk_resources = m.add_generated_target(
@@ -500,6 +524,14 @@ t = m.add_compile_target(
         inputs=['wayland-protocol-keyboard.c'],
     )
 metanoia.add_input(t)
+
+t = m.add_compile_target(
+        output='wayland-protocol-screenshooter.o',
+        inputs=['wayland-protocol-screenshooter.c'],
+    )
+metanoia.add_input(t)
+
+metanoia.add_input(target_screenshooter_protocol_code)
 
 #-------------------------------------------------------------------------------
 #

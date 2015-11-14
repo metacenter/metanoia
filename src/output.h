@@ -62,5 +62,11 @@ NoiaResult noia_output_initialize_rendering(NoiaOutput* output);
 /// @return `0` if identical.
 int noia_output_compare(NoiaOutput* first, NoiaOutput* second);
 
+/// Take screenshot.
+void noia_output_take_screenshot(NoiaOutput* output,
+                                 NoiaArea area,
+                                 uint8_t* data,
+                                 unsigned stride);
+
 #endif // __NOIA_OUTPUT_H__
 

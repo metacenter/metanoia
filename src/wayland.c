@@ -7,6 +7,7 @@
 #include "wayland-protocol-seat.h"
 #include "wayland-protocol-xdg-shell.h"
 #include "wayland-protocol-output.h"
+#include "wayland-protocol-screenshooter.h"
 #include "wayland-cache.h"
 #include "wayland-state.h"
 
@@ -22,6 +23,7 @@
 #include <pthread.h>
 
 #include "xdg-shell-server-protocol.h"
+#include "screenshooter-server-protocol.h"
 
 //------------------------------------------------------------------------------
 
@@ -202,6 +204,11 @@ void noia_wayland_initialize(NoiaLoop* this_loop)
     if (!wl_global_create(wayland_display, &wl_seat_interface, 4,
                           NULL, noia_wayland_seat_bind)) {
         LOG_ERROR("Could not create global seat!");
+    }
+
+    if (!wl_global_create(wayland_display, &screenshooter_interface, 1,
+                          NULL, noia_wayland_screenshooter_bind)) {
+        LOG_ERROR("Could not create global screenshooter!");
     }
 
     wl_display_init_shm(wayland_display);

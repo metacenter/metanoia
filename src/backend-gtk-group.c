@@ -105,7 +105,8 @@ void noia_backend_gtk_group_draw(int n,
     pthread_mutex_lock(&mutex_buffer);
 
     // Copy buffer data
-    renderer->copy_buffer(renderer, 0, 0, width, height, group[n].data);
+    NoiaArea area = {.pos={0,0},.size={width,height}};
+    renderer->copy_buffer(renderer, area, group[n].data, stride);
 
     // Draw buffer on GUI
     cairo_surface_t* source = cairo_image_surface_create_for_data

@@ -74,6 +74,7 @@ build/metanoia: Makefile \
                 build/wayland-protocol-output.o \
                 build/wayland-protocol-pointer.o \
                 build/wayland-protocol-region.o \
+                build/wayland-protocol-screenshooter.o \
                 build/wayland-protocol-seat.o \
                 build/wayland-protocol-shell-surface.o \
                 build/wayland-protocol-shell.o \
@@ -84,24 +85,43 @@ build/metanoia: Makefile \
                 build/wayland-state.o \
                 build/wayland-surface.o \
                 build/wayland.o \
-                build/xdg-shell-protocol.o
+                build/xdg-shell-protocol.o \
+                gen/screenshooter-protocol.c
 	@mkdir -p build
 	@echo "  LD   metanoia"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/metanoia \
-	       build/config.o build/global-types.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-argmand.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/bind-egl-wayland.o build/backend-gtk-res.o build/backend-gtk-output.o build/backend-gtk-group.o build/backend-gtk-win.o build/backend-gtk-app.o build/backend-gtk.o build/metanoia.o \
+	       build/config.o build/global-types.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-argmand.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/wayland-protocol-screenshooter.o gen/screenshooter-protocol.c build/bind-egl-wayland.o build/backend-gtk-res.o build/backend-gtk-output.o build/backend-gtk-group.o build/backend-gtk-win.o build/backend-gtk-app.o build/backend-gtk.o build/metanoia.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -ldrm -ludev -lwayland-server -lxkbcommon
 
 gen/xdg-shell-server-protocol.h: Makefile \
                                  res/xdg-shell.xml
 	@mkdir -p gen
 	@echo "  GEN  xdg-shell-server-protocol.h"
-	@wayland-scanner server-header  < "res/xdg-shell.xml" > "gen/xdg-shell-server-protocol.h"
+	@wayland-scanner server-header "res/xdg-shell.xml" "gen/xdg-shell-server-protocol.h"
 
 gen/xdg-shell-protocol.c: Makefile \
                           res/xdg-shell.xml
 	@mkdir -p gen
 	@echo "  GEN  xdg-shell-protocol.c"
-	@wayland-scanner code  < "res/xdg-shell.xml" > "gen/xdg-shell-protocol.c"
+	@wayland-scanner code "res/xdg-shell.xml" "gen/xdg-shell-protocol.c"
+
+gen/screenshooter-server-protocol.h: Makefile \
+                                     res/screenshooter.xml
+	@mkdir -p gen
+	@echo "  GEN  screenshooter-server-protocol.h"
+	@wayland-scanner server-header "res/screenshooter.xml" "gen/screenshooter-server-protocol.h"
+
+gen/screenshooter-client-protocol.h: Makefile \
+                                     res/screenshooter.xml
+	@mkdir -p gen
+	@echo "  GEN  screenshooter-client-protocol.h"
+	@wayland-scanner client-header "res/screenshooter.xml" "gen/screenshooter-client-protocol.h"
+
+gen/screenshooter-protocol.c: Makefile \
+                              res/screenshooter.xml
+	@mkdir -p gen
+	@echo "  GEN  screenshooter-protocol.c"
+	@wayland-scanner code "res/screenshooter.xml" "gen/screenshooter-protocol.c"
 
 gen/backend-gtk-res.c: Makefile \
                        res/backend-gtk-area.ui \
@@ -563,6 +583,7 @@ build/device-udev.o: Makefile \
 
 build/output.o: Makefile \
                 src/global-constants.h \
+                src/global-macros.h \
                 src/global-types.h \
                 src/output.c \
                 src/output.h \
@@ -969,6 +990,7 @@ build/wayland-state.o: Makefile \
 	       -c src/wayland-state.c
 
 build/wayland.o: Makefile \
+                 gen/screenshooter-server-protocol.h \
                  gen/xdg-shell-server-protocol.h \
                  src/config.h \
                  src/event-loop.h \
@@ -991,6 +1013,7 @@ build/wayland.o: Makefile \
                  src/wayland-cache.h \
                  src/wayland-protocol-compositor.h \
                  src/wayland-protocol-output.h \
+                 src/wayland-protocol-screenshooter.h \
                  src/wayland-protocol-seat.h \
                  src/wayland-protocol-shell.h \
                  src/wayland-protocol-xdg-shell.h \
@@ -1139,7 +1162,6 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/utils-store.h \
                                     src/wayland-cache.h \
                                     src/wayland-protocol-xdg-shell.c \
-                                    src/wayland-protocol-xdg-shell.h \
                                     src/wayland-protocol-xdg-surface.h \
                                     src/wayland-region.h \
                                     src/wayland-surface.h \
@@ -1253,6 +1275,23 @@ build/wayland-protocol-keyboard.o: Makefile \
 	@echo "  CC   wayland-protocol-keyboard.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-keyboard.o -Isrc -Igen \
 	       -c src/wayland-protocol-keyboard.c
+
+build/wayland-protocol-screenshooter.o: Makefile \
+                                        gen/screenshooter-server-protocol.h \
+                                        src/global-constants.h \
+                                        src/global-macros.h \
+                                        src/global-types.h \
+                                        src/output.h \
+                                        src/renderer.h \
+                                        src/utils-log.h \
+                                        src/utils-object.h \
+                                        src/utils-pool.h \
+                                        src/wayland-protocol-screenshooter.c \
+                                        src/wayland-protocol-screenshooter.h
+	@mkdir -p build
+	@echo "  CC   wayland-protocol-screenshooter.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-screenshooter.o -Isrc -Igen \
+	       -c src/wayland-protocol-screenshooter.c
 
 build/bind-egl-wayland.o: Makefile \
                           src/bind-egl-wayland.c \

@@ -221,10 +221,11 @@ void noia_renderer_mmap_swap_buffers(NoiaRenderer* self)
 /// Copy specified frament of front buffer to given destination.
 /// @param x, y, w, h - describe size and position of copied fragment
 /// @param dest_data - is destination of coppied data
+/// @todo Take into account passed buffer size.
 void noia_renderer_mmap_copy_buffer(NoiaRenderer* self,
-                                    int x NOIA_UNUSED, int y NOIA_UNUSED,
-                                    int w NOIA_UNUSED, int h NOIA_UNUSED,
-                                    uint8_t* dest_data)
+                                    NoiaArea area NOIA_UNUSED,
+                                    uint8_t* dest_data,
+                                    unsigned stride NOIA_UNUSED)
 {
     NOIA_ASSERT_RENDERER_MMAP(self);
 

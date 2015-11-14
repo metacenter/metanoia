@@ -9,13 +9,15 @@
 
 //------------------------------------------------------------------------------
 
+/// @todo Handle destruction of output resource.
 void noia_wayland_output_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
-    /// @todo Unbind Wayland output
+    LOG_WAYL2("Wayland: unbind output");
 }
 
 //------------------------------------------------------------------------------
 
+/// Wayland protocol: Handle request for interface to output object.
 void noia_wayland_output_bind(struct wl_client* client,
                               void* data,
                               uint32_t version,
@@ -38,26 +40,22 @@ void noia_wayland_output_bind(struct wl_client* client,
         return;
     }
 
-    wl_resource_set_implementation(rc, NULL, NULL, noia_wayland_output_unbind);
+    wl_resource_set_implementation(rc, NULL, data, noia_wayland_output_unbind);
 
     /// @todo Pass more realistic data to wl_output_send_geometry
-    wl_output_send_geometry(rc, 0, 0,
+    wl_output_send_geometry(rc,
+                            output->area.pos.x, output->area.pos.y,
                             output->area.size.width, output->area.size.height,
                             0,
                             output->unique_name, output->unique_name,
                             0);
 
-    if (version >= WL_OUTPUT_SCALE_SINCE_VERSION) {
-        wl_output_send_scale(rc, 1);
-    }
-
     /// @todo Pass more realistic data to wl_output_send_mode
     wl_output_send_mode(rc, 0, output->area.size.width,
                                output->area.size.height, 60);
 
-    if (version >= WL_OUTPUT_DONE_SINCE_VERSION) {
-        wl_output_send_done(rc);
-    }
+    wl_output_send_scale(rc, 1);
+    wl_output_send_done(rc);
 }
 
 //------------------------------------------------------------------------------
