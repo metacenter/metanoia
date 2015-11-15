@@ -124,6 +124,7 @@ build/config.o: Makefile \
                 src/configuration.h \
                 src/global-constants.h \
                 src/global-functions.h \
+                src/global-macros.h \
                 src/global-types.h \
                 src/keyboard-binding.h \
                 src/keyboard-bindings.h \
@@ -138,6 +139,7 @@ build/config.o: Makefile \
 	       -c src/config.c
 
 build/global-types.o: Makefile \
+                      src/global-macros.h \
                       src/global-types.c \
                       src/global-types.h
 	@mkdir -p build
@@ -193,6 +195,7 @@ build/utils-object.o: Makefile \
 	       -c src/utils-object.c
 
 build/utils-pool.o: Makefile \
+                    src/global-macros.h \
                     src/global-types.h \
                     src/utils-pool.c \
                     src/utils-pool.h
@@ -236,6 +239,7 @@ build/utils-branch.o: Makefile \
 
 build/utils-store.o: Makefile \
                      src/global-constants.h \
+                     src/global-macros.h \
                      src/global-types.h \
                      src/utils-log.h \
                      src/utils-store.c \
@@ -295,6 +299,7 @@ build/utils-log.o: Makefile \
 
 build/utils-environment.o: Makefile \
                            src/global-constants.h \
+                           src/global-macros.h \
                            src/global-types.h \
                            src/utils-environment.c \
                            src/utils-environment.h \
@@ -308,6 +313,7 @@ build/event-dispatcher.o: Makefile \
                           src/event-dispatcher.c \
                           src/event-dispatcher.h \
                           src/global-constants.h \
+                          src/global-macros.h \
                           src/global-types.h \
                           src/utils-chain.h \
                           src/utils-list.h \
@@ -418,6 +424,7 @@ build/renderer-mmap.o: Makefile \
                        src/exhibitor-compositor.h \
                        src/exhibitor-frame.h \
                        src/global-constants.h \
+                       src/global-macros.h \
                        src/global-types.h \
                        src/output.h \
                        src/renderer-mmap.c \
@@ -442,6 +449,7 @@ build/renderer-gl.o: Makefile \
                      src/exhibitor-compositor.h \
                      src/exhibitor-frame.h \
                      src/global-constants.h \
+                     src/global-macros.h \
                      src/global-types.h \
                      src/renderer-gl.c \
                      src/renderer-gl.h \
@@ -497,6 +505,7 @@ build/device-drm.o: Makefile \
                     src/device-drm.c \
                     src/device-drm.h \
                     src/global-constants.h \
+                    src/global-macros.h \
                     src/global-types.h \
                     src/output.h \
                     src/renderer-gl.h \
@@ -574,6 +583,7 @@ build/output-collector.o: Makefile \
                           src/event-signals.h \
                           src/event-task.h \
                           src/global-constants.h \
+                          src/global-macros.h \
                           src/global-types.h \
                           src/output-collector.c \
                           src/output-collector.h \
@@ -615,6 +625,7 @@ build/surface-manager.o: Makefile \
                          src/exhibitor-compositor.h \
                          src/exhibitor-frame.h \
                          src/global-constants.h \
+                         src/global-macros.h \
                          src/global-types.h \
                          src/surface-data.h \
                          src/surface-manager.c \
@@ -639,6 +650,7 @@ build/keyboard-functions.o: Makefile \
                             src/exhibitor-frame.h \
                             src/exhibitor.h \
                             src/global-constants.h \
+                            src/global-macros.h \
                             src/global-types.h \
                             src/keyboard-argmand.h \
                             src/keyboard-functions.c \
@@ -723,6 +735,7 @@ build/exhibitor.o: Makefile \
                    src/exhibitor.h \
                    src/global-constants.h \
                    src/global-functions.h \
+                   src/global-macros.h \
                    src/global-objects.h \
                    src/global-types.h \
                    src/output.h \
@@ -775,6 +788,7 @@ build/exhibitor-compositor.o: Makefile \
                               src/exhibitor-compositor.h \
                               src/exhibitor-frame.h \
                               src/global-constants.h \
+                              src/global-macros.h \
                               src/global-types.h \
                               src/surface-data.h \
                               src/surface-manager.h \
@@ -796,6 +810,7 @@ build/exhibitor-frame.o: Makefile \
                          src/exhibitor-frame.c \
                          src/exhibitor-frame.h \
                          src/global-constants.h \
+                         src/global-macros.h \
                          src/global-types.h \
                          src/surface-data.h \
                          src/surface-manager.h \
@@ -822,6 +837,7 @@ build/exhibitor-strategist.o: Makefile \
                               src/exhibitor-strategist.h \
                               src/exhibitor.h \
                               src/global-constants.h \
+                              src/global-macros.h \
                               src/global-types.h \
                               src/output.h \
                               src/renderer.h \
@@ -847,6 +863,7 @@ build/exhibitor-pointer.o: Makefile \
                            src/exhibitor-pointer.h \
                            src/exhibitor.h \
                            src/global-constants.h \
+                           src/global-macros.h \
                            src/global-objects.h \
                            src/global-types.h \
                            src/output.h \
@@ -958,6 +975,7 @@ build/wayland.o: Makefile \
                  src/event-signals.h \
                  src/event-task.h \
                  src/global-constants.h \
+                 src/global-macros.h \
                  src/global-objects.h \
                  src/global-types.h \
                  src/output.h \
@@ -991,6 +1009,7 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/exhibitor-compositor.h \
                                      src/exhibitor-frame.h \
                                      src/global-constants.h \
+                                     src/global-macros.h \
                                      src/global-types.h \
                                      src/output.h \
                                      src/renderer.h \
@@ -1021,6 +1040,7 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/exhibitor-compositor.h \
                                   src/exhibitor-frame.h \
                                   src/global-constants.h \
+                                  src/global-macros.h \
                                   src/global-types.h \
                                   src/output.h \
                                   src/renderer.h \
@@ -1047,6 +1067,7 @@ build/wayland-protocol-surface.o: Makefile \
 
 build/wayland-protocol-region.o: Makefile \
                                  src/global-constants.h \
+                                 src/global-macros.h \
                                  src/global-types.h \
                                  src/utils-chain.h \
                                  src/utils-list.h \
@@ -1067,6 +1088,7 @@ build/wayland-protocol-shell.o: Makefile \
                                 src/exhibitor-compositor.h \
                                 src/exhibitor-frame.h \
                                 src/global-constants.h \
+                                src/global-macros.h \
                                 src/global-types.h \
                                 src/surface-data.h \
                                 src/surface-manager.h \
@@ -1090,6 +1112,7 @@ build/wayland-protocol-shell.o: Makefile \
 
 build/wayland-protocol-shell-surface.o: Makefile \
                                         src/global-constants.h \
+                                        src/global-macros.h \
                                         src/global-types.h \
                                         src/utils-log.h \
                                         src/wayland-protocol-shell-surface.c \
@@ -1104,6 +1127,7 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/exhibitor-compositor.h \
                                     src/exhibitor-frame.h \
                                     src/global-constants.h \
+                                    src/global-macros.h \
                                     src/global-types.h \
                                     src/surface-data.h \
                                     src/surface-manager.h \
@@ -1130,6 +1154,7 @@ build/wayland-protocol-xdg-surface.o: Makefile \
                                       src/exhibitor-compositor.h \
                                       src/exhibitor-frame.h \
                                       src/global-constants.h \
+                                      src/global-macros.h \
                                       src/global-types.h \
                                       src/surface-data.h \
                                       src/surface-manager.h \
@@ -1155,6 +1180,7 @@ build/xdg-shell-protocol.o: Makefile \
 
 build/wayland-protocol-output.o: Makefile \
                                  src/global-constants.h \
+                                 src/global-macros.h \
                                  src/global-types.h \
                                  src/output.h \
                                  src/renderer.h \
@@ -1171,6 +1197,7 @@ build/wayland-protocol-output.o: Makefile \
 build/wayland-protocol-seat.o: Makefile \
                                src/config.h \
                                src/global-constants.h \
+                               src/global-macros.h \
                                src/global-types.h \
                                src/output.h \
                                src/renderer.h \
@@ -1197,6 +1224,7 @@ build/wayland-protocol-seat.o: Makefile \
 
 build/wayland-protocol-pointer.o: Makefile \
                                   src/global-constants.h \
+                                  src/global-macros.h \
                                   src/global-types.h \
                                   src/output.h \
                                   src/renderer.h \
@@ -1216,6 +1244,7 @@ build/wayland-protocol-pointer.o: Makefile \
 
 build/wayland-protocol-keyboard.o: Makefile \
                                    src/global-constants.h \
+                                   src/global-macros.h \
                                    src/global-types.h \
                                    src/utils-log.h \
                                    src/wayland-protocol-keyboard.c \
@@ -1303,6 +1332,7 @@ build/backend-gtk-win.o: Makefile \
                          src/event-signals.h \
                          src/event-task.h \
                          src/global-constants.h \
+                         src/global-macros.h \
                          src/global-types.h \
                          src/output.h \
                          src/renderer.h \
@@ -1323,6 +1353,7 @@ build/backend-gtk-app.o: Makefile \
                          src/event-signals.h \
                          src/event-task.h \
                          src/global-constants.h \
+                         src/global-macros.h \
                          src/global-types.h \
                          src/utils-log.h \
                          src/utils-object.h
@@ -1340,6 +1371,7 @@ build/backend-gtk.o: Makefile \
                      src/event-task.h \
                      src/global-constants.h \
                      src/global-functions.h \
+                     src/global-macros.h \
                      src/global-types.h \
                      src/output.h \
                      src/renderer.h \
@@ -1385,6 +1417,7 @@ build/metanoia.o: Makefile \
 	       -c src/metanoia.c
 
 checks/check-pool: Makefile \
+                   src/global-macros.h \
                    src/global-types.h \
                    src/utils-pool.c \
                    src/utils-pool.h \
@@ -1438,6 +1471,7 @@ checks/check-branch: Makefile \
 
 checks/check-store: Makefile \
                     src/global-constants.h \
+                    src/global-macros.h \
                     src/global-types.h \
                     src/utils-chain.c \
                     src/utils-chain.h \
@@ -1458,6 +1492,7 @@ checks/check-frame: Makefile \
                     src/exhibitor-frame.c \
                     src/exhibitor-frame.h \
                     src/global-constants.h \
+                    src/global-macros.h \
                     src/global-types.h \
                     src/surface-data.h \
                     src/surface-manager.h \

@@ -5,6 +5,7 @@
 
 #include "utils-log.h"
 #include "event-signals.h"
+#include "global-macros.h"
 
 #include "malloc.h"
 #include "memory.h"
@@ -30,10 +31,10 @@ void noia_strategist_on_surface_ready(NoiaExhibitor* exhibitor,
 
 //------------------------------------------------------------------------------
 
-void noia_strategist_on_surface_destroyed(NOIA_UNUSED NoiaExhibitor* exhibitor,
-                                          NOIA_UNUSED NoiaSurfaceId sid)
+void noia_strategist_on_surface_destroyed(NoiaExhibitor* exhibitor NOIA_UNUSED,
+                                          NoiaSurfaceId sid        NOIA_UNUSED)
 {
-    // TODO: move to compositor strategy
+    /// @todo Move to compositor strategy
     noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED,
                                scInvalidSurfaceId);
 }

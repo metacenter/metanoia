@@ -7,28 +7,28 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_shell_surface_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_shell_surface_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind shell surface");
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_shell_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_shell_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind shell");
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_get_shell_surface
-                              (NOIA_UNUSED struct wl_client* client,
-                               NOIA_UNUSED struct wl_resource* resource,
-                               uint32_t id,
-                               NOIA_UNUSED struct wl_resource* surface_resource)
+void noia_wayland_get_shell_surface(struct wl_client* client,
+                                    struct wl_resource* resource,
+                                    uint32_t id,
+                                    struct wl_resource* surface_resource)
 {
     struct wl_resource* rc;
     NoiaSurfaceId sid =
@@ -60,7 +60,7 @@ static const struct wl_shell_interface shell_implementation = {
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_bind(struct wl_client* client,
-                             NOIA_UNUSED void* data,
+                             void* data NOIA_UNUSED,
                              uint32_t version,
                              uint32_t id)
 {

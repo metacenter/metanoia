@@ -4,11 +4,12 @@
 #include "wayland-protocol-region.h"
 #include "wayland-cache.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
 /// @todo: Wayland protocol: destroy region.
-void noia_wayland_region_destroy(struct wl_client* client NOIA_UNUSED,
+void noia_wayland_region_destroy(struct wl_client* client     NOIA_UNUSED,
                                  struct wl_resource* resource NOIA_UNUSED)
 {
     NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(resource);
@@ -40,7 +41,7 @@ void noia_wayland_region_add(struct wl_client* client NOIA_UNUSED,
 
 /// @todo Wayland protocol: subtract a square from a region.
 /// @see wayland-region.h
-void noia_wayland_region_subtract(struct wl_client* client NOIA_UNUSED,
+void noia_wayland_region_subtract(struct wl_client* client     NOIA_UNUSED,
                                   struct wl_resource* resource NOIA_UNUSED,
                                   int32_t x,
                                   int32_t y,

@@ -5,10 +5,11 @@
 
 #include "utils-log.h"
 #include "output.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_output_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_output_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     /// @todo Unbind Wayland output
 }

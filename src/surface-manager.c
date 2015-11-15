@@ -6,6 +6,7 @@
 #include "utils-log.h"
 #include "event-timer.h"
 #include "event-signals.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -70,12 +71,12 @@ void noia_surface_clear_all()
 //------------------------------------------------------------------------------
 
 void noia_surface_attach_egl(NoiaSurfaceId sid,
-                             NOIA_UNUSED void* resource)
+                             void* resource NOIA_UNUSED)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
 
-    // TODO: log at init if renderer supports egl
-    // TODO: move 'attach' out from renderer
+    /// @todo Log at init if renderer supports egl
+    /// @todo Move 'attach' out from renderer
     //if (renderer && renderer->attach) {
     //    renderer->attach((renderer, sid, resource);
     //}
@@ -113,7 +114,7 @@ void noia_surface_commit(NoiaSurfaceId sid,
 
 //------------------------------------------------------------------------------
 
-void noia_surface_show(NOIA_UNUSED NoiaSurfaceId sid)
+void noia_surface_show(NoiaSurfaceId sid NOIA_UNUSED)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
     surface->is_toplevel = true;

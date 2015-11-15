@@ -9,10 +9,11 @@
 
 #include "utils-log.h"
 #include "config.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_pointer_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_pointer_unbind(struct wl_resource* resource)
 {
     LOG_WAYL3("Wayland: unbind pointer");
     noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_POINTER, resource);
@@ -20,7 +21,7 @@ void noia_wayland_pointer_unbind(NOIA_UNUSED struct wl_resource* resource)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_keyboard_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_keyboard_unbind(struct wl_resource* resource)
 {
     LOG_WAYL3("Wayland: unbind keyboard");
     noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_KEYBOARD,resource);
@@ -28,7 +29,7 @@ void noia_wayland_keyboard_unbind(NOIA_UNUSED struct wl_resource* resource)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_seat_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_seat_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind seat");
 }
@@ -94,8 +95,8 @@ void noia_wayland_get_keyboard(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_get_touch(NOIA_UNUSED struct wl_client* client,
-                            NOIA_UNUSED struct wl_resource* resource,
+void noia_wayland_get_touch(struct wl_client* client     NOIA_UNUSED,
+                            struct wl_resource* resource NOIA_UNUSED,
                             uint32_t id)
 {
     LOG_NYIMP("Wayland: get touch (id: %d)", id);
@@ -112,7 +113,7 @@ static const struct wl_seat_interface seat_implementation = {
 //------------------------------------------------------------------------------
 
 void noia_wayland_seat_bind(struct wl_client* client,
-                            NOIA_UNUSED void* data,
+                            void* data NOIA_UNUSED,
                             uint32_t version,
                             uint32_t id)
 {
@@ -129,7 +130,7 @@ void noia_wayland_seat_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &seat_implementation,
                                    NULL, noia_wayland_seat_unbind);
 
-    // TODO:
+    /// @todo Add more capabilities
     wl_seat_send_capabilities(rc, WL_SEAT_CAPABILITY_POINTER
                                 | WL_SEAT_CAPABILITY_KEYBOARD);
     wl_seat_send_name(rc, "seat0");

@@ -4,6 +4,7 @@
 #include "event-dispatcher.h"
 #include "utils-log.h"
 #include "utils-list.h"
+#include "global-macros.h"
 
 #include <errno.h>
 #include <stdlib.h>
@@ -187,7 +188,7 @@ void noia_event_dispatcher_stop(NoiaEventDispatcher* self)
 
 void noia_event_dispatcher_default_signal_handler
                                          (NoiaEventData* data,
-                                          NOIA_UNUSED struct epoll_event* event)
+                                          struct epoll_event* event NOIA_UNUSED)
 {
     int size;
     struct signalfd_siginfo fdsi;

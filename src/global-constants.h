@@ -6,10 +6,6 @@
 
 #include "global-types.h"
 
-/// @todo Move to global-macros.h
-#define NOIA_UNUSED __attribute__((unused))
-#define NOIA_ASSERT_RESULT(RESULT) { if (RESULT != NOIA_RESULT_SUCCESS) break; }
-
 /// Invalid value for NoiaItemId
 static const NoiaItemId scInvalidItemId = 0;
 
@@ -68,6 +64,8 @@ typedef enum {
     NOIA_RESULT_INCORRECT_ARGUMENT, ///< Incorrect or invalid argument passed
     NOIA_RESULT_NOT_FOUND,          ///< Required data not found
 } NoiaResult;
+
+#define NOIA_ASSERT_RESULT(RESULT) { if (RESULT != NOIA_RESULT_SUCCESS) break; }
 
 #endif // __NOIA_CONSTANTS_H__
 

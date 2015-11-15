@@ -4,6 +4,8 @@
 #include "exhibitor-frame.h"
 #include "utils-log.h"
 #include "surface-manager.h"
+#include "global-macros.h"
+
 /// @todo: remove event signals from exhibitor frame
 #include "event-signals.h"
 
@@ -421,8 +423,8 @@ void noia_frame_move(NoiaFrame* self,
 //------------------------------------------------------------------------------
 
 void noia_frame_jump(NoiaFrame* self,
-                     NOIA_UNUSED NoiaArgmandType direction,
-                     NOIA_UNUSED int magnitude)
+                     NoiaArgmandType direction NOIA_UNUSED,
+                     int magnitude             NOIA_UNUSED)
 {
     if (!self) {
         return;

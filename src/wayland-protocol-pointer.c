@@ -5,14 +5,15 @@
 #include "wayland-state.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
 void noia_wayland_pointer_set_cursor(
-                               NOIA_UNUSED struct wl_client* client,
-                               NOIA_UNUSED struct wl_resource* resource,
+                               struct wl_client* client             NOIA_UNUSED,
+                               struct wl_resource* resource         NOIA_UNUSED,
                                uint32_t serial,
-                               NOIA_UNUSED struct wl_resource* surface_resource,
+                               struct wl_resource* surface_resource NOIA_UNUSED,
                                int32_t hotspot_x,
                                int32_t hotspot_y)
 {
@@ -32,7 +33,7 @@ void noia_wayland_pointer_set_cursor(
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_pointer_release(NOIA_UNUSED struct wl_client* client,
+void noia_wayland_pointer_release(struct wl_client* client NOIA_UNUSED,
                                   struct wl_resource* resource)
 {
     LOG_WAYL2("Wayland: pointer release");

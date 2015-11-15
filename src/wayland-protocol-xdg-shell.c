@@ -7,26 +7,27 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include "xdg-shell-server-protocol.h"
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_surface_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_xdg_surface_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind XDG shell surface");
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_shell_unbind(NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_xdg_shell_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind XDG shell");
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_destroy(NOIA_UNUSED struct wl_client* client,
+void noia_wayland_xdg_destroy(struct wl_client* client NOIA_UNUSED,
                               struct wl_resource* resource)
 {
     wl_resource_destroy(resource);
@@ -35,8 +36,8 @@ void noia_wayland_xdg_destroy(NOIA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_use_unstable_version
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
+                                      (struct wl_client* client     NOIA_UNUSED,
+                                       struct wl_resource* resource NOIA_UNUSED,
                                        int32_t version)
 {
     LOG_NYIMP("Wayland: use unstable version (version: %d)", version);
@@ -44,11 +45,10 @@ void noia_wayland_xdg_use_unstable_version
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_get_xdg_surface
-                              (NOIA_UNUSED struct wl_client* client,
-                               NOIA_UNUSED struct wl_resource* resource,
-                               uint32_t id,
-                               NOIA_UNUSED struct wl_resource* surface_resource)
+void noia_wayland_xdg_get_xdg_surface(struct wl_client* client,
+                                      struct wl_resource* resource,
+                                      uint32_t id,
+                                      struct wl_resource* surface_resource)
 {
     struct wl_resource* rc;
     NoiaSurfaceId sid =
@@ -74,12 +74,12 @@ void noia_wayland_xdg_get_xdg_surface
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_get_xdg_popup
-                              (NOIA_UNUSED struct wl_client* client,
-                               NOIA_UNUSED struct wl_resource* resource,
+                              (struct wl_client* client             NOIA_UNUSED,
+                               struct wl_resource* resource         NOIA_UNUSED,
                                uint32_t id,
-                               NOIA_UNUSED struct wl_resource* surface_resource,
-                               NOIA_UNUSED struct wl_resource* parent_resource,
-                               NOIA_UNUSED struct wl_resource* seat_resource,
+                               struct wl_resource* surface_resource NOIA_UNUSED,
+                               struct wl_resource* parent_resource  NOIA_UNUSED,
+                               struct wl_resource* seat_resource    NOIA_UNUSED,
                                uint32_t serial,
                                int32_t x,
                                int32_t y)
@@ -91,8 +91,8 @@ void noia_wayland_xdg_get_xdg_popup
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_pong(NOIA_UNUSED struct wl_client* client,
-                           NOIA_UNUSED struct wl_resource* resource,
+void noia_wayland_xdg_pong(struct wl_client* client     NOIA_UNUSED,
+                           struct wl_resource* resource NOIA_UNUSED,
                            uint32_t serial)
 {
     LOG_NYIMP("Wayland: XDG pong (serial: %d)", serial);
@@ -111,7 +111,7 @@ static const struct xdg_shell_interface xdg_shell_implementation = {
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_shell_bind(struct wl_client* client,
-                                 NOIA_UNUSED void* data,
+                                 void* data NOIA_UNUSED,
                                  uint32_t version,
                                  uint32_t id)
 {

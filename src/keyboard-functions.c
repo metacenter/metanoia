@@ -5,6 +5,7 @@
 #include "keyboard-argmand.h"
 #include "utils-log.h"
 #include "exhibitor.h"
+#include "global-macros.h"
 
 #include <linux/input.h>
 
@@ -39,8 +40,8 @@ void noia_put_resize(NoiaList* stack)
 //------------------------------------------------------------------------------
 
 void noia_put_number(NoiaList* stack, int code,
-                     NOIA_UNUSED uint32_t modifiers,
-                     NOIA_UNUSED NoiaKeyState state)
+                     uint32_t modifiers NOIA_UNUSED,
+                     NoiaKeyState state NOIA_UNUSED)
 {
     int number = 0;
     switch (code) {

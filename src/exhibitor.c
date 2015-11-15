@@ -9,6 +9,7 @@
 #include "event-signals.h"
 #include "global-objects.h"
 #include "global-functions.h"
+#include "global-macros.h"
 #include "surface-manager.h"
 
 #include <malloc.h>

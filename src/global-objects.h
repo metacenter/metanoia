@@ -4,7 +4,6 @@
 #ifndef __NOIA_GLOBAL_OBJECTS_H__
 #define __NOIA_GLOBAL_OBJECTS_H__
 
-#include "global-types.h"
 #include "utils-object.h"
 
 //------------------------------------------------------------------------------

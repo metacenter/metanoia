@@ -5,6 +5,7 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include <math.h>
 #include <malloc.h>
@@ -34,7 +35,7 @@ typedef struct {
 /// Dummy function, no initialization needed, everything is done during
 /// construction.
 /// @see noia_renderer_mmap_set_buffer
-NoiaResult noia_renderer_mmap_initialize(NOIA_UNUSED NoiaRenderer* self)
+NoiaResult noia_renderer_mmap_initialize(NoiaRenderer* self NOIA_UNUSED)
 {
     return NOIA_RESULT_SUCCESS;
 }
@@ -43,7 +44,7 @@ NoiaResult noia_renderer_mmap_initialize(NOIA_UNUSED NoiaRenderer* self)
 
 /// Finalize Mmap renderer.
 /// Dummy function, nothing to be done.
-void noia_renderer_mmap_finalize(NOIA_UNUSED NoiaRenderer* self)
+void noia_renderer_mmap_finalize(NoiaRenderer* self NOIA_UNUSED)
 {
     return;
 }
@@ -221,8 +222,8 @@ void noia_renderer_mmap_swap_buffers(NoiaRenderer* self)
 /// @param x, y, w, h - describe size and position of copied fragment
 /// @param dest_data - is destination of coppied data
 void noia_renderer_mmap_copy_buffer(NoiaRenderer* self,
-                                    NOIA_UNUSED int x, NOIA_UNUSED int y,
-                                    NOIA_UNUSED int w, NOIA_UNUSED int h,
+                                    int x NOIA_UNUSED, int y NOIA_UNUSED,
+                                    int w NOIA_UNUSED, int h NOIA_UNUSED,
                                     uint8_t* dest_data)
 {
     NOIA_ASSERT_RENDERER_MMAP(self);

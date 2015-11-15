@@ -4,7 +4,6 @@
 #include "exhibitor-display.h"
 #include "exhibitor-pointer.h"
 #include "utils-log.h"
-#include "utils-list.h"
 #include "utils-environment.h"
 #include "event-timer.h"
 #include "event-signals.h"

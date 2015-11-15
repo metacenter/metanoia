@@ -3,6 +3,7 @@
 
 #include "utils-environment.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include <stdlib.h>
 #include <memory.h>
@@ -64,8 +65,8 @@ void noia_environment_on_enter_new_thread(pthread_t thread, char* name)
 //------------------------------------------------------------------------------
 
 void noia_environment_async_signal_handler(int sig,
-                                           NOIA_UNUSED siginfo_t* si,
-                                           NOIA_UNUSED void* arg)
+                                           siginfo_t* si NOIA_UNUSED,
+                                           void* arg     NOIA_UNUSED)
 {
     switch (sig) {
         case SIGINT:

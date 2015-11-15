@@ -8,6 +8,7 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include <GL/gl.h>
 
@@ -171,7 +172,7 @@ clear_context:
 
 /// Finalize GL renderer.
 /// @todo Finnish this function.
-void noia_renderer_gl_finalize(NOIA_UNUSED NoiaRenderer* self)
+void noia_renderer_gl_finalize(NoiaRenderer* self NOIA_UNUSED)
 {
     return;
 }
@@ -181,7 +182,7 @@ void noia_renderer_gl_finalize(NOIA_UNUSED NoiaRenderer* self)
 /// Setup GL environment.
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
-void noia_renderer_gl_prepare_view(NOIA_UNUSED NoiaRendererGL* mine)
+void noia_renderer_gl_prepare_view(NoiaRendererGL* mine)
 {
     /// @todo remove
     static double d = 0.05;
@@ -203,7 +204,7 @@ void noia_renderer_gl_prepare_view(NOIA_UNUSED NoiaRendererGL* mine)
 /// Draw background image.
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
-void noia_renderer_gl_draw_bg_image(NOIA_UNUSED NoiaRendererGL* mine)
+void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine NOIA_UNUSED)
 {
 }
 
@@ -253,7 +254,7 @@ void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaSurfaceId sid,
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
 ///      noia_renderer_gl_load_texture_and_prepare_vertices
-void noia_renderer_gl_draw_surfaces(NOIA_UNUSED NoiaRendererGL* mine,
+void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine NOIA_UNUSED,
                                     NoiaPool* surfaces)
 {
     if (surfaces == NULL || noia_pool_get_size(surfaces) == 0) {
@@ -298,9 +299,10 @@ void noia_renderer_gl_draw_surfaces(NOIA_UNUSED NoiaRendererGL* mine,
 /// @param x, y - position of hot point
 /// @param cursor_sid - surface ID of cursor
 /// @see noia_renderer_gl_draw
-void noia_renderer_gl_draw_pointer(NOIA_UNUSED NoiaRendererGL* mine,
-                                   NOIA_UNUSED int x, NOIA_UNUSED int y,
-                                   NOIA_UNUSED NoiaSurfaceId cursor_sid)
+void noia_renderer_gl_draw_pointer(NoiaRendererGL* mine     NOIA_UNUSED,
+                                   int x                    NOIA_UNUSED,
+                                   int y                    NOIA_UNUSED,
+                                   NoiaSurfaceId cursor_sid NOIA_UNUSED)
 {
 }
 

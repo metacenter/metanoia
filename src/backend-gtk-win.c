@@ -7,6 +7,7 @@
 
 #include "utils-log.h"
 #include "event-signals.h"
+#include "global-macros.h"
 #include "version.h"
 
 #include <malloc.h>

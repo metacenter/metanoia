@@ -4,11 +4,12 @@
 #include "wayland-protocol-shell-surface.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_shell_surface_pong(NOIA_UNUSED struct wl_client* client,
-                                     NOIA_UNUSED struct wl_resource* resource,
+void noia_wayland_shell_surface_pong(struct wl_client* client     NOIA_UNUSED,
+                                     struct wl_resource* resource NOIA_UNUSED,
                                      uint32_t serial)
 {
     LOG_NYIMP("Wayland: pong (serial: %d)", serial);
@@ -17,9 +18,9 @@ void noia_wayland_shell_surface_pong(NOIA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_move
-                                 (NOIA_UNUSED struct wl_client* client,
-                                  NOIA_UNUSED struct wl_resource* resource,
-                                  NOIA_UNUSED struct wl_resource* seat_resource,
+                                 (struct wl_client* client          NOIA_UNUSED,
+                                  struct wl_resource* resource      NOIA_UNUSED,
+                                  struct wl_resource* seat_resource NOIA_UNUSED,
                                   uint32_t serial)
 {
     LOG_NYIMP("Wayland: move (serial: %d)", serial);
@@ -28,9 +29,9 @@ void noia_wayland_shell_surface_move
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_resize
-                                 (NOIA_UNUSED struct wl_client* client,
-                                  NOIA_UNUSED struct wl_resource* resource,
-                                  NOIA_UNUSED struct wl_resource* seat_resource,
+                                 (struct wl_client* client          NOIA_UNUSED,
+                                  struct wl_resource* resource      NOIA_UNUSED,
+                                  struct wl_resource* seat_resource NOIA_UNUSED,
                                   uint32_t serial,
                                   uint32_t edges)
 {
@@ -40,8 +41,8 @@ void noia_wayland_shell_surface_resize
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_set_toplevel
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource)
+                                      (struct wl_client* client     NOIA_UNUSED,
+                                       struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: set toplevel");
 }
@@ -49,9 +50,9 @@ void noia_wayland_shell_surface_set_toplevel
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_set_transient
-                               (NOIA_UNUSED struct wl_client* client,
-                                NOIA_UNUSED struct wl_resource* resource,
-                                NOIA_UNUSED struct wl_resource* parent_resource,
+                               (struct wl_client* client            NOIA_UNUSED,
+                                struct wl_resource* resource        NOIA_UNUSED,
+                                struct wl_resource* parent_resource NOIA_UNUSED,
                                 int32_t x,
                                 int32_t y,
                                 uint32_t f)
@@ -62,11 +63,11 @@ void noia_wayland_shell_surface_set_transient
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_set_fullscreen
-                               (NOIA_UNUSED struct wl_client* client,
-                                NOIA_UNUSED struct wl_resource* resource,
+                               (struct wl_client* client            NOIA_UNUSED,
+                                struct wl_resource* resource        NOIA_UNUSED,
                                 uint32_t method,
                                 uint32_t framerate,
-                                NOIA_UNUSED struct wl_resource* output_resource)
+                                struct wl_resource* output_resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: set fullscreen (method: %d, framerate: %d)",
               method, framerate);
@@ -75,11 +76,11 @@ void noia_wayland_shell_surface_set_fullscreen
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_set_popup
-                               (NOIA_UNUSED struct wl_client* client,
-                                NOIA_UNUSED struct wl_resource* resource,
-                                NOIA_UNUSED struct wl_resource* seat_resource,
+                               (struct wl_client* client            NOIA_UNUSED,
+                                struct wl_resource* resource        NOIA_UNUSED,
+                                struct wl_resource* seat_resource   NOIA_UNUSED,
                                 uint32_t serial,
-                                NOIA_UNUSED struct wl_resource* parent_resource,
+                                struct wl_resource* parent_resource NOIA_UNUSED,
                                 int32_t x,
                                 int32_t y,
                                 uint32_t flags)
@@ -91,9 +92,9 @@ void noia_wayland_shell_surface_set_popup
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_set_maximized
-                               (NOIA_UNUSED struct wl_client* client,
-                                NOIA_UNUSED struct wl_resource* resource,
-                                NOIA_UNUSED struct wl_resource* output_resource)
+                               (struct wl_client* client            NOIA_UNUSED,
+                                struct wl_resource* resource        NOIA_UNUSED,
+                                struct wl_resource* output_resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: set maximized");
 }
@@ -101,8 +102,8 @@ void noia_wayland_shell_surface_set_maximized
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_set_title
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
+                                      (struct wl_client* client     NOIA_UNUSED,
+                                       struct wl_resource* resource NOIA_UNUSED,
                                        const char* title)
 {
     LOG_NYIMP("Wayland: set title (title: '%s')", title);
@@ -111,8 +112,8 @@ void noia_wayland_shell_surface_set_title
 //------------------------------------------------------------------------------
 
 void noia_wayland_shell_surface_set_class
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
+                                      (struct wl_client* client     NOIA_UNUSED,
+                                       struct wl_resource* resource NOIA_UNUSED,
                                        const char* class)
 {
     LOG_NYIMP("Wayland: set class (class: '%s')", class);

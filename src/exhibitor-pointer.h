@@ -5,8 +5,6 @@
 #define __NOIA_EXHIBITOR_POINTER_H__
 
 #include "event-loop.h"
-#include "global-types.h"
-#include "utils-pool.h"
 
 #include "output.h"
 

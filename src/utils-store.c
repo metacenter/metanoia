@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "utils-store.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <stdlib.h>
@@ -45,8 +46,9 @@ int noia_store_str_compare(const void* data1, const void* data2)
 //------------------------------------------------------------------------------
 
 /// Tree destroy action used to free duplicated id-keys when freeing store.
-void noia_store_destroy_id_key(NOIA_UNUSED void* data)
+void noia_store_destroy_id_key(void* data NOIA_UNUSED)
 {
+    // Nothing to do
 }
 
 //------------------------------------------------------------------------------

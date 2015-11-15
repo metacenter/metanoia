@@ -5,13 +5,14 @@
 
 #include "utils-log.h"
 #include "surface-manager.h"
+#include "global-macros.h"
 
 #include "xdg-shell-server-protocol.h"
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_surface_destroy(NOIA_UNUSED struct wl_client* client,
-                                      NOIA_UNUSED struct wl_resource* resource)
+void noia_wayland_xdg_surface_destroy(struct wl_client* client NOIA_UNUSED,
+                                      struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface destroy (sid: %d)", sid);
@@ -20,9 +21,9 @@ void noia_wayland_xdg_surface_destroy(NOIA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_set_parent
-                               (NOIA_UNUSED struct wl_client* client,
-                                NOIA_UNUSED struct wl_resource* resource,
-                                NOIA_UNUSED struct wl_resource* parent_resource)
+                               (struct wl_client* client            NOIA_UNUSED,
+                                struct wl_resource* resource,
+                                struct wl_resource* parent_resource NOIA_UNUSED)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface set parent (sid: %d)", sid);
@@ -30,9 +31,9 @@ void noia_wayland_xdg_surface_set_parent
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_surface_set_title(NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
-                                       const char* title)
+void noia_wayland_xdg_surface_set_title(struct wl_client* client NOIA_UNUSED,
+                                        struct wl_resource* resource,
+                                        const char* title)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface set title "
@@ -41,9 +42,9 @@ void noia_wayland_xdg_surface_set_title(NOIA_UNUSED struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_surface_set_app_id(NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
-                                       const char* app_id)
+void noia_wayland_xdg_surface_set_app_id(struct wl_client* client NOIA_UNUSED,
+                                         struct wl_resource* resource,
+                                         const char* app_id)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface set app id "
@@ -53,12 +54,12 @@ void noia_wayland_xdg_surface_set_app_id(NOIA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_show_window_menu
-                              (NOIA_UNUSED struct wl_client* client,
-                               NOIA_UNUSED struct wl_resource* resource,
-                               NOIA_UNUSED struct wl_resource* seat_resource,
-                               uint32_t serial,
-                               int32_t x,
-                               int32_t y)
+                                 (struct wl_client* client          NOIA_UNUSED,
+                                  struct wl_resource* resource,
+                                  struct wl_resource* seat_resource NOIA_UNUSED,
+                                  uint32_t serial,
+                                  int32_t x,
+                                  int32_t y)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface show window menu "
@@ -67,9 +68,10 @@ void noia_wayland_xdg_surface_show_window_menu
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_surface_move(NOIA_UNUSED struct wl_client* client,
-                                  NOIA_UNUSED struct wl_resource* resource,
-                                  NOIA_UNUSED struct wl_resource* seat_resource,
+void noia_wayland_xdg_surface_move
+                                 (struct wl_client* client          NOIA_UNUSED,
+                                  struct wl_resource* resource,
+                                  struct wl_resource* seat_resource NOIA_UNUSED,
                                   uint32_t serial)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
@@ -79,9 +81,9 @@ void noia_wayland_xdg_surface_move(NOIA_UNUSED struct wl_client* client,
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_resize
-                                 (NOIA_UNUSED struct wl_client* client,
-                                  NOIA_UNUSED struct wl_resource* resource,
-                                  NOIA_UNUSED struct wl_resource* seat_resource,
+                                 (struct wl_client* client          NOIA_UNUSED,
+                                  struct wl_resource* resource,
+                                  struct wl_resource* seat_resource NOIA_UNUSED,
                                   uint32_t serial,
                                   uint32_t edges)
 {
@@ -93,9 +95,9 @@ void noia_wayland_xdg_surface_resize
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_ack_configure
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
-                                       uint32_t serial)
+                                          (struct wl_client* client NOIA_UNUSED,
+                                           struct wl_resource* resource,
+                                           uint32_t serial)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface ack configure "
@@ -105,12 +107,12 @@ void noia_wayland_xdg_surface_ack_configure
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_set_window_geometry
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource,
-                                       int32_t x,
-                                       int32_t y,
-                                       int32_t width,
-                                       int32_t height)
+                                          (struct wl_client* client NOIA_UNUSED,
+                                           struct wl_resource* resource,
+                                           int32_t x,
+                                           int32_t y,
+                                           int32_t width,
+                                           int32_t height)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
 
@@ -125,8 +127,8 @@ void noia_wayland_xdg_surface_set_window_geometry
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_set_maximized
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource)
+                                          (struct wl_client* client NOIA_UNUSED,
+                                           struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface set maximized (sid: %d)", sid);
@@ -135,8 +137,8 @@ void noia_wayland_xdg_surface_set_maximized
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_unset_maximized
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource)
+                                          (struct wl_client* client NOIA_UNUSED,
+                                           struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface uset maximized (sid: %d)", sid);
@@ -145,9 +147,9 @@ void noia_wayland_xdg_surface_unset_maximized
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_set_fullscreen
-                               (NOIA_UNUSED struct wl_client* client,
-                                NOIA_UNUSED struct wl_resource* resource,
-                                NOIA_UNUSED struct wl_resource* output_resource)
+                               (struct wl_client* client            NOIA_UNUSED,
+                                struct wl_resource* resource,
+                                struct wl_resource* output_resource NOIA_UNUSED)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface set fullscreen (sid: %d)", sid);
@@ -156,8 +158,8 @@ void noia_wayland_xdg_surface_set_fullscreen
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_unset_fullscreen
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource)
+                                          (struct wl_client* client NOIA_UNUSED,
+                                           struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface unset fullscreen (sid: %d)", sid);
@@ -166,8 +168,8 @@ void noia_wayland_xdg_surface_unset_fullscreen
 //------------------------------------------------------------------------------
 
 void noia_wayland_xdg_surface_set_minimized
-                                      (NOIA_UNUSED struct wl_client* client,
-                                       NOIA_UNUSED struct wl_resource* resource)
+                                          (struct wl_client* client NOIA_UNUSED,
+                                           struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_NYIMP("Wayland: XDG surface set minimized (sid: %d)", sid);

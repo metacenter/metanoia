@@ -4,10 +4,11 @@
 #include "wayland-protocol-keyboard.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_keyboard_release(NOIA_UNUSED struct wl_client* client,
+void noia_wayland_keyboard_release(struct wl_client* client NOIA_UNUSED,
                                    struct wl_resource* resource)
 {
     LOG_WAYL2("Wayland: keyboard release");

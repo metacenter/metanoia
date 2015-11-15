@@ -4,7 +4,6 @@
 #ifndef __NOIA_SURFACE_DATA_H__
 #define __NOIA_SURFACE_DATA_H__
 
-#include "global-types.h"
 #include "utils-store.h"
 #include "exhibitor-compositor.h"
 

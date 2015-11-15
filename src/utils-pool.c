@@ -3,6 +3,7 @@
 
 #include "utils-pool.h"
 #include "global-types.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>

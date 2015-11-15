@@ -6,9 +6,6 @@
 
 #include "global-constants.h"
 
-#include <stdint.h>
-#include <stdbool.h>
-
 NoiaResult noia_dbus_initalize(void);
 void noia_dbus_finalize(void);
 

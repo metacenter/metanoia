@@ -6,8 +6,6 @@
 
 #include "utils-list.h"
 
-#include <stdint.h>
-
 typedef void (*NoiaBindingSimpleExecuteFunc) (NoiaList*);
 typedef void (*NoiaBindingExecuteFunc) (NoiaList*, int, uint32_t, NoiaKeyState);
 

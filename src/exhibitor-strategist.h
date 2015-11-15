@@ -5,7 +5,6 @@
 #define __NOIA_EXHIBITOR_STRATEGIST_H__
 
 #include "exhibitor.h"
-#include "global-types.h"
 
 typedef void (*NoiaStrategistOnSurfaceCreatedFunc)
              (NoiaExhibitor*, NoiaSurfaceId);

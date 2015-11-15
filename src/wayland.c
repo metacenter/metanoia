@@ -15,6 +15,7 @@
 #include "utils-environment.h"
 #include "global-objects.h"
 #include "event-signals.h"
+#include "global-macros.h"
 
 #include <errno.h>
 #include <string.h>
@@ -137,7 +138,7 @@ void wayland_surface_reconfigured_handler(void* data)
 
 //------------------------------------------------------------------------------
 
-int noia_wayland_event_loop_feeder(NOIA_UNUSED void* data)
+int noia_wayland_event_loop_feeder(void* data NOIA_UNUSED)
 {
     struct wl_event_loop* loop;
     static struct wl_event_source* src = NULL;
@@ -155,7 +156,7 @@ int noia_wayland_event_loop_feeder(NOIA_UNUSED void* data)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_finalize(NOIA_UNUSED void* data)
+void noia_wayland_finalize(void* data NOIA_UNUSED)
 {
     noia_wayland_state_finalize();
     noia_wayland_cache_finalize();

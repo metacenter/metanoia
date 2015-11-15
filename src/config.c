@@ -4,6 +4,7 @@
 #include "config.h"
 #include "configuration.h"
 #include "keyboard-bindings.h"
+#include "global-macros.h"
 #include "utils-log.h"
 
 #include <stdlib.h>
@@ -20,7 +21,7 @@ static NoiaSettings sSettings;
 //------------------------------------------------------------------------------
 
 int noia_config_parse_option(int key,
-                             NOIA_UNUSED char *arg,
+                             char *arg NOIA_UNUSED,
                              struct argp_state* state)
 {
     NoiaSettings* settings = state->input;

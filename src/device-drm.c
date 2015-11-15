@@ -6,6 +6,7 @@
 #include "renderer-mmap.h"
 #include "renderer-gl.h"
 #include "config.h"
+#include "global-macros.h"
 
 #include <sys/mman.h>
 #include <gbm.h>
@@ -152,7 +153,7 @@ void noia_drm_gbm_destroy(NoiaGBMBundle* bundle)
 //------------------------------------------------------------------------------
 
 /// GBM user data destruction notification handler.
-void noia_drm_gbm_destroy_event(struct gbm_bo *bo, NOIA_UNUSED void *data)
+void noia_drm_gbm_destroy_event(struct gbm_bo *bo, void *data NOIA_UNUSED)
 {
     LOG_INFO2("Destroing GBM buffer object!");
     NoiaGBMBundle* bundle = gbm_bo_get_user_data(bo);

@@ -9,6 +9,7 @@
 #include "device-fb.h"
 #include "backend-gtk.h"
 #include "config.h"
+#include "global-macros.h"
 
 #include <limits.h>
 #include <memory.h>
@@ -141,7 +142,7 @@ void noia_output_collector_update()
 //------------------------------------------------------------------------------
 
 /// Handle SIGNAL_OUTPUTS_CHANGED signal.
-void noia_output_on_change(NOIA_UNUSED void* data)
+void noia_output_on_change(void* data NOIA_UNUSED)
 {
     noia_output_collector_update();
 }
@@ -149,7 +150,7 @@ void noia_output_on_change(NOIA_UNUSED void* data)
 //------------------------------------------------------------------------------
 
 /// Finalize loop.
-void noia_output_collector_finalize(NOIA_UNUSED void* data)
+void noia_output_collector_finalize(void* data NOIA_UNUSED)
 {
     noia_list_free(outputs);
 }

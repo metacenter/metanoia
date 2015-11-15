@@ -4,6 +4,7 @@
 #include "utils-store.h"
 
 #include <malloc.h>
+#include <assert.h>
 
 typedef struct {
     NoiaItem item;

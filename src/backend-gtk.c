@@ -6,6 +6,7 @@
 #include "utils-log.h"
 #include "utils-environment.h"
 #include "global-functions.h"
+#include "global-macros.h"
 
 #include <gtk/gtk.h>
 #include <pthread.h>

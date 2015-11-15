@@ -9,7 +9,6 @@
 #include "exhibitor-display.h"
 
 #include "event-loop.h"
-#include "utils-list.h"
 
 typedef struct NoiaExhibitorPriv NoiaExhibitorPriv;
 

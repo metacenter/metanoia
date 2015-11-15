@@ -7,6 +7,7 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
@@ -20,7 +21,7 @@ void noia_wayland_surface_frame_unbind(struct wl_resource* resource NOIA_UNUSED)
 //------------------------------------------------------------------------------
 
 /// Wayland protocol: destroy surface.
-void noia_wayland_surface_destroy(struct wl_client* client NOIA_UNUSED,
+void noia_wayland_surface_destroy(struct wl_client* client     NOIA_UNUSED,
                                   struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: surface destroy");
@@ -57,7 +58,7 @@ void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
     if (!data) {
         noia_surface_attach_egl(sid, buffer_resource);
     } else {
-        // TODO: do this on commit
+        /// @todo Do this on commit
         noia_surface_commit(sid, width, height, stride, data);
     }
 }
@@ -65,7 +66,7 @@ void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
 //------------------------------------------------------------------------------
 
 /// @todo: Wayland protocol: damage surface.
-void noia_wayland_surface_damage(struct wl_client* client NOIA_UNUSED,
+void noia_wayland_surface_damage(struct wl_client* client     NOIA_UNUSED,
                                  struct wl_resource* resource NOIA_UNUSED,
                                  int32_t x, int32_t y,
                                  int32_t width, int32_t height)
@@ -153,7 +154,7 @@ void noia_wayland_surface_commit(struct wl_client* client NOIA_UNUSED,
 
 /// @todo: Wayland protocol: set surface buffer transform.
 void noia_wayland_surface_set_buffer_transform
-                                      (struct wl_client* client NOIA_UNUSED,
+                                      (struct wl_client* client     NOIA_UNUSED,
                                        struct wl_resource* resource NOIA_UNUSED,
                                        int32_t transform)
 {
@@ -164,7 +165,7 @@ void noia_wayland_surface_set_buffer_transform
 
 /// @todo: Wayland protocol: set surface buffer scale.
 void noia_wayland_surface_set_buffer_scale
-                                      (struct wl_client* client NOIA_UNUSED,
+                                      (struct wl_client* client     NOIA_UNUSED,
                                        struct wl_resource* resource NOIA_UNUSED,
                                        int32_t scale)
 {

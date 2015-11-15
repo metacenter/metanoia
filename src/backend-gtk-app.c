@@ -5,6 +5,7 @@
 #include "backend-gtk-win.h"
 #include "utils-log.h"
 #include "event-signals.h"
+#include "global-macros.h"
 
 #include <gtk/gtk.h>
 
