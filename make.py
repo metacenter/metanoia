@@ -28,12 +28,6 @@ class Generator:
 class Target:
     """Represents target object"""
 
-    proc = None
-    output = None
-    inputs = list()
-    deps = list()
-    pkgs = set()
-
     def __init__(self, name, output, inputs, deps=list(), pkgs=set()):
         self.name = name
         self.output = output
@@ -75,7 +69,8 @@ class CompileTarget(Target):
     pass
 
 class LinkTarget(Target):
-    pass
+    def __init__(self, name, output, inputs, pkgs=set()):
+        Target.__init__(self, name, output, inputs, pkgs=pkgs)
 
 class GeneratedTarget(Target):
     generator = None

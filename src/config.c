@@ -54,8 +54,8 @@ void noia_config_parse_arguments(int argc, char** argv)
 
 void noia_config_log_settings()
 {
-    LOG_INFO2("Settings: run in test window = '%d'",
-              sSettings.run_in_test_window);
+    LOG_INFO2("Settings: run in test mode = '%d'",
+              sSettings.run_in_test_mode);
     LOG_INFO2("Settings: use GL = '%d'",
               sSettings.use_gl);
     LOG_INFO2("Settings: use DRM = '%d'",
@@ -81,7 +81,7 @@ void noia_config_apply(int argc, char** argv)
     }
 
     // Apply evironment variables
-    sSettings.run_in_test_window = (getenv("DISPLAY") != NULL);
+    sSettings.run_in_test_mode = (getenv("DISPLAY") != NULL);
 
     const char* env = getenv("METANOIA_WAYLAND_DISPLAY");
     if (env) {

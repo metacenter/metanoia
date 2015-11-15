@@ -38,8 +38,8 @@ int main(int argc, char** argv)
     task = factorize_setup_input_devices_task(dispatcher);
     noia_loop_schedule_task(loop_devices, task);
 
-    if (noia_settings()->run_in_test_window) {
-        task = factorize_backend_gtk_run_task(loop_devices);
+    if (noia_settings()->run_in_test_mode) {
+        task = factorize_backend_offscreen_run_task(loop_devices);
         noia_loop_schedule_task(loop_devices, task);
     }
 

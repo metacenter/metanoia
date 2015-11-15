@@ -27,11 +27,14 @@ with_gtk_support = True
 metanoia = m.add_link_target(
         output='metanoia',
         include_in_all=True,
+        pkgs=set(),
     )
+
 
 metanoiactl_gtk = m.add_link_target(
         output='metanoiactl-gtk',
         include_in_all=True,
+        pkgs=set(),
     )
 
 #-------------------------------------------------------------------------------
@@ -562,57 +565,13 @@ t = m.add_compile_target(
 metanoia.add_input(t)
 
 #-------------------------------------------------------------------------------
-# GTK BACKEND
+# OFFSCREEN BACKEND
 
-if with_gtk_support:
-    t = m.add_compile_target(
-            output='backend-gtk-res.o',
-            deps=['backend-gtk-res.c'],
-            pkgs={'gtk+-3.0'}
-        )
-    metanoia.add_input(t)
-
-    t = m.add_compile_target(
-            output='backend-gtk-output.o',
-            inputs=['backend-gtk-output.c'],
-            pkgs={'gtk+-3.0'}
-        )
-    metanoia.add_input(t)
-
-    t = m.add_compile_target(
-            output='backend-gtk-group.o',
-            inputs=['backend-gtk-group.c'],
-            pkgs={'gtk+-3.0'}
-        )
-    metanoia.add_input(t)
-
-    t = m.add_compile_target(
-            output='backend-gtk-win.o',
-            inputs=['backend-gtk-win.c'],
-            pkgs={'gtk+-3.0'}
-        )
-    metanoia.add_input(t)
-
-    t = m.add_compile_target(
-            output='backend-gtk-app.o',
-            inputs=['backend-gtk-app.c'],
-            pkgs={'gtk+-3.0'}
-        )
-    metanoia.add_input(t)
-
-    t = m.add_compile_target(
-            output='backend-gtk.o',
-            inputs=['backend-gtk.c'],
-            pkgs={'gtk+-3.0'}
-        )
-    metanoia.add_input(t)
-
-else:
-    t = m.add_compile_target(
-            output='backend-gtk-dummy.o',
-            inputs=['backend-gtk-dummy.c'],
-        )
-    metanoia.add_input(t)
+t = m.add_compile_target(
+        output='backend-offscreen.o',
+        inputs=['backend-offscreen.c'],
+    )
+metanoia.add_input(t)
 
 #-------------------------------------------------------------------------------
 # MAIN

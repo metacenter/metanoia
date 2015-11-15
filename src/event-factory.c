@@ -5,7 +5,7 @@
 #include "event-dispatcher.h"
 #include "device-evdev.h"
 #include "device-udev.h"
-#include "backend-gtk.h"
+#include "backend-offscreen.h"
 #include "output-collector.h"
 #include "exhibitor.h"
 #include "wayland.h"
@@ -41,9 +41,9 @@ NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop)
 
 //------------------------------------------------------------------------------
 
-NoiaTask* factorize_backend_gtk_run_task(NoiaLoop* loop)
+NoiaTask* factorize_backend_offscreen_run_task(NoiaLoop* loop)
 {
-    return noia_task_new((NoiaTaskProcessor) noia_backend_gtk_run,
+    return noia_task_new((NoiaTaskProcessor) noia_backend_offscreen_run,
                          (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, loop);
 }
 

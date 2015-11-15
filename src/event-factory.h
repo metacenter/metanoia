@@ -11,7 +11,7 @@ NoiaTask* factorize_setup_input_devices_task(NoiaEventDispatcher* ed);
 
 NoiaTask* factorize_setup_device_monitor_task(NoiaEventDispatcher* ed);
 
-NoiaTask* factorize_backend_gtk_run_task(NoiaLoop* loop);
+NoiaTask* factorize_backend_offscreen_run_task(NoiaLoop* loop);
 
 NoiaTask* factorize_stop_dispatcher_task(NoiaEventDispatcher* dispatcher);
 

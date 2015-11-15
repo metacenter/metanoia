@@ -7,7 +7,7 @@
 #include "utils-list.h"
 #include "device-drm.h"
 #include "device-fb.h"
-#include "backend-gtk.h"
+#include "backend-offscreen.h"
 #include "config.h"
 #include "global-macros.h"
 
@@ -54,7 +54,7 @@ NoiaList* noia_output_collector_fetch_actual_outputs()
     int num = 0;
     NoiaList* actual_outputs = noia_list_new(NULL);
 
-    if (!noia_settings()->run_in_test_window) {
+    if (!noia_settings()->run_in_test_mode) {
         if (noia_settings()->use_drm) {
             num = noia_drm_update_devices(actual_outputs);
         }
@@ -62,7 +62,7 @@ NoiaList* noia_output_collector_fetch_actual_outputs()
             num = noia_devfb_setup_framebuffer(actual_outputs);
         }
     } else {
-        num = noia_backend_gtk_get_outputs(actual_outputs);
+        num = noia_backend_offscreen_get_outputs(actual_outputs);
     }
 
     if (num < 1) {
