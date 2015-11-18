@@ -1,6 +1,9 @@
 // file: utils-environment.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
+/// @file
+/// No unit tests needed.
+
 #include "utils-environment.h"
 #include "utils-log.h"
 #include "global-macros.h"
@@ -48,6 +51,7 @@ void noia_environment_set_thread_name(pthread_t thread, char* name)
     if (!thread) {
         thread = pthread_self();
     }
+    /// @note Linux thread name is up to 15 characters.
     if (strlen(name) > 15) {
         LOG_WARN1("Thread name '%s' is too long!", name);
     }
@@ -64,6 +68,8 @@ void noia_environment_on_enter_new_thread(pthread_t thread, char* name)
 
 //------------------------------------------------------------------------------
 
+/// Handle system signals.
+/// @see noia_event_dispatcher_default_signal_handler
 void noia_environment_async_signal_handler(int sig,
                                            siginfo_t* si NOIA_UNUSED,
                                            void* arg     NOIA_UNUSED)
@@ -83,6 +89,7 @@ void noia_environment_async_signal_handler(int sig,
 
 //------------------------------------------------------------------------------
 
+/// Set up signal handlers.
 void noia_environment_signal_handler_set_up(void)
 {
     struct sigaction sa;
@@ -100,6 +107,7 @@ void noia_environment_signal_handler_set_up(void)
 
 //------------------------------------------------------------------------------
 
+/// Make a directory if not exists.
 void noia_environment_mkdir(char* dir_name)
 {
     struct stat st;
@@ -112,6 +120,8 @@ void noia_environment_mkdir(char* dir_name)
 
 //------------------------------------------------------------------------------
 
+/// Create data directory.
+/// '$XDG_DATA_HOME/noia' or '/tmp' if environment variable not provided.
 int noia_environment_data_path_setup(void)
 {
     // Choose directory
@@ -136,6 +146,8 @@ int noia_environment_data_path_setup(void)
 
 //------------------------------------------------------------------------------
 
+/// Create runtime directory.
+/// '$XDG_RUNTIME_DIR/noia' or '/tmp' if environment variable not provided.
 int noia_environment_runtime_path_setup(void)
 {
     int result = 0;
@@ -226,9 +238,7 @@ int noia_environment_open_file(const char *file_name,
     }
 
     char* file_path = malloc(strlen(base_path) + strlen(file_name) + 2);
-    if (!file_path) {
-        return -1;
-    }
+    assert(file_path);
 
     strcpy(file_path, base_path);
     strcat(file_path, "/");

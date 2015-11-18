@@ -39,7 +39,6 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //------------------------------------------------------------------------------
 
-/// Inialize logging - open the file and write welcome message.
 void noia_log_initialize(const char* filename)
 {
     if (filename && strlen(filename) > 0) {
@@ -57,7 +56,6 @@ void noia_log_initialize(const char* filename)
 
 //------------------------------------------------------------------------------
 
-/// Finalize logging - close file.
 void noia_log_finalize(void)
 {
     if (sLogFD > 1) {
@@ -73,7 +71,6 @@ void noia_log_finalize(void)
 
 //------------------------------------------------------------------------------
 
-/// Print log.
 void noia_log(const char* log_level,
               const int   line,
               const char* file,
@@ -136,7 +133,6 @@ void noia_log_print_delimiter(char* string)
 
 //------------------------------------------------------------------------------
 
-/// Lock mutex and print the log header.
 void noia_log_begin(char* string)
 {
     pthread_mutex_lock(&mutex);
@@ -145,7 +141,6 @@ void noia_log_begin(char* string)
 
 //------------------------------------------------------------------------------
 
-/// Unlock mutex and print the log footer.
 void noia_log_end()
 {
     noia_log_print_delimiter("");
@@ -154,9 +149,6 @@ void noia_log_end()
 
 //------------------------------------------------------------------------------
 
-/// Prints single simple line without additional info.
-/// @note This function must be used between `noia_log_begin` and
-/// `noia_log_end` to avoid printing in the same time from many threads.
 void noia_log_print(const char* format, ...)
 {
     char buff[128];
@@ -171,7 +163,6 @@ void noia_log_print(const char* format, ...)
 
 //------------------------------------------------------------------------------
 
-/// Print backtrace.
 void noia_print_backtrace(void)
 {
     size_t size;
@@ -196,7 +187,6 @@ void noia_print_backtrace(void)
 
 //------------------------------------------------------------------------------
 
-/// Return number of miliseconds since Epoch.
 int noia_log_get_miliseconds(void)
 {
     struct timespec ts;
