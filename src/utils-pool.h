@@ -33,14 +33,17 @@ NoiaPool* noia_pool_create(unsigned array_size, size_t type_size);
 /// Pool destructor.
 void noia_pool_destroy(NoiaPool* self);
 
-/// Set default element returned when requested not existing element.
-void noia_pool_set_defaut(NoiaPool* self, void* element);
-
 /// Return pointer to next not used element and grow pool if necessary.
 void* noia_pool_add(NoiaPool* self);
 
 /// Return element defined by `index`.
 void* noia_pool_get(NoiaPool* self, unsigned index);
+
+/// Return top (or last) element.
+void* noia_pool_top(NoiaPool* self);
+
+/// Drop last `num_droped_elements` elements without realising any memory.
+void noia_pool_drop(NoiaPool* self, unsigned num_droped_elements);
 
 /// Frees all memory and resets pools `array size` to current allocation size.
 /// After call to this function all pointers returned previously should be

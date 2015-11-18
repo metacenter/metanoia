@@ -78,6 +78,32 @@ NoiaTestResult should_add_and_get_correctly_after_realising()
 
 //------------------------------------------------------------------------------
 
+NoiaTestResult should_add_and_get_correctly_after_dropping()
+{
+    const unsigned initial_size = 4;
+    int a1 [] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int a2 [] = {1, 2, 3, 4, 5};
+    int a3 [] = {11, 12, 13, 14, 15};
+    int a23[] = {1, 2, 3, 4, 5, 11, 12, 13, 14, 15};
+
+    NoiaPool* pool = noia_pool_create(initial_size, sizeof(int));
+
+    FILL_POOL(pool, a1, int);
+
+    noia_pool_drop(pool, 5);
+
+    ASSERT_POOL(pool, a2, int, 3*initial_size);
+
+    FILL_POOL(pool, a3, int);
+
+    ASSERT_POOL(pool, a23, int, 3*initial_size);
+
+    noia_pool_destroy(pool);
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 int main(int argc, char** argv)
 {
     NOIA_INIT_TESTS();
@@ -87,6 +113,7 @@ int main(int argc, char** argv)
             NOIA_TEST(should_add_and_get_correctly_when_resized_1),
             NOIA_TEST(should_add_and_get_correctly_when_resized_2),
             NOIA_TEST(should_add_and_get_correctly_after_realising),
+            NOIA_TEST(should_add_and_get_correctly_after_dropping),
         };
 
     return noia_test_run("Pool", test, NOIA_NUM_TESTS(test));

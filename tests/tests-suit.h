@@ -37,6 +37,11 @@
 
 #define ASSERT_POOL(POOL, ARRAY, TYPE, SIZE) { \
     ASSERT_POOL_SIZE(POOL, ARRAY_LEN(ARRAY), SIZE) \
+    TYPE *ptr = noia_pool_top(POOL); \
+    TYPE array_data = ARRAY[ARRAY_LEN(ARRAY)-1]; \
+    NOIA_ASSERT(array_data == *ptr, \
+                "Top element should be '%d' (is '%d')", \
+                array_data, *ptr); \
     for (unsigned i = 0; i < ARRAY_LEN(ARRAY); ++i) { \
         TYPE* ptr = noia_pool_get(POOL, i); \
         NOIA_ASSERT(ARRAY[i] == *ptr, \

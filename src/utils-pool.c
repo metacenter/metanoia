@@ -28,9 +28,6 @@ struct NoiaPoolStruct {
 
     /// Size of type of stored data.
     size_t type_size;
-
-    /// Default element.
-    void* default_element;
 };
 
 //------------------------------------------------------------------------------
@@ -51,9 +48,6 @@ NoiaPool* noia_pool_create(unsigned array_size, size_t type_size)
 {
     NoiaPool* self = calloc(1, sizeof(NoiaPool));
     assert(self != NULL);
-
-    self->default_element = calloc(1, type_size);
-    assert(self->default_element != NULL);
 
     self->pool = NULL;
     self->pool_size = 0;
@@ -76,16 +70,8 @@ void noia_pool_destroy(NoiaPool* self)
     }
 
     free(self->pool);
-    free(self->default_element);
     memset(self, 0, sizeof(NoiaPool));
     free(self);
-}
-
-//------------------------------------------------------------------------------
-
-void noia_pool_set_defaut(NoiaPool* self, void* element)
-{
-    memcpy(self->default_element, element, self->type_size);
 }
 
 //------------------------------------------------------------------------------
@@ -104,7 +90,7 @@ void* noia_pool_add(NoiaPool* self)
 
 void* noia_pool_get(NoiaPool* self, unsigned index)
 {
-    void* result = self->default_element;
+    void* result = NULL;
     NOIA_TRY {
         if (self->num_elements < index) {
             break;
@@ -120,7 +106,20 @@ void* noia_pool_get(NoiaPool* self, unsigned index)
 
 //------------------------------------------------------------------------------
 
-/// @todo Do not free memory if array size will not change.
+void* noia_pool_top(NoiaPool* self)
+{
+    return noia_pool_get(self, self->num_elements-1);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_pool_drop(NoiaPool* self, unsigned num_droped_elements)
+{
+    self->num_elements -= num_droped_elements;
+}
+
+//------------------------------------------------------------------------------
+
 void noia_pool_release(NoiaPool* self)
 {
     if (self->pool_size > 1) {
