@@ -4,10 +4,11 @@
 #ifndef __NOIA_KEYBOARD_BINDING_H__
 #define __NOIA_KEYBOARD_BINDING_H__
 
-#include "utils-list.h"
+#include "utils-pool.h"
+#include "global-constants.h"
 
-typedef void (*NoiaBindingSimpleExecuteFunc) (NoiaList*);
-typedef void (*NoiaBindingExecuteFunc) (NoiaList*, int, uint32_t, NoiaKeyState);
+typedef void (*NoiaBindingSimpleExecuteFunc) (NoiaPool*);
+typedef void (*NoiaBindingExecuteFunc) (NoiaPool*, int, uint32_t, NoiaKeyState);
 
 typedef struct {
     int code;

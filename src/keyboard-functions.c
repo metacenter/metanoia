@@ -11,35 +11,79 @@
 
 //------------------------------------------------------------------------------
 
-void noia_clean_stack(NoiaList* stack)
+static inline void noia_action(NoiaPool* stack,
+                               NoiaArgmandType action)
 {
-    noia_list_clean(stack);
+    NoiaArgmand* top = (NoiaArgmand*) noia_pool_top(stack);
+
+    if (top) {
+        if (noia_argmand_type_is_directed(top->type)) {
+            noia_exhibitor_command_position(action, top->type, top->value);
+            noia_pool_drop(stack, 1);
+        } else if (top->type == NOIA_ARGMAND_NUMBER) {
+            top->type = action;
+        } else if (top->type == action) {
+            top->value += 1;
+        }
+    } else {
+        NoiaArgmand* argmand = noia_pool_add(stack);
+        noia_argmand_init(argmand, action, 1);
+    }
 }
 
 //------------------------------------------------------------------------------
 
-void noia_put_focus(NoiaList* stack)
+static inline void noia_direction(NoiaPool* stack,
+                                  NoiaArgmandType direction)
 {
-    noia_list_append(stack, noia_argmand_new(NOIA_ARGMAND_FOCUS, 0));
+    NoiaArgmand* top = (NoiaArgmand*) noia_pool_top(stack);
+
+    if (top) {
+        if (noia_argmand_type_is_actionable(top->type)) {
+            noia_exhibitor_command_position(top->type, direction, top->value);
+            noia_pool_drop(stack, 1);
+        } else if (top->type == NOIA_ARGMAND_NUMBER) {
+            top->type = direction;
+        } else if (top->type == direction) {
+            top->value += 1;
+        }
+    } else {
+        NoiaArgmand* argmand = noia_pool_add(stack);
+        noia_argmand_init(argmand, direction, 1);
+    }
 }
 
 //------------------------------------------------------------------------------
 
-void noia_put_move(NoiaList* stack)
+void noia_clean_stack(NoiaPool* stack)
 {
-    noia_list_append(stack, noia_argmand_new(NOIA_ARGMAND_MOVE, 0));
+    noia_pool_release(stack);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_put_resize(NoiaList* stack)
+void noia_put_focus(NoiaPool* stack)
 {
-    noia_list_append(stack, noia_argmand_new(NOIA_ARGMAND_RESIZE, 0));
+    noia_action(stack, NOIA_ARGMAND_FOCUS);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_put_number(NoiaList* stack, int code,
+void noia_put_move(NoiaPool* stack)
+{
+    noia_action(stack, NOIA_ARGMAND_MOVE);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_put_resize(NoiaPool* stack)
+{
+    noia_action(stack, NOIA_ARGMAND_RESIZE);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_put_number(NoiaPool* stack, int code,
                      uint32_t modifiers NOIA_UNUSED,
                      NoiaKeyState state NOIA_UNUSED)
 {
@@ -58,73 +102,49 @@ void noia_put_number(NoiaList* stack, int code,
         case KEY_9: case KEY_NUMERIC_9: number = 9; break;
     }
 
-    if (noia_list_len(stack) != 0
-    && ((NoiaArgmand*) noia_list_last(stack)->data)->type
-    == NOIA_ARGMAND_NUMBER) {
-        NoiaArgmand* argmand = (NoiaArgmand*) noia_list_last(stack)->data;
-        argmand->value *= number;
+    NoiaArgmand* top = (NoiaArgmand*) noia_pool_top(stack);
+    if (top && top->type == NOIA_ARGMAND_NUMBER) {
+        top->value = 10 * top->value + number;
     } else {
-        noia_list_append(stack, noia_argmand_new(NOIA_ARGMAND_NUMBER, number));
+        NoiaArgmand* argmand = noia_pool_add(stack);
+        noia_argmand_init(argmand, NOIA_ARGMAND_NUMBER, number);
     }
 }
 
 //------------------------------------------------------------------------------
 
-void noia_anchorize(NoiaList* stack)
+void noia_anchorize(NoiaPool* stack)
 {
-    noia_list_clean(stack);
+    noia_pool_release(stack);
     noia_exhibitor_command_anchorize();
 }
 
 //------------------------------------------------------------------------------
 
-static inline void noia_position_change(NoiaList* stack,
-                                        NoiaArgmandType direction)
+void noia_right(NoiaPool* stack)
 {
-    int magnitude = 1;
-    while (noia_list_len(stack)) {
-        NoiaArgmand* argmand = (NoiaArgmand*) noia_list_pop(stack);
-
-        if (argmand->type == NOIA_ARGMAND_FOCUS
-        ||  argmand->type == NOIA_ARGMAND_MOVE
-        ||  argmand->type == NOIA_ARGMAND_RESIZE) {
-            noia_exhibitor_command_position(argmand->type,
-                                            direction, magnitude);
-            magnitude = 1;
-        } else if (argmand->type == NOIA_ARGMAND_NUMBER) {
-            magnitude = argmand->value;
-        }
-
-        noia_argmand_free(argmand);
-    }
+    noia_direction(stack, NOIA_ARGMAND_E);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_right(NoiaList* stack)
+void noia_left(NoiaPool* stack)
 {
-    noia_position_change(stack, NOIA_ARGMAND_E);
+    noia_direction(stack, NOIA_ARGMAND_W);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_left(NoiaList* stack)
+void noia_up(NoiaPool* stack)
 {
-    noia_position_change(stack, NOIA_ARGMAND_W);
+    noia_direction(stack, NOIA_ARGMAND_N);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_up(NoiaList* stack)
+void noia_down(NoiaPool* stack)
 {
-    noia_position_change(stack, NOIA_ARGMAND_N);
-}
-
-//------------------------------------------------------------------------------
-
-void noia_down(NoiaList* stack)
-{
-    noia_position_change(stack, NOIA_ARGMAND_S);
+    noia_direction(stack, NOIA_ARGMAND_S);
 }
 
 //------------------------------------------------------------------------------

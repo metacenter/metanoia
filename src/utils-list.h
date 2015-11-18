@@ -6,6 +6,8 @@
 
 #include "utils-chain.h"
 
+#include <stddef.h>
+
 #define FOR_EACH(LIST,LINK) \
     for (Link* LINK = LIST->base.first; LINK; LINK = LINK->next)
 
@@ -79,15 +81,23 @@ static inline int noia_list_recalculate_length(NoiaList* self)
 }
 
 /// Return first element of the list.
-static inline Link* noia_list_first(NoiaList* self)
+static inline void* noia_list_first(NoiaList* self)
 {
-    return self->base.first;
+    if (self->base.first) {
+        return self->base.first->data;
+    } else {
+        return NULL;
+    }
 }
 
 /// Return last element of the list.
-static inline Link* noia_list_last(NoiaList* self)
+static inline void* noia_list_last(NoiaList* self)
 {
-    return self->base.last;
+    if (self->base.last) {
+        return self->base.last->data;
+    } else {
+        return NULL;
+    }
 }
 
 #endif // __NOIA_UTILS_LIST_H__

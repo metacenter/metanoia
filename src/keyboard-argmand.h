@@ -11,8 +11,12 @@ typedef struct {
     int value;
 } NoiaArgmand;
 
-NoiaArgmand* noia_argmand_new(NoiaArgmandType type, int value);
+NoiaArgmand* noia_argmand_();
+void noia_argmand_init(NoiaArgmand*, NoiaArgmandType type, int value);
 void noia_argmand_free(NoiaArgmand* self);
+
+bool noia_argmand_type_is_directed(NoiaArgmandType type);
+bool noia_argmand_type_is_actionable(NoiaArgmandType type);
 
 #endif // __NOIA_KEYBOARD_ARGMAND_H__
 

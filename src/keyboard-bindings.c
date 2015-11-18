@@ -6,6 +6,7 @@
 #include "keyboard-argmand.h"
 
 #include "utils-log.h"
+#include "utils-list.h"
 
 #include <malloc.h>
 #include <search.h>
@@ -13,7 +14,7 @@
 
 //------------------------------------------------------------------------------
 
-static NoiaList* stack = NULL;
+static NoiaPool* stack = NULL;
 static NoiaList* modes = NULL;
 static uint32_t modifiers = 0;
 
@@ -30,7 +31,7 @@ void noia_keyboard_add_binding(NoiaModeEnum modeid, const NoiaBinding* binding)
     }
 
     if (!stack) {
-        stack = noia_list_new((NoiaFreeFunc) noia_argmand_free);
+        stack = noia_pool_create(8, sizeof(NoiaArgmand));
     }
 
     if (!modes) {
@@ -65,7 +66,7 @@ void noia_keyboard_add_binding(NoiaModeEnum modeid, const NoiaBinding* binding)
 void noia_keyboard_free_all()
 {
     noia_list_free(modes);
-    noia_list_free(stack);
+    noia_pool_destroy(stack);
 }
 
 //------------------------------------------------------------------------------

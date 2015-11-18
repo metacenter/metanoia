@@ -73,16 +73,24 @@
 
 #define ASSERT_LIST(LIST, ARRAY) { \
     int i = 0, len = ARRAY_LEN(ARRAY); \
+    char* list_data = NULL; char* array_data = NULL; \
     NOIA_ASSERT(len == noia_list_len(LIST), \
                 "Stored list length should be %d (is %d)", \
                 len, noia_list_len(LIST)); \
     NOIA_ASSERT(len == noia_list_len(LIST), \
                 "Calculated list length should be %d (is %d)", \
                 len, noia_list_recalculate_length(LIST)); \
+    list_data = noia_list_first(LIST); array_data = ARRAY[0]; \
+    NOIA_ASSERT(strcmp(list_data, array_data) == 0, \
+                "First element should be '%s' (is '%s')", \
+                array_data, list_data); \
+    list_data = noia_list_last(LIST); array_data = ARRAY[ARRAY_LEN(ARRAY)-1]; \
+    NOIA_ASSERT(strcmp(list_data, array_data) == 0, \
+                "Last element should be '%s' (is '%s')", \
+                array_data, list_data); \
     FOR_EACH(LIST, link) { \
-        char* list_data = link->data; \
-        char* array_data = ARRAY[i++]; \
-        NOIA_ASSERT(strcmp(list_data, array_data) == 0, \
+        list_data = link->data; array_data = ARRAY[i++]; \
+        NOIA_ASSERT(strcmp(array_data, list_data) == 0, \
                     "List data should be '%s' (is '%s')", \
                     array_data, list_data); }}
 

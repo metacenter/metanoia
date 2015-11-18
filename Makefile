@@ -176,10 +176,9 @@ build/config.o: Makefile \
                 src/keyboard-binding.h \
                 src/keyboard-bindings.h \
                 src/keyboard-functions.h \
-                src/utils-chain.h \
                 src/utils-keymap.h \
-                src/utils-list.h \
-                src/utils-log.h
+                src/utils-log.h \
+                src/utils-pool.h
 	@mkdir -p build
 	@echo "  CC   config.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/config.o -Isrc -Igen \
@@ -583,11 +582,10 @@ build/device-evdev.o: Makefile \
                       src/global-types.h \
                       src/keyboard-binding.h \
                       src/keyboard-bindings.h \
-                      src/utils-chain.h \
                       src/utils-dbus.h \
-                      src/utils-list.h \
                       src/utils-log.h \
-                      src/utils-object.h
+                      src/utils-object.h \
+                      src/utils-pool.h
 	@mkdir -p build
 	@echo "  CC   device-evdev.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-evdev.o -Isrc -Igen \
@@ -721,9 +719,8 @@ build/keyboard-binding.o: Makefile \
                           src/global-types.h \
                           src/keyboard-binding.c \
                           src/keyboard-binding.h \
-                          src/utils-chain.h \
-                          src/utils-list.h \
-                          src/utils-log.h
+                          src/utils-log.h \
+                          src/utils-pool.h
 	@mkdir -p build
 	@echo "  CC   keyboard-binding.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-binding.o -Isrc -Igen \
@@ -731,6 +728,7 @@ build/keyboard-binding.o: Makefile \
 
 build/keyboard-argmand.o: Makefile \
                           src/global-constants.h \
+                          src/global-macros.h \
                           src/global-types.h \
                           src/keyboard-argmand.c \
                           src/keyboard-argmand.h \
@@ -750,7 +748,8 @@ build/keyboard-bindings.o: Makefile \
                            src/keyboard-mode.h \
                            src/utils-chain.h \
                            src/utils-list.h \
-                           src/utils-log.h
+                           src/utils-log.h \
+                           src/utils-pool.h
 	@mkdir -p build
 	@echo "  CC   keyboard-bindings.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-bindings.o -Isrc -Igen \
@@ -762,9 +761,8 @@ build/keyboard-mode.o: Makefile \
                        src/keyboard-binding.h \
                        src/keyboard-mode.c \
                        src/keyboard-mode.h \
-                       src/utils-chain.h \
-                       src/utils-list.h \
-                       src/utils-log.h
+                       src/utils-log.h \
+                       src/utils-pool.h
 	@mkdir -p build
 	@echo "  CC   keyboard-mode.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-mode.o -Isrc -Igen \
