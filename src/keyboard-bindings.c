@@ -3,7 +3,6 @@
 
 #include "keyboard-bindings.h"
 #include "keyboard-mode.h"
-#include "keyboard-argmand.h"
 
 #include "utils-log.h"
 #include "utils-list.h"
@@ -14,7 +13,7 @@
 
 //------------------------------------------------------------------------------
 
-static NoiaPool* stack = NULL;
+static NoiaAction action;
 static NoiaList* modes = NULL;
 static uint32_t modifiers = 0;
 
@@ -30,12 +29,9 @@ void noia_keyboard_add_binding(NoiaModeEnum modeid, const NoiaBinding* binding)
         return;
     }
 
-    if (!stack) {
-        stack = noia_pool_create(8, sizeof(NoiaArgmand));
-    }
-
     if (!modes) {
         modes = noia_list_new((NoiaFreeFunc) noia_mode_free);
+        noia_action_clean(&action);
     }
 
     // Try to find mode
@@ -66,7 +62,6 @@ void noia_keyboard_add_binding(NoiaModeEnum modeid, const NoiaBinding* binding)
 void noia_keyboard_free_all()
 {
     noia_list_free(modes);
-    noia_pool_destroy(stack);
 }
 
 //------------------------------------------------------------------------------
@@ -136,7 +131,7 @@ bool noia_keyboard_catch_key(int code, NoiaKeyState state)
         return 0;
     }
 
-    binding->execute(stack, code, modifiers, state);
+    binding->execute(&action, code, modifiers, state);
     return 1;
 }
 

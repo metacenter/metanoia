@@ -147,6 +147,12 @@ metanoia.add_input(t)
 # GLOBALS
 
 t = m.add_compile_target(
+        output='global-enums.o',
+        inputs=['global-enums.c'],
+    )
+metanoia.add_input(t)
+
+t = m.add_compile_target(
         output='global-types.o',
         inputs=['global-types.c'],
     )
@@ -375,12 +381,6 @@ metanoia.add_input(t)
 t = m.add_compile_target(
         output='keyboard-binding.o',
         inputs=['keyboard-binding.c'],
-    )
-metanoia.add_input(t)
-
-t = m.add_compile_target(
-        output='keyboard-argmand.o',
-        inputs=['keyboard-argmand.c'],
     )
 metanoia.add_input(t)
 
@@ -672,7 +672,7 @@ m.add_test(output='check-frame',
            inputs=['test-frame.c', 'fake-utils-log.c',
                    'mock-surface-manager.c'],
            deps=['utils-chain.c', 'utils-branch.c', 'utils-store.c',
-                 'utils-pool.c', 'exhibitor-frame.c'])
+                 'utils-pool.c', 'global-enums.c', 'exhibitor-frame.c'])
 
 #-------------------------------------------------------------------------------
 

@@ -11,20 +11,6 @@
 /// @file
 /// @todo Unit tests for NoiaFrame.
 
-/// Frame types.
-typedef enum {
-    NOIA_FRAME_TYPE_NONE       = 0x00,
-    NOIA_FRAME_TYPE_STACKED    = 0x01,
-    NOIA_FRAME_TYPE_HORIZONTAL = 0x02,
-    NOIA_FRAME_TYPE_VERTICAL   = 0x04,
-    NOIA_FRAME_TYPE_FLOATING   = 0x08,
-    NOIA_FRAME_TYPE_FIXED      = 0x10,
-    NOIA_FRAME_TYPE_LEAF       = 0x20,
-
-    NOIA_FRAME_TYPE_WORKSPACE  = 0x1000 | NOIA_FRAME_TYPE_FIXED
-                                        | NOIA_FRAME_TYPE_STACKED,
-} NoiaFrameType;
-
 typedef NoiaBranch NoiaFrame;
 
 /// Parameters describing state of surface hold by frame.
@@ -86,23 +72,27 @@ void noia_frame_append(NoiaFrame* self, NoiaFrame* other);
 /// Add child frame to beginning.
 void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other);
 
+/// Find first trunk which type has NOIA_FRAME_TYPE_SPECIAL.
+/// For normal frame this should be workspace.
+NoiaFrame* noia_frame_get_top(NoiaFrame* self);
+
 /// Remove frame `self` from its current parent and prepend to frame `target`.
 NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target);
 
 /// Resize the frame.
 void noia_frame_resize(NoiaFrame* self,
-                       NoiaArgmandType direction,
+                       NoiaArgmand direction,
                        int magnitude);
 
 /// Move the frame.
 /// This takes effect only on surfaces which are FLOATING but not FIXED.
 void noia_frame_move(NoiaFrame* self,
-                     NoiaArgmandType direction,
+                     NoiaArgmand direction,
                      int magnitude);
 
 /// @todo Implement noia_frame_jump
 void noia_frame_jump(NoiaFrame* self,
-                     NoiaArgmandType direction,
+                     NoiaArgmand direction,
                      int magnitude);
 
 /// Pop the surface `pop` and its parents recursively ending on `self`.
@@ -113,6 +103,11 @@ NoiaResult noia_frame_remove_self(NoiaFrame* self);
 
 /// Find a frame holding surface with given ID.
 NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid);
+
+/// Find a frame `magnitude` frames forther in `direction` direction.
+NoiaFrame* noia_frame_find_pointed(NoiaFrame* self,
+                                   NoiaArgmand direction,
+                                   int magnitude);
 
 /// Print frame tree to log file.
 void noia_frame_log(NoiaFrame* self);

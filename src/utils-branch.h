@@ -35,5 +35,15 @@ NoiaBranch* noia_branch_find(NoiaBranch* self,
                              void* data,
                              NoiaBranchCompare compare);
 
+static inline NoiaBranch* noia_branch_get_next(NoiaBranch* self)
+{
+    return (NoiaBranch*) self->base.next;
+}
+
+static inline NoiaBranch* noia_branch_get_previous(NoiaBranch* self)
+{
+    return (NoiaBranch*) self->base.prev;
+}
+
 #endif // __NOIA_UTILS_BRANCH_H__
 

@@ -42,6 +42,9 @@ void noia_list_append(NoiaList* self, void* data);
 /// Removes and return last element of the list.
 void* noia_list_pop(NoiaList* self);
 
+/// Get `n`-th element of the list.
+void* noia_list_get_nth(NoiaList* self, int n);
+
 /// Searches for first occurrence of given data using given compare function and
 /// removes it.
 NoiaResult noia_list_remove(NoiaList* self,

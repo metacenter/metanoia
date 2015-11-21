@@ -34,16 +34,10 @@ void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 /// @see noia_frame_find_with_sid
 void noia_compositor_pop_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 
-/// Anchorizes the currently selected frame.
-void noia_compositor_command_anchorize(NoiaCompositor* self);
-
-/// Moves, jumps, resizes, changes order of currently selected frame basing on
-/// given Argmand.
-/// @see NoiaArgmandType
-void noia_compositor_command_position(NoiaCompositor* self,
-                                      NoiaArgmandType type,
-                                      NoiaArgmandType direction,
-                                      int magnitude);
+/// Moves, jumps, resizes, changes order, anchorizes, changes parameters
+/// of currently selected frame basing on given action.
+/// @see NoiaAction
+void noia_compositor_execute(NoiaCompositor* self, NoiaAction* action);
 
 #endif // __NOIA_EXHIBITOR_COMPOSITOR_H__
 

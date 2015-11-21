@@ -29,17 +29,9 @@ NoiaExhibitor* noia_exhibitor_get_instance();
 /// Get list of active displays.
 NoiaList* noia_exhibitor_get_displays();
 
-/// Pop `position`-th surface in history up.
-void noia_exhibitor_pop_history_surface(int position);
-
-/// Anchorize selected frame.
-void noia_exhibitor_command_anchorize();
-
-/// Execute an argmand on selected frame.
-/// @see NoiaArgmandType
-void noia_exhibitor_command_position(NoiaArgmandType type,
-                                     NoiaArgmandType direction,
-                                     int magnitude);
+/// Execute an action on selected frame.
+/// @see NoiaAction
+void noia_exhibitor_execute(NoiaAction* action);
 
 /// Subscrube for notifications.
 void noia_exhibitor_initialize(NoiaLoop* this_loop);

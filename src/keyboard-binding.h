@@ -7,8 +7,9 @@
 #include "utils-pool.h"
 #include "global-constants.h"
 
-typedef void (*NoiaBindingSimpleExecuteFunc) (NoiaPool*);
-typedef void (*NoiaBindingExecuteFunc) (NoiaPool*, int, uint32_t, NoiaKeyState);
+typedef void (*NoiaBindingSimpleExecuteFunc) (NoiaAction*);
+typedef void (*NoiaBindingExecuteFunc)
+             (NoiaAction*, int, uint32_t, NoiaKeyState);
 
 typedef struct {
     int code;

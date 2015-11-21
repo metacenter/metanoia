@@ -5,8 +5,9 @@
 #define __NOIA_GLOBAL_TYPES_H__
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <limits.h>
+
+#include "global-enums.h"
 
 /// Id for NoiaItem
 typedef uintptr_t NoiaItemId;
@@ -73,9 +74,17 @@ typedef struct {
 } NoiaSurfaceContext;
 
 /// Data needed by Renderer to draw layover
-typedef struct NoiaLayoverContextStruct {
+typedef struct {
     NoiaSurfaceContext pointer;
 } NoiaLayoverContext;
+
+/// Compositor action context
+typedef struct {
+    NoiaArgmand action;
+    NoiaArgmand direction;
+    NoiaFrameType frame_type;
+    int magnitude;
+} NoiaAction;
 
 /// Check if point `position` is inside area `area`.
 bool noia_position_is_inside(NoiaPosition position, NoiaArea area);
@@ -83,6 +92,9 @@ bool noia_position_is_inside(NoiaPosition position, NoiaArea area);
 /// If point `position` is outside area `area` return a point inside area `area`
 /// that is the colosest to point `position`.
 NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area);
+
+/// Clear the action.
+void noia_action_clean(NoiaAction* action);
 
 #endif // __NOIA_GLOBAL_TYPES_H__
 

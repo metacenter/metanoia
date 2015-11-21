@@ -27,17 +27,3 @@ void noia_refresh_displays()
 
 //------------------------------------------------------------------------------
 
-void noia_cicle_history_forward()
-{
-    noia_exhibitor_pop_history_surface(1);
-}
-
-//------------------------------------------------------------------------------
-
-void noia_cicle_history_back()
-{
-    noia_exhibitor_pop_history_surface(-1);
-}
-
-//------------------------------------------------------------------------------
-

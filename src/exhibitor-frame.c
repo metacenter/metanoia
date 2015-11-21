@@ -98,7 +98,7 @@ NoiaFrame* noia_frame_resize_find_helper(NoiaFrame* frame,
 
 /// Resize the surface frame is holding.
 void noia_frame_reconfigure(NoiaFrame* self,
-                            NoiaArgmandType direction,
+                            NoiaArgmand direction,
                             int magnitude)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
@@ -119,7 +119,7 @@ void noia_frame_reconfigure(NoiaFrame* self,
 
 /// Resize floating frame.
 void noia_frame_resize_floating(NoiaFrame* self,
-                                NoiaArgmandType direction,
+                                NoiaArgmand direction,
                                 int magnitude)
 {
     noia_frame_reconfigure(self, direction, magnitude);
@@ -132,7 +132,7 @@ void noia_frame_resize_floating(NoiaFrame* self,
 
 /// Resize anchored frame.
 void noia_frame_resize_anchored(NoiaFrame* self,
-                                NoiaArgmandType direction,
+                                NoiaArgmand direction,
                                 int magnitude)
 {
     if (direction == NOIA_ARGMAND_N || direction == NOIA_ARGMAND_W) {
@@ -339,6 +339,18 @@ void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other)
 
 //------------------------------------------------------------------------------
 
+NoiaFrame* noia_frame_get_top(NoiaFrame* self)
+{
+    assert(self);
+    NoiaFrame* frame = self;
+    while (frame && !noia_frame_has_type(frame, NOIA_FRAME_TYPE_SPECIAL)) {
+        frame = frame->trunk;
+    }
+    return frame;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target)
 {
     NoiaResult result = NOIA_RESULT_SUCCESS;
@@ -355,7 +367,7 @@ NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target)
 //------------------------------------------------------------------------------
 
 void noia_frame_resize(NoiaFrame* self,
-                       NoiaArgmandType direction,
+                       NoiaArgmand direction,
                        int magnitude)
 {
     if (!self) {
@@ -363,7 +375,7 @@ void noia_frame_resize(NoiaFrame* self,
     }
 
     // Find adequate frame for resize
-    NoiaFrameType type = 0x0;
+    NoiaFrameType type = NOIA_FRAME_TYPE_NONE;
     if (direction == NOIA_ARGMAND_N || direction == NOIA_ARGMAND_S) {
         type = NOIA_FRAME_TYPE_VERTICAL;
     } else if (direction == NOIA_ARGMAND_E || direction == NOIA_ARGMAND_W) {
@@ -390,7 +402,7 @@ void noia_frame_resize(NoiaFrame* self,
 //------------------------------------------------------------------------------
 
 void noia_frame_move(NoiaFrame* self,
-                     NoiaArgmandType direction,
+                     NoiaArgmand direction,
                      int magnitude)
 {
     if (!self) {
@@ -423,8 +435,8 @@ void noia_frame_move(NoiaFrame* self,
 //------------------------------------------------------------------------------
 
 void noia_frame_jump(NoiaFrame* self,
-                     NoiaArgmandType direction NOIA_UNUSED,
-                     int magnitude             NOIA_UNUSED)
+                     NoiaArgmand direction NOIA_UNUSED,
+                     int magnitude         NOIA_UNUSED)
 {
     if (!self) {
         return;
@@ -465,6 +477,59 @@ NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid)
 {
     return noia_branch_find(self, (void*) sid,
                            (NoiaBranchCompare) noia_frame_params_compare_sid);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_frame_find_pointed(NoiaFrame* self,
+                                   NoiaArgmand direction,
+                                   int magnitude)
+{
+    assert(noia_argmand_is_directed(direction));
+
+    // If magnitude is zero, this is the last step of recurency.
+    if (magnitude == 0) {
+        return self;
+    }
+
+    // Hangle negative magnitude.
+    if (magnitude < 0) {
+        direction = noia_argmand_reverse_directed(direction);
+        magnitude = -magnitude;
+    }
+
+    // Find new frame whitch is farther.
+    NoiaFrame* new_frame = NULL;
+    int new_magnitude = magnitude;
+
+    if (noia_frame_has_type(self->trunk, NOIA_FRAME_TYPE_VERTICAL)) {
+        if (direction == NOIA_ARGMAND_N) {
+            new_frame = noia_branch_get_previous(self);
+        } else if (direction == NOIA_ARGMAND_S) {
+            new_frame = noia_branch_get_next(self);
+        }
+    } else if (noia_frame_has_type(self->trunk, NOIA_FRAME_TYPE_HORIZONTAL)) {
+        if (direction == NOIA_ARGMAND_W) {
+            new_frame = noia_branch_get_previous(self);
+        } else if (direction == NOIA_ARGMAND_E) {
+            new_frame = noia_branch_get_next(self);
+        }
+    }
+
+    // If there is nothing farther go higher. If it is, decrease magnitude.
+    if (new_frame || direction == NOIA_ARGMAND_TRUNK) {
+        new_magnitude = magnitude - 1;
+    }
+    if (!new_frame) {
+        new_frame = self->trunk;
+    }
+
+    // Next recurency step if possible.
+    if (!noia_frame_has_type(new_frame, NOIA_FRAME_TYPE_SPECIAL)) {
+        return noia_frame_find_pointed(new_frame, direction, new_magnitude);
+    } else {
+        return NULL;
+    }
 }
 
 //------------------------------------------------------------------------------

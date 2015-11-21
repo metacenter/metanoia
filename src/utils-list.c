@@ -79,6 +79,26 @@ void* noia_list_pop(NoiaList* self)
 
 //------------------------------------------------------------------------------
 
+void* noia_list_get_nth(NoiaList* self, int n)
+{
+    Link* link = NULL;
+    if (n < 0) {
+        link = self->base.last;
+        for (int i = 1; link && i < -n; ++i, link = link->prev);
+    } else {
+        link = self->base.first;
+        for (int i = 0; link && i < n; ++i, link = link->next);
+    }
+
+    if (link) {
+        return link->data;
+    } else {
+        return NULL;
+    }
+}
+
+//------------------------------------------------------------------------------
+
 NoiaResult noia_list_remove(NoiaList* self, void* data, NoiaCompareFunc compare)
 {
     if (!self) {

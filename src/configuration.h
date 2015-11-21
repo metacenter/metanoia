@@ -21,12 +21,13 @@ static const NoiaBinding scBindings[] = {
         {KEY_TAB,  NOIA_KEY_META,                {noia_cicle_history_forward}},
         {KEY_TAB,  NOIA_KEY_META|NOIA_KEY_SHIFT, {noia_cicle_history_back}},
         // stack
-        {KEY_ESC,   NOIA_KEY_NONE, {noia_clean_stack}},
+        {KEY_ESC,   NOIA_KEY_NONE, {noia_action_clean}},
         // actions
         {KEY_F,     NOIA_KEY_NONE, {noia_put_focus}},
         {KEY_M,     NOIA_KEY_NONE, {noia_put_move}},
         {KEY_R,     NOIA_KEY_NONE, {noia_put_resize}},
         {KEY_A,     NOIA_KEY_NONE, {noia_anchorize}},
+        {KEY_P,     NOIA_KEY_NONE, {noia_select_above}},
         // directions
         {KEY_RIGHT, NOIA_KEY_NONE, {noia_right}},
         {KEY_LEFT,  NOIA_KEY_NONE, {noia_left}},

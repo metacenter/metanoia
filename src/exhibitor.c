@@ -42,20 +42,6 @@ void noia_exhibitor_create_new_display(NoiaOutput* output)
 
 //------------------------------------------------------------------------------
 
-/// Pop up the surface with given ID.
-void noia_exhibitor_pop_surface(NoiaSurfaceId sid)
-{
-    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-
-    noia_list_remove(exhibitor->surface_history,
-                    (void*) sid, (NoiaCompareFunc) noia_surface_compare);
-    noia_list_append(exhibitor->surface_history, (void*) sid);
-
-    noia_compositor_pop_surface(exhibitor->compositor, sid);
-}
-
-//------------------------------------------------------------------------------
-
 /// Handle display found notification.
 void noia_exhibitor_on_display_found(void* data)
 {
@@ -182,49 +168,11 @@ NoiaList* noia_exhibitor_get_displays()
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_pop_history_surface(int position)
+void noia_exhibitor_execute(NoiaAction* action)
 {
+    assert(action);
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-
-    Link* link = NULL;
-    NoiaSurfaceId sid = scInvalidSurfaceId;
-    if (position < 0) {
-        int i = 1;
-        link = noia_list_first(exhibitor->surface_history);
-        for (; link && i < -position; ++i, link = link->next);
-    } else {
-        int i = 0;
-        link = noia_list_last(exhibitor->surface_history);
-        for (; link && i < position; ++i, link = link->prev);
-    }
-
-    if (link) {
-        sid = (NoiaSurfaceId) link->data;
-    }
-    if (sid == scInvalidSurfaceId) {
-        return;
-    }
-
-    noia_exhibitor_pop_surface(sid);
-}
-
-//------------------------------------------------------------------------------
-
-void noia_exhibitor_command_anchorize()
-{
-    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-    noia_compositor_command_anchorize(exhibitor->compositor);
-}
-
-//------------------------------------------------------------------------------
-
-void noia_exhibitor_command_position(NoiaArgmandType type,
-                                     NoiaArgmandType direction,
-                                     int magnitude)
-{
-    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-    noia_compositor_command_position(exhibitor->compositor,
-                                     type, direction, magnitude);
+    noia_compositor_execute(exhibitor->compositor, action);
 }
 
 //------------------------------------------------------------------------------

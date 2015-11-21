@@ -40,6 +40,55 @@ NoiaTestResult should_prepend_values()
 
 //------------------------------------------------------------------------------
 
+NoiaTestResult should_get_nth()
+{
+    char* e;
+    NoiaList* l = noia_list_new(free);
+    noia_list_append(l, strdup("0"));
+    noia_list_append(l, strdup("1"));
+    noia_list_append(l, strdup("2"));
+    noia_list_append(l, strdup("3"));
+    noia_list_append(l, strdup("4"));
+
+    e = noia_list_get_nth(l, 0);
+    NOIA_ASSERT(strcmp("0", e) == 0,
+               "First element should be '0' (is '%s')", e);
+
+    e = noia_list_get_nth(l, 1);
+    NOIA_ASSERT(strcmp("1", e) == 0,
+               "Second element should be '1' (is '%s')", e);
+
+    e = noia_list_get_nth(l, 4);
+    NOIA_ASSERT(strcmp("4", e) == 0,
+               "Last element should be '4' (is '%s')", e);
+
+    e = noia_list_get_nth(l, -1);
+    NOIA_ASSERT(strcmp("4", e) == 0,
+               "Last element should be '4' (is '%s')", e);
+
+    e = noia_list_get_nth(l, -2);
+    NOIA_ASSERT(strcmp("3", e) == 0,
+               "Last but one element should be '3' (is '%s')", e);
+
+    e = noia_list_get_nth(l, -5);
+    NOIA_ASSERT(strcmp("0", e) == 0,
+               "First element should be '0' (is '%s')", e);
+
+    e = noia_list_get_nth(l, 5);
+    NOIA_ASSERT(e == NULL,
+               "Over-last element should be '(nil)' (is '%s')", e);
+
+    e = noia_list_get_nth(l, -6);
+    NOIA_ASSERT(e == NULL,
+               "Over-fist element should be '(nil)' (is '%s')", e);
+
+    noia_list_free(l);
+
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaTestResult should_remove_from_begining()
 {
     char* a[] = {"3", "4"};
@@ -221,7 +270,6 @@ NoiaTestResult should_subtract_all()
     return NOIA_TEST_SUCCESS;
 }
 
-
 //------------------------------------------------------------------------------
 
 int main(int argc, char** argv)
@@ -231,6 +279,7 @@ int main(int argc, char** argv)
     NoiaTest test[] = {
             NOIA_TEST(should_append_values),
             NOIA_TEST(should_prepend_values),
+            NOIA_TEST(should_get_nth),
             NOIA_TEST(should_remove_from_begining),
             NOIA_TEST(should_remove_from_end),
             NOIA_TEST(should_remove_from_inside),

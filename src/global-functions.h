@@ -8,9 +8,5 @@ void noia_quit();
 
 void noia_refresh_displays();
 
-void noia_cicle_history_forward();
-
-void noia_cicle_history_back();
-
 #endif // __NOIA_GLOBAL_FUNCTIONS_H__
 

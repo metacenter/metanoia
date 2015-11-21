@@ -7,9 +7,20 @@
 
 #include <malloc.h>
 
+//------------------------------------------------------------------------------
+
+void noia_test_frame_config(NoiaFrame* frame,
+                            NoiaFrameType type,
+                            NoiaSurfaceId sid)
+{
+    NoiaPosition pos = {0,0};
+    NoiaSize size = {0,0};
+    noia_frame_configure(frame, type, sid, pos, size);
+}
+
+//------------------------------------------------------------------------------
+
 #define NOIA_MAKE_FRAMES() \
-    NoiaPosition pos = {0,0}; \
-    NoiaSize size = {0,0}; \
     NoiaFrame* r  = noia_frame_new(); \
     NoiaFrame* v  = noia_frame_new(); \
     NoiaFrame* h  = noia_frame_new(); \
@@ -29,29 +40,25 @@
     NoiaFrame* s3 = noia_frame_new(); \
     NoiaFrame* s4 = noia_frame_new(); \
     NoiaFrame* s5 = noia_frame_new(); \
-    noia_frame_configure(r, NOIA_FRAME_TYPE_NONE, \
-                         scInvalidSurfaceId, pos, size); \
-    noia_frame_configure(v, NOIA_FRAME_TYPE_VERTICAL, \
-                         scInvalidSurfaceId, pos, size); \
-    noia_frame_configure(h, NOIA_FRAME_TYPE_HORIZONTAL, \
-                         scInvalidSurfaceId, pos, size); \
-    noia_frame_configure(s,  NOIA_FRAME_TYPE_STACKED, \
-                         scInvalidSurfaceId, pos, size); \
-    noia_frame_configure(v1, NOIA_FRAME_TYPE_LEAF, 11, pos, size); \
-    noia_frame_configure(v2, NOIA_FRAME_TYPE_LEAF, 12, pos, size); \
-    noia_frame_configure(v3, NOIA_FRAME_TYPE_LEAF, 13, pos, size); \
-    noia_frame_configure(v4, NOIA_FRAME_TYPE_LEAF, 14, pos, size); \
-    noia_frame_configure(v5, NOIA_FRAME_TYPE_LEAF, 15, pos, size); \
-    noia_frame_configure(h1, NOIA_FRAME_TYPE_LEAF, 21, pos, size); \
-    noia_frame_configure(h2, NOIA_FRAME_TYPE_LEAF, 22, pos, size); \
-    noia_frame_configure(h3, NOIA_FRAME_TYPE_LEAF, 23, pos, size); \
-    noia_frame_configure(h4, NOIA_FRAME_TYPE_LEAF, 24, pos, size); \
-    noia_frame_configure(h5, NOIA_FRAME_TYPE_LEAF, 25, pos, size); \
-    noia_frame_configure(s1, NOIA_FRAME_TYPE_LEAF, 31, pos, size); \
-    noia_frame_configure(s2, NOIA_FRAME_TYPE_LEAF, 32, pos, size); \
-    noia_frame_configure(s3, NOIA_FRAME_TYPE_LEAF, 33, pos, size); \
-    noia_frame_configure(s4, NOIA_FRAME_TYPE_LEAF, 34, pos, size); \
-    noia_frame_configure(s5, NOIA_FRAME_TYPE_LEAF, 35, pos, size); \
+    noia_test_frame_config(r, NOIA_FRAME_TYPE_NONE,       scInvalidSurfaceId); \
+    noia_test_frame_config(v, NOIA_FRAME_TYPE_VERTICAL,   scInvalidSurfaceId); \
+    noia_test_frame_config(h, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId); \
+    noia_test_frame_config(s,  NOIA_FRAME_TYPE_STACKED,   scInvalidSurfaceId); \
+    noia_test_frame_config(v1, NOIA_FRAME_TYPE_LEAF, 11); \
+    noia_test_frame_config(v2, NOIA_FRAME_TYPE_LEAF, 12); \
+    noia_test_frame_config(v3, NOIA_FRAME_TYPE_LEAF, 13); \
+    noia_test_frame_config(v4, NOIA_FRAME_TYPE_LEAF, 14); \
+    noia_test_frame_config(v5, NOIA_FRAME_TYPE_LEAF, 15); \
+    noia_test_frame_config(h1, NOIA_FRAME_TYPE_LEAF, 21); \
+    noia_test_frame_config(h2, NOIA_FRAME_TYPE_LEAF, 22); \
+    noia_test_frame_config(h3, NOIA_FRAME_TYPE_LEAF, 23); \
+    noia_test_frame_config(h4, NOIA_FRAME_TYPE_LEAF, 24); \
+    noia_test_frame_config(h5, NOIA_FRAME_TYPE_LEAF, 25); \
+    noia_test_frame_config(s1, NOIA_FRAME_TYPE_LEAF, 31); \
+    noia_test_frame_config(s2, NOIA_FRAME_TYPE_LEAF, 32); \
+    noia_test_frame_config(s3, NOIA_FRAME_TYPE_LEAF, 33); \
+    noia_test_frame_config(s4, NOIA_FRAME_TYPE_LEAF, 34); \
+    noia_test_frame_config(s5, NOIA_FRAME_TYPE_LEAF, 35); \
     noia_frame_append (s,  s3); \
     noia_frame_prepend(s,  s2); \
     noia_frame_append (s,  s4); \
@@ -449,6 +456,173 @@ NoiaTestResult should_find_with_sid()
 
 //------------------------------------------------------------------------------
 
+/// Find next on the down and up on vertical frame.
+///
+///  - 0*South from A should be A.
+///  - 1*South from A should be B.
+///  - 1*North from B should be A.
+///  - 1*South from B should be NULL.
+///
+///
+///     ┌─────┐
+///     │  A  │
+///     ├─────┤
+///     │  B  │
+///     └─────┘
+///
+NoiaTestResult should_find_pointed_on_the_same_level_one_further()
+{
+    noia_mock_surface_manager_initialize();
+
+    NoiaFrame* p = NULL;
+    NoiaFrame* r = noia_frame_new();
+    NoiaFrame* a = noia_frame_new();
+    NoiaFrame* b = noia_frame_new();
+    noia_test_frame_config(r, NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_VERTICAL,
+                           scInvalidSurfaceId);
+    noia_test_frame_config(a, NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(b, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_frame_append(r, a);
+    noia_frame_append(r, b);
+
+    p = noia_frame_find_pointed(a, NOIA_ARGMAND_S, 0);
+    NOIA_ASSERT(p == a, "0*South from A should be A");
+
+    p = noia_frame_find_pointed(a, NOIA_ARGMAND_S, 1);
+    NOIA_ASSERT(p == b, "1*South from A should be B");
+
+    p = noia_frame_find_pointed(b, NOIA_ARGMAND_N, 1);
+    NOIA_ASSERT(p == a, "1*North from B should be A");
+
+    p = noia_frame_find_pointed(b, NOIA_ARGMAND_S, 1);
+    NOIA_ASSERT(p == NULL, "1*South from B should be NULL");
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Find next on the right on horizontal frame.
+///
+/// - 3*East from B should be E.
+/// - 5*West from F should be A.
+///
+///
+///     ┌─────┬─────┬─────┬─────┬─────┬─────┐
+///     │  A  │  B  │  C  │  D  │  E  │  F  │
+///     └─────┴─────┴─────┴─────┴─────┴─────┘
+///
+NoiaTestResult should_find_pointed_on_the_same_level_many_further()
+{
+    noia_mock_surface_manager_initialize();
+
+    NoiaFrame* p = NULL;
+    NoiaFrame* r = noia_frame_new();
+    NoiaFrame* a = noia_frame_new();
+    NoiaFrame* b = noia_frame_new();
+    NoiaFrame* c = noia_frame_new();
+    NoiaFrame* d = noia_frame_new();
+    NoiaFrame* e = noia_frame_new();
+    NoiaFrame* f = noia_frame_new();
+    noia_test_frame_config(r,
+                           NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_HORIZONTAL,
+                           scInvalidSurfaceId);
+    noia_test_frame_config(a, NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(b, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_test_frame_config(c, NOIA_FRAME_TYPE_LEAF, 3);
+    noia_test_frame_config(d, NOIA_FRAME_TYPE_LEAF, 4);
+    noia_test_frame_config(e, NOIA_FRAME_TYPE_LEAF, 5);
+    noia_test_frame_config(f, NOIA_FRAME_TYPE_LEAF, 6);
+    noia_frame_append(r, a);
+    noia_frame_append(r, b);
+    noia_frame_append(r, c);
+    noia_frame_append(r, d);
+    noia_frame_append(r, e);
+    noia_frame_append(r, f);
+
+    p = noia_frame_find_pointed(b, NOIA_ARGMAND_E, 3);
+    NOIA_ASSERT(p == e, "3*West from B should be E");
+
+    p = noia_frame_find_pointed(f, NOIA_ARGMAND_W, 5);
+    NOIA_ASSERT(p == a, "5*East from F should be A");
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Find next on the down and up on vertical frame.
+///
+///  - 1*East from B should be D.
+///  - 1*East from A should be BC.
+///  - 1*West from C should be A.
+///  - 2*East from A should be D
+///  - 1*Trunk from C should be BC.
+///
+///
+///     ┌───────┬───────┬───────┐
+///     │       │┌─────┐│       │
+///     │       ││  B  ││       │
+///     │   A   │├─────┤│   D   │
+///     │       ││  C  ││       │
+///     │       │└─────┘│       │
+///     └───────┴───────┴───────┘
+///
+NoiaTestResult should_find_pointed_on_the_second_level()
+{
+    noia_mock_surface_manager_initialize();
+
+    NoiaFrame* p  = NULL;
+    NoiaFrame* r  = noia_frame_new();
+    NoiaFrame* a  = noia_frame_new();
+    NoiaFrame* bc = noia_frame_new();
+    NoiaFrame* b  = noia_frame_new();
+    NoiaFrame* c  = noia_frame_new();
+    NoiaFrame* d  = noia_frame_new();
+    noia_test_frame_config(r,
+                           NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_HORIZONTAL,
+                           scInvalidSurfaceId);
+    noia_test_frame_config(a,  NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(bc, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId);
+    noia_test_frame_config(b,  NOIA_FRAME_TYPE_LEAF, 2);
+    noia_test_frame_config(c,  NOIA_FRAME_TYPE_LEAF, 3);
+    noia_test_frame_config(d,  NOIA_FRAME_TYPE_LEAF, 4);
+    noia_frame_append(r,  a);
+    noia_frame_append(r,  bc);
+    noia_frame_append(bc, b);
+    noia_frame_append(bc, c);
+    noia_frame_append(r,  d);
+
+    p = noia_frame_find_pointed(b, NOIA_ARGMAND_E, 1);
+    NOIA_ASSERT(p == d, "1*East from B should be D");
+
+    p = noia_frame_find_pointed(a, NOIA_ARGMAND_E, 1);
+    NOIA_ASSERT(p == bc, "1*West from A should be BC");
+
+    p = noia_frame_find_pointed(c, NOIA_ARGMAND_W, 1);
+    NOIA_ASSERT(p == a, "1*East from C should be A");
+
+    p = noia_frame_find_pointed(a, NOIA_ARGMAND_E, 2);
+    NOIA_ASSERT(p == d, "2*West from A should be D");
+
+    p = noia_frame_find_pointed(c, NOIA_ARGMAND_TRUNK, 1);
+    NOIA_ASSERT(p == c->trunk, "1*Trunk from C should be BC");
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+
 /// Empty test
 NoiaTestResult should()
 {
@@ -480,6 +654,10 @@ int main(int argc, char** argv)
             NOIA_TEST(should_resettle_one_frame),
             NOIA_TEST(should_resettle_frame_with_subframes),
             NOIA_TEST(should_find_with_sid),
+
+            NOIA_TEST(should_find_pointed_on_the_same_level_one_further),
+            NOIA_TEST(should_find_pointed_on_the_same_level_many_further),
+            NOIA_TEST(should_find_pointed_on_the_second_level),
         };
 
     return noia_test_run("Frame", test, NOIA_NUM_TESTS(test));

@@ -22,7 +22,7 @@ void noia_strategist_on_surface_ready(NoiaExhibitor* exhibitor,
 
     // Put surface on current workspace on current display
     if (noia_compositor_manage_surface(exhibitor->compositor, sid)) {
-        noia_list_append(exhibitor->surface_history, (void*) sid);
+        noia_list_prepend(exhibitor->surface_history, (void*) sid);
     }
 
     /// @todo Focus changing should be done in compositor strategy.
@@ -44,15 +44,13 @@ void noia_strategist_on_surface_destroyed(NoiaExhibitor* exhibitor NOIA_UNUSED,
 NoiaStrategist* noia_strategist_new()
 {
     NoiaStrategist* self = malloc(sizeof(NoiaStrategist));
-    if (!self) {
-        LOG_ERROR("Could not create strategist!");
-        return self;
-    }
-
+    assert(self);
     memset(self, 0, sizeof(NoiaStrategist));
 
-    self->on_surface_ready     = noia_strategist_on_surface_ready;
-    self->on_surface_destroyed = noia_strategist_on_surface_destroyed;
+    noia_strategist_setup(self,
+                          noia_strategist_on_surface_ready,
+                          noia_strategist_on_surface_destroyed);
+
     return self;
 }
 
@@ -60,13 +58,23 @@ NoiaStrategist* noia_strategist_new()
 
 void noia_strategist_free(NoiaStrategist* self)
 {
-    if (!self) {
-        return;
-    }
-
+    assert(self);
     memset(self, 0, sizeof(NoiaStrategist));
     free(self);
 }
 
 //------------------------------------------------------------------------------
+
+void noia_strategist_setup
+                     (NoiaStrategist* self,
+                      NoiaStrategistOnSurfaceReadyFunc     on_surface_ready,
+                      NoiaStrategistOnSurfaceDestroyedFunc on_surface_destroyed)
+{
+    assert(self);
+    self->on_surface_ready     = on_surface_ready;
+    self->on_surface_destroyed = on_surface_destroyed;
+}
+
+//------------------------------------------------------------------------------
+
 

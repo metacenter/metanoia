@@ -4,29 +4,32 @@
 #ifndef __NOIA_KEYBOARD_FUNCTIONS_H__
 #define __NOIA_KEYBOARD_FUNCTIONS_H__
 
-#include "utils-pool.h"
 #include "global-constants.h"
 
-void noia_clean_stack(NoiaPool* stack);
+void noia_cicle_history_forward(NoiaAction* action);
 
-void noia_put_focus(NoiaPool* stack);
+void noia_cicle_history_back(NoiaAction* action);
 
-void noia_put_move(NoiaPool* stack);
+void noia_put_focus(NoiaAction* action);
 
-void noia_put_resize(NoiaPool* stack);
+void noia_put_move(NoiaAction* action);
 
-void noia_put_number(NoiaPool* stack, int code,
+void noia_put_resize(NoiaAction* action);
+
+void noia_put_number(NoiaAction* action, int code,
                      uint32_t modifiers, NoiaKeyState state);
 
-void noia_anchorize(NoiaPool* stack);
+void noia_anchorize(NoiaAction* action);
 
-void noia_right(NoiaPool* stack);
+void noia_select_above(NoiaAction* action);
 
-void noia_left(NoiaPool* stack);
+void noia_right(NoiaAction* action);
 
-void noia_up(NoiaPool* stack);
+void noia_left(NoiaAction* action);
 
-void noia_down(NoiaPool* stack);
+void noia_up(NoiaAction* action);
+
+void noia_down(NoiaAction* action);
 
 #endif // __NOIA_KEYBOARD_FUNCTIONS_H__
 
