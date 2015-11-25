@@ -8,27 +8,27 @@
 
 //------------------------------------------------------------------------------
 
-Link* link_new(void* data)
+NoiaLink* noia_link_new(void* data)
 {
-    Link* self = malloc(sizeof(Link));
-    link_initialize(self, data);
+    NoiaLink* self = malloc(sizeof(NoiaLink));
+    noia_link_initialize(self, data);
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void link_free(Link* self)
+void noia_link_free(NoiaLink* self)
 {
     if (!self) {
         return;
     }
-    memset(self, 0, sizeof(Link));
+    memset(self, 0, sizeof(NoiaLink));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-void link_destroy(Link* self, NoiaFreeFunc free_data)
+void noia_link_destroy(NoiaLink* self, NoiaFreeFunc free_data)
 {
     if (!self) {
         return;
@@ -36,13 +36,13 @@ void link_destroy(Link* self, NoiaFreeFunc free_data)
     if (free_data) {
         free_data(self->data);
     }
-    memset(self, 0, sizeof(Link));
+    memset(self, 0, sizeof(NoiaLink));
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-void link_initialize(Link* self, void* data)
+void noia_link_initialize(NoiaLink* self, void* data)
 {
     if (!self) {
         return;
@@ -54,20 +54,20 @@ void link_initialize(Link* self, void* data)
 
 //------------------------------------------------------------------------------
 
-Chain* chain_new(NoiaFreeFunc free_link)
+NoiaChain* noia_chain_new(NoiaFreeFunc free_link)
 {
-    Chain* self = malloc(sizeof(Chain));
+    NoiaChain* self = malloc(sizeof(NoiaChain));
     if (!self) {
         return NULL;
     }
 
-    chain_initialize(self, free_link);
+    noia_chain_initialize(self, free_link);
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-void chain_initialize(Chain* self, NoiaFreeFunc free_link)
+void noia_chain_initialize(NoiaChain* self, NoiaFreeFunc free_link)
 {
     if (!self) {
         return;
@@ -81,19 +81,19 @@ void chain_initialize(Chain* self, NoiaFreeFunc free_link)
 
 //------------------------------------------------------------------------------
 
-void chain_free(Chain* self)
+void noia_chain_free(NoiaChain* self)
 {
     if (!self) {
         return;
     }
 
-    chain_clean(self);
+    noia_chain_clean(self);
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-int chain_len(Chain* self)
+int noia_chain_len(NoiaChain* self)
 {
     if (!self) {
         return 0;
@@ -104,10 +104,10 @@ int chain_len(Chain* self)
 
 //------------------------------------------------------------------------------
 
-int chain_recalculate_length(Chain* self)
+int noia_chain_recalculate_length(NoiaChain* self)
 {
     int len = 0;
-    for (Link* link = self->first; link; link = link->next) {
+    for (NoiaLink* link = self->first; link; link = link->next) {
         len += 1;
     }
     return len;
@@ -115,7 +115,7 @@ int chain_recalculate_length(Chain* self)
 
 //------------------------------------------------------------------------------
 
-void chain_add_first(Chain* self, Link* link)
+void noia_chain_add_first(NoiaChain* self, NoiaLink* link)
 {
     if (!self) {
         return;
@@ -130,14 +130,14 @@ void chain_add_first(Chain* self, Link* link)
 
 //------------------------------------------------------------------------------
 
-void chain_prejoin(Chain* self, Link* link)
+void noia_chain_prejoin(NoiaChain* self, NoiaLink* link)
 {
     if (!self) {
         return;
     }
 
     if (self->len == 0) {
-        chain_add_first(self, link);
+        noia_chain_add_first(self, link);
     } else {
         link->next = self->first;
         link->prev = NULL;
@@ -149,14 +149,14 @@ void chain_prejoin(Chain* self, Link* link)
 
 //------------------------------------------------------------------------------
 
-void chain_adjoin(Chain* self, Link* link)
+void noia_chain_adjoin(NoiaChain* self, NoiaLink* link)
 {
     if (!self) {
         return;
     }
 
     if (self->len == 0) {
-        chain_add_first(self, link);
+        noia_chain_add_first(self, link);
     } else {
         link->next = NULL;
         link->prev = self->last;
@@ -168,14 +168,14 @@ void chain_adjoin(Chain* self, Link* link)
 
 //------------------------------------------------------------------------------
 
-NoiaResult chain_unjoin(Chain* self, Link* unjoinee)
+NoiaResult noia_chain_unjoin(NoiaChain* self, NoiaLink* unjoinee)
 {
     if (!self || !unjoinee) {
         return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
     int found = false;
-    Link* link = NULL;
+    NoiaLink* link = NULL;
     for (link = self->first; link; link = link->next) {
         found = (link == unjoinee);
         if (found) {
@@ -187,20 +187,20 @@ NoiaResult chain_unjoin(Chain* self, Link* unjoinee)
         return NOIA_RESULT_NOT_FOUND;
     }
 
-    NoiaResult result = chain_disjoin(self, link);
+    NoiaResult result = noia_chain_disjoin(self, link);
     return result;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaResult chain_disjoin(Chain* self, Link* link)
+NoiaResult noia_chain_disjoin(NoiaChain* self, NoiaLink* link)
 {
     if (!self || !link) {
         return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
-    Link* prev = link->prev;
-    Link* next = link->next;
+    NoiaLink* prev = link->prev;
+    NoiaLink* next = link->next;
 
     if (prev) {
         prev->next = next;
@@ -216,22 +216,22 @@ NoiaResult chain_disjoin(Chain* self, Link* link)
 
     link->prev = NULL;
     link->next = NULL;
-    self->len = chain_recalculate_length(self);
+    self->len = noia_chain_recalculate_length(self);
     return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-void chain_clean(Chain* self)
+void noia_chain_clean(NoiaChain* self)
 {
     if (!self) {
         return;
     }
 
     if (self->free_link) {
-        Link* link = self->first;
+        NoiaLink* link = self->first;
         while (link) {
-            Link* next = link->next;
+            NoiaLink* next = link->next;
             self->free_link(link);
             link = next;
         }

@@ -10,7 +10,7 @@
 
 void noia_test_free_link_with_str(void* data)
 {
-    link_destroy((Link*) data, free);
+    noia_link_destroy((NoiaLink*) data, free);
 }
 
 //------------------------------------------------------------------------------
@@ -19,14 +19,14 @@ NoiaTestResult should_adjoin_and_prejoin_links()
 {
     char* a[] = {"4", "2", "1", "3"};
 
-    Chain* ch = chain_new(noia_test_free_link_with_str);
-    chain_adjoin (ch, link_new(strdup("1")));
-    chain_prejoin(ch, link_new(strdup("2")));
-    chain_adjoin (ch, link_new(strdup("3")));
-    chain_prejoin(ch, link_new(strdup("4")));
+    NoiaChain* ch = noia_chain_new(noia_test_free_link_with_str);
+    noia_chain_adjoin (ch, noia_link_new(strdup("1")));
+    noia_chain_prejoin(ch, noia_link_new(strdup("2")));
+    noia_chain_adjoin (ch, noia_link_new(strdup("3")));
+    noia_chain_prejoin(ch, noia_link_new(strdup("4")));
 
     ASSERT_CHAIN(ch, a);
-    chain_free(ch);
+    noia_chain_free(ch);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -36,22 +36,22 @@ NoiaTestResult should_unjoin_from_begining()
 {
     char* a[] = {"3", "4"};
 
-    Chain* ch = chain_new(noia_test_free_link_with_str);
-    chain_adjoin(ch, link_new(strdup("1")));
-    chain_adjoin(ch, link_new(strdup("2")));
-    chain_adjoin(ch, link_new(strdup("3")));
-    chain_adjoin(ch, link_new(strdup("4")));
+    NoiaChain* ch = noia_chain_new(noia_test_free_link_with_str);
+    noia_chain_adjoin(ch, noia_link_new(strdup("1")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("2")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("3")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("4")));
 
-    Link* link1 = ch->first;
-    chain_unjoin(ch, link1);
+    NoiaLink* link1 = ch->first;
+    noia_chain_unjoin(ch, link1);
 
-    Link* link2 = ch->first;
-    chain_unjoin(ch, link2);
+    NoiaLink* link2 = ch->first;
+    noia_chain_unjoin(ch, link2);
 
     ASSERT_CHAIN(ch, a);
-    link_destroy(link1, free);
-    link_destroy(link2, free);
-    chain_free(ch);
+    noia_link_destroy(link1, free);
+    noia_link_destroy(link2, free);
+    noia_chain_free(ch);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -61,22 +61,22 @@ NoiaTestResult should_unjoin_from_end()
 {
     char* a[] = {"1", "2"};
 
-    Chain* ch = chain_new(noia_test_free_link_with_str);
-    chain_adjoin(ch, link_new(strdup("1")));
-    chain_adjoin(ch, link_new(strdup("2")));
-    chain_adjoin(ch, link_new(strdup("3")));
-    chain_adjoin(ch, link_new(strdup("4")));
+    NoiaChain* ch = noia_chain_new(noia_test_free_link_with_str);
+    noia_chain_adjoin(ch, noia_link_new(strdup("1")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("2")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("3")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("4")));
 
-    Link* link1 = ch->last;
-    chain_unjoin(ch, link1);
+    NoiaLink* link1 = ch->last;
+    noia_chain_unjoin(ch, link1);
 
-    Link* link2 = ch->last;
-    chain_unjoin(ch, link2);
+    NoiaLink* link2 = ch->last;
+    noia_chain_unjoin(ch, link2);
 
     ASSERT_CHAIN(ch, a);
-    link_destroy(link1, free);
-    link_destroy(link2, free);
-    chain_free(ch);
+    noia_link_destroy(link1, free);
+    noia_link_destroy(link2, free);
+    noia_chain_free(ch);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -86,22 +86,22 @@ NoiaTestResult should_unjoin_from_inside()
 {
     char* a[] = {"1", "4"};
 
-    Chain* ch = chain_new(noia_test_free_link_with_str);
-    chain_adjoin(ch, link_new(strdup("1")));
-    chain_adjoin(ch, link_new(strdup("2")));
-    chain_adjoin(ch, link_new(strdup("3")));
-    chain_adjoin(ch, link_new(strdup("4")));
+    NoiaChain* ch = noia_chain_new(noia_test_free_link_with_str);
+    noia_chain_adjoin(ch, noia_link_new(strdup("1")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("2")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("3")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("4")));
 
-    Link* link1 = ch->first->next;
-    chain_unjoin(ch, link1);
+    NoiaLink* link1 = ch->first->next;
+    noia_chain_unjoin(ch, link1);
 
-    Link* link2 = ch->first->next;
-    chain_unjoin(ch, link2);
+    NoiaLink* link2 = ch->first->next;
+    noia_chain_unjoin(ch, link2);
 
     ASSERT_CHAIN(ch, a);
-    link_destroy(link1, free);
-    link_destroy(link2, free);
-    chain_free(ch);
+    noia_link_destroy(link1, free);
+    noia_link_destroy(link2, free);
+    noia_chain_free(ch);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -111,16 +111,16 @@ NoiaTestResult should_rejoin_without_cicles()
 {
     char* a[] = {"2", "1"};
 
-    Chain* ch = chain_new(noia_test_free_link_with_str);
-    chain_adjoin(ch, link_new(strdup("1")));
-    chain_adjoin(ch, link_new(strdup("2")));
+    NoiaChain* ch = noia_chain_new(noia_test_free_link_with_str);
+    noia_chain_adjoin(ch, noia_link_new(strdup("1")));
+    noia_chain_adjoin(ch, noia_link_new(strdup("2")));
 
-    Link* link = ch->first;
-    chain_unjoin(ch, link);
-    chain_adjoin(ch, link);
+    NoiaLink* link = ch->first;
+    noia_chain_unjoin(ch, link);
+    noia_chain_adjoin(ch, link);
 
     ASSERT_CHAIN(ch, a);
-    chain_free(ch);
+    noia_chain_free(ch);
     return NOIA_TEST_SUCCESS;
 }
 

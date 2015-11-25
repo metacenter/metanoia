@@ -5,14 +5,15 @@
 #define __NOIA_UTILS_LIST_H__
 
 #include "utils-chain.h"
+#include "global-macros.h"
 
 #include <stddef.h>
 
 #define FOR_EACH(LIST,LINK) \
-    for (Link* LINK = LIST->base.first; LINK; LINK = LINK->next)
+    for (NoiaLink* LINK = LIST->base.first; LINK; LINK = LINK->next)
 
 #define FOR_EACH_REVERSE(LIST,LINK) \
-    for (Link* LINK = LIST->base.last; LINK; LINK = LINK->prev)
+    for (NoiaLink* LINK = LIST->base.last; LINK; LINK = LINK->prev)
 
 /// Simple implementations of double linked list.
 /// This list is meant for storing data of the same type and provide
@@ -20,9 +21,9 @@
 ///
 /// @note When frequent allocation and deallocation of memory is needed,
 ///       NoiaPool may be a better choise.
-/// @see Chain, NoiaPool
+/// @see NoiaChain, NoiaPool
 typedef struct {
-    Chain base;
+    NoiaChain base;
     NoiaFreeFunc free_data;
 } NoiaList;
 
@@ -74,13 +75,15 @@ NoiaList* noia_list_subtract(NoiaList* minuend,
 /// Return the length of the list.
 static inline int noia_list_len(NoiaList* self)
 {
-    return chain_len((Chain*) self);
+    assert(self);
+    return noia_chain_len(&self->base);
 }
 
 /// Recalculate and return the length of the list.
 static inline int noia_list_recalculate_length(NoiaList* self)
 {
-    return chain_recalculate_length((Chain*) self);
+    assert(self);
+    return noia_chain_recalculate_length(&self->base);
 }
 
 /// Return first element of the list.

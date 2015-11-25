@@ -191,7 +191,7 @@ static inline void noia_frame_log_internal(NoiaFrame* self, unsigned level)
     }
 
     noia_log_print("NoiaFrame(type='0x%x', sid='%d', len='%d')\n",
-                   params->type, params->sid, chain_len(self->twigs));
+                   params->type, params->sid, noia_chain_len(self->twigs));
 
     FOR_EACH_TWIG(self, twig) {
         noia_frame_log_internal(twig, level+1);

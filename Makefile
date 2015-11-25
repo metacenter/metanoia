@@ -228,6 +228,7 @@ build/global-functions.o: Makefile \
                           src/global-enums.h \
                           src/global-functions.c \
                           src/global-functions.h \
+                          src/global-macros.h \
                           src/global-types.h \
                           src/output.h \
                           src/renderer.h \
@@ -278,6 +279,7 @@ build/utils-chain.o: Makefile \
 build/utils-list.o: Makefile \
                     src/global-constants.h \
                     src/global-enums.h \
+                    src/global-macros.h \
                     src/global-types.h \
                     src/utils-chain.h \
                     src/utils-list.c \
@@ -412,6 +414,7 @@ build/event-signals.o: Makefile \
                        src/event-task.h \
                        src/global-constants.h \
                        src/global-enums.h \
+                       src/global-macros.h \
                        src/global-objects.h \
                        src/global-types.h \
                        src/utils-chain.h \
@@ -429,6 +432,7 @@ build/event-loop.o: Makefile \
                     src/event-task.h \
                     src/global-constants.h \
                     src/global-enums.h \
+                    src/global-macros.h \
                     src/global-types.h \
                     src/utils-chain.h \
                     src/utils-environment.h \
@@ -468,6 +472,7 @@ build/event-factory.o: Makefile \
                        src/exhibitor.h \
                        src/global-constants.h \
                        src/global-enums.h \
+                       src/global-macros.h \
                        src/global-types.h \
                        src/output-collector.h \
                        src/output.h \
@@ -566,6 +571,7 @@ build/device-fb.o: Makefile \
                    src/device-fb.h \
                    src/global-constants.h \
                    src/global-enums.h \
+                   src/global-macros.h \
                    src/global-types.h \
                    src/output.h \
                    src/renderer-mmap.h \
@@ -690,6 +696,7 @@ build/surface-data.o: Makefile \
                       src/exhibitor-frame.h \
                       src/global-constants.h \
                       src/global-enums.h \
+                      src/global-macros.h \
                       src/global-types.h \
                       src/surface-data.c \
                       src/surface-data.h \
@@ -771,6 +778,7 @@ build/keyboard-binding.o: Makefile \
 build/keyboard-bindings.o: Makefile \
                            src/global-constants.h \
                            src/global-enums.h \
+                           src/global-macros.h \
                            src/global-types.h \
                            src/keyboard-binding.h \
                            src/keyboard-bindings.c \
@@ -844,6 +852,7 @@ build/exhibitor-display.o: Makefile \
                            src/exhibitor-pointer.h \
                            src/global-constants.h \
                            src/global-enums.h \
+                           src/global-macros.h \
                            src/global-types.h \
                            src/output.h \
                            src/renderer.h \
@@ -1017,6 +1026,7 @@ build/wayland-output.o: Makefile \
 build/wayland-cache.o: Makefile \
                        src/global-constants.h \
                        src/global-enums.h \
+                       src/global-macros.h \
                        src/global-types.h \
                        src/utils-chain.h \
                        src/utils-list.h \
@@ -1038,6 +1048,7 @@ build/wayland-state.o: Makefile \
                        src/exhibitor-frame.h \
                        src/global-constants.h \
                        src/global-enums.h \
+                       src/global-macros.h \
                        src/global-types.h \
                        src/output.h \
                        src/renderer.h \
@@ -1435,6 +1446,7 @@ build/metanoia.o: Makefile \
                   src/exhibitor-frame.h \
                   src/global-constants.h \
                   src/global-enums.h \
+                  src/global-macros.h \
                   src/global-types.h \
                   src/metanoia.c \
                   src/surface-data.h \
@@ -1582,6 +1594,7 @@ checks/check-chain: Makefile \
 checks/check-list: Makefile \
                    src/global-constants.h \
                    src/global-enums.h \
+                   src/global-macros.h \
                    src/global-types.h \
                    src/utils-chain.c \
                    src/utils-chain.h \

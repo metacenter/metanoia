@@ -6,41 +6,41 @@
 
 #include "global-constants.h"
 
-typedef struct Link Link;
-struct Link {
-    Link* prev;
-    Link* next;
+typedef struct NoiaLink NoiaLink;
+struct NoiaLink {
+    NoiaLink* prev;
+    NoiaLink* next;
     void* data;
 };
 
-Link* link_new(void* data);
-void link_free(Link* link);
-void link_destroy(Link* link, NoiaFreeFunc free_data);
+NoiaLink* noia_link_new(void* data);
+void noia_link_free(NoiaLink* link);
+void noia_link_destroy(NoiaLink* link, NoiaFreeFunc free_data);
 
-void link_initialize(Link* link, void* data);
+void noia_link_initialize(NoiaLink* link, void* data);
 
 typedef struct {
-    Link* first;
-    Link* last;
+    NoiaLink* first;
+    NoiaLink* last;
     int len;
     NoiaFreeFunc free_link;
-} Chain;
+} NoiaChain;
 
-Chain* chain_new(NoiaFreeFunc free_link);
-void chain_free(Chain* self);
+NoiaChain* noia_chain_new(NoiaFreeFunc free_link);
+void noia_chain_free(NoiaChain* self);
 
-void chain_initialize(Chain* self, NoiaFreeFunc free_link);
+void noia_chain_initialize(NoiaChain* self, NoiaFreeFunc free_link);
 
-int chain_len(Chain* self);
-int chain_recalculate_length(Chain* self);
+int noia_chain_len(NoiaChain* self);
+int noia_chain_recalculate_length(NoiaChain* self);
 
-void chain_prejoin(Chain* self, Link* link);
-void chain_adjoin(Chain* self, Link* link);
+void noia_chain_prejoin(NoiaChain* self, NoiaLink* link);
+void noia_chain_adjoin(NoiaChain* self, NoiaLink* link);
 
-NoiaResult chain_unjoin(Chain* self, Link* link);
-NoiaResult chain_disjoin(Chain* self, Link* link);
+NoiaResult noia_chain_unjoin(NoiaChain* self, NoiaLink* link);
+NoiaResult noia_chain_disjoin(NoiaChain* self, NoiaLink* link);
 
-void chain_clean(Chain* self);
+void noia_chain_clean(NoiaChain* self);
 
 #endif // __NOIA_UTILS_CHAIN_H__
 

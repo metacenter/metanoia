@@ -16,9 +16,9 @@ NoiaBranch* noia_branch_new()
         return NULL;
     }
 
-    link_initialize(&self->base, NULL);
+    noia_link_initialize(&self->base, NULL);
     self->trunk = NULL;
-    self->twigs = chain_new(NULL);
+    self->twigs = noia_chain_new(NULL);
     return self;
 }
 
@@ -37,7 +37,7 @@ void noia_branch_free(NoiaBranch* self, NoiaFreeFunc free_data)
         noia_branch_free(twig, free_data);
         twig = next;
     }
-    chain_free(self->twigs);
+    noia_chain_free(self->twigs);
     if (free_data) {
         free_data(self->base.data);
     }
@@ -55,7 +55,7 @@ void noia_branch_prepend(NoiaBranch* self, NoiaBranch* other)
     }
 
     other->trunk = self;
-    chain_prejoin(self->twigs, (Link*) other);
+    noia_chain_prejoin(self->twigs, (NoiaLink*) other);
 }
 
 //------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ void noia_branch_append(NoiaBranch* self, NoiaBranch* other)
     }
 
     other->trunk = self;
-    chain_adjoin(self->twigs, (Link*) other);
+    noia_chain_adjoin(self->twigs, (NoiaLink*) other);
 }
 
 //------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ NoiaResult noia_branch_remove(NoiaBranch* self, NoiaBranch* other)
     }
 
     other->trunk = NULL;
-    return chain_unjoin(self->twigs, (Link*) other);
+    return noia_chain_unjoin(self->twigs, (NoiaLink*) other);
 }
 
 //------------------------------------------------------------------------------

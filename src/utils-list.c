@@ -15,7 +15,7 @@ NoiaList* noia_list_new(NoiaFreeFunc free_data)
         return NULL;
     }
 
-    chain_initialize(&self->base, (NoiaFreeFunc) link_free);
+    noia_chain_initialize(&self->base, (NoiaFreeFunc) noia_link_free);
     self->free_data = free_data;
     return self;
 }
@@ -40,7 +40,7 @@ void noia_list_prepend(NoiaList* self, void* data)
         return;
     }
 
-    chain_prejoin(&self->base, link_new(data));
+    noia_chain_prejoin(&self->base, noia_link_new(data));
 }
 
 //------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ void noia_list_append(NoiaList* self, void* data)
         return;
     }
 
-    chain_adjoin(&self->base, link_new(data));
+    noia_chain_adjoin(&self->base, noia_link_new(data));
 }
 
 //------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ void noia_list_append(NoiaList* self, void* data)
 void* noia_list_pop(NoiaList* self)
 {
     void* result;
-    Link* next;
+    NoiaLink* next;
 
     if (!self || self->base.len == 0) {
         return NULL;
@@ -67,7 +67,7 @@ void* noia_list_pop(NoiaList* self)
 
     result = self->base.first->data;
     next = self->base.first->next;
-    link_free(self->base.first);
+    noia_link_free(self->base.first);
     self->base.first = next;
     self->base.len -= 1;
 
@@ -81,7 +81,7 @@ void* noia_list_pop(NoiaList* self)
 
 void* noia_list_get_nth(NoiaList* self, int n)
 {
-    Link* link = NULL;
+    NoiaLink* link = NULL;
     if (n < 0) {
         link = self->base.last;
         for (int i = 1; link && i < -n; ++i, link = link->prev);
@@ -106,7 +106,7 @@ NoiaResult noia_list_remove(NoiaList* self, void* data, NoiaCompareFunc compare)
     }
 
     int found = false;
-    Link* link = NULL;
+    NoiaLink* link = NULL;
     for (link = self->base.first; link; link = link->next) {
         found = !compare(link->data, data);
         if (found) {
@@ -118,9 +118,9 @@ NoiaResult noia_list_remove(NoiaList* self, void* data, NoiaCompareFunc compare)
         return NOIA_RESULT_NOT_FOUND;
     }
 
-    NoiaResult result = chain_disjoin(&self->base, link);
+    NoiaResult result = noia_chain_disjoin(&self->base, link);
     if (result == NOIA_RESULT_SUCCESS) {
-        link_destroy(link, self->free_data);
+        noia_link_destroy(link, self->free_data);
     }
     return result;
 }
@@ -147,10 +147,10 @@ NoiaResult noia_list_remove_all(NoiaList* self,
 
 void noia_list_clean(NoiaList* self)
 {
-    Link* iter = self->base.first;
+    NoiaLink* iter = self->base.first;
     while (iter) {
-        Link* next = iter->next;
-        link_destroy(iter, self->free_data);
+        NoiaLink* next = iter->next;
+        noia_link_destroy(iter, self->free_data);
         iter = next;
     }
 

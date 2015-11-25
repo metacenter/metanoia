@@ -16,9 +16,9 @@ typedef struct NoiaBranch NoiaBranch;
 
 /// @todo Unit tests for NoiaBranch
 struct NoiaBranch {
-    Link base;
+    NoiaLink base;
     NoiaBranch* trunk;
-    Chain* twigs;
+    NoiaChain* twigs;
 };
 
 NoiaBranch* noia_branch_new();
