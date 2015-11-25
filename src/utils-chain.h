@@ -34,13 +34,21 @@ void noia_chain_initialize(NoiaChain* self, NoiaFreeFunc free_link);
 int noia_chain_len(NoiaChain* self);
 int noia_chain_recalculate_length(NoiaChain* self);
 
-void noia_chain_prejoin(NoiaChain* self, NoiaLink* link);
-void noia_chain_adjoin(NoiaChain* self, NoiaLink* link);
+NoiaResult noia_chain_prejoin(NoiaChain* self, NoiaLink* link);
+NoiaResult noia_chain_adjoin(NoiaChain* self, NoiaLink* link);
+
+NoiaResult noia_chain_prejoin_onto(NoiaChain* self,
+                                   NoiaLink* link,
+                                   NoiaLink* onto);
+
+NoiaResult noia_chain_adjoin_onto(NoiaChain* self,
+                                  NoiaLink* link,
+                                  NoiaLink* onto);
 
 NoiaResult noia_chain_unjoin(NoiaChain* self, NoiaLink* link);
 NoiaResult noia_chain_disjoin(NoiaChain* self, NoiaLink* link);
 
-void noia_chain_clean(NoiaChain* self);
+NoiaResult noia_chain_clean(NoiaChain* self);
 
 #endif // __NOIA_UTILS_CHAIN_H__
 

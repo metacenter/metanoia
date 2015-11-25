@@ -59,14 +59,19 @@
                 LEN, noia_chain_recalculate_length(CHAIN));
 
 #define ASSERT_CHAIN(CHAIN, ARRAY) { \
-    int i = 0, len = ARRAY_LEN(ARRAY); \
+    int i = 0; int len = ARRAY_LEN(ARRAY); int j = len - 1; \
+    char* chain_data = NULL; char* array_data = NULL; \
     NOIA_ASSERT(len == noia_chain_len(CHAIN), \
                 "Stored chain length should be %d (is %d)", \
                 len, noia_chain_len(CHAIN)); \
     NOIA_ASSERT_CHAIN_LEN(CHAIN, len); \
     for (NoiaLink* link = CHAIN->first; link; link = link->next, ++i) { \
-        char* chain_data = link->data; \
-        char* array_data = ARRAY[i]; \
+        chain_data = link->data; array_data = ARRAY[i]; \
+        NOIA_ASSERT(strcmp(chain_data, array_data) == 0, \
+                    "Chain data should be '%s' (is '%s')", \
+                    array_data, chain_data); } \
+    for (NoiaLink* link = CHAIN->last; link; link = link->prev, --j) { \
+        chain_data = link->data; array_data = ARRAY[j]; \
         NOIA_ASSERT(strcmp(chain_data, array_data) == 0, \
                     "Chain data should be '%s' (is '%s')", \
                     array_data, chain_data); }}

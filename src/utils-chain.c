@@ -67,6 +67,18 @@ NoiaChain* noia_chain_new(NoiaFreeFunc free_link)
 
 //------------------------------------------------------------------------------
 
+void noia_chain_free(NoiaChain* self)
+{
+    if (!self) {
+        return;
+    }
+
+    noia_chain_clean(self);
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_chain_initialize(NoiaChain* self, NoiaFreeFunc free_link)
 {
     if (!self) {
@@ -77,18 +89,6 @@ void noia_chain_initialize(NoiaChain* self, NoiaFreeFunc free_link)
     self->last = NULL;
     self->len = 0;
     self->free_link = free_link;
-}
-
-//------------------------------------------------------------------------------
-
-void noia_chain_free(NoiaChain* self)
-{
-    if (!self) {
-        return;
-    }
-
-    noia_chain_clean(self);
-    free(self);
 }
 
 //------------------------------------------------------------------------------
@@ -115,29 +115,33 @@ int noia_chain_recalculate_length(NoiaChain* self)
 
 //------------------------------------------------------------------------------
 
-void noia_chain_add_first(NoiaChain* self, NoiaLink* link)
+NoiaResult noia_chain_add_first(NoiaChain* self, NoiaLink* link)
 {
+    NoiaResult result = NOIA_RESULT_SUCCESS;
+
     if (!self) {
-        return;
+        result = NOIA_RESULT_INCORRECT_ARGUMENT;
+    } else {
+        self->first = link;
+        self->last = link;
+        link->prev = NULL;
+        link->next = NULL;
+        self->len = 1;
     }
 
-    self->first = link;
-    self->last = link;
-    link->prev = NULL;
-    link->next = NULL;
-    self->len = 1;
+    return result;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_chain_prejoin(NoiaChain* self, NoiaLink* link)
+NoiaResult noia_chain_prejoin(NoiaChain* self, NoiaLink* link)
 {
-    if (!self) {
-        return;
-    }
+    NoiaResult result = NOIA_RESULT_SUCCESS;
 
-    if (self->len == 0) {
-        noia_chain_add_first(self, link);
+    if (!self || !link) {
+        result = NOIA_RESULT_INCORRECT_ARGUMENT;
+    } else if (self->len == 0) {
+        result = noia_chain_add_first(self, link);
     } else {
         link->next = self->first;
         link->prev = NULL;
@@ -145,18 +149,20 @@ void noia_chain_prejoin(NoiaChain* self, NoiaLink* link)
         self->first = link;
         self->len += 1;
     }
+
+    return result;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_chain_adjoin(NoiaChain* self, NoiaLink* link)
+NoiaResult noia_chain_adjoin(NoiaChain* self, NoiaLink* link)
 {
-    if (!self) {
-        return;
-    }
+    NoiaResult result = NOIA_RESULT_SUCCESS;
 
-    if (self->len == 0) {
-        noia_chain_add_first(self, link);
+    if (!self || !link) {
+        result = NOIA_RESULT_INCORRECT_ARGUMENT;
+    } else if (self->len == 0) {
+        result = noia_chain_add_first(self, link);
     } else {
         link->next = NULL;
         link->prev = self->last;
@@ -164,6 +170,54 @@ void noia_chain_adjoin(NoiaChain* self, NoiaLink* link)
         self->last = link;
         self->len += 1;
     }
+
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaResult noia_chain_prejoin_onto(NoiaChain* self,
+                                   NoiaLink* link,
+                                   NoiaLink* onto)
+{
+    NoiaResult result = NOIA_RESULT_SUCCESS;
+
+    if (!self || !link || (self->len != 0 && !onto)) {
+        result = NOIA_RESULT_INCORRECT_ARGUMENT;
+    } else if (self->len == 0 || onto == self->first) {
+        result = noia_chain_prejoin(self, link);
+    } else {
+        link->prev = onto->prev;
+        link->next = onto;
+        onto->prev->next = link;
+        onto->prev = link;
+        self->len += 1;
+    }
+
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaResult noia_chain_adjoin_onto(NoiaChain* self,
+                                  NoiaLink* link,
+                                  NoiaLink* onto)
+{
+    NoiaResult result = NOIA_RESULT_SUCCESS;
+
+    if (!self || !link || (self->len != 0 && !onto)) {
+        result = NOIA_RESULT_INCORRECT_ARGUMENT;
+    } else if (self->len == 0 || onto == self->last) {
+        result = noia_chain_adjoin(self, link);
+    } else {
+        link->next = onto->next;
+        link->prev = onto;
+        onto->next->prev = link;
+        onto->next = link;
+        self->len += 1;
+    }
+
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -187,8 +241,7 @@ NoiaResult noia_chain_unjoin(NoiaChain* self, NoiaLink* unjoinee)
         return NOIA_RESULT_NOT_FOUND;
     }
 
-    NoiaResult result = noia_chain_disjoin(self, link);
-    return result;
+    return noia_chain_disjoin(self, link);
 }
 
 //------------------------------------------------------------------------------
@@ -222,10 +275,10 @@ NoiaResult noia_chain_disjoin(NoiaChain* self, NoiaLink* link)
 
 //------------------------------------------------------------------------------
 
-void noia_chain_clean(NoiaChain* self)
+NoiaResult noia_chain_clean(NoiaChain* self)
 {
     if (!self) {
-        return;
+        return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
     if (self->free_link) {
@@ -240,6 +293,8 @@ void noia_chain_clean(NoiaChain* self)
     self->first = NULL;
     self->last = NULL;
     self->len = 0;
+
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
