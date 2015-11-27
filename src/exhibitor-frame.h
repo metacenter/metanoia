@@ -67,16 +67,20 @@ void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces);
 bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type);
 
 /// Add child frame to ending.
+/// If `self` has twigs add `other` to them.
+/// If not, add to subframes of its trunk.
 void noia_frame_append(NoiaFrame* self, NoiaFrame* other);
 
 /// Add child frame to beginning.
+/// If `self` has twigs add `other` to them.
+/// If not, add to subframes of its trunk.
 void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other);
 
 /// Find first trunk which type has NOIA_FRAME_TYPE_SPECIAL.
 /// For normal frame this should be workspace.
 NoiaFrame* noia_frame_get_top(NoiaFrame* self);
 
-/// Remove frame `self` from its current parent and prepend to frame `target`.
+/// Remove frame `self` from its current trunk and prepend to frame `target`.
 NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target);
 
 /// Resize the frame.
@@ -98,7 +102,7 @@ void noia_frame_jump(NoiaFrame* self,
 /// Pop the surface `pop` and its parents recursively ending on `self`.
 void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
 
-/// Detach frame `self` from its parent.
+/// Detach frame `self` from its trunk.
 NoiaResult noia_frame_remove_self(NoiaFrame* self);
 
 /// Find a frame holding surface with given ID.
@@ -111,6 +115,18 @@ NoiaFrame* noia_frame_find_pointed(NoiaFrame* self,
 
 /// Print frame tree to log file.
 void noia_frame_log(NoiaFrame* self);
+
+/// Insert `other` to twings of `self`'s trunk just before `self`.
+static inline void noia_frame_insert_before(NoiaFrame* self, NoiaFrame* other)
+{
+    noia_branch_insert_before(self, other);
+}
+
+/// Insert `other` to twings of `self`'s trunk just after `self`.
+static inline void noia_frame_insert_after(NoiaFrame* self, NoiaFrame* other)
+{
+    noia_branch_insert_after(self, other);
+}
 
 #endif // __NOIA_EXHIBITOR_FRAME_H__
 

@@ -72,6 +72,22 @@ void noia_branch_append(NoiaBranch* self, NoiaBranch* other)
 
 //------------------------------------------------------------------------------
 
+void noia_branch_insert_before(NoiaBranch* self, NoiaBranch* other)
+{
+    noia_chain_prejoin_onto(self->trunk->twigs, &other->base, &self->base);
+    other->trunk = self->trunk;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_branch_insert_after(NoiaBranch* self, NoiaBranch* other)
+{
+    noia_chain_adjoin_onto(self->trunk->twigs, &other->base, &self->base);
+    other->trunk = self->trunk;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaResult noia_branch_remove(NoiaBranch* self, NoiaBranch* other)
 {
     if (!self || !other) {

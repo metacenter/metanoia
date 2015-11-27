@@ -102,9 +102,9 @@
 #define NOIA_ASSERT_TRUNK(BRANCH, TRUNK) \
     NOIA_ASSERT(BRANCH->trunk == TRUNK, \
                 "Trunk should be '%p', (is '%p')", \
-                (void*) BRANCH->trunk, (void*) TRUNK); \
+                (void*) TRUNK, (void*) BRANCH->trunk); \
 
-#define ASSERT_BRANCH(BRANCH, TRUNK, ARRAY) \
+#define NOIA_ASSERT_BRANCH(BRANCH, TRUNK, ARRAY) \
     NOIA_ASSERT(BRANCH != NULL, "Branch should not be NULL"); \
     NOIA_ASSERT_TRUNK(BRANCH, TRUNK); \
     ASSERT_CHAIN(BRANCH->twigs, ARRAY);

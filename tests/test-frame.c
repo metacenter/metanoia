@@ -100,7 +100,7 @@ void noia_test_frame_config(NoiaFrame* frame,
 
 //------------------------------------------------------------------------------
 
-/// Check if frames are assigned to correct parent.
+/// Check if appended and prepended frames are assigned to correct trunk.
 /// Content check will be done in `should_translate_to_array`
 NoiaTestResult should_append_and_prepend_values()
 {
@@ -132,6 +132,44 @@ NoiaTestResult should_append_and_prepend_values()
     NOIA_ASSERT_CHAIN_LEN(v->twigs, 5);
     NOIA_ASSERT_CHAIN_LEN(h->twigs, 5);
     NOIA_ASSERT_CHAIN_LEN(s->twigs, 5);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Check if inserted frames are assigned to correct trunk.
+NoiaTestResult should_insert_values()
+{
+    noia_mock_surface_manager_initialize();
+
+    NoiaFrame* r  = noia_frame_new();
+    NoiaFrame* f1 = noia_frame_new();
+    NoiaFrame* f2 = noia_frame_new();
+    NoiaFrame* f3 = noia_frame_new();
+    NoiaFrame* f4 = noia_frame_new();
+    NoiaFrame* f5 = noia_frame_new();
+    noia_test_frame_config(r,  NOIA_FRAME_TYPE_NONE, scInvalidSurfaceId);
+    noia_test_frame_config(f1, NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(f2, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_test_frame_config(f3, NOIA_FRAME_TYPE_LEAF, 3);
+    noia_test_frame_config(f4, NOIA_FRAME_TYPE_LEAF, 4);
+    noia_test_frame_config(f5, NOIA_FRAME_TYPE_LEAF, 5);
+    noia_frame_append(r, f2);
+    noia_frame_insert_after(f2, f4);
+    noia_frame_insert_before(f4, f3);
+    noia_frame_insert_after(f4, f5);
+    noia_frame_insert_before(f2, f1);
+
+    NOIA_ASSERT_TRUNK(f1, r);
+    NOIA_ASSERT_TRUNK(f2, r);
+    NOIA_ASSERT_TRUNK(f3, r);
+    NOIA_ASSERT_TRUNK(f4, r);
+    NOIA_ASSERT_TRUNK(f5, r);
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 5);
 
     noia_frame_free(r);
 
@@ -219,9 +257,9 @@ NoiaTestResult should_translate_subframes_to_array()
     noia_frame_to_array(s, ps);
     noia_frame_free(r);
 
-    NOIA_ASSERT_FRAME_ARRAY(av, pv)
-    NOIA_ASSERT_FRAME_ARRAY(ah, ph)
-    NOIA_ASSERT_FRAME_ARRAY(as, ps)
+    NOIA_ASSERT_FRAME_ARRAY(av, pv);
+    NOIA_ASSERT_FRAME_ARRAY(ah, ph);
+    NOIA_ASSERT_FRAME_ARRAY(as, ps);
 
     noia_pool_destroy(pv);
     noia_pool_destroy(ph);
@@ -647,6 +685,7 @@ int main(int argc, char** argv)
     NoiaTest test[] = {
             NOIA_TEST(should),
             NOIA_TEST(should_append_and_prepend_values),
+            NOIA_TEST(should_insert_values),
             NOIA_TEST(should_translate_frame_to_array),
             NOIA_TEST(should_translate_subframes_to_array),
             NOIA_TEST(should_remove_some_leaf_frames),
