@@ -67,14 +67,14 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 
     /// @todo Frame type, size and position should be configurable.
     NoiaFrame* frame = noia_frame_new();
-    noia_frame_configure(frame, NOIA_FRAME_TYPE_FLOATING, sid,
-                         (NoiaPosition) {0,0}, surface->requested_size);
+    noia_frame_configure(frame, NOIA_FRAME_TYPE_FLOATING | NOIA_FRAME_TYPE_LEAF,
+                         sid, (NoiaPosition) {0,0}, surface->requested_size);
 
     noia_frame_append(self->selection, frame);
     /// @todo This should be configurable
     self->selection = frame;
 
-    noia_frame_log(self->root);
+    noia_frame_log(self->root, self->selection);
 
     return true;
 }
@@ -117,17 +117,28 @@ void noia_compositor_pop_surface(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
+void noia_compositor_jump(NoiaCompositor* self,
+                          NoiaFrame* frame,
+                          NoiaArgmand argmand)
+{
+    assert(self);
+    assert(frame);
+    assert(noia_argmand_is_directed(argmand));
+}
+
+//------------------------------------------------------------------------------
+
 void noia_compositor_focus(NoiaCompositor* self,
                            NoiaArgmand argmand,
                            int position)
 {
+    assert(self);
     assert(noia_argmand_is_directed(argmand));
 
     if (argmand == NOIA_ARGMAND_BACK || argmand == NOIA_ARGMAND_FORWARD) {
         NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
         if (argmand == NOIA_ARGMAND_BACK) {
             position = -1 * position;
-            argmand = NOIA_ARGMAND_FORWARD;
         }
 
         NoiaSurfaceId sid = (NoiaSurfaceId) noia_list_get_nth
@@ -136,9 +147,62 @@ void noia_compositor_focus(NoiaCompositor* self,
             noia_compositor_pop_surface(self, sid);
         }
     } else {
-        self->selection = noia_frame_find_pointed(self->selection,
-                                                  argmand, position);
+        if (position < 0) {
+            argmand = noia_argmand_reverse_directed(argmand);
+            position = -position;
+        }
+
+        NoiaFrame* new_selection =
+                   noia_frame_find_adjacent(self->selection, argmand, position);
+        if (new_selection) {
+            self->selection = new_selection;
+        }
     }
+
+    noia_frame_log(self->root, self->selection);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_compositor_configure(NoiaCompositor* self,
+                               NoiaFrame* frame,
+                               NoiaArgmand direction)
+{
+    assert(self);
+    assert(frame);
+    assert(frame->trunk);
+
+    // Translate direction to frame type
+    NoiaFrameType type = NOIA_FRAME_TYPE_NONE;
+    switch (direction) {
+    case NOIA_ARGMAND_BEGIN:
+    case NOIA_ARGMAND_END:
+        type = NOIA_FRAME_TYPE_STACKED;
+        break;
+
+    case NOIA_ARGMAND_N:
+    case NOIA_ARGMAND_S:
+        type = NOIA_FRAME_TYPE_VERTICAL;
+        break;
+
+    case NOIA_ARGMAND_E:
+    case NOIA_ARGMAND_W:
+        type = NOIA_FRAME_TYPE_HORIZONTAL;
+        break;
+
+    default:
+        break;
+    }
+
+    // Change frame type
+    if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
+        /// @todo: Create new frame at trunk and resettle selection.
+        noia_frame_change_type(frame->trunk, type);
+    } else {
+        noia_frame_change_type(frame, type);
+    }
+
+    noia_frame_log(self->root, self->selection);
 }
 
 //------------------------------------------------------------------------------
@@ -153,14 +217,14 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
             break;
         }
 
-        NoiaFrame* workspace = noia_frame_get_top(self->selection);
+        NoiaFrame* workspace = noia_frame_find_top(self->selection);
         if (!workspace) {
             break;
         }
 
         noia_frame_resettle(frame, workspace);
     }
-    noia_frame_log(self->root);
+    noia_frame_log(self->root, self->selection);
 }
 
 //------------------------------------------------------------------------------
@@ -182,12 +246,13 @@ void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
         noia_frame_move(self->selection, a->direction, a->magnitude);
         break;
     case NOIA_ARGMAND_JUMP:
-        noia_frame_jump(self->selection, a->direction, a->magnitude);
+        noia_compositor_jump(self, self->selection, a->direction);
         break;
     case NOIA_ARGMAND_FOCUS:
         noia_compositor_focus(self, a->direction, a->magnitude);
         break;
     case NOIA_ARGMAND_CONF:
+        noia_compositor_configure(self, self->selection, a->direction);
         break;
     case NOIA_ARGMAND_ANCHOR:
         noia_compositor_anchorize(self, self->selection);

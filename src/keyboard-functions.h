@@ -21,7 +21,13 @@ void noia_put_number(NoiaAction* action, int code,
 
 void noia_anchorize(NoiaAction* action);
 
-void noia_select_above(NoiaAction* action);
+void noia_stackedize(NoiaAction* action);
+
+void noia_verticalize(NoiaAction* action);
+
+void noia_horizontalize(NoiaAction* action);
+
+void noia_select_trunk(NoiaAction* action);
 
 void noia_right(NoiaAction* action);
 

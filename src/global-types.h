@@ -90,7 +90,7 @@ typedef struct {
 bool noia_position_is_inside(NoiaPosition position, NoiaArea area);
 
 /// If point `position` is outside area `area` return a point inside area `area`
-/// that is the colosest to point `position`.
+/// that is the closest to point `position`.
 NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area);
 
 /// Clear the action.

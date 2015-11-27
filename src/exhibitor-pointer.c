@@ -8,6 +8,7 @@
 #include "utils-log.h"
 #include "global-macros.h"
 #include "global-objects.h"
+#include "global-macros.h"
 #include "event-signals.h"
 
 #define INVALID_POINTER_VALUE -1

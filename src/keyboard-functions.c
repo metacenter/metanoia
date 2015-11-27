@@ -122,7 +122,43 @@ void noia_anchorize(NoiaAction* action)
 
 //------------------------------------------------------------------------------
 
-void noia_select_above(NoiaAction* action)
+void noia_stackedize(NoiaAction* action)
+{
+    assert(action);
+    noia_action_clean(action);
+    action->action = NOIA_ARGMAND_CONF;
+    action->direction = NOIA_ARGMAND_END;
+    noia_exhibitor_execute(action);
+    noia_action_clean(action);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_verticalize(NoiaAction* action)
+{
+    assert(action);
+    noia_action_clean(action);
+    action->action = NOIA_ARGMAND_CONF;
+    action->direction = NOIA_ARGMAND_N;
+    noia_exhibitor_execute(action);
+    noia_action_clean(action);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_horizontalize(NoiaAction* action)
+{
+    assert(action);
+    noia_action_clean(action);
+    action->action = NOIA_ARGMAND_CONF;
+    action->direction = NOIA_ARGMAND_W;
+    noia_exhibitor_execute(action);
+    noia_action_clean(action);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_select_trunk(NoiaAction* action)
 {
     assert(action);
     action->action = NOIA_ARGMAND_FOCUS;

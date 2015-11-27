@@ -23,7 +23,7 @@ typedef struct {
 } NoiaExhibitor;
 
 /// Return the singleton instance.
-/// @todo Do not se singletons.
+/// @todo Do not use singletons.
 NoiaExhibitor* noia_exhibitor_get_instance();
 
 /// Get list of active displays.
@@ -33,7 +33,7 @@ NoiaList* noia_exhibitor_get_displays();
 /// @see NoiaAction
 void noia_exhibitor_execute(NoiaAction* action);
 
-/// Subscrube for notifications.
+/// Subscribe for notifications.
 void noia_exhibitor_initialize(NoiaLoop* this_loop);
 
 #endif // __NOIA_EXHIBITOR_H__

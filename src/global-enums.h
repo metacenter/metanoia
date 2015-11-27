@@ -34,12 +34,12 @@ typedef enum {
 typedef enum {
     NOIA_ARGMAND_NONE = 0,///< Dummy; do/parametrize nothing
     NOIA_ARGMAND_NUMBER,  ///< Number; numeric value; integer
-    NOIA_ARGMAND_CONF,    ///< Change focused surface
-    NOIA_ARGMAND_FOCUS,   ///< Change focused surface
+    NOIA_ARGMAND_ANCHOR,  ///< Anchorize; de-anchorize
+    NOIA_ARGMAND_CONF,    ///< Change configuration
+    NOIA_ARGMAND_FOCUS,   ///< Change focus
     NOIA_ARGMAND_MOVE,    ///< Change position
     NOIA_ARGMAND_JUMP,    ///< Change placement in tree structure
     NOIA_ARGMAND_RESIZE,  ///< Change size
-    NOIA_ARGMAND_ANCHOR,  ///< Anchor; de-anchor
     NOIA_ARGMAND_N,       ///< North; up; above
     NOIA_ARGMAND_E,       ///< East; right
     NOIA_ARGMAND_S,       ///< South; down; below
@@ -47,7 +47,7 @@ typedef enum {
     NOIA_ARGMAND_BACK,    ///< Back in time; most recently used
     NOIA_ARGMAND_FORWARD, ///< Forward in time; the oldest used
     NOIA_ARGMAND_BEGIN,   ///< Begin; start; head
-    NOIA_ARGMAND_END,     ///< End; finnish; tail
+    NOIA_ARGMAND_END,     ///< End; finish; tail
     NOIA_ARGMAND_TRUNK,   ///< Trunk; make a trunk; up in frame hierarchy
 } NoiaArgmand;
 
@@ -62,6 +62,10 @@ typedef enum {
     NOIA_FRAME_TYPE_LEAF       = 0x0020,
 
     NOIA_FRAME_TYPE_SPECIAL    = 0x1000,
+
+    NOIA_FRAME_TYPE_DIRECTED   = NOIA_FRAME_TYPE_HORIZONTAL
+                               | NOIA_FRAME_TYPE_VERTICAL
+                               | NOIA_FRAME_TYPE_STACKED,
 
     NOIA_FRAME_TYPE_WORKSPACE  = NOIA_FRAME_TYPE_SPECIAL
                                | NOIA_FRAME_TYPE_FIXED

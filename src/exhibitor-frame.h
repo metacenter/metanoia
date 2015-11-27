@@ -11,6 +11,7 @@
 /// @file
 /// @todo Unit tests for NoiaFrame.
 
+/// Structure representing frame containing surfaces and other frames.
 typedef NoiaBranch NoiaFrame;
 
 /// Parameters describing state of surface hold by frame.
@@ -25,11 +26,8 @@ typedef struct {
     /// Surface ID.
     NoiaSurfaceId sid;
 
-    /// Position in workspace coordinates.
-    NoiaPosition pos;
-
-    /// Size of the frame.
-    NoiaSize size;
+    /// Position in workspace coordinates and size of the frame.
+    NoiaArea area;
 } NoiaFrameParams;
 
 /// Compare frame parameters.
@@ -66,6 +64,9 @@ void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces);
 /// Check if frame has compatible type.
 bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type);
 
+/// Get frame area
+NoiaArea noia_frame_get_area(NoiaFrame* self);
+
 /// Add child frame to ending.
 /// If `self` has twigs add `other` to them.
 /// If not, add to subframes of its trunk.
@@ -75,10 +76,6 @@ void noia_frame_append(NoiaFrame* self, NoiaFrame* other);
 /// If `self` has twigs add `other` to them.
 /// If not, add to subframes of its trunk.
 void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other);
-
-/// Find first trunk which type has NOIA_FRAME_TYPE_SPECIAL.
-/// For normal frame this should be workspace.
-NoiaFrame* noia_frame_get_top(NoiaFrame* self);
 
 /// Remove frame `self` from its current trunk and prepend to frame `target`.
 NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target);
@@ -94,10 +91,8 @@ void noia_frame_move(NoiaFrame* self,
                      NoiaArgmand direction,
                      int magnitude);
 
-/// @todo Implement noia_frame_jump
-void noia_frame_jump(NoiaFrame* self,
-                     NoiaArgmand direction,
-                     int magnitude);
+/// Change directed type of frame.
+NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type);
 
 /// Pop the surface `pop` and its parents recursively ending on `self`.
 void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
@@ -108,21 +103,39 @@ NoiaResult noia_frame_remove_self(NoiaFrame* self);
 /// Find a frame holding surface with given ID.
 NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid);
 
-/// Find a frame `magnitude` frames forther in `direction` direction.
-NoiaFrame* noia_frame_find_pointed(NoiaFrame* self,
-                                   NoiaArgmand direction,
-                                   int magnitude);
+/// Find leaf frame contained in frame `self` containing `point` or the closest
+/// one if `point` lies outside `self`.
+NoiaFrame* noia_frame_find_pointed(NoiaFrame* self, NoiaPosition point);
+
+/// Find find top-most frame bordering with frame `self` in given direction.
+NoiaFrame* noia_frame_find_contiguous(NoiaFrame* self,
+                                      NoiaArgmand direction,
+                                      unsigned distance);
+
+/// Find find bottom-most frame bordering with frame `self` in given direction.
+NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
+                                    NoiaArgmand direction,
+                                    unsigned distance);
+
+/// Find first trunk which type has NOIA_FRAME_TYPE_SPECIAL.
+/// For normal frame this should be workspace.
+NoiaFrame* noia_frame_find_top(NoiaFrame* self);
+
+/// Find first ancestor which trunk has type `type`, `FLOATING` or `SPECIAL`.
+/// @see noia_frame_resize
+NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame,
+                                           NoiaFrameType type);
 
 /// Print frame tree to log file.
-void noia_frame_log(NoiaFrame* self);
+void noia_frame_log(NoiaFrame* self, NoiaFrame* selection);
 
-/// Insert `other` to twings of `self`'s trunk just before `self`.
+/// Insert `other` to twigs of `self`'s trunk just before `self`.
 static inline void noia_frame_insert_before(NoiaFrame* self, NoiaFrame* other)
 {
     noia_branch_insert_before(self, other);
 }
 
-/// Insert `other` to twings of `self`'s trunk just after `self`.
+/// Insert `other` to twigs of `self`'s trunk just after `self`.
 static inline void noia_frame_insert_after(NoiaFrame* self, NoiaFrame* other)
 {
     noia_branch_insert_after(self, other);

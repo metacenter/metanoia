@@ -1662,6 +1662,7 @@ checks/check-frame: Makefile \
                     src/global-enums.c \
                     src/global-enums.h \
                     src/global-macros.h \
+                    src/global-types.c \
                     src/global-types.h \
                     src/surface-data.h \
                     src/surface-manager.h \
@@ -1684,5 +1685,5 @@ checks/check-frame: Makefile \
 	@mkdir -p checks
 	@echo "  CC   check-frame"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-frame -Isrc -Igen \
-	      tests/test-frame.c tests/fake-utils-log.c tests/mock-surface-manager.c src/utils-chain.c src/utils-branch.c src/utils-store.c src/utils-pool.c src/global-enums.c src/exhibitor-frame.c
+	      tests/test-frame.c tests/fake-utils-log.c tests/mock-surface-manager.c src/utils-chain.c src/utils-branch.c src/utils-store.c src/utils-pool.c src/global-enums.c src/global-types.c src/exhibitor-frame.c
 

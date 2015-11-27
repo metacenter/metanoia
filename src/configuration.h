@@ -27,7 +27,10 @@ static const NoiaBinding scBindings[] = {
         {KEY_M,     NOIA_KEY_NONE, {noia_put_move}},
         {KEY_R,     NOIA_KEY_NONE, {noia_put_resize}},
         {KEY_A,     NOIA_KEY_NONE, {noia_anchorize}},
-        {KEY_P,     NOIA_KEY_NONE, {noia_select_above}},
+        {KEY_S,     NOIA_KEY_NONE, {noia_stackedize}},
+        {KEY_V,     NOIA_KEY_NONE, {noia_verticalize}},
+        {KEY_H,     NOIA_KEY_NONE, {noia_horizontalize}},
+        {KEY_P,     NOIA_KEY_NONE, {noia_select_trunk}},
         // directions
         {KEY_RIGHT, NOIA_KEY_NONE, {noia_right}},
         {KEY_LEFT,  NOIA_KEY_NONE, {noia_left}},

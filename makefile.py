@@ -676,7 +676,8 @@ m.add_test(output='check-frame',
            inputs=['test-frame.c', 'fake-utils-log.c',
                    'mock-surface-manager.c'],
            deps=['utils-chain.c', 'utils-branch.c', 'utils-store.c',
-                 'utils-pool.c', 'global-enums.c', 'exhibitor-frame.c'])
+                 'utils-pool.c', 'global-enums.c', 'global-types.c',
+                 'exhibitor-frame.c'])
 
 #-------------------------------------------------------------------------------
 
