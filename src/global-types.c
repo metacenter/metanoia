@@ -30,13 +30,13 @@ NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area)
             position.x = area.pos.x;
         }
         if (position.x > area.pos.x + area.size.width) {
-            position.x = area.pos.x + area.size.width;
+            position.x = area.pos.x + area.size.width - 1;
         }
         if (position.y < area.pos.y) {
             position.y = area.pos.y;
         }
         if (position.y > area.pos.y + area.size.height) {
-            position.y = area.pos.y + area.size.height;
+            position.y = area.pos.y + area.size.height - 1;
         }
     }
     return position;

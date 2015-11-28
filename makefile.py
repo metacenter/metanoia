@@ -648,6 +648,10 @@ metanoiactl_gtk.add_input(target_screenshooter_protocol)
 #-------------------------------------------------------------------------------
 # TESTS
 
+m.add_test(output='check-globals',
+           inputs=['test-globals.c'],
+           deps=['global-types.c'])
+
 m.add_test(output='check-pool',
            inputs=['test-pool.c'],
            deps=['utils-pool.c'])
