@@ -7,7 +7,6 @@
 #include "output.h"
 #include "event-signals.h"
 #include "utils-log.h"
-#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -29,7 +28,7 @@ typedef struct {
 NoiaRenderer* noia_backend_offscreen_output_mmap_initialize(NoiaOutput* output,
                                                             NoiaSize size)
 {
-    assert(output);
+    NOIA_ENSURE(output, return NULL);
     NoiaOutputOffscreen* output_offscreen = (NoiaOutputOffscreen*) output;
     LOG_INFO1("Initializing plain offscreen output...");
 
@@ -50,9 +49,8 @@ NoiaRenderer* noia_backend_offscreen_output_mmap_initialize(NoiaOutput* output,
 NoiaRenderer* noia_backend_offscreen_output_gl_initialize(NoiaOutput* output,
                                                           NoiaSize size)
 {
-    assert(output);
+    NOIA_ENSURE(output, return NULL);
     NoiaOutputOffscreen* output_offscreen = (NoiaOutputOffscreen*) output;
-
     LOG_INFO1("Initializing offscreen GL output...");
 
     // Initialize EGL
@@ -77,7 +75,7 @@ NoiaRenderer* noia_backend_offscreen_output_gl_initialize(NoiaOutput* output,
 
 void noia_backend_offscreen_output_free(NoiaOutput* output)
 {
-    assert(output);
+    NOIA_ENSURE(output, return);
     NoiaOutputOffscreen* output_offscreen = (NoiaOutputOffscreen*) output;
 
     if (output->renderer) {

@@ -4,12 +4,10 @@
 #include "output-collector.h"
 #include "event-signals.h"
 #include "utils-log.h"
-#include "utils-list.h"
 #include "device-drm.h"
 #include "device-fb.h"
 #include "backend-offscreen.h"
 #include "config.h"
-#include "global-macros.h"
 
 #include <limits.h>
 #include <memory.h>

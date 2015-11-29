@@ -21,6 +21,9 @@ typedef int (*NoiaCompareFunc) (void*, void*);
 /// Duplicate function definition
 typedef void* (*NoiaDuplicateFunc) (void*);
 
+/// Print formated string function
+typedef void (*NoiaPrintFunc) (const char*, ...);
+
 /// Structure to be inherited by all types that want to be stored in NoiaStore
 typedef struct {
     union {

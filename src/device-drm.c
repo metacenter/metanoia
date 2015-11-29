@@ -6,7 +6,6 @@
 #include "renderer-mmap.h"
 #include "renderer-gl.h"
 #include "config.h"
-#include "global-macros.h"
 
 #include <sys/mman.h>
 #include <gbm.h>
@@ -95,7 +94,7 @@ void noia_drm_log(int drm_fd, drmModeRes* resources)
         drmModeEncoderPtr encoder =
                               drmModeGetEncoder(drm_fd, resources->encoders[i]);
         if (encoder) {
-            LOG_INFO2("Encoder (id: %u, CTRC: %u, mask: 0x%x)",
+            LOG_INFO2("Encoder (id: %u, CRTC: %u, mask: 0x%x)",
                        encoder->encoder_id, encoder->crtc_id,
                        encoder->possible_crtcs);
         }

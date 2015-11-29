@@ -12,7 +12,8 @@
 #include <string.h>
 
 #define NOIA_ASSERT_RENDERER_MMAP(renderer) \
-    NoiaRendererMMap* mine = (NoiaRendererMMap*) self; assert(mine);
+    NoiaRendererMMap* mine = (NoiaRendererMMap*) self; \
+    NOIA_ENSURE(mine, return);
 
 //------------------------------------------------------------------------------
 
@@ -93,8 +94,8 @@ void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine)
 void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
                                      NoiaSurfaceContext* context)
 {
-    assert(mine);
-    assert(context);
+    NOIA_ENSURE(mine, return);
+    NOIA_ENSURE(context, return);
 
     NoiaSurfaceData* surface = noia_surface_get(context->sid);
     if (!surface) {
@@ -197,7 +198,8 @@ void noia_renderer_mmap_draw(NoiaRenderer* self,
                              NoiaLayoverContext* context)
 {
     NOIA_ASSERT_RENDERER_MMAP(self);
-    assert(surfaces); assert(context);
+    NOIA_ENSURE(surfaces, return);
+    NOIA_ENSURE(context, return);
 
     noia_renderer_mmap_draw_bg_image(mine);
     noia_renderer_mmap_draw_surfaces(mine, surfaces);

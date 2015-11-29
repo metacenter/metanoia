@@ -127,7 +127,7 @@ NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame,
                                            NoiaFrameType type);
 
 /// Print frame tree to log file.
-void noia_frame_log(NoiaFrame* self, NoiaFrame* selection);
+void noia_frame_log(NoiaFrame* self, NoiaPrintFunc print, NoiaFrame* selection);
 
 /// Insert `other` to twigs of `self`'s trunk just before `self`.
 static inline void noia_frame_insert_before(NoiaFrame* self, NoiaFrame* other)

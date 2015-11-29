@@ -2,9 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "exhibitor-frame.h"
-#include "utils-log.h"
 #include "surface-manager.h"
-#include "global-macros.h"
 
 /// @todo: remove event signals from exhibitor frame
 #include "event-signals.h"
@@ -178,32 +176,25 @@ void noia_frame_resize_anchored(NoiaFrame* self,
 /// Helper function for log printing.
 /// @see noia_frame_log
 static inline void noia_frame_log_internal(NoiaFrame* self,
+                                           NoiaPrintFunc print,
                                            NoiaFrame* selection,
                                            unsigned level)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
 
-    if (level == 0) {
-        noia_log_begin("FRAMES");
-    }
-
     for (unsigned i = 0; i < level; ++i) {
-        noia_log_print("    ");
+        print("    ");
     }
 
-    noia_log_print("NoiaFrame(type='0x%x', sid='%d', len='%d'"
-                   "x='%d', y='%d', w='%d', h='%d')%s\n",
-                   params->type, params->sid, noia_chain_len(self->twigs),
-                   params->area.pos.x, params->area.pos.y,
-                   params->area.size.width, params->area.size.height,
-                   (self == selection) ? " <== FOCUS" : "");
+    print("NoiaFrame(type='0x%x', sid='%d', len='%d'"
+          "x='%d', y='%d', w='%d', h='%d')%s\n",
+          params->type, params->sid, noia_chain_len(self->twigs),
+          params->area.pos.x, params->area.pos.y,
+          params->area.size.width, params->area.size.height,
+          (self == selection) ? " <== FOCUS" : "");
 
     FOR_EACH_TWIG(self, twig) {
-        noia_frame_log_internal(twig, selection, level+1);
-    }
-
-    if (level == 0) {
-        noia_log_end();
+        noia_frame_log_internal(twig, print, selection, level+1);
     }
 }
 
@@ -232,7 +223,7 @@ NoiaFrame* noia_frame_new()
     NoiaFrame* self = noia_branch_new();
 
     self->base.data = malloc(sizeof(NoiaFrameParams));
-    assert(self->base.data);
+    NOIA_ENSURE(self->base.data, abort());
 
     NoiaFrameParams* params = self->base.data;
     memset(params, 0, sizeof(NoiaFrameParams));
@@ -371,7 +362,7 @@ void noia_frame_resize(NoiaFrame* self,
                        NoiaArgmand direction,
                        int magnitude)
 {
-    assert(self);
+    NOIA_ENSURE(self, return);
 
     // Find adequate frame for resize
     NoiaFrameType type = NOIA_FRAME_TYPE_NONE;
@@ -401,12 +392,10 @@ void noia_frame_resize(NoiaFrame* self,
 
 NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type)
 {
-    assert(self);
+    NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
+
     int len = noia_chain_len(self->twigs);
-    if (len == 0) {
-        LOG_INFO3("Can't change type of frame that does not have twigs!");
-        return NOIA_RESULT_INCORRECT_ARGUMENT;
-    }
+    NOIA_ENSURE(len > 0, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
     // Decide how to resize and move twigs
     NoiaFrameParams* params = noia_frame_get_params(self);
@@ -421,7 +410,6 @@ NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type)
         size.height = params->area.size.height;
         size.width = increment.width = params->area.size.width / len;
     } else {
-        LOG_INFO3("Unsupported frame type! (%d)", params->type);
         return NOIA_RESULT_INCORRECT_ARGUMENT;
     }
 
@@ -447,7 +435,7 @@ void noia_frame_move(NoiaFrame* self,
                      NoiaArgmand direction,
                      int magnitude)
 {
-    assert(self);
+    NOIA_ENSURE(self, return);
 
     NoiaFrameParams* params = noia_frame_get_params(self);
     if (!(params->type & NOIA_FRAME_TYPE_FLOATING)
@@ -512,7 +500,7 @@ NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid)
 
 NoiaFrame* noia_frame_find_pointed(NoiaFrame* self, NoiaPosition point)
 {
-    assert(self);
+    NOIA_ENSURE(self, return NULL);
 
     NoiaFrame* frame = NULL;
     NoiaFrameParams* params = noia_frame_get_params(self);
@@ -544,8 +532,8 @@ NoiaFrame* noia_frame_find_contiguous(NoiaFrame* self,
                                       NoiaArgmand direction,
                                       unsigned distance)
 {
-    assert(self);
-    assert(noia_argmand_is_directed(direction));
+    NOIA_ENSURE(self, return NULL);
+    NOIA_ENSURE(noia_argmand_is_directed(direction), return NULL);
 
     // If distance is zero, this is the last step of recurrence.
     if (distance == 0) {
@@ -592,8 +580,8 @@ NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
                                     NoiaArgmand direction,
                                     unsigned distance)
 {
-    assert(self);
-    assert(noia_argmand_is_directed(direction));
+    NOIA_ENSURE(self, return NULL);
+    NOIA_ENSURE(noia_argmand_is_directed(direction), return NULL);
 
     // If distance is zero, this is the last step of recurrence.
     if (distance == 0) {
@@ -622,7 +610,8 @@ NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
 
 NoiaFrame* noia_frame_find_top(NoiaFrame* self)
 {
-    assert(self);
+    NOIA_ENSURE(self, return NULL);
+
     NoiaFrame* frame = self;
     while (frame && !noia_frame_has_type(frame, NOIA_FRAME_TYPE_SPECIAL)) {
         frame = frame->trunk;
@@ -634,7 +623,8 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self)
 
 NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame, NoiaFrameType type)
 {
-    assert(frame);
+    NOIA_ENSURE(frame, return NULL);
+
     if (noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_FLOATING
     ||  noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_SPECIAL
     ||  noia_frame_get_params(frame->trunk)->type & type) {
@@ -645,9 +635,9 @@ NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame, NoiaFrameType type)
 
 //------------------------------------------------------------------------------
 
-void noia_frame_log(NoiaFrame* self, NoiaFrame* selection)
+void noia_frame_log(NoiaFrame* self, NoiaPrintFunc print, NoiaFrame* selection)
 {
-    noia_frame_log_internal(self, selection, 0);
+    noia_frame_log_internal(self, print, selection, 0);
 }
 
 //------------------------------------------------------------------------------

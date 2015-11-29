@@ -75,14 +75,14 @@ NoiaList* noia_list_subtract(NoiaList* minuend,
 /// Return the length of the list.
 static inline int noia_list_len(NoiaList* self)
 {
-    assert(self);
+    NOIA_ENSURE(self, return 0);
     return noia_chain_len(&self->base);
 }
 
 /// Recalculate and return the length of the list.
 static inline int noia_list_recalculate_length(NoiaList* self)
 {
-    assert(self);
+    NOIA_ENSURE(self, return 0);
     return noia_chain_recalculate_length(&self->base);
 }
 

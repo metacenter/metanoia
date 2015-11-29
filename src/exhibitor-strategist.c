@@ -44,7 +44,7 @@ void noia_strategist_on_surface_destroyed(NoiaExhibitor* exhibitor NOIA_UNUSED,
 NoiaStrategist* noia_strategist_new()
 {
     NoiaStrategist* self = malloc(sizeof(NoiaStrategist));
-    assert(self);
+    NOIA_ENSURE(self, abort());
     memset(self, 0, sizeof(NoiaStrategist));
 
     noia_strategist_setup(self,
@@ -58,7 +58,7 @@ NoiaStrategist* noia_strategist_new()
 
 void noia_strategist_free(NoiaStrategist* self)
 {
-    assert(self);
+    NOIA_ENSURE(self, return);
     memset(self, 0, sizeof(NoiaStrategist));
     free(self);
 }
@@ -70,7 +70,7 @@ void noia_strategist_setup
                       NoiaStrategistOnSurfaceReadyFunc     on_surface_ready,
                       NoiaStrategistOnSurfaceDestroyedFunc on_surface_destroyed)
 {
-    assert(self);
+    NOIA_ENSURE(self, return);
     self->on_surface_ready     = on_surface_ready;
     self->on_surface_destroyed = on_surface_destroyed;
 }

@@ -332,8 +332,11 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
                            NoiaPool* surfaces,
                            NoiaLayoverContext* context)
 {
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(surfaces, return);
+    NOIA_ENSURE(context, return);
+
     NoiaRendererGL* mine = (NoiaRendererGL*) self;
-    assert(mine); assert(surfaces); assert(context);
 
     pthread_mutex_lock(&mutex_renderer_gl);
 

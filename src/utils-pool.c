@@ -47,7 +47,7 @@ void noia_pool_grow(NoiaPool* self)
 NoiaPool* noia_pool_create(unsigned array_size, size_t type_size)
 {
     NoiaPool* self = calloc(1, sizeof(NoiaPool));
-    assert(self != NULL);
+    NOIA_ENSURE(self, abort());
 
     self->pool = NULL;
     self->pool_size = 0;
@@ -63,7 +63,7 @@ NoiaPool* noia_pool_create(unsigned array_size, size_t type_size)
 
 void noia_pool_destroy(NoiaPool* self)
 {
-    assert(self != NULL);
+    NOIA_ENSURE(self, return);
 
     for (unsigned i = 0; i < self->pool_size; ++i) {
         free(self->pool[i]);

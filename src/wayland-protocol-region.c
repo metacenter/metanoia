@@ -4,7 +4,6 @@
 #include "wayland-protocol-region.h"
 #include "wayland-cache.h"
 #include "utils-log.h"
-#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 

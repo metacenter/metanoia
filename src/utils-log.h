@@ -36,29 +36,49 @@
 #define LEVEL_EVNT4 0
 #define LEVEL_WAYL5 0
 
-#define _LOG_(L, ...) \
+#define NOIA_LOG(L, ...) \
      do{if(LEVEL_##L)noia_log(LEVEL_##L,__LINE__,__FILE__,__VA_ARGS__);}while(0)
 
-#define LOG(L, ...)    _LOG_(L,     __VA_ARGS__)
-#define LOG_ERROR(...) _LOG_(ERROR, __VA_ARGS__)
-#define LOG_NYIMP(...) _LOG_(NYIMP, __VA_ARGS__)
-#define LOG_DEBUG(...) _LOG_(DEBUG, __VA_ARGS__)
-#define LOG_WARN1(...) _LOG_(WARN1, __VA_ARGS__)
-#define LOG_INFO1(...) _LOG_(INFO1, __VA_ARGS__)
-#define LOG_WAYL1(...) _LOG_(WAYL1, __VA_ARGS__)
-#define LOG_WARN2(...) _LOG_(WARN2, __VA_ARGS__)
-#define LOG_INFO2(...) _LOG_(INFO2, __VA_ARGS__)
-#define LOG_WAYL2(...) _LOG_(WAYL2, __VA_ARGS__)
-#define LOG_EVNT2(...) _LOG_(EVNT2, __VA_ARGS__)
-#define LOG_WARN3(...) _LOG_(WARN3, __VA_ARGS__)
-#define LOG_INFO3(...) _LOG_(INFO3, __VA_ARGS__)
-#define LOG_WAYL3(...) _LOG_(WAYL3, __VA_ARGS__)
-#define LOG_EVNT3(...) _LOG_(EVNT3, __VA_ARGS__)
-#define LOG_WARN4(...) _LOG_(WARN4, __VA_ARGS__)
-#define LOG_INFO4(...) _LOG_(INFO4, __VA_ARGS__)
-#define LOG_WAYL4(...) _LOG_(WAYL4, __VA_ARGS__)
-#define LOG_EVNT4(...) _LOG_(EVNT4, __VA_ARGS__)
-#define LOG_WAYL5(...) _LOG_(WAYL5, __VA_ARGS__)
+#define LOG_ERROR(...) NOIA_LOG(ERROR, __VA_ARGS__)
+#define LOG_NYIMP(...) NOIA_LOG(NYIMP, __VA_ARGS__)
+#define LOG_DEBUG(...) NOIA_LOG(DEBUG, __VA_ARGS__)
+#define LOG_WARN1(...) NOIA_LOG(WARN1, __VA_ARGS__)
+#define LOG_INFO1(...) NOIA_LOG(INFO1, __VA_ARGS__)
+#define LOG_WAYL1(...) NOIA_LOG(WAYL1, __VA_ARGS__)
+#define LOG_WARN2(...) NOIA_LOG(WARN2, __VA_ARGS__)
+#define LOG_INFO2(...) NOIA_LOG(INFO2, __VA_ARGS__)
+#define LOG_WAYL2(...) NOIA_LOG(WAYL2, __VA_ARGS__)
+#define LOG_EVNT2(...) NOIA_LOG(EVNT2, __VA_ARGS__)
+#define LOG_WARN3(...) NOIA_LOG(WARN3, __VA_ARGS__)
+#define LOG_INFO3(...) NOIA_LOG(INFO3, __VA_ARGS__)
+#define LOG_WAYL3(...) NOIA_LOG(WAYL3, __VA_ARGS__)
+#define LOG_EVNT3(...) NOIA_LOG(EVNT3, __VA_ARGS__)
+#define LOG_WARN4(...) NOIA_LOG(WARN4, __VA_ARGS__)
+#define LOG_INFO4(...) NOIA_LOG(INFO4, __VA_ARGS__)
+#define LOG_WAYL4(...) NOIA_LOG(WAYL4, __VA_ARGS__)
+#define LOG_EVNT4(...) NOIA_LOG(EVNT4, __VA_ARGS__)
+#define LOG_WAYL5(...) NOIA_LOG(WAYL5, __VA_ARGS__)
+
+/// If condition `COND` is not fulfilled print an error and execute expression
+/// `EXPR`.
+///
+/// Switched of when `NDEBUG` macro is defined so if `EXPR` is `abort()`,
+/// it is equivalent to `assert()`.
+///
+/// @note File `utils-macros.h` also defines this macro but without support for
+///       writing to log file.
+#undef NOIA_ENSURE
+#ifndef NDEBUG
+    #define NOIA_ENSURE(COND,EXPR) \
+        if (!(COND)) { \
+            fprintf(stderr, "Noia: %s: %d: Ensurence '%s' failed!\n", \
+                    __FILE__, __LINE__, #COND); \
+            LOG_ERROR("Ensurence failed: >> %s <<", #COND); \
+            noia_print_backtrace(); \
+            EXPR; }
+#else
+    #define NOIA_ENSURE(COND,EXPR) ((void) 0)
+#endif
 
 /// Inialize logging - open the file and write welcome message.
 void noia_log_initialize(const char* filename);

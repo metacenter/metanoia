@@ -170,7 +170,7 @@ NoiaList* noia_exhibitor_get_displays()
 
 void noia_exhibitor_execute(NoiaAction* action)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
     noia_compositor_execute(exhibitor->compositor, action);
 }

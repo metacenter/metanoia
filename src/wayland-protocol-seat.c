@@ -9,7 +9,6 @@
 
 #include "utils-log.h"
 #include "config.h"
-#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
@@ -42,7 +41,7 @@ void noia_wayland_get_pointer(struct wl_client* client,
 {
     struct wl_resource* rc;
 
-    LOG_NYIMP("Wayland: get pointer (id: %d)", id);
+    LOG_WAYL2("Wayland: get pointer (id: %d)", id);
 
     rc = wl_resource_create(client, &wl_pointer_interface,
                             wl_resource_get_version(resource), id);

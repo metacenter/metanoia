@@ -16,7 +16,6 @@
 #include "utils-environment.h"
 #include "global-objects.h"
 #include "event-signals.h"
-#include "global-macros.h"
 
 #include <errno.h>
 #include <string.h>

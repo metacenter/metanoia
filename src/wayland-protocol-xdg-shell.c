@@ -6,7 +6,6 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
-#include "global-macros.h"
 
 #include "xdg-shell-server-protocol.h"
 

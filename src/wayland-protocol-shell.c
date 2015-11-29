@@ -7,7 +7,6 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
-#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 

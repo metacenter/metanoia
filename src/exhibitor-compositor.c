@@ -6,7 +6,6 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
-#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -16,7 +15,7 @@
 NoiaCompositor* noia_compositor_new()
 {
     NoiaCompositor* self = malloc(sizeof(NoiaCompositor));
-    assert(self);
+    NOIA_ENSURE(self, abort());
 
     NoiaPosition pos = {0, 0};
     NoiaSize size = {-1, -1};
@@ -30,7 +29,7 @@ NoiaCompositor* noia_compositor_new()
 
 void noia_compositor_free(NoiaCompositor* self)
 {
-    assert(self);
+    NOIA_ENSURE(self, return);
 
     noia_frame_free(self->root);
 
@@ -43,7 +42,7 @@ void noia_compositor_free(NoiaCompositor* self)
 NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
                                                 NoiaSize size)
 {
-    assert(self);
+    NOIA_ENSURE(self, return NULL);
 
     NoiaFrame* workspace = noia_frame_new();
     noia_frame_configure_as_workspace(workspace, size);
@@ -56,9 +55,18 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
+void noia_compositor_log_frame(NoiaCompositor* self)
+{
+    noia_log_begin("FRAMES");
+    noia_frame_log(self->root, noia_log_print, self->selection);
+    noia_log_end();
+}
+
+//------------------------------------------------------------------------------
+
 bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 {
-    assert(self);
+    NOIA_ENSURE(self, return false);
 
     NoiaSurfaceData* surface = noia_surface_get(sid);
     if (!surface || !surface->is_toplevel) {
@@ -74,7 +82,7 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     /// @todo This should be configurable
     self->selection = frame;
 
-    noia_frame_log(self->root, self->selection);
+    noia_compositor_log_frame(self);
 
     return true;
 }
@@ -83,7 +91,7 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 
 void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 {
-    assert(self);
+    NOIA_ENSURE(self, return);
     NoiaFrame* frame = noia_frame_find_with_sid(self->root, sid);
     noia_frame_remove_self(frame);
     noia_frame_free(frame);
@@ -99,7 +107,7 @@ void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 void noia_compositor_pop_surface(NoiaCompositor* self,
                                  NoiaSurfaceId sid)
 {
-    assert(self);
+    NOIA_ENSURE(self, return);
 
     // Pop in frame hierarchy.
     NoiaFrame* frame = noia_frame_find_with_sid(self->root, sid);
@@ -117,13 +125,13 @@ void noia_compositor_pop_surface(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
-void noia_compositor_jump(NoiaCompositor* self,
-                          NoiaFrame* frame,
-                          NoiaArgmand argmand)
+void noia_compositor_jump(NoiaCompositor* self NOIA_UNUSED,
+                          NoiaFrame* frame     NOIA_UNUSED,
+                          NoiaArgmand argmand  NOIA_UNUSED)
 {
-    assert(self);
-    assert(frame);
-    assert(noia_argmand_is_directed(argmand));
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(frame, return);
+    NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
 }
 
 //------------------------------------------------------------------------------
@@ -132,8 +140,8 @@ void noia_compositor_focus(NoiaCompositor* self,
                            NoiaArgmand argmand,
                            int position)
 {
-    assert(self);
-    assert(noia_argmand_is_directed(argmand));
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
 
     if (argmand == NOIA_ARGMAND_BACK || argmand == NOIA_ARGMAND_FORWARD) {
         NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
@@ -159,7 +167,7 @@ void noia_compositor_focus(NoiaCompositor* self,
         }
     }
 
-    noia_frame_log(self->root, self->selection);
+    noia_compositor_log_frame(self);
 }
 
 //------------------------------------------------------------------------------
@@ -168,9 +176,9 @@ void noia_compositor_configure(NoiaCompositor* self,
                                NoiaFrame* frame,
                                NoiaArgmand direction)
 {
-    assert(self);
-    assert(frame);
-    assert(frame->trunk);
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(frame, return);
+    NOIA_ENSURE(frame->trunk, return);
 
     // Translate direction to frame type
     NoiaFrameType type = NOIA_FRAME_TYPE_NONE;
@@ -202,15 +210,15 @@ void noia_compositor_configure(NoiaCompositor* self,
         noia_frame_change_type(frame, type);
     }
 
-    noia_frame_log(self->root, self->selection);
+    noia_compositor_log_frame(self);
 }
 
 //------------------------------------------------------------------------------
 
 void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
 {
-    assert(self);
-    assert(frame);
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(frame, return);
 
     NOIA_TRY {
         if (!noia_frame_has_type(self->selection, NOIA_FRAME_TYPE_FLOATING)) {
@@ -224,16 +232,16 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
 
         noia_frame_resettle(frame, workspace);
     }
-    noia_frame_log(self->root, self->selection);
+    noia_compositor_log_frame(self);
 }
 
 //------------------------------------------------------------------------------
 
 void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
 {
-    assert(a);
-    assert(self);
-    assert(noia_argmand_is_actionable(a->action));
+    NOIA_ENSURE(a, return);
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(noia_argmand_is_actionable(a->action), return);
     if (!self->selection) {
         return;
     }

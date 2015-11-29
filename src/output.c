@@ -54,10 +54,10 @@ void noia_output_take_screenshot(NoiaOutput* output,
                                  uint8_t* data,
                                  unsigned stride)
 {
-    assert(data);
-    assert(output);
-    assert(output->renderer);
-    assert(output->renderer->copy_buffer);
+    NOIA_ENSURE(data, return);
+    NOIA_ENSURE(output, return);
+    NOIA_ENSURE(output->renderer, return);
+    NOIA_ENSURE(output->renderer->copy_buffer, return);
 
     output->renderer->copy_buffer(output->renderer, area, data, stride);
 }

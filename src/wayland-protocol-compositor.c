@@ -10,7 +10,6 @@
 #include "surface-manager.h"
 #include "utils-log.h"
 #include "global-types.h"
-#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 

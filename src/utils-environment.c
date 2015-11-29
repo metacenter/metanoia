@@ -233,12 +233,12 @@ int noia_environment_open_file(const char *file_name,
 
     char* base_path;
     switch (path) {
-        case RUNTIME_PATH: base_path = sNoiaRuntimePath; break;
-        case DATA_PATH:    base_path = sNoiaDataPath;    break;
+    case RUNTIME_PATH:       base_path = sNoiaRuntimePath; break;
+    case DATA_PATH: default: base_path = sNoiaDataPath;    break;
     }
 
     char* file_path = malloc(strlen(base_path) + strlen(file_name) + 2);
-    assert(file_path);
+    NOIA_ENSURE(file_path, abort());
 
     strcpy(file_path, base_path);
     strcat(file_path, "/");

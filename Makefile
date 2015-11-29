@@ -914,7 +914,6 @@ build/exhibitor-frame.o: Makefile \
                          src/utils-branch.h \
                          src/utils-chain.h \
                          src/utils-list.h \
-                         src/utils-log.h \
                          src/utils-object.h \
                          src/utils-pool.h \
                          src/utils-store.h

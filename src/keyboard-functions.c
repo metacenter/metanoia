@@ -13,8 +13,8 @@
 static inline void noia_action(NoiaAction* action,
                                NoiaArgmand argmand)
 {
-    assert(action);
-    assert(noia_argmand_is_actionable(argmand));
+    NOIA_ENSURE(action, return);
+    NOIA_ENSURE(noia_argmand_is_actionable(argmand), return);
 
     action->action = argmand;
     if (action->direction != NOIA_ARGMAND_NONE) {
@@ -28,8 +28,8 @@ static inline void noia_action(NoiaAction* action,
 static inline void noia_direction(NoiaAction* action,
                                   NoiaArgmand argmand)
 {
-    assert(action);
-    assert(noia_argmand_is_directed(argmand));
+    NOIA_ENSURE(action, return);
+    NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
 
     action->direction = argmand;
     if (action->action != NOIA_ARGMAND_NONE) {
@@ -42,7 +42,7 @@ static inline void noia_direction(NoiaAction* action,
 
 void noia_cicle_history_forward(NoiaAction* action)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_FORWARD;
     noia_exhibitor_execute(action);
@@ -53,7 +53,7 @@ void noia_cicle_history_forward(NoiaAction* action)
 
 void noia_cicle_history_back(NoiaAction* action)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_FORWARD;
     action->magnitude = -1 * action->magnitude;
@@ -88,7 +88,7 @@ void noia_put_number(NoiaAction* action, int code,
                      uint32_t modifiers NOIA_UNUSED,
                      NoiaKeyState state NOIA_UNUSED)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
 
     /// @todo Move elsewhere.
     int number = 0;
@@ -113,7 +113,7 @@ void noia_put_number(NoiaAction* action, int code,
 
 void noia_anchorize(NoiaAction* action)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_ANCHOR;
     noia_exhibitor_execute(action);
@@ -124,7 +124,7 @@ void noia_anchorize(NoiaAction* action)
 
 void noia_stackedize(NoiaAction* action)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_END;
@@ -136,7 +136,7 @@ void noia_stackedize(NoiaAction* action)
 
 void noia_verticalize(NoiaAction* action)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_N;
@@ -148,7 +148,7 @@ void noia_verticalize(NoiaAction* action)
 
 void noia_horizontalize(NoiaAction* action)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_W;
@@ -160,7 +160,7 @@ void noia_horizontalize(NoiaAction* action)
 
 void noia_select_trunk(NoiaAction* action)
 {
-    assert(action);
+    NOIA_ENSURE(action, return);
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_TRUNK;
     noia_exhibitor_execute(action);
