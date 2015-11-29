@@ -84,6 +84,7 @@ void noia_surface_attach_egl(NoiaSurfaceId sid,
 
 //------------------------------------------------------------------------------
 
+/// Buffer data is copied.
 void noia_surface_commit(NoiaSurfaceId sid,
                          int width,
                          int height,
@@ -95,12 +96,25 @@ void noia_surface_commit(NoiaSurfaceId sid,
 
     int is_first_time_commited = !surface->buffer.data;
 
+    // Prepare space for data if its size changed
+    size_t size = stride * height;
+    size_t old_size = surface->buffer.stride * surface->buffer.height;
+    if (size != old_size) {
+        if (surface->buffer.data) {
+            free(surface->buffer.data);
+        }
+        surface->buffer.data = malloc(size);
+    }
+
+    // Copy buffer
     surface->buffer.width  = width;
     surface->buffer.height = height;
     surface->buffer.stride = stride;
-    surface->buffer.data   = data;
+    memcpy(surface->buffer.data, data, size);
 
+    // If surface was just created - inform others
     if (is_first_time_commited) {
+        /// @todo Size should not be set here.
         if (surface->requested_size.width  == 0
         ||  surface->requested_size.height == 0) {
             surface->requested_size.width  = width;
