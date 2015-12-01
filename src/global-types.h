@@ -16,7 +16,7 @@ typedef uintptr_t NoiaItemId;
 typedef void (*NoiaFreeFunc) (void*);
 
 /// Compare function definition
-typedef int (*NoiaCompareFunc) (void*, void*);
+typedef int (*NoiaCompareFunc) (const void*, const void*);
 
 /// Duplicate function definition
 typedef void* (*NoiaDuplicateFunc) (void*);

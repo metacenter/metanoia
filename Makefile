@@ -176,10 +176,12 @@ build/config.o: Makefile \
                 src/global-types.h \
                 src/keyboard-binding.h \
                 src/keyboard-bindings.h \
+                src/keyboard-context.h \
                 src/keyboard-functions.h \
+                src/utils-chain.h \
                 src/utils-keymap.h \
-                src/utils-log.h \
-                src/utils-pool.h
+                src/utils-list.h \
+                src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   config.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/config.o -Isrc -Igen \
@@ -620,14 +622,17 @@ build/device-evdev.o: Makefile \
                       src/event-task.h \
                       src/global-constants.h \
                       src/global-enums.h \
+                      src/global-macros.h \
                       src/global-objects.h \
                       src/global-types.h \
                       src/keyboard-binding.h \
                       src/keyboard-bindings.h \
+                      src/keyboard-context.h \
+                      src/utils-chain.h \
                       src/utils-dbus.h \
+                      src/utils-list.h \
                       src/utils-log.h \
-                      src/utils-object.h \
-                      src/utils-pool.h
+                      src/utils-object.h
 	@mkdir -p build
 	@echo "  CC   device-evdev.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-evdev.o -Isrc -Igen \
@@ -747,8 +752,11 @@ build/keyboard-functions.o: Makefile \
                             src/global-enums.h \
                             src/global-macros.h \
                             src/global-types.h \
+                            src/keyboard-binding.h \
+                            src/keyboard-context.h \
                             src/keyboard-functions.c \
                             src/keyboard-functions.h \
+                            src/keyboard-mode.h \
                             src/output.h \
                             src/renderer.h \
                             src/utils-branch.h \
@@ -765,11 +773,14 @@ build/keyboard-functions.o: Makefile \
 build/keyboard-binding.o: Makefile \
                           src/global-constants.h \
                           src/global-enums.h \
+                          src/global-macros.h \
                           src/global-types.h \
                           src/keyboard-binding.c \
                           src/keyboard-binding.h \
-                          src/utils-log.h \
-                          src/utils-pool.h
+                          src/keyboard-context.h \
+                          src/utils-chain.h \
+                          src/utils-list.h \
+                          src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   keyboard-binding.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-binding.o -Isrc -Igen \
@@ -783,11 +794,11 @@ build/keyboard-bindings.o: Makefile \
                            src/keyboard-binding.h \
                            src/keyboard-bindings.c \
                            src/keyboard-bindings.h \
+                           src/keyboard-context.h \
                            src/keyboard-mode.h \
                            src/utils-chain.h \
                            src/utils-list.h \
-                           src/utils-log.h \
-                           src/utils-pool.h
+                           src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   keyboard-bindings.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-bindings.o -Isrc -Igen \
@@ -796,12 +807,15 @@ build/keyboard-bindings.o: Makefile \
 build/keyboard-mode.o: Makefile \
                        src/global-constants.h \
                        src/global-enums.h \
+                       src/global-macros.h \
                        src/global-types.h \
                        src/keyboard-binding.h \
+                       src/keyboard-context.h \
                        src/keyboard-mode.c \
                        src/keyboard-mode.h \
-                       src/utils-log.h \
-                       src/utils-pool.h
+                       src/utils-chain.h \
+                       src/utils-list.h \
+                       src/utils-log.h
 	@mkdir -p build
 	@echo "  CC   keyboard-mode.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-mode.o -Isrc -Igen \

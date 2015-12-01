@@ -11,6 +11,8 @@
 
 #define NOIA_TRY switch(0) default:
 
+#define NOIA_SIZEOF_ARRAY(a) (sizeof(a)/sizeof(*a))
+
 /// If condition `COND` is not fulfilled print an error and execute expression
 /// `EXPR`.
 ///

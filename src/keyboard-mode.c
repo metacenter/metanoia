@@ -15,22 +15,6 @@
 
 //------------------------------------------------------------------------------
 
-static int compare(const void* data1, const void* data2)
-{
-    const NoiaBinding* binding1 = (const NoiaBinding*) data1;
-    const NoiaBinding* binding2 = (const NoiaBinding*) data2;
-
-    if (binding1->modifiers < binding2->modifiers) return -1;
-    if (binding1->modifiers > binding2->modifiers) return  1;
-
-    if (binding1->code < binding2->code) return -1;
-    if (binding1->code > binding2->code) return  1;
-
-    return 0;
-}
-
-//------------------------------------------------------------------------------
-
 NoiaMode* noia_mode_new(NoiaModeEnum modeid)
 {
     NoiaMode* self = malloc(sizeof(NoiaMode));
@@ -62,12 +46,11 @@ void noia_mode_free(NoiaMode* self)
 
 void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding)
 {
-    void* found;
-
     // Skip if already exists
-    found = tfind((void*) binding, &self->bindings, compare);
+    void* found = tfind((void*) binding, &self->bindings,
+                        (NoiaCompareFunc) noia_binding_compare);
     if (found) {
-        LOG_WARN2("Argmand already exists! (code: %d, modifiers: %d)",
+        LOG_WARN2("Binding already exists! (code: %d, modifiers: %d)",
                   binding->code, binding->modifiers);
         return;
     }
@@ -75,7 +58,8 @@ void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding)
     // Add binding
     NoiaBinding* copy = noia_binding_copy(binding);
 
-    found = tsearch((void*) copy, &self->bindings, compare);
+    found = tsearch((void*) copy, &self->bindings,
+                    (NoiaCompareFunc) noia_binding_compare);
     if (!found) {
         LOG_ERROR("Could not store binding!");
         noia_binding_free(copy);
@@ -92,12 +76,12 @@ NoiaBinding* noia_mode_find_binding(NoiaMode* self,
                                     int code,
                                     uint32_t modifiers)
 {
-    NoiaBinding** found = NULL;
     NoiaBinding searched;
     searched.code = code;
     searched.modifiers = modifiers;
 
-    found = tfind((void*) &searched, &self->bindings, compare);
+    NoiaBinding** found = tfind((void*) &searched, &self->bindings,
+                                (NoiaCompareFunc) noia_binding_compare);
     if (found) {
         return *found;
     }

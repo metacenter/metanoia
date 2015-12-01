@@ -4,26 +4,27 @@
 #ifndef __NOIA_KEYBOARD_BINDING_H__
 #define __NOIA_KEYBOARD_BINDING_H__
 
-#include "utils-pool.h"
-#include "global-constants.h"
+#include "keyboard-context.h"
 
-typedef void (*NoiaBindingSimpleExecuteFunc) (NoiaAction*);
-typedef void (*NoiaBindingExecuteFunc)
-             (NoiaAction*, int, uint32_t, NoiaKeyState);
+typedef void (*NoiaBindingExecuteFunc) (NoiaBindingContext*);
 
+/// Data type representing key binding.
 typedef struct {
-    int code;
-    uint32_t modifiers;
-    /// Workaround to easily define bindings in configuration without cast
-    union {
-        NoiaBindingSimpleExecuteFunc execute_simple;
-        NoiaBindingExecuteFunc execute;
-    };
+    int code;                       ///< Key code.
+    uint32_t modifiers;             ///< Active modifiers.
+    NoiaBindingExecuteFunc execute; ///< Binding execution callback.
 } NoiaBinding;
 
+/// Free binding.
 void noia_binding_free(NoiaBinding* self);
 
+/// Copy binding.
 NoiaBinding* noia_binding_copy(const NoiaBinding* self);
+
+/// Compare two bindings.
+/// @return `0` if code and modifiers are the same.
+int noia_binding_compare(const NoiaBinding* binding1,
+                         const NoiaBinding* binding2);
 
 #endif // __NOIA_KEYBOARD_BINDING_H__
 

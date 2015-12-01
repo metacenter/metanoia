@@ -45,3 +45,17 @@ NoiaBinding* noia_binding_copy(const NoiaBinding* self)
 
 //------------------------------------------------------------------------------
 
+int noia_binding_compare(const NoiaBinding* binding1,
+                         const NoiaBinding* binding2)
+{
+    if (binding1->modifiers < binding2->modifiers) return -1;
+    if (binding1->modifiers > binding2->modifiers) return  1;
+
+    if (binding1->code < binding2->code) return -1;
+    if (binding1->code > binding2->code) return  1;
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+

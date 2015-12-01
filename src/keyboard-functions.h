@@ -4,38 +4,47 @@
 #ifndef __NOIA_KEYBOARD_FUNCTIONS_H__
 #define __NOIA_KEYBOARD_FUNCTIONS_H__
 
-#include "global-constants.h"
+#include "keyboard-context.h"
 
-void noia_cicle_history_forward(NoiaAction* action);
+void noia_clean_action(NoiaBindingContext* context);
 
-void noia_cicle_history_back(NoiaAction* action);
+void noia_cicle_history_forward(NoiaBindingContext* context);
 
-void noia_put_focus(NoiaAction* action);
+void noia_cicle_history_back(NoiaBindingContext* context);
 
-void noia_put_move(NoiaAction* action);
+void noia_put_focus(NoiaBindingContext* context);
 
-void noia_put_resize(NoiaAction* action);
+void noia_put_move(NoiaBindingContext* context);
 
-void noia_put_number(NoiaAction* action, int code,
-                     uint32_t modifiers, NoiaKeyState state);
+void noia_put_resize(NoiaBindingContext* context);
 
-void noia_anchorize(NoiaAction* action);
+void noia_put_number(NoiaBindingContext* context);
 
-void noia_stackedize(NoiaAction* action);
+void noia_anchorize(NoiaBindingContext* context);
 
-void noia_verticalize(NoiaAction* action);
+void noia_stackedize(NoiaBindingContext* context);
 
-void noia_horizontalize(NoiaAction* action);
+void noia_verticalize(NoiaBindingContext* context);
 
-void noia_select_trunk(NoiaAction* action);
+void noia_horizontalize(NoiaBindingContext* context);
 
-void noia_right(NoiaAction* action);
+void noia_select_trunk(NoiaBindingContext* context);
 
-void noia_left(NoiaAction* action);
+void noia_right(NoiaBindingContext* context);
 
-void noia_up(NoiaAction* action);
+void noia_left(NoiaBindingContext* context);
 
-void noia_down(NoiaAction* action);
+void noia_up(NoiaBindingContext* context);
+
+void noia_down(NoiaBindingContext* context);
+
+void noia_back(NoiaBindingContext* context);
+
+void noia_forward(NoiaBindingContext* context);
+
+void noia_swap_mode_normal_to_insert(NoiaBindingContext* context);
+
+void noia_swap_mode_insert_to_normal(NoiaBindingContext* context);
 
 #endif // __NOIA_KEYBOARD_FUNCTIONS_H__
 

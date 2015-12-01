@@ -76,9 +76,17 @@ void noia_config_apply(int argc, char** argv)
     keymap = noia_utils_keymap_new();
     noia_utils_keymap_initialize(keymap);
 
-    for (unsigned i = 0; i < sizeof(scBindings)/sizeof(NoiaBinding); ++i) {
-        noia_keyboard_add_binding(NOIA_NORMAL_MODE, &scBindings[i]);
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsCommon); ++i) {
+        noia_keyboard_add_binding(NOIA_MODE_COMMON, &scBindingsCommon[i]);
     }
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsNormal); ++i) {
+        noia_keyboard_add_binding(NOIA_MODE_NORMAL, &scBindingsNormal[i]);
+    }
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsInsert); ++i) {
+        noia_keyboard_add_binding(NOIA_MODE_INSERT, &scBindingsInsert[i]);
+    }
+    noia_keyboard_mode_make_active(NOIA_MODE_COMMON, true);
+    noia_keyboard_mode_make_active(NOIA_MODE_NORMAL, true);
 
     // Apply evironment variables
     sSettings.run_in_test_mode = (getenv("DISPLAY") != NULL);

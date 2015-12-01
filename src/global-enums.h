@@ -24,7 +24,9 @@ typedef enum {
 /// Enumerate key binding modes.
 /// The mode is set of key bindings that can be active.
 typedef enum {
-    NOIA_NORMAL_MODE,
+    NOIA_MODE_COMMON,
+    NOIA_MODE_NORMAL,
+    NOIA_MODE_INSERT,
     NOIA_MODE_NUM, ///< Guard
 } NoiaModeEnum;
 
