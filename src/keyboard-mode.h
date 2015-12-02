@@ -1,8 +1,8 @@
 // file: keyboard-mode.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_KEYBOARD_MODE_H__
-#define __NOIA_KEYBOARD_MODE_H__
+#ifndef NOIA_KEYBOARD_MODE_H
+#define NOIA_KEYBOARD_MODE_H
 
 #include "keyboard-binding.h"
 #include "global-constants.h"
@@ -29,5 +29,5 @@ NoiaBinding* noia_mode_find_binding(NoiaMode* self,
                                     int code,
                                     uint32_t Noiamodifiers);
 
-#endif // __NOIA_KEYBOARD_MODE_H__
+#endif // NOIA_KEYBOARD_MODE_H
 

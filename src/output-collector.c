@@ -24,7 +24,7 @@ NoiaList* outputs = NULL;
 ///
 /// @todo Currently it places new output to the right of the most right one.
 ///       This behavior should be more configurable.
-NoiaPosition noia_output_collector_allocate_position()
+NoiaPosition noia_output_collector_allocate_position(void)
 {
     NoiaPosition result = {INT_MIN, INT_MIN};
     FOR_EACH (outputs, link) {
@@ -47,7 +47,7 @@ NoiaPosition noia_output_collector_allocate_position()
 
 /// Fetch all available (active) outputs from all possible sources.
 /// If running in simulator, fetch only simulated outputs.
-NoiaList* noia_output_collector_fetch_actual_outputs()
+NoiaList* noia_output_collector_fetch_actual_outputs(void)
 {
     int num = 0;
     NoiaList* actual_outputs = noia_list_new(NULL);
@@ -117,7 +117,7 @@ void noia_output_collector_notify_outputs_lost(NoiaList* lost_outputs)
 /// -# fetch all outputs
 /// -# compare with existing outputs
 /// -# process findings and loses
-void noia_output_collector_update()
+void noia_output_collector_update(void)
 {
     LOG_INFO1("Updating outputs");
 

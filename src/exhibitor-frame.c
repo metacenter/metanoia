@@ -218,7 +218,7 @@ bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
 
 //------------------------------------------------------------------------------
 
-NoiaFrame* noia_frame_new()
+NoiaFrame* noia_frame_new(void)
 {
     NoiaFrame* self = noia_branch_new();
 
@@ -346,7 +346,7 @@ void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other)
 NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target)
 {
     NoiaResult result = NOIA_RESULT_SUCCESS;
-    NOIA_TRY {
+    NOIA_BLOCK {
         result = noia_frame_remove_self(self);
         NOIA_ASSERT_RESULT(result);
 

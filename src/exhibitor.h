@@ -1,8 +1,8 @@
 // file: exhibitor.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EXHIBITOR_H__
-#define __NOIA_EXHIBITOR_H__
+#ifndef NOIA_EXHIBITOR_H
+#define NOIA_EXHIBITOR_H
 
 /// @todo Add exhibitor interface
 
@@ -24,10 +24,10 @@ typedef struct {
 
 /// Return the singleton instance.
 /// @todo Do not use singletons.
-NoiaExhibitor* noia_exhibitor_get_instance();
+NoiaExhibitor* noia_exhibitor_get_instance(void);
 
 /// Get list of active displays.
-NoiaList* noia_exhibitor_get_displays();
+NoiaList* noia_exhibitor_get_displays(void);
 
 /// Execute an action on selected frame.
 /// @see NoiaAction
@@ -36,5 +36,5 @@ void noia_exhibitor_execute(NoiaAction* action);
 /// Subscribe for notifications.
 void noia_exhibitor_initialize(NoiaLoop* this_loop);
 
-#endif // __NOIA_EXHIBITOR_H__
+#endif // NOIA_EXHIBITOR_H
 

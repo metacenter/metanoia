@@ -1,8 +1,8 @@
 // file: controller-gtk-app.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_CONTROLLER_GTK_APP_H__
-#define __NOIA_CONTROLLER_GTK_APP_H__
+#ifndef NOIA_CONTROLLER_GTK_APP_H
+#define NOIA_CONTROLLER_GTK_APP_H
 
 #include <gtk/gtk.h>
 
@@ -18,5 +18,5 @@ typedef struct NoiaCtlGtkAppClass NoiaCtlGtkAppClass;
 GType          noia_controller_gtk_app_get_type(void);
 NoiaCtlGtkApp* noia_controller_gtk_app_new(void);
 
-#endif // __NOIA_CONTROLLER_GTK_APP_H__
+#endif // NOIA_CONTROLLER_GTK_APP_H
 

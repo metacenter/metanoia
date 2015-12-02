@@ -107,7 +107,7 @@ int noia_devfb_setup_framebuffer(NoiaList* outputs)
     struct fb_fix_screeninfo fixed_info;
     int fd;
 
-    fd = noia_open(scFrameBufferPath, O_RDWR);
+    fd = noia_device_open(scFrameBufferPath, O_RDWR);
     if (fd < 0) {
         LOG_ERROR("Could not open '%s'!", scFrameBufferPath);
         return -1;

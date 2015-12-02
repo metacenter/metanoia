@@ -1,8 +1,8 @@
 // file: keyboard-binding.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_KEYBOARD_BINDING_H__
-#define __NOIA_KEYBOARD_BINDING_H__
+#ifndef NOIA_KEYBOARD_BINDING_H
+#define NOIA_KEYBOARD_BINDING_H
 
 #include "keyboard-context.h"
 
@@ -26,5 +26,5 @@ NoiaBinding* noia_binding_copy(const NoiaBinding* self);
 int noia_binding_compare(const NoiaBinding* binding1,
                          const NoiaBinding* binding2);
 
-#endif // __NOIA_KEYBOARD_BINDING_H__
+#endif // NOIA_KEYBOARD_BINDING_H
 

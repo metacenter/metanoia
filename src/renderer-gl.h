@@ -1,8 +1,8 @@
 // file: renderer-gl.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_RENDERER_GL_H__
-#define __NOIA_RENDERER_GL_H__
+#ifndef NOIA_RENDERER_GL_H
+#define NOIA_RENDERER_GL_H
 
 #include "renderer.h"
 #include "utils-gl.h"
@@ -25,5 +25,5 @@ typedef struct {
 
 NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl, NoiaSize size);
 
-#endif // __NOIA_RENDERER_GL_H__
+#endif // NOIA_RENDERER_GL_H
 

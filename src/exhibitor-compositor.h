@@ -1,8 +1,8 @@
 // file: exhibitor-compositor.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EXHIBITOR_COMPOSITOR_H__
-#define __NOIA_EXHIBITOR_COMPOSITOR_H__
+#ifndef NOIA_EXHIBITOR_COMPOSITOR_H
+#define NOIA_EXHIBITOR_COMPOSITOR_H
 
 #include "exhibitor-frame.h"
 
@@ -14,7 +14,7 @@ typedef struct {
 } NoiaCompositor;
 
 /// Compositor constructor.
-NoiaCompositor* noia_compositor_new();
+NoiaCompositor* noia_compositor_new(void);
 
 /// Compositor destructor.
 void noia_compositor_free(NoiaCompositor* self);
@@ -39,5 +39,5 @@ void noia_compositor_pop_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 /// @see NoiaAction
 void noia_compositor_execute(NoiaCompositor* self, NoiaAction* action);
 
-#endif // __NOIA_EXHIBITOR_COMPOSITOR_H__
+#endif // NOIA_EXHIBITOR_COMPOSITOR_H
 

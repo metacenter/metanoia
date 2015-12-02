@@ -1,8 +1,8 @@
 // file: wayland-types.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_WAYLAND_TYPES_H__
-#define __NOIA_WAYLAND_TYPES_H__
+#ifndef NOIA_WAYLAND_TYPES_H
+#define NOIA_WAYLAND_TYPES_H
 
 typedef enum {
     NOIA_RESOURCE_SURFACE,
@@ -20,5 +20,5 @@ typedef enum {
     NOIA_NUM_GENERAL_RESOURCE_TYPES,
 } NoiaWaylandGeneralResourceType;
 
-#endif // __NOIA_WAYLAND_TYPES_H__
+#endif // NOIA_WAYLAND_TYPES_H
 

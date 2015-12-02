@@ -1,8 +1,8 @@
 // file: wayland-cache.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_WAYLAND_CACHE_H__
-#define __NOIA_WAYLAND_CACHE_H__
+#ifndef NOIA_WAYLAND_CACHE_H
+#define NOIA_WAYLAND_CACHE_H
 
 #include "utils-store.h"
 #include "wayland-region.h"
@@ -13,9 +13,9 @@
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_wayland_cache_initialize();
+NoiaResult noia_wayland_cache_initialize(void);
 
-void noia_wayland_cache_finalize();
+void noia_wayland_cache_finalize(void);
 
 //------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ void noia_wayland_cache_remove_surface(NoiaSurfaceId sid);
 
 //------------------------------------------------------------------------------
 
-NoiaItemId noia_wayland_cache_create_region();
+NoiaItemId noia_wayland_cache_create_region(void);
 
 NoiaWaylandRegion* noia_wayland_cache_find_region(NoiaItemId rid);
 
@@ -56,5 +56,5 @@ NoiaList* noia_wayland_cache_get_resources
 
 //------------------------------------------------------------------------------
 
-#endif // __NOIA_WAYLAND_CACHE_H__
+#endif // NOIA_WAYLAND_CACHE_H
 

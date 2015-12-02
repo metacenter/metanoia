@@ -1,8 +1,8 @@
 // file: renderer.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_RENDERER_H__
-#define __NOIA_RENDERER_H__
+#ifndef NOIA_RENDERER_H
+#define NOIA_RENDERER_H
 
 #include "utils-pool.h"
 #include "global-constants.h"
@@ -67,5 +67,5 @@ void noia_renderer_initialize(NoiaRenderer* self,
                               NoiaRendererCopyBufferFunc copy_buffer,
                               NoiaRendererFinalizeFunc free);
 
-#endif // __NOIA_RENDERER_H__
+#endif // NOIA_RENDERER_H
 

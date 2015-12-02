@@ -9,7 +9,7 @@
 
 //------------------------------------------------------------------------------
 
-NoiaBranch* noia_branch_new()
+NoiaBranch* noia_branch_new(void)
 {
     NoiaBranch* self = malloc(sizeof(NoiaBranch));
     if (!self) {

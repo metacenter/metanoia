@@ -32,7 +32,7 @@ int noia_wayland_cache_compare_resources(struct wl_resource* rc1,
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_wayland_cache_initialize()
+NoiaResult noia_wayland_cache_initialize(void)
 {
     sCache.regions = noia_store_new_for_id();
     if (!sCache.regions) {
@@ -63,7 +63,7 @@ NoiaResult noia_wayland_cache_initialize()
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_cache_finalize()
+void noia_wayland_cache_finalize(void)
 {
     for (int type = 0; type < NOIA_NUM_GENERAL_RESOURCE_TYPES; ++type) {
         noia_list_free(sCache.general_resource[type]);
@@ -118,7 +118,7 @@ NoiaWaylandSurface* noia_wayland_cache_find_surface(NoiaSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-NoiaItemId noia_wayland_cache_create_region()
+NoiaItemId noia_wayland_cache_create_region(void)
 {
     NoiaWaylandRegion* region = noia_wayland_region_new();
     NoiaItemId rid = scInvalidItemId;

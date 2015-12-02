@@ -185,7 +185,7 @@ void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
         }
 
         // Add event source
-        fd = noia_open(devnode, O_RDONLY);
+        fd = noia_device_open(devnode, O_RDONLY);
         if (fd < 0) {
             LOG_INFO1("Failed to open device '%s'", devnode);
             udev_device_unref(dev);

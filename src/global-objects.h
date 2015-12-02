@@ -1,8 +1,8 @@
 // file: global-objects.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_GLOBAL_OBJECTS_H__
-#define __NOIA_GLOBAL_OBJECTS_H__
+#ifndef NOIA_GLOBAL_OBJECTS_H
+#define NOIA_GLOBAL_OBJECTS_H
 
 #include "utils-object.h"
 
@@ -59,5 +59,5 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos);
 
 //------------------------------------------------------------------------------
 
-#endif // __NOIA_GLOBAL_OBJECTS_H__
+#endif // NOIA_GLOBAL_OBJECTS_H
 

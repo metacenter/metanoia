@@ -141,7 +141,7 @@ void noia_exhibitor_finalize(void* data NOIA_UNUSED)
 //------------------------------------------------------------------------------
 // PUBLIC
 
-NoiaExhibitor* noia_exhibitor_get_instance()
+NoiaExhibitor* noia_exhibitor_get_instance(void)
 {
     static NoiaExhibitor exhibitor;
     if (exhibitor.priv) {
@@ -160,7 +160,7 @@ NoiaExhibitor* noia_exhibitor_get_instance()
 
 //------------------------------------------------------------------------------
 
-NoiaList* noia_exhibitor_get_displays()
+NoiaList* noia_exhibitor_get_displays(void)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
     return exhibitor->displays;

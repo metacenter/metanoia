@@ -1,8 +1,8 @@
 // file: utils-pool.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_UTILS_POOL_H__
-#define __NOIA_UTILS_POOL_H__
+#ifndef NOIA_UTILS_POOL_H
+#define NOIA_UTILS_POOL_H
 
 #include "stddef.h"
 
@@ -56,5 +56,5 @@ unsigned noia_pool_get_size(NoiaPool* self);
 /// Get number of element which could be stored without growing the pool.
 unsigned noia_pool_get_alocation_size(NoiaPool* self);
 
-#endif // __NOIA_UTILS_POOL_H__
+#endif // NOIA_UTILS_POOL_H
 

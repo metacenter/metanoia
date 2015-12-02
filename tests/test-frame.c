@@ -20,7 +20,7 @@ void noia_test_frame_config(NoiaFrame* frame,
 
 //------------------------------------------------------------------------------
 
-#define NOIA_MAKE_FRAMES_SIMPLE() \
+#define NOIA_MAKE_FRAMES_SIMPLE \
     NoiaFrame* r  = noia_frame_new(); \
     NoiaFrame* v  = noia_frame_new(); \
     NoiaFrame* h  = noia_frame_new(); \
@@ -78,7 +78,7 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_prepend(h3, h1); \
     noia_frame_append (h3, h5); \
 
-#define NOIA_MAKE_FRAMES_POSITIONED() \
+#define NOIA_MAKE_FRAMES_POSITIONED \
     NoiaFrame* r     = noia_frame_new(); \
     NoiaFrame* a     = noia_frame_new(); \
     NoiaFrame* b     = noia_frame_new(); \
@@ -120,10 +120,10 @@ void noia_test_frame_config(NoiaFrame* frame,
                          (NoiaPosition) { 0,  0}, (NoiaSize) {100,  60});
 
 #define NOIA_ASSERT_FRAME_ARRAY(ARRAY, POOL) \
-    NOIA_ASSERT(ARRAY_LEN(ARRAY) == noia_pool_get_size(POOL), \
+    NOIA_ASSERT(NOIA_SIZEOF_ARRAY(ARRAY) == noia_pool_get_size(POOL), \
                 "Number of elements should be '%lu' (is '%u')", \
-                ARRAY_LEN(ARRAY), noia_pool_get_size(POOL)); \
-    for (unsigned i = 0; i < ARRAY_LEN(ARRAY); ++i) { \
+                NOIA_SIZEOF_ARRAY(ARRAY), noia_pool_get_size(POOL)); \
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(ARRAY); ++i) { \
         NoiaSurfaceContext* c1 = &ARRAY[i]; \
         NoiaSurfaceContext* c2 = noia_pool_get(POOL, i); \
         NOIA_ASSERT(c1->sid == c2->sid && \
@@ -143,11 +143,11 @@ void noia_test_frame_config(NoiaFrame* frame,
 
 /// Check if appended and prepended frames are assigned to correct trunk.
 /// Content check will be done in `should_translate_to_array`
-NoiaTestResult should_append_and_prepend_values()
+NoiaTestResult should_append_and_prepend_values(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_SIMPLE();
+    NOIA_MAKE_FRAMES_SIMPLE;
 
     NOIA_ASSERT_TRUNK(r,  NULL);
     NOIA_ASSERT_TRUNK(h,  r);
@@ -183,7 +183,7 @@ NoiaTestResult should_append_and_prepend_values()
 //------------------------------------------------------------------------------
 
 /// Check if inserted frames are assigned to correct trunk.
-NoiaTestResult should_insert_values()
+NoiaTestResult should_insert_values(void)
 {
     noia_mock_surface_manager_initialize();
 
@@ -221,11 +221,11 @@ NoiaTestResult should_insert_values()
 //------------------------------------------------------------------------------
 
 /// Check order and position when translating whole frame to array.
-NoiaTestResult should_translate_frame_to_array()
+NoiaTestResult should_translate_frame_to_array(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_SIMPLE();
+    NOIA_MAKE_FRAMES_SIMPLE;
 
     NoiaSurfaceContext a[] = {
             {11, {0, 0}},
@@ -245,7 +245,8 @@ NoiaTestResult should_translate_frame_to_array()
             {35, {0, 0}},
         };
 
-    NoiaPool* pool = noia_pool_create(ARRAY_LEN(a), sizeof(NoiaSurfaceContext));
+    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
+                                      sizeof(NoiaSurfaceContext));
 
     noia_frame_to_array(r, pool);
     noia_frame_free(r);
@@ -261,11 +262,11 @@ NoiaTestResult should_translate_frame_to_array()
 //------------------------------------------------------------------------------
 
 /// Check order and position when translating subframes to array.
-NoiaTestResult should_translate_subframes_to_array()
+NoiaTestResult should_translate_subframes_to_array(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_SIMPLE();
+    NOIA_MAKE_FRAMES_SIMPLE;
 
     NoiaSurfaceContext av[] = {
             {11, {0, 0}},
@@ -289,9 +290,12 @@ NoiaTestResult should_translate_subframes_to_array()
             {35, {0, 0}},
         };
 
-    NoiaPool* pv = noia_pool_create(ARRAY_LEN(ah), sizeof(NoiaSurfaceContext));
-    NoiaPool* ph = noia_pool_create(ARRAY_LEN(av), sizeof(NoiaSurfaceContext));
-    NoiaPool* ps = noia_pool_create(ARRAY_LEN(as), sizeof(NoiaSurfaceContext));
+    NoiaPool* pv = noia_pool_create(NOIA_SIZEOF_ARRAY(ah),
+                                    sizeof(NoiaSurfaceContext));
+    NoiaPool* ph = noia_pool_create(NOIA_SIZEOF_ARRAY(av),
+                                    sizeof(NoiaSurfaceContext));
+    NoiaPool* ps = noia_pool_create(NOIA_SIZEOF_ARRAY(as),
+                                    sizeof(NoiaSurfaceContext));
 
     noia_frame_to_array(v, pv);
     noia_frame_to_array(h, ph);
@@ -313,11 +317,11 @@ NoiaTestResult should_translate_subframes_to_array()
 //------------------------------------------------------------------------------
 
 /// Check correctness of frame after removing several leafs.
-NoiaTestResult should_remove_some_leaf_frames()
+NoiaTestResult should_remove_some_leaf_frames(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_SIMPLE();
+    NOIA_MAKE_FRAMES_SIMPLE;
 
     noia_frame_remove_self(v1);
     noia_frame_remove_self(v2);
@@ -372,11 +376,11 @@ NoiaTestResult should_remove_some_leaf_frames()
 //------------------------------------------------------------------------------
 
 /// Check correctness of frame after removing frame with leafs.
-NoiaTestResult should_remove_frame_with_subframes()
+NoiaTestResult should_remove_frame_with_subframes(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_SIMPLE();
+    NOIA_MAKE_FRAMES_SIMPLE;
 
     noia_frame_remove_self(h);
 
@@ -415,11 +419,11 @@ NoiaTestResult should_remove_frame_with_subframes()
 //------------------------------------------------------------------------------
 
 /// Resettle one frame without children and check if trunks are OK.
-NoiaTestResult should_resettle_one_frame()
+NoiaTestResult should_resettle_one_frame(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_SIMPLE();
+    NOIA_MAKE_FRAMES_SIMPLE;
 
     noia_frame_resettle(h3, s);
 
@@ -457,11 +461,11 @@ NoiaTestResult should_resettle_one_frame()
 //------------------------------------------------------------------------------
 
 /// Resettle one frame with children and check if trunks are OK.
-NoiaTestResult should_resettle_frame_with_subframes()
+NoiaTestResult should_resettle_frame_with_subframes(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_SIMPLE();
+    NOIA_MAKE_FRAMES_SIMPLE;
 
     noia_frame_resettle(h, s);
 
@@ -499,11 +503,11 @@ NoiaTestResult should_resettle_frame_with_subframes()
 //------------------------------------------------------------------------------
 
 /// Check if `noia_frame_find_with_sid` returns correct frames.
-NoiaTestResult should_find_with_sid()
+NoiaTestResult should_find_with_sid(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_SIMPLE();
+    NOIA_MAKE_FRAMES_SIMPLE;
 
     NOIA_ASSERT_FRAME_POINTER(NULL, noia_frame_find_with_sid(r, 666))
 
@@ -549,7 +553,7 @@ NoiaTestResult should_find_with_sid()
 ///     │  B  │
 ///     └─────┘
 ///
-NoiaTestResult should_find_contiguous_on_the_same_level_one_further()
+NoiaTestResult should_find_contiguous_on_the_same_level_one_further(void)
 {
     noia_mock_surface_manager_initialize();
 
@@ -594,7 +598,7 @@ NoiaTestResult should_find_contiguous_on_the_same_level_one_further()
 ///     │  A  │  B  │  C  │  D  │  E  │  F  │
 ///     └─────┴─────┴─────┴─────┴─────┴─────┘
 ///
-NoiaTestResult should_find_contiguous_on_the_same_level_many_further()
+NoiaTestResult should_find_contiguous_on_the_same_level_many_further(void)
 {
     noia_mock_surface_manager_initialize();
 
@@ -653,7 +657,7 @@ NoiaTestResult should_find_contiguous_on_the_same_level_many_further()
 ///     │       │└─────┘│       │
 ///     └───────┴───────┴───────┘
 ///
-NoiaTestResult should_find_contiguous_on_the_second_level()
+NoiaTestResult should_find_contiguous_on_the_second_level(void)
 {
     noia_mock_surface_manager_initialize();
 
@@ -714,7 +718,7 @@ NoiaTestResult should_find_contiguous_on_the_second_level()
 ///     │└─────┴─────────────┘│     │
 ///     └─────────────────────┴─────┘
 ///
-NoiaTestResult should_find_contiguous_on_the_third_level()
+NoiaTestResult should_find_contiguous_on_the_third_level(void)
 {
     noia_mock_surface_manager_initialize();
 
@@ -769,11 +773,11 @@ NoiaTestResult should_find_contiguous_on_the_third_level()
 ///     ┃└─────────────────┘       ┃
 ///     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ///
-NoiaTestResult should_find_stacked_pointed_inside()
+NoiaTestResult should_find_stacked_pointed_inside(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_POSITIONED();
+    NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {10, 10};
     NoiaFrame* p = noia_frame_find_pointed(r, point);
@@ -803,11 +807,11 @@ NoiaTestResult should_find_stacked_pointed_inside()
 ///     ┃└────────────────┘      ┃
 ///     ┗━━━━━━━━━━━━━━━━━━━━━━━━┛
 ///
-NoiaTestResult should_find_flat_pointed_inside()
+NoiaTestResult should_find_flat_pointed_inside(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_POSITIONED();
+    NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {50, 10};
     NoiaFrame* p = noia_frame_find_pointed(r, point);
@@ -839,11 +843,11 @@ NoiaTestResult should_find_flat_pointed_inside()
 ///     ┃└────────────────┘       ┃
 ///     ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ///
-NoiaTestResult should_find_stacked_pointed_outside()
+NoiaTestResult should_find_stacked_pointed_outside(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_POSITIONED();
+    NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {20, -10};
     NoiaFrame* p = noia_frame_find_pointed(r, point);
@@ -875,11 +879,11 @@ NoiaTestResult should_find_stacked_pointed_outside()
 ///     ┃└────────────────┘      ┃
 ///     ┗━━━━━━━━━━━━━━━━━━━━━━━━┛
 ///
-NoiaTestResult should_find_flat_pointed_outside()
+NoiaTestResult should_find_flat_pointed_outside(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_POSITIONED();
+    NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {60, -10};
     NoiaFrame* p = noia_frame_find_pointed(r, point);
@@ -910,11 +914,11 @@ NoiaTestResult should_find_flat_pointed_outside()
 ///     │└────────────────┘      │
 ///     └────────────────────────┘
 ///
-NoiaTestResult should_find_frame_over_another()
+NoiaTestResult should_find_frame_over_another(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_POSITIONED();
+    NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {50, 70};
     NoiaFrame* p = noia_frame_find_pointed(abcde, point);
@@ -945,11 +949,11 @@ NoiaTestResult should_find_frame_over_another()
 ///     ▐ └────────────────┘      ▌
 ///     ▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▌
 ///
-NoiaTestResult should_find_frame_in_empty_space()
+NoiaTestResult should_find_frame_in_empty_space(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_POSITIONED();
+    NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {80, 80};
     NoiaFrame* p = noia_frame_find_pointed(r, point);
@@ -986,7 +990,7 @@ NoiaTestResult should_find_frame_in_empty_space()
 ///     │└─────┴─────────────┘│
 ///     └─────────────────────┘
 ///
-NoiaTestResult should_find_adjacent_frames()
+NoiaTestResult should_find_adjacent_frames(void)
 {
     noia_mock_surface_manager_initialize();
 
@@ -1052,11 +1056,11 @@ NoiaTestResult should_find_adjacent_frames()
 //------------------------------------------------------------------------------
 
 /// Empty test
-NoiaTestResult should()
+NoiaTestResult should(void)
 {
     noia_mock_surface_manager_initialize();
 
-    NOIA_MAKE_FRAMES_POSITIONED();
+    NOIA_MAKE_FRAMES_POSITIONED;
 
     // ...
 
@@ -1070,7 +1074,7 @@ NoiaTestResult should()
 
 int main(int argc, char** argv)
 {
-    NOIA_INIT_TESTS();
+    NOIA_INIT_TESTS;
 
     NoiaTest test[] = {
             NOIA_TEST(should),

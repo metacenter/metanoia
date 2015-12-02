@@ -1,8 +1,8 @@
 // file: global-enums.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_GLOBAL_ENUMS_H__
-#define __NOIA_GLOBAL_ENUMS_H__
+#ifndef NOIA_GLOBAL_ENUMS_H
+#define NOIA_GLOBAL_ENUMS_H
 
 #include <stdbool.h>
 
@@ -99,5 +99,5 @@ bool noia_argmand_is_actionable(NoiaArgmand argmand);
 /// @see noia_argmand_is_directed NoiaArgmand
 NoiaArgmand noia_argmand_reverse_directed(NoiaArgmand argmand);
 
-#endif // __NOIA_GLOBAL_ENUMS_H__
+#endif // NOIA_GLOBAL_ENUMS_H
 

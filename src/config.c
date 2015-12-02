@@ -52,7 +52,7 @@ void noia_config_parse_arguments(int argc, char** argv)
 
 //------------------------------------------------------------------------------
 
-void noia_config_log_settings()
+void noia_config_log_settings(void)
 {
     LOG_INFO2("Settings: run in test mode = '%d'",
               sSettings.run_in_test_mode);
@@ -107,7 +107,7 @@ void noia_config_apply(int argc, char** argv)
 
 //------------------------------------------------------------------------------
 
-void noia_config_finalize()
+void noia_config_finalize(void)
 {
     noia_utils_keymap_finalize(keymap);
     noia_utils_keymap_free(keymap);
@@ -117,21 +117,21 @@ void noia_config_finalize()
 
 //------------------------------------------------------------------------------
 
-NoiaKeymap* noia_config_get_keymap()
+NoiaKeymap* noia_config_get_keymap(void)
 {
     return keymap;
 }
 
 //------------------------------------------------------------------------------
 
-const NoiaConfig* noia_config()
+const NoiaConfig* noia_config(void)
 {
     return &scConfig;
 }
 
 //------------------------------------------------------------------------------
 
-const NoiaSettings* noia_settings()
+const NoiaSettings* noia_settings(void)
 {
     return &sSettings;
 }

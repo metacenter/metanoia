@@ -1,8 +1,8 @@
 // file: keyboard-bindings.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_KEYBOARD_BINDINGS_H__
-#define __NOIA_KEYBOARD_BINDINGS_H__
+#ifndef NOIA_KEYBOARD_BINDINGS_H
+#define NOIA_KEYBOARD_BINDINGS_H
 
 #include "keyboard-binding.h"
 #include "global-constants.h"
@@ -17,7 +17,7 @@ void noia_keyboard_mode_make_active(NoiaModeEnum modeid, bool active);
 bool noia_keyboard_catch_key(int code, NoiaKeyState state);
 
 /// Free allocated memory.
-void noia_keyboard_free_all();
+void noia_keyboard_free_all(void);
 
-#endif // __NOIA_KEYBOARD_BINDINGS_H__
+#endif // NOIA_KEYBOARD_BINDINGS_H
 

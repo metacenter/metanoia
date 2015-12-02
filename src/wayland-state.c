@@ -54,7 +54,7 @@ NoiaResult noia_wayland_state_initialize(struct wl_display* display)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_state_finalize()
+void noia_wayland_state_finalize(void)
 {
     sState.pointer_serial = 0;
     sState.pointer_focused_sid = scInvalidItemId;
@@ -372,7 +372,7 @@ void noia_wayland_state_screen_refresh(NoiaSurfaceId sid)
 {
     pthread_mutex_lock(&sStateMutex);
 
-    LOG_WAYL3("Wayland: screen refresh (sid: %u)", sid);
+    LOG_WAYL4("Wayland: screen refresh (sid: %u)", sid);
 
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(sid);
 

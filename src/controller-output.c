@@ -11,7 +11,7 @@ static int scLastID = 0;
 
 //------------------------------------------------------------------------------
 
-NoiaCtlOutput* noia_controller_output_new()
+NoiaCtlOutput* noia_controller_output_new(void)
 {
     NoiaCtlOutput* self = malloc(sizeof(*self));
     assert(self);

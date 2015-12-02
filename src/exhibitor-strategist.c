@@ -41,7 +41,7 @@ void noia_strategist_on_surface_destroyed(NoiaExhibitor* exhibitor NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-NoiaStrategist* noia_strategist_new()
+NoiaStrategist* noia_strategist_new(void)
 {
     NoiaStrategist* self = malloc(sizeof(NoiaStrategist));
     NOIA_ENSURE(self, abort());

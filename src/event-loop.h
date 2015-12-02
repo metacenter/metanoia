@@ -1,8 +1,8 @@
 // file: event-loop.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EVENT_LOOP_H__
-#define __NOIA_EVENT_LOOP_H__
+#ifndef NOIA_EVENT_LOOP_H
+#define NOIA_EVENT_LOOP_H
 
 #include "event-task.h"
 
@@ -20,4 +20,4 @@ int noia_loop_schedule_task(NoiaLoop* loop, NoiaTask* task);
 
 void noia_loop_add_finalizer(NoiaLoop* self, NoiaTaskProcessor finalizer);
 
-#endif // __NOIA_EVENT_LOOP_H__
+#endif // NOIA_EVENT_LOOP_H

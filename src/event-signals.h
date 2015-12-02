@@ -1,8 +1,8 @@
 // file: event-signals.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EVENT_SIGNALS_H__
-#define __NOIA_EVENT_SIGNALS_H__
+#ifndef NOIA_EVENT_SIGNALS_H
+#define NOIA_EVENT_SIGNALS_H
 
 #include "event-task.h"
 
@@ -35,7 +35,7 @@ NoiaResult noia_event_signal_emit(NoiaSignalNum sig_num, NoiaObject* object);
 
 NoiaResult noia_event_signal_emit_int(NoiaSignalNum sig_num, intptr_t value);
 
-void noia_event_signal_clear_all_substriptions();
+void noia_event_signal_clear_all_substriptions(void);
 
-#endif // __NOIA_EVENT_SIGNAL_H__
+#endif // NOIA_EVENT_SIGNAL_H
 

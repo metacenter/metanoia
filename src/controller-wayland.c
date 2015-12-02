@@ -212,7 +212,7 @@ static const struct wl_registry_listener registry_listener = {
 //------------------------------------------------------------------------------
 // CONNECT
 
-bool noia_controller_do_connect()
+bool noia_controller_do_connect(void)
 {
     display = wl_display_connect(scWaylandSocketName);
     if (display == NULL) {

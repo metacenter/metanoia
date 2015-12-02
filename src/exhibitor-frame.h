@@ -1,8 +1,8 @@
 // file: exhibitor-frame.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EXHIBITOR_FRAME_H__
-#define __NOIA_EXHIBITOR_FRAME_H__
+#ifndef NOIA_EXHIBITOR_FRAME_H
+#define NOIA_EXHIBITOR_FRAME_H
 
 #include "utils-branch.h"
 #include "utils-list.h"
@@ -36,7 +36,7 @@ bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
                                           NoiaFrameParams* p2);
 
 /// Create new frame.
-NoiaFrame* noia_frame_new();
+NoiaFrame* noia_frame_new(void);
 
 /// Create new frame with the same position and size as `self`, attach to `self`
 /// and set new type.
@@ -141,5 +141,5 @@ static inline void noia_frame_insert_after(NoiaFrame* self, NoiaFrame* other)
     noia_branch_insert_after(self, other);
 }
 
-#endif // __NOIA_EXHIBITOR_FRAME_H__
+#endif // NOIA_EXHIBITOR_FRAME_H
 

@@ -25,14 +25,14 @@ NoiaMockSurfaceData* noia_mock_surface_manager_data_create(NoiaSize size)
 
 //------------------------------------------------------------------------------
 
-void noia_mock_surface_manager_initialize()
+void noia_mock_surface_manager_initialize(void)
 {
     sSurfaceStore = noia_store_new_for_id();
 }
 
 //------------------------------------------------------------------------------
 
-void noia_mock_surface_manager_finalize()
+void noia_mock_surface_manager_finalize(void)
 {
     noia_store_free_with_items(sSurfaceStore, free);
 }

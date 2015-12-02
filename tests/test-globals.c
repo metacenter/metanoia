@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 
 /// Check if `noia_position_is_inside` works correctly.
-NoiaTestResult should_correctly_check_if_point_is_inside_area()
+NoiaTestResult should_correctly_check_if_point_is_inside_area(void)
 {
     NoiaArea area = {{10, 10}, {10, 10}};
 
@@ -27,13 +27,13 @@ NoiaTestResult should_correctly_check_if_point_is_inside_area()
             {15, 20},
         };
 
-    for (unsigned i = 0; i < ARRAY_LEN(inside_positions); ++i) {
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(inside_positions); ++i) {
         NoiaPosition pos = inside_positions[i];
         NOIA_ASSERT(noia_position_is_inside(pos, area),
                     "Position {'%d', '%d'} should be inside", pos.x, pos.y);
     }
 
-    for (unsigned i = 0; i < ARRAY_LEN(outside_positions); ++i) {
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(outside_positions); ++i) {
         NoiaPosition pos = outside_positions[i];
         NOIA_ASSERT(!noia_position_is_inside(pos, area),
                     "Position {'%d', '%d'} should be outside", pos.x, pos.y);
@@ -45,7 +45,7 @@ NoiaTestResult should_correctly_check_if_point_is_inside_area()
 //------------------------------------------------------------------------------
 
 /// Check if `noia_position_cast` works correctly.
-NoiaTestResult should_correctly_cast_point_into_area()
+NoiaTestResult should_correctly_cast_point_into_area(void)
 {
     NoiaArea area = {{10, 10}, {10, 10}};
 
@@ -61,7 +61,7 @@ NoiaTestResult should_correctly_cast_point_into_area()
             {30, 30}, {19, 19},
         };
 
-    for (unsigned i = 0; i < ARRAY_LEN(positions); i += 2) {
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(positions); i += 2) {
         NoiaPosition orig_pos = positions[i+0];
         NoiaPosition corr_pos = positions[i+1];
         NoiaPosition cast_pos = noia_position_cast(orig_pos, area);
@@ -78,7 +78,7 @@ NoiaTestResult should_correctly_cast_point_into_area()
 
 int main(int argc, char** argv)
 {
-    NOIA_INIT_TESTS();
+    NOIA_INIT_TESTS;
 
     NoiaTest test[] = {
             NOIA_TEST(should_correctly_check_if_point_is_inside_area),

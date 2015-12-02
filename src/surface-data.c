@@ -9,7 +9,7 @@
 
 //------------------------------------------------------------------------------
 
-NoiaSurfaceData* noia_surface_data_new()
+NoiaSurfaceData* noia_surface_data_new(void)
 {
     NoiaSurfaceData* self = malloc(sizeof(NoiaSurfaceData));
     if (!self) {

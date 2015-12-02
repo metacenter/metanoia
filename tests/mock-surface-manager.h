@@ -1,13 +1,13 @@
 // file: mock-surface-manager.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_MOCK_SURFACE_MANAGER_H__
-#define __NOIA_MOCK_SURFACE_MANAGER_H__
+#ifndef NOIA_MOCK_SURFACE_MANAGER_H
+#define NOIA_MOCK_SURFACE_MANAGER_H
 
 #include "surface-manager.h"
 
-void noia_mock_surface_manager_initialize();
-void noia_mock_surface_manager_finalize();
+void noia_mock_surface_manager_initialize(void);
+void noia_mock_surface_manager_finalize(void);
 
-#endif // __NOIA_MOCK_SURFACE_MANAGER_H__
+#endif // NOIA_MOCK_SURFACE_MANAGER_H
 

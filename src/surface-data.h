@@ -1,8 +1,8 @@
 // file: surface-data.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_SURFACE_DATA_H__
-#define __NOIA_SURFACE_DATA_H__
+#ifndef NOIA_SURFACE_DATA_H
+#define NOIA_SURFACE_DATA_H
 
 #include "utils-store.h"
 #include "exhibitor-compositor.h"
@@ -43,10 +43,10 @@ typedef struct {
 } NoiaSurfaceData;
 
 /// Allocate Surface Data.
-NoiaSurfaceData* noia_surface_data_new();
+NoiaSurfaceData* noia_surface_data_new(void);
 
 /// Deallocate Surface Data.
 void noia_surface_data_free(NoiaSurfaceData* self);
 
-#endif // __NOIA_SURFACE_DATA_H__
+#endif // NOIA_SURFACE_DATA_H
 

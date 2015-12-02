@@ -9,7 +9,7 @@
 
 //------------------------------------------------------------------------------
 
-NoiaWaylandRegion* noia_wayland_region_new()
+NoiaWaylandRegion* noia_wayland_region_new(void)
 {
     return calloc(1, sizeof(NoiaWaylandRegion));
 }

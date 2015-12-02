@@ -3,31 +3,31 @@
 
 #include "device-common.h"
 #include "utils-dbus.h"
-#include "utils-log.h"
+#include "global-macros.h"
 
 #include <errno.h>
-#include <fcntl.h>
 #include <libudev.h>
-#include <string.h>
 #include <sys/stat.h>
 
-int noia_open(const char* node, int flags)
+int noia_device_open(const char* node, int flags)
 {
-    struct stat st;
-    int result, fd;
+    int fd = -1;
 
-    fd = open(node, flags);
-    if (fd > 0) {
-        return fd;
-    }
-    if (fd < 0 && errno != EPERM && errno != EACCES) {
-        return fd;
-    }
+    NOIA_BLOCK {
+        fd = open(node, flags);
+        if (fd > 0) {
+            break;
+        }
 
-    result = stat(node, &st);
-    if (result >= 0) {
-        return noia_dbus_session_take_device(major(st.st_rdev),
-                                             minor(st.st_rdev));
+        if (fd < 0 && errno != EPERM && errno != EACCES) {
+           break;
+        }
+
+        struct stat st;
+        if (stat(node, &st) >= 0) {
+            fd = noia_dbus_session_take_device(major(st.st_rdev),
+                                               minor(st.st_rdev));
+        }
     }
 
     return fd;

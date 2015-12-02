@@ -1,8 +1,8 @@
 // file: utils-environment.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_UTILS_ENVIRONMENT_H__
-#define __NOIA_UTILS_ENVIRONMENT_H__
+#ifndef NOIA_UTILS_ENVIRONMENT_H
+#define NOIA_UTILS_ENVIRONMENT_H
 
 #include "global-constants.h"
 
@@ -54,5 +54,5 @@ int noia_environment_open_file(const char *file_name,
                                unsigned size,
                                NoiaPath path);
 
-#endif // __NOIA_UTILS_ENVIRONMENT_H__
+#endif // NOIA_UTILS_ENVIRONMENT_H
 

@@ -1,8 +1,8 @@
 // file: tests-suit.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_TESTS_SUIT_H__
-#define __NOIA_TESTS_SUIT_H__
+#ifndef NOIA_TESTS_SUIT_H
+#define NOIA_TESTS_SUIT_H
 
 /// @file
 /// @todo Add NOIA prefixes.
@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define NOIA_INIT_TESTS() noia_test_init(argc, argv)
+#define NOIA_INIT_TESTS noia_test_init(argc, argv)
 
 #define NOIA_TEST_PRINTF(...) if (!sQuiet) printf(__VA_ARGS__);
 
@@ -27,7 +27,7 @@
         NOIA_TEST_PRINTF("\n"); \
     }
 
-#define ASSERT_POOL_SIZE(POOL, ARRAY_SIZE, SIZE) { \
+#define NOIA_ASSERT_POOL_SIZE(POOL, ARRAY_SIZE, SIZE) { \
     NOIA_ASSERT(ARRAY_SIZE == noia_pool_get_size(POOL), \
                 "Number of elements should be '%lu' (is '%u')", \
                 ARRAY_SIZE, noia_pool_get_size(POOL)); \
@@ -35,21 +35,21 @@
                 "Number of allocated elements should be '%u' (is '%u')", \
                 SIZE, noia_pool_get_alocation_size(POOL)); } \
 
-#define ASSERT_POOL(POOL, ARRAY, TYPE, SIZE) { \
-    ASSERT_POOL_SIZE(POOL, ARRAY_LEN(ARRAY), SIZE) \
+#define NOIA_ASSERT_POOL(POOL, ARRAY, TYPE, SIZE) { \
+    NOIA_ASSERT_POOL_SIZE(POOL, NOIA_SIZEOF_ARRAY(ARRAY), SIZE) \
     TYPE *ptr = noia_pool_top(POOL); \
-    TYPE array_data = ARRAY[ARRAY_LEN(ARRAY)-1]; \
+    TYPE array_data = ARRAY[NOIA_SIZEOF_ARRAY(ARRAY)-1]; \
     NOIA_ASSERT(array_data == *ptr, \
                 "Top element should be '%d' (is '%d')", \
                 array_data, *ptr); \
-    for (unsigned i = 0; i < ARRAY_LEN(ARRAY); ++i) { \
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(ARRAY); ++i) { \
         TYPE* ptr = noia_pool_get(POOL, i); \
         NOIA_ASSERT(ARRAY[i] == *ptr, \
                     "Element should be '%d' (is '%d')", \
                     ARRAY[i], *ptr); }}
 
-#define FILL_POOL(POOL, ARRAY, TYPE) { \
-    for (unsigned i = 0; i < ARRAY_LEN(ARRAY); ++i) { \
+#define NOIA_FILL_POOL(POOL, ARRAY, TYPE) { \
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(ARRAY); ++i) { \
         TYPE* ptr = noia_pool_add(POOL); \
         *ptr = ARRAY[i]; }};
 
@@ -58,8 +58,8 @@
                 "Calculated chain length should be %d (is %d)", \
                 LEN, noia_chain_recalculate_length(CHAIN));
 
-#define ASSERT_CHAIN(CHAIN, ARRAY) { \
-    int i = 0; int len = ARRAY_LEN(ARRAY); int j = len - 1; \
+#define NOIA_ASSERT_CHAIN(CHAIN, ARRAY) { \
+    int i = 0; int len = NOIA_SIZEOF_ARRAY(ARRAY); int j = len - 1; \
     char* chain_data = NULL; char* array_data = NULL; \
     NOIA_ASSERT(len == noia_chain_len(CHAIN), \
                 "Stored chain length should be %d (is %d)", \
@@ -76,8 +76,8 @@
                     "Chain data should be '%s' (is '%s')", \
                     array_data, chain_data); }}
 
-#define ASSERT_LIST(LIST, ARRAY) { \
-    int i = 0, len = ARRAY_LEN(ARRAY); \
+#define NOIA_ASSERT_LIST(LIST, ARRAY) { \
+    int i = 0, len = NOIA_SIZEOF_ARRAY(ARRAY); \
     char* list_data = NULL; char* array_data = NULL; \
     NOIA_ASSERT(len == noia_list_len(LIST), \
                 "Stored list length should be %d (is %d)", \
@@ -89,7 +89,8 @@
     NOIA_ASSERT(strcmp(list_data, array_data) == 0, \
                 "First element should be '%s' (is '%s')", \
                 array_data, list_data); \
-    list_data = noia_list_last(LIST); array_data = ARRAY[ARRAY_LEN(ARRAY)-1]; \
+    list_data = noia_list_last(LIST); \
+    array_data = ARRAY[NOIA_SIZEOF_ARRAY(ARRAY)-1]; \
     NOIA_ASSERT(strcmp(list_data, array_data) == 0, \
                 "Last element should be '%s' (is '%s')", \
                 array_data, list_data); \
@@ -107,10 +108,10 @@
 #define NOIA_ASSERT_BRANCH(BRANCH, TRUNK, ARRAY) \
     NOIA_ASSERT(BRANCH != NULL, "Branch should not be NULL"); \
     NOIA_ASSERT_TRUNK(BRANCH, TRUNK); \
-    ASSERT_CHAIN(BRANCH->twigs, ARRAY);
+    NOIA_ASSERT_CHAIN(BRANCH->twigs, ARRAY);
 
 #define NOIA_TEST(test) {#test,test}
-#define ARRAY_LEN(a) (sizeof(a)/sizeof(*a))
+#define NOIA_SIZEOF_ARRAY(a) (sizeof(a)/sizeof(*a))
 #define NOIA_NUM_TESTS(array) (sizeof(array)/(sizeof(NoiaTest)))
 
 static bool sQuiet = false;
@@ -120,7 +121,7 @@ typedef enum {
     NOIA_TEST_SUCCESS = 1,
 } NoiaTestResult;
 
-typedef NoiaTestResult (*NoiaTestFunc) ();
+typedef NoiaTestResult (*NoiaTestFunc) (void);
 
 typedef struct {
     char* name;
@@ -152,5 +153,5 @@ int noia_test_run(const char* suit_name, NoiaTest* test, int N)
     return result;
 }
 
-#endif // __NOIA_TESTS_SUIT_H__
+#endif // NOIA_TESTS_SUIT_H
 

@@ -1,8 +1,8 @@
 // file: wayland-output.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_WAYLAND_OUTPUT_H__
-#define __NOIA_WAYLAND_OUTPUT_H__
+#ifndef NOIA_WAYLAND_OUTPUT_H
+#define NOIA_WAYLAND_OUTPUT_H
 
 #include "utils-store.h"
 #include "output.h"
@@ -20,5 +20,5 @@ NoiaWaylandOutput* noia_wayland_output_create(struct wl_global* global_output,
 
 void noia_wayland_output_destroy(NoiaWaylandOutput* self);
 
-#endif // __NOIA_WAYLAND_OUTPUT_H__
+#endif // NOIA_WAYLAND_OUTPUT_H
 

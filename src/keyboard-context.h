@@ -1,8 +1,8 @@
 // file: keyboard-context.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_KEYBOARD_CONTEXT_H__
-#define __NOIA_KEYBOARD_CONTEXT_H__
+#ifndef NOIA_KEYBOARD_CONTEXT_H
+#define NOIA_KEYBOARD_CONTEXT_H
 
 #include "utils-list.h"
 #include "global-constants.h"
@@ -21,5 +21,5 @@ typedef struct {
         { NOIA_ARGMAND_NONE, NOIA_ARGMAND_NONE, NOIA_FRAME_TYPE_NONE, 0 }, \
         NULL, 0, 0x0, NOIA_KEY_RELEASED }
 
-#endif // __NOIA_KEYBOARD_CONTEXT_H__
+#endif // NOIA_KEYBOARD_CONTEXT_H
 

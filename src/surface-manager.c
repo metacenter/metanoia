@@ -61,7 +61,7 @@ NoiaSurfaceData* noia_surface_get(NoiaSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-void noia_surface_clear_all()
+void noia_surface_clear_all(void)
 {
     noia_surface_lock();
     noia_store_free_with_items(sStore, (NoiaFreeFunc) noia_surface_data_free);
@@ -176,14 +176,14 @@ void noia_surface_set_as_cursor(NoiaSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-void noia_surface_lock()
+void noia_surface_lock(void)
 {
     pthread_mutex_lock(&surface_mutex);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_surface_unlock()
+void noia_surface_unlock(void)
 {
     pthread_mutex_unlock(&surface_mutex);
 }

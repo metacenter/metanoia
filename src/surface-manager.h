@@ -1,8 +1,8 @@
 // file: surface-manager.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_SURFACE_MANAGER_H__
-#define __NOIA_SURFACE_MANAGER_H__
+#ifndef NOIA_SURFACE_MANAGER_H
+#define NOIA_SURFACE_MANAGER_H
 
 #include "surface-data.h"
 
@@ -35,11 +35,11 @@ void noia_surface_set_as_cursor(NoiaSurfaceId sid);
 
 int noia_surface_compare(NoiaSurfaceId first, NoiaSurfaceId second);
 
-void noia_surface_lock();
+void noia_surface_lock(void);
 
-void noia_surface_unlock();
+void noia_surface_unlock(void);
 
-void noia_surface_clear_all();
+void noia_surface_clear_all(void);
 
-#endif // __NOIA_SURFACE_MANAGER_H__
+#endif // NOIA_SURFACE_MANAGER_H
 

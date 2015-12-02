@@ -3,7 +3,7 @@ all: build/metanoia build/metanoiactl-gtk
 res/force:
 
 clean:
-	rm -rf doc build gen checks callgrind*
+	rm -rf doc build gen checks callgrind* *plist*
 
 checks: checks/check-globals checks/check-pool checks/check-chain checks/check-list checks/check-branch checks/check-store checks/check-frame
 check: checks

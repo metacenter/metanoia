@@ -1,8 +1,8 @@
 // file: event-timer.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EVENT_TIMER_H__
-#define __NOIA_EVENT_TIMER_H__
+#ifndef NOIA_EVENT_TIMER_H
+#define NOIA_EVENT_TIMER_H
 
 #include <sys/signal.h>
 #include <time.h>
@@ -17,5 +17,5 @@ void noia_event_timer_delete(timer_t timerid);
 
 void noia_event_timer_nanosleep(long nonoseconds);
 
-#endif // __NOIA_EVENT_TIMER_H__
+#endif // NOIA_EVENT_TIMER_H
 

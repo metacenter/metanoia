@@ -1,8 +1,8 @@
 // file: global-constants.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_GLOBAL_CONSTANTS_H__
-#define __NOIA_GLOBAL_CONSTANTS_H__
+#ifndef NOIA_GLOBAL_CONSTANTS_H
+#define NOIA_GLOBAL_CONSTANTS_H
 
 #include "global-types.h"
 
@@ -12,5 +12,5 @@ static const NoiaItemId scInvalidItemId = 0;
 /// Invalid value for NoiaSurfaceId
 static const NoiaSurfaceId scInvalidSurfaceId = 0;
 
-#endif // __NOIA_GLOBAL_CONSTANTS_H__
+#endif // NOIA_GLOBAL_CONSTANTS_H
 

@@ -20,10 +20,6 @@ m.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
 
 #-------------------------------------------------------------------------------
 
-with_gtk_support = True
-
-#-------------------------------------------------------------------------------
-
 metanoia = m.add_link_target(
         output='metanoia',
         include_in_all=True,

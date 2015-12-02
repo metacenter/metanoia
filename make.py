@@ -200,8 +200,9 @@ class Make:
 
             if len(self.all):
                 wr('all: {0}\n'.format(' '.join(self.all)))
-            wr('res/force:\n\nclean:\n\trm -rf doc {0} {1} {2} callgrind*\n'
-                             .format(self.builddir, self.gendir, self.checkdir))
+            wr('res/force:\n\nclean:\n'
+               '\trm -rf doc {0} {1} {2} callgrind* *plist*\n'
+               .format(self.builddir, self.gendir, self.checkdir))
             if len(self.checks):
                 wr('checks: {0}\ncheck: checks\n'
                    '\t@time (echo; for c in checks/check*; do $$c; done)\n'

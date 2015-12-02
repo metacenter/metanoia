@@ -1,8 +1,8 @@
 // file: event-task.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EVENT_TASK_H__
-#define __NOIA_EVENT_TASK_H__
+#ifndef NOIA_EVENT_TASK_H
+#define NOIA_EVENT_TASK_H
 
 #include "utils-object.h"
 
@@ -33,5 +33,5 @@ NoiaTask* noia_task_copy(NoiaTask* task);
 
 void noia_task_free(NoiaTask *self);
 
-#endif // __NOIA_EVENT_TASK_H__
+#endif // NOIA_EVENT_TASK_H
 

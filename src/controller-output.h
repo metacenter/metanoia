@@ -1,8 +1,8 @@
 // file: controller-output.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_CONTROLLER_OUTPUT_H__
-#define __NOIA_CONTROLLER_OUTPUT_H__
+#ifndef NOIA_CONTROLLER_OUTPUT_H
+#define NOIA_CONTROLLER_OUTPUT_H
 
 #include <stdint.h>
 
@@ -17,7 +17,7 @@ typedef struct {
     uint8_t* data; ///< Memory buffer for drawn data.
 } NoiaCtlOutput;
 
-NoiaCtlOutput* noia_controller_output_new();
+NoiaCtlOutput* noia_controller_output_new(void);
 
-#endif // __NOIA_CONTROLLER_OUTPUT_H__
+#endif // NOIA_CONTROLLER_OUTPUT_H
 

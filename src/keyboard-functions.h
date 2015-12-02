@@ -1,8 +1,8 @@
 // file: keyboard-functions.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_KEYBOARD_FUNCTIONS_H__
-#define __NOIA_KEYBOARD_FUNCTIONS_H__
+#ifndef NOIA_KEYBOARD_FUNCTIONS_H
+#define NOIA_KEYBOARD_FUNCTIONS_H
 
 #include "keyboard-context.h"
 
@@ -46,5 +46,5 @@ void noia_swap_mode_normal_to_insert(NoiaBindingContext* context);
 
 void noia_swap_mode_insert_to_normal(NoiaBindingContext* context);
 
-#endif // __NOIA_KEYBOARD_FUNCTIONS_H__
+#endif // NOIA_KEYBOARD_FUNCTIONS_H
 

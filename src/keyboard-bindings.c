@@ -142,7 +142,7 @@ bool noia_keyboard_catch_key(int code, NoiaKeyState state)
 
 //------------------------------------------------------------------------------
 
-void noia_keyboard_free_all()
+void noia_keyboard_free_all(void)
 {
     noia_list_free(sContext.modes);
 }

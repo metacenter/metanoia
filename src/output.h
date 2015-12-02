@@ -1,8 +1,8 @@
 // file: output.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_OUTPUT_H__
-#define __NOIA_OUTPUT_H__
+#ifndef NOIA_OUTPUT_H
+#define NOIA_OUTPUT_H
 
 #include "renderer.h"
 #include "utils-object.h"
@@ -68,5 +68,5 @@ void noia_output_take_screenshot(NoiaOutput* output,
                                  uint8_t* data,
                                  unsigned stride);
 
-#endif // __NOIA_OUTPUT_H__
+#endif // NOIA_OUTPUT_H
 

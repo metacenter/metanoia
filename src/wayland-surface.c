@@ -9,7 +9,7 @@
 
 //------------------------------------------------------------------------------
 
-NoiaWaylandSurface* noia_wayland_surface_new()
+NoiaWaylandSurface* noia_wayland_surface_new(void)
 {
     return calloc(1, sizeof(NoiaWaylandSurface));
 }

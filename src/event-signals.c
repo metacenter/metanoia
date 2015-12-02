@@ -17,7 +17,7 @@ typedef struct SignalSubscriber {
 
 //------------------------------------------------------------------------------
 
-SignalSubscriber* get_signal_subscriber()
+SignalSubscriber* get_signal_subscriber(void)
 {
     static SignalSubscriber ss = {NULL};
     if (ss.tab != NULL) {
@@ -149,7 +149,7 @@ NoiaResult noia_event_signal_emit_int(NoiaSignalNum sig_num, intptr_t value)
 
 //------------------------------------------------------------------------------
 
-void noia_event_signal_clear_all_substriptions()
+void noia_event_signal_clear_all_substriptions(void)
 {
     SignalSubscriber* ss = get_signal_subscriber();
     if (ss == NULL) {

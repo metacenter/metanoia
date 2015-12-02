@@ -1,8 +1,8 @@
 // file: utils-gl.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_UTILS_GL_H__
-#define __NOIA_UTILS_GL_H__
+#ifndef NOIA_UTILS_GL_H
+#define NOIA_UTILS_GL_H
 
 #include "global-constants.h"
 
@@ -53,7 +53,7 @@ typedef struct {
     EGLConfig  config;
 } NoiaEGLBundle;
 
-void noia_gl_log_status();
+void noia_gl_log_status(void);
 
 void noia_gl_print_log(GLuint object);
 
@@ -61,7 +61,7 @@ char* noia_gl_read_shader_source(const char* filename);
 
 GLuint noia_gl_create_shader(const char* filename, GLenum type);
 
-GLuint noia_gl_prepare_shaders_and_program();
+GLuint noia_gl_prepare_shaders_and_program(void);
 
 GLint noia_gl_get_attrib_location(GLuint program, const char* name);
 
@@ -89,5 +89,5 @@ NoiaResult noia_gl_make_current(NoiaEGLBundle* egl);
 
 NoiaResult noia_gl_release_current(NoiaEGLBundle* egl);
 
-#endif // __NOIA_UTILS_GL_H__
+#endif // NOIA_UTILS_GL_H
 

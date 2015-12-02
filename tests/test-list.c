@@ -8,7 +8,7 @@
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_append_values()
+NoiaTestResult should_append_values(void)
 {
     char* a[] = {"1", "2", "3"};
 
@@ -17,14 +17,14 @@ NoiaTestResult should_append_values()
     noia_list_append(l, strdup("2"));
     noia_list_append(l, strdup("3"));
 
-    ASSERT_LIST(l, a);
+    NOIA_ASSERT_LIST(l, a);
     noia_list_free(l);
     return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_prepend_values()
+NoiaTestResult should_prepend_values(void)
 {
     char* a[] = {"3", "2", "1"};
 
@@ -33,14 +33,14 @@ NoiaTestResult should_prepend_values()
     noia_list_prepend(l, strdup("2"));
     noia_list_prepend(l, strdup("3"));
 
-    ASSERT_LIST(l, a);
+    NOIA_ASSERT_LIST(l, a);
     noia_list_free(l);
     return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_get_nth()
+NoiaTestResult should_get_nth(void)
 {
     char* e;
     NoiaList* l = noia_list_new(free);
@@ -89,7 +89,7 @@ NoiaTestResult should_get_nth()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_remove_from_begining()
+NoiaTestResult should_remove_from_begining(void)
 {
     char* a[] = {"3", "4"};
 
@@ -102,14 +102,14 @@ NoiaTestResult should_remove_from_begining()
     noia_list_remove(l, "1", (NoiaCompareFunc) strcmp);
     noia_list_remove(l, "2", (NoiaCompareFunc) strcmp);
 
-    ASSERT_LIST(l, a);
+    NOIA_ASSERT_LIST(l, a);
     noia_list_free(l);
     return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_remove_from_end()
+NoiaTestResult should_remove_from_end(void)
 {
     char* a[] = {"1", "2"};
 
@@ -122,14 +122,14 @@ NoiaTestResult should_remove_from_end()
     noia_list_remove(l, "4", (NoiaCompareFunc) strcmp);
     noia_list_remove(l, "3", (NoiaCompareFunc) strcmp);
 
-    ASSERT_LIST(l, a);
+    NOIA_ASSERT_LIST(l, a);
     noia_list_free(l);
     return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_remove_from_inside()
+NoiaTestResult should_remove_from_inside(void)
 {
     char* a[] = {"1", "4"};
 
@@ -142,14 +142,14 @@ NoiaTestResult should_remove_from_inside()
     noia_list_remove(l, "3", (NoiaCompareFunc) strcmp);
     noia_list_remove(l, "2", (NoiaCompareFunc) strcmp);
 
-    ASSERT_LIST(l, a);
+    NOIA_ASSERT_LIST(l, a);
     noia_list_free(l);
     return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_remove_all_equal()
+NoiaTestResult should_remove_all_equal(void)
 {
     char* a[] = {"1", "3"};
 
@@ -162,14 +162,14 @@ NoiaTestResult should_remove_all_equal()
 
     noia_list_remove_all(l, "2", (NoiaCompareFunc) strcmp);
 
-    ASSERT_LIST(l, a);
+    NOIA_ASSERT_LIST(l, a);
     noia_list_free(l);
     return NOIA_TEST_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_subtract_none()
+NoiaTestResult should_subtract_none(void)
 {
     char* a[] = {"1", "4"};
     char* m[] = {"1", "4"};
@@ -187,9 +187,9 @@ NoiaTestResult should_subtract_none()
                                               (NoiaCompareFunc) strcmp,
                                               (NoiaDuplicateFunc) strdup);
 
-    ASSERT_LIST(difference, a);
-    ASSERT_LIST(minuend, m);
-    ASSERT_LIST(subtrahent, s);
+    NOIA_ASSERT_LIST(difference, a);
+    NOIA_ASSERT_LIST(minuend, m);
+    NOIA_ASSERT_LIST(subtrahent, s);
 
     noia_list_free(difference);
     noia_list_free(subtrahent);
@@ -200,7 +200,7 @@ NoiaTestResult should_subtract_none()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_subtract_some()
+NoiaTestResult should_subtract_some(void)
 {
     char* d[] = {"1", "3"};
     char* m[] = {"1", "2", "3", "4"};
@@ -221,9 +221,9 @@ NoiaTestResult should_subtract_some()
                                               (NoiaCompareFunc) strcmp,
                                               (NoiaDuplicateFunc) strdup);
 
-    ASSERT_LIST(difference, d);
-    ASSERT_LIST(minuend, m);
-    ASSERT_LIST(subtrahent, s);
+    NOIA_ASSERT_LIST(difference, d);
+    NOIA_ASSERT_LIST(minuend, m);
+    NOIA_ASSERT_LIST(subtrahent, s);
 
     noia_list_free(difference);
     noia_list_free(subtrahent);
@@ -234,7 +234,7 @@ NoiaTestResult should_subtract_some()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_subtract_all()
+NoiaTestResult should_subtract_all(void)
 {
     char* m[] = {"1", "2", "3", "4"};
     char* s[] = {"1", "2", "3", "4", "5"};
@@ -260,8 +260,8 @@ NoiaTestResult should_subtract_all()
     NOIA_ASSERT(difference_length == 0, "Difference should be empty "
                 "(length is '%d')", difference_length);
 
-    ASSERT_LIST(minuend, m);
-    ASSERT_LIST(subtrahent, s);
+    NOIA_ASSERT_LIST(minuend, m);
+    NOIA_ASSERT_LIST(subtrahent, s);
 
     noia_list_free(difference);
     noia_list_free(subtrahent);
@@ -274,7 +274,7 @@ NoiaTestResult should_subtract_all()
 
 int main(int argc, char** argv)
 {
-    NOIA_INIT_TESTS();
+    NOIA_INIT_TESTS;
 
     NoiaTest test[] = {
             NOIA_TEST(should_append_values),

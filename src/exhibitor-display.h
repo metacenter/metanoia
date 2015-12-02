@@ -1,8 +1,8 @@
 // file: exhibitor-display.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EXHIBITOR_DISPLAY_H__
-#define __NOIA_EXHIBITOR_DISPLAY_H__
+#ifndef NOIA_EXHIBITOR_DISPLAY_H
+#define NOIA_EXHIBITOR_DISPLAY_H
 
 #include "exhibitor-compositor.h"
 #include "output.h"
@@ -46,5 +46,5 @@ void noia_display_stop(NoiaDisplay* self);
 int noia_display_compare_unique_name(NoiaDisplay* self,
                                      char* unique_name);
 
-#endif // __NOIA_EXHIBITOR_DISPLAY_H__
+#endif // NOIA_EXHIBITOR_DISPLAY_H
 

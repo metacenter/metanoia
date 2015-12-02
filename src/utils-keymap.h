@@ -1,8 +1,8 @@
 // file: utils-keymap.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_UTILS_KEYMAP_H__
-#define __NOIA_UTILS_KEYMAP_H__
+#ifndef NOIA_UTILS_KEYMAP_H
+#define NOIA_UTILS_KEYMAP_H
 
 typedef struct NoiaKeymapPriv NoiaKeymapPriv;
 
@@ -21,5 +21,5 @@ int noia_utils_keymap_initialize(NoiaKeymap* self);
 
 void noia_utils_keymap_finalize(NoiaKeymap* self);
 
-#endif // __NOIA_UTILS_KEYMAP_H__
+#endif // NOIA_UTILS_KEYMAP_H
 

@@ -1,8 +1,8 @@
 // file: utils-list.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_UTILS_LIST_H__
-#define __NOIA_UTILS_LIST_H__
+#ifndef NOIA_UTILS_LIST_H
+#define NOIA_UTILS_LIST_H
 
 #include "utils-chain.h"
 #include "global-macros.h"
@@ -106,5 +106,5 @@ static inline void* noia_list_last(NoiaList* self)
     }
 }
 
-#endif // __NOIA_UTILS_LIST_H__
+#endif // NOIA_UTILS_LIST_H
 

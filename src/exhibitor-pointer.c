@@ -33,7 +33,7 @@ pthread_mutex_t pointer_mutex = PTHREAD_MUTEX_INITIALIZER;
 /// @see noia_exhibitor_pointer_on_motion_x, noia_exhibitor_pointer_on_motion_y
 NoiaPosition noia_exhibitor_pointer_cast_into_output(NoiaPosition position)
 {
-    NOIA_TRY {
+    NOIA_BLOCK {
         if (active_output
         &&  noia_position_is_inside(position, active_output->area)) {
             // Nothing to do - pointer inside active output
@@ -142,14 +142,14 @@ void noia_exhibitor_pointer_on_surface_destroyed(void* data)
 //------------------------------------------------------------------------------
 // PUBLIC
 
-NoiaPosition noia_exhibitor_pointer_get_global_position()
+NoiaPosition noia_exhibitor_pointer_get_global_position(void)
 {
     return position;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaSurfaceId noia_exhibitor_pointer_get_sid()
+NoiaSurfaceId noia_exhibitor_pointer_get_sid(void)
 {
     return cursor_sid;
 }

@@ -1,8 +1,8 @@
 // file: utils-chain.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_UTILS_CHAIN_H__
-#define __NOIA_UTILS_CHAIN_H__
+#ifndef NOIA_UTILS_CHAIN_H
+#define NOIA_UTILS_CHAIN_H
 
 #include "global-constants.h"
 
@@ -85,5 +85,5 @@ NoiaResult noia_chain_disjoin(NoiaChain* self, NoiaLink* link);
 /// Free all links contained in chain if free function provided.
 NoiaResult noia_chain_clean(NoiaChain* self);
 
-#endif // __NOIA_UTILS_CHAIN_H__
+#endif // NOIA_UTILS_CHAIN_H
 

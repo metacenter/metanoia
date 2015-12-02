@@ -1,8 +1,8 @@
 // file: wayland-state.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_WAYLAND_STATE_H__
-#define __NOIA_WAYLAND_STATE_H__
+#ifndef NOIA_WAYLAND_STATE_H
+#define NOIA_WAYLAND_STATE_H
 
 #include "utils-store.h"
 #include "output.h"
@@ -12,7 +12,7 @@
 
 NoiaResult noia_wayland_state_initialize(struct wl_display* display);
 
-void noia_wayland_state_finalize();
+void noia_wayland_state_finalize(void);
 
 void noia_wayland_state_add_surface(NoiaItemId sid, struct wl_resource* rc);
 
@@ -42,7 +42,7 @@ void noia_wayland_state_set_cursor(int serial,
                                    int hotspot_y,
                                    NoiaSurfaceId sid);
 
-void noia_wayland_state_screen_refresh();
+void noia_wayland_state_screen_refresh(NoiaSurfaceId sid);
 
 void noia_wayland_state_advertise_output(NoiaOutput* output);
 
@@ -50,5 +50,5 @@ void noia_wayland_state_destroy_output(NoiaOutput* output);
 
 void noia_wayland_state_surface_reconfigured(NoiaSurfaceId sid);
 
-#endif // __NOIA_WAYLAND_STATE_H__
+#endif // NOIA_WAYLAND_STATE_H
 

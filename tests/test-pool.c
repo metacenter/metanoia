@@ -6,15 +6,15 @@
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_add_and_get_correctly_when_not_resized()
+NoiaTestResult should_add_and_get_correctly_when_not_resized(void)
 {
     const unsigned initial_size = 4;
     int a[] = {1, 2, 3, 4};
 
     NoiaPool* pool = noia_pool_create(initial_size, sizeof(int));
-    FILL_POOL(pool, a, int);
+    NOIA_FILL_POOL(pool, a, int);
 
-    ASSERT_POOL(pool, a, int, initial_size);
+    NOIA_ASSERT_POOL(pool, a, int, initial_size);
 
     noia_pool_destroy(pool);
     return NOIA_TEST_SUCCESS;
@@ -22,15 +22,15 @@ NoiaTestResult should_add_and_get_correctly_when_not_resized()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_add_and_get_correctly_when_resized_1()
+NoiaTestResult should_add_and_get_correctly_when_resized_1(void)
 {
     const unsigned initial_size = 4;
     int a[] = {1, 2, 3, 4, 5, 6, 7, 8};
 
     NoiaPool* pool = noia_pool_create(initial_size, sizeof(int));
-    FILL_POOL(pool, a, int);
+    NOIA_FILL_POOL(pool, a, int);
 
-    ASSERT_POOL(pool, a, int, 2*initial_size);
+    NOIA_ASSERT_POOL(pool, a, int, 2*initial_size);
 
     noia_pool_destroy(pool);
     return NOIA_TEST_SUCCESS;
@@ -38,15 +38,15 @@ NoiaTestResult should_add_and_get_correctly_when_resized_1()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_add_and_get_correctly_when_resized_2()
+NoiaTestResult should_add_and_get_correctly_when_resized_2(void)
 {
     const unsigned initial_size = 4;
     int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
     NoiaPool* pool = noia_pool_create(initial_size, sizeof(int));
-    FILL_POOL(pool, a, int);
+    NOIA_FILL_POOL(pool, a, int);
 
-    ASSERT_POOL(pool, a, int, 3*initial_size);
+    NOIA_ASSERT_POOL(pool, a, int, 3*initial_size);
 
     noia_pool_destroy(pool);
     return NOIA_TEST_SUCCESS;
@@ -54,7 +54,7 @@ NoiaTestResult should_add_and_get_correctly_when_resized_2()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_add_and_get_correctly_after_realising()
+NoiaTestResult should_add_and_get_correctly_after_realising(void)
 {
     const unsigned initial_size = 4;
     int a1[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -62,15 +62,15 @@ NoiaTestResult should_add_and_get_correctly_after_realising()
 
     NoiaPool* pool = noia_pool_create(initial_size, sizeof(int));
 
-    FILL_POOL(pool, a1, int);
+    NOIA_FILL_POOL(pool, a1, int);
 
     noia_pool_release(pool);
 
-    ASSERT_POOL_SIZE(pool, 0lu, 3*initial_size);
+    NOIA_ASSERT_POOL_SIZE(pool, 0lu, 3*initial_size);
 
-    FILL_POOL(pool, a2, int);
+    NOIA_FILL_POOL(pool, a2, int);
 
-    ASSERT_POOL(pool, a2, int, 3*initial_size);
+    NOIA_ASSERT_POOL(pool, a2, int, 3*initial_size);
 
     noia_pool_destroy(pool);
     return NOIA_TEST_SUCCESS;
@@ -78,7 +78,7 @@ NoiaTestResult should_add_and_get_correctly_after_realising()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_add_and_get_correctly_after_dropping()
+NoiaTestResult should_add_and_get_correctly_after_dropping(void)
 {
     const unsigned initial_size = 4;
     int a1 [] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -88,15 +88,15 @@ NoiaTestResult should_add_and_get_correctly_after_dropping()
 
     NoiaPool* pool = noia_pool_create(initial_size, sizeof(int));
 
-    FILL_POOL(pool, a1, int);
+    NOIA_FILL_POOL(pool, a1, int);
 
     noia_pool_drop(pool, 5);
 
-    ASSERT_POOL(pool, a2, int, 3*initial_size);
+    NOIA_ASSERT_POOL(pool, a2, int, 3*initial_size);
 
-    FILL_POOL(pool, a3, int);
+    NOIA_FILL_POOL(pool, a3, int);
 
-    ASSERT_POOL(pool, a23, int, 3*initial_size);
+    NOIA_ASSERT_POOL(pool, a23, int, 3*initial_size);
 
     noia_pool_destroy(pool);
     return NOIA_TEST_SUCCESS;
@@ -106,7 +106,7 @@ NoiaTestResult should_add_and_get_correctly_after_dropping()
 
 int main(int argc, char** argv)
 {
-    NOIA_INIT_TESTS();
+    NOIA_INIT_TESTS;
 
     NoiaTest test[] = {
             NOIA_TEST(should_add_and_get_correctly_when_not_resized),

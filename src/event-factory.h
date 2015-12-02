@@ -1,8 +1,8 @@
 // file: event-factory.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EVENT_TASK_FACTORY_H__
-#define __NOIA_EVENT_TASK_FACTORY_H__
+#ifndef NOIA_EVENT_TASK_FACTORY_H
+#define NOIA_EVENT_TASK_FACTORY_H
 
 #include "event-task.h"
 #include "event-dispatcher.h"
@@ -23,5 +23,5 @@ NoiaTask* factorize_initialize_output_collector_task(NoiaLoop* loop);
 
 NoiaEventData* factorize_signal_event_data(NoiaEventDispatcher* dispatcher);
 
-#endif // __NOIA_EVENT_TASK_FACTORY_H__
+#endif // NOIA_EVENT_TASK_FACTORY_H
 

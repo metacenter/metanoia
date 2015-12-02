@@ -1,8 +1,8 @@
 // file: event-dispatcher.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EVENT_DISPATCHER_H__
-#define __NOIA_EVENT_DISPATCHER_H__
+#ifndef NOIA_EVENT_DISPATCHER_H
+#define NOIA_EVENT_DISPATCHER_H
 
 #include <sys/epoll.h>
 
@@ -46,5 +46,5 @@ void noia_event_dispatcher_stop(NoiaEventDispatcher* self);
 void noia_event_dispatcher_default_signal_handler(NoiaEventData* data,
                                                   struct epoll_event* event);
 
-#endif // __NOIA_EVENT_DISPATCHER_H__
+#endif // NOIA_EVENT_DISPATCHER_H
 

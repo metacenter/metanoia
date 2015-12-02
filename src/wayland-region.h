@@ -1,8 +1,8 @@
 // file: wayland-region.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_WAYLAND_REGION_H__
-#define __NOIA_WAYLAND_REGION_H__
+#ifndef NOIA_WAYLAND_REGION_H
+#define NOIA_WAYLAND_REGION_H
 
 #include "global-types.h"
 
@@ -20,5 +20,5 @@ void noia_wayland_region_inflate(NoiaWaylandRegion* self,
                                  int x, int y,
                                  int width, int height);
 
-#endif // __NOIA_WAYLAND_REGION_H__
+#endif // NOIA_WAYLAND_REGION_H
 

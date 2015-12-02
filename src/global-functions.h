@@ -1,12 +1,12 @@
 // file: global-functions.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_GLOBAL_FUNCTIONS_H__
-#define __NOIA_GLOBAL_FUNCTIONS_H__
+#ifndef NOIA_GLOBAL_FUNCTIONS_H
+#define NOIA_GLOBAL_FUNCTIONS_H
 
 void noia_quit();
 
 void noia_refresh_displays();
 
-#endif // __NOIA_GLOBAL_FUNCTIONS_H__
+#endif // NOIA_GLOBAL_FUNCTIONS_H
 

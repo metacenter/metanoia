@@ -21,7 +21,7 @@ bool noia_position_is_inside(NoiaPosition position, NoiaArea area)
 
 NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area)
 {
-    NOIA_TRY {
+    NOIA_BLOCK {
         if (noia_position_is_inside(position, area)) {
             break;
         }

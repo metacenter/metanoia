@@ -1,8 +1,8 @@
 // file: configuration.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_CONFIGURATION_H__
-#define __NOIA_CONFIGURATION_H__
+#ifndef NOIA_CONFIGURATION_H
+#define NOIA_CONFIGURATION_H
 
 #include "global-functions.h"
 #include "keyboard-functions.h"
@@ -73,5 +73,5 @@ static const NoiaBinding scBindingsInsert[] = {
         {KEY_TAB, NOIA_KEY_META|NOIA_KEY_SHIFT, noia_cicle_history_back},
     };
 
-#endif // __NOIA_CONFIGURATION_H__
+#endif // NOIA_CONFIGURATION_H
 

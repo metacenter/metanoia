@@ -31,7 +31,7 @@ static struct wl_display* wayland_display;
 
 //------------------------------------------------------------------------------
 
-struct wl_display* get_wayland_display()
+struct wl_display* get_wayland_display(void)
 {
     return wayland_display;
 }
@@ -50,7 +50,7 @@ void* display_run(void* data)
 void wayland_screen_refresh_handler(void* data)
 {
     NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
-    LOG_WAYL3("Wayland: handling screen refresh");
+    LOG_WAYL4("Wayland: handling screen refresh");
     noia_wayland_state_screen_refresh(sid);
 }
 

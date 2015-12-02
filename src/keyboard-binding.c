@@ -8,7 +8,7 @@
 
 //------------------------------------------------------------------------------
 
-NoiaBinding* noia_binding_new()
+NoiaBinding* noia_binding_new(void)
 {
     NoiaBinding* self = malloc(sizeof(NoiaBinding));
     if (!self) {

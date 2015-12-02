@@ -6,7 +6,7 @@
 
 #include <malloc.h>
 
-#define NOIA_MAKE_BRANCHES() \
+#define NOIA_MAKE_BRANCHES \
     NoiaBranch* b = noia_branch_new();\
     NoiaBranch* b1 = noia_branch_new();\
     NoiaBranch* b2 = noia_branch_new();\
@@ -34,7 +34,7 @@
     noia_branch_set_data(b32, strdup("32"));\
     noia_branch_set_data(b33, strdup("33"))
 
-#define NOIA_GLUE_BRANCHES() \
+#define NOIA_GLUE_BRANCHES \
     noia_branch_append(b3, b31);\
     noia_branch_append(b1, b11);\
     noia_branch_append(b,  b1);\
@@ -50,15 +50,15 @@
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_append_values()
+NoiaTestResult should_append_values(void)
 {
     char* a[] = {"1", "2", "3"};
     char* a1[] = {"11", "12", "13"};
     char* a2[] = {"21", "22", "23"};
     char* a3[] = {"31", "32", "33"};
 
-    NOIA_MAKE_BRANCHES();
-    NOIA_GLUE_BRANCHES();
+    NOIA_MAKE_BRANCHES;
+    NOIA_GLUE_BRANCHES;
 
     NOIA_ASSERT_BRANCH(b,  NULL, a);
     NOIA_ASSERT_BRANCH(b1, b,    a1);
@@ -71,14 +71,14 @@ NoiaTestResult should_append_values()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_prepend_values()
+NoiaTestResult should_prepend_values(void)
 {
     char* a[] = {"1", "2", "3"};
     char* a1[] = {"11", "12", "13"};
     char* a2[] = {"21", "22", "23"};
     char* a3[] = {"31", "32", "33"};
 
-    NOIA_MAKE_BRANCHES();
+    NOIA_MAKE_BRANCHES;
 
     noia_branch_prepend(b,  b3);
     noia_branch_prepend(b2, b23);
@@ -104,7 +104,7 @@ NoiaTestResult should_prepend_values()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_insert_values()
+NoiaTestResult should_insert_values(void)
 {
     char* a[] = {"1", "2", "3", "4", "5"};
 
@@ -135,15 +135,15 @@ NoiaTestResult should_insert_values()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_remove_branch()
+NoiaTestResult should_remove_branch(void)
 {
     char* a[] = {"1", "3"};
     char* a1[] = {"11", "12", "13"};
     char* a2[] = {"21", "22", "23"};
     char* a3[] = {"31", "32", "33"};
 
-    NOIA_MAKE_BRANCHES();
-    NOIA_GLUE_BRANCHES();
+    NOIA_MAKE_BRANCHES;
+    NOIA_GLUE_BRANCHES;
 
     noia_branch_remove(b, b2);
 
@@ -160,12 +160,12 @@ NoiaTestResult should_remove_branch()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_find_branch()
+NoiaTestResult should_find_branch(void)
 {
     char* a2[] = {"21", "22", "23"};
 
-    NOIA_MAKE_BRANCHES();
-    NOIA_GLUE_BRANCHES();
+    NOIA_MAKE_BRANCHES;
+    NOIA_GLUE_BRANCHES;
 
     NoiaBranch* f = noia_branch_find(b, "2", (NoiaBranchCompare) strcmp);
 
@@ -179,7 +179,7 @@ NoiaTestResult should_find_branch()
 
 int main(int argc, char** argv)
 {
-    NOIA_INIT_TESTS();
+    NOIA_INIT_TESTS;
 
     NoiaTest test[] = {
             NOIA_TEST(should_append_values),

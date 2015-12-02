@@ -1,8 +1,8 @@
 // file: config.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_CONFIG_H__
-#define __NOIA_CONFIG_H__
+#ifndef NOIA_CONFIG_H
+#define NOIA_CONFIG_H
 
 #include "utils-keymap.h"
 #include "global-constants.h"
@@ -23,10 +23,10 @@ typedef struct {
 } NoiaSettings;
 
 /// Get configuration.
-const NoiaConfig* noia_config();
+const NoiaConfig* noia_config(void);
 
 /// Get settings.
-const NoiaSettings* noia_settings();
+const NoiaSettings* noia_settings(void);
 
 /// Apply configuration:
 ///
@@ -37,10 +37,10 @@ const NoiaSettings* noia_settings();
 void noia_config_apply(int argc, char** argv);
 
 /// Free memory allocated for storing configuration.
-void noia_config_finalize();
+void noia_config_finalize(void);
 
 /// Get key map.
-NoiaKeymap* noia_config_get_keymap();
+NoiaKeymap* noia_config_get_keymap(void);
 
-#endif // __NOIA_CONFIG_H__
+#endif // NOIA_CONFIG_H
 

@@ -1,13 +1,13 @@
 // file: wayland.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_WAYLAND_H__
-#define __NOIA_WAYLAND_H__
+#ifndef NOIA_WAYLAND_H
+#define NOIA_WAYLAND_H
 
 #include "event-loop.h"
 
-struct wl_display* get_wayland_display();
+struct wl_display* get_wayland_display(void);
 
 void noia_wayland_initialize(NoiaLoop* this_loop);
 
-#endif // __NOIA_WAYLAND_H__
+#endif // NOIA_WAYLAND_H

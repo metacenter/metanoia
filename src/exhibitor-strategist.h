@@ -1,8 +1,8 @@
 // file: exhibitor-strategist.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_EXHIBITOR_STRATEGIST_H__
-#define __NOIA_EXHIBITOR_STRATEGIST_H__
+#ifndef NOIA_EXHIBITOR_STRATEGIST_H
+#define NOIA_EXHIBITOR_STRATEGIST_H
 
 #include "exhibitor.h"
 
@@ -16,7 +16,7 @@ typedef struct {
     NoiaStrategistOnSurfaceDestroyedFunc on_surface_destroyed;
 } NoiaStrategist;
 
-NoiaStrategist* noia_strategist_new();
+NoiaStrategist* noia_strategist_new(void);
 void noia_strategist_free(NoiaStrategist* self);
 
 void noia_strategist_setup
@@ -25,5 +25,5 @@ void noia_strategist_setup
                      NoiaStrategistOnSurfaceDestroyedFunc on_surface_destroyed);
 
 
-#endif // __NOIA_EXHIBITOR_STRATEGIST_H__
+#endif // NOIA_EXHIBITOR_STRATEGIST_H
 

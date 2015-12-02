@@ -12,7 +12,7 @@
 //------------------------------------------------------------------------------
 
 /// Log current GL and EGL error
-void noia_gl_log_status()
+void noia_gl_log_status(void)
 {
     GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     bool framebufferComplete = (framebufferStatus == GL_FRAMEBUFFER_COMPLETE);
@@ -126,7 +126,7 @@ GLuint noia_gl_create_shader(const char* filename, GLenum type)
 //------------------------------------------------------------------------------
 
 /// Create program and link with shaders
-GLuint noia_gl_prepare_shaders_and_program()
+GLuint noia_gl_prepare_shaders_and_program(void)
 {
     // Create shaders
     /// @todo use different paths

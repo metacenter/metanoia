@@ -55,7 +55,7 @@ void noia_event_data_destroy(NoiaEventData* event_data)
 
 //------------------------------------------------------------------------------
 
-NoiaEventDispatcher* noia_event_dispatcher_new()
+NoiaEventDispatcher* noia_event_dispatcher_new(void)
 {
     NoiaEventDispatcher* self = malloc(sizeof(NoiaEventDispatcher));
     if (!self) {

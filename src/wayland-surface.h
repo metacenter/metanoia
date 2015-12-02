@@ -1,8 +1,8 @@
 // file: wayland-surface.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_WAYLAND_SURFACE_H__
-#define __NOIA_WAYLAND_SURFACE_H__
+#ifndef NOIA_WAYLAND_SURFACE_H
+#define NOIA_WAYLAND_SURFACE_H
 
 #include "global-types.h"
 #include "wayland-types.h"
@@ -27,5 +27,5 @@ void noia_wayland_surface_set_resource
                                    NoiaWaylandSurfaceResourceType resource_type,
                                    struct wl_resource* resource);
 
-#endif // __NOIA_WAYLAND_SURFACE_H__
+#endif // NOIA_WAYLAND_SURFACE_H
 

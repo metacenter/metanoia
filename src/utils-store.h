@@ -1,8 +1,8 @@
 // file: utils-store.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_STORE_H__
-#define __NOIA_STORE_H__
+#ifndef NOIA_STORE_H
+#define NOIA_STORE_H
 
 #include "global-constants.h"
 
@@ -13,8 +13,8 @@ typedef struct NoiaStorePriv NoiaStore;
 
 NoiaStore* noia_store_new(NoiaStoreValueCompareFunc value_compare_func,
                           NoiaStoreKeyFreeFunc key_free_func);
-NoiaStore* noia_store_new_for_id();
-NoiaStore* noia_store_new_for_str();
+NoiaStore* noia_store_new_for_id(void);
+NoiaStore* noia_store_new_for_str(void);
 
 void noia_store_free(NoiaStore* self);
 void noia_store_free_with_items(NoiaStore* self, NoiaFreeFunc free_func);
@@ -39,5 +39,5 @@ void* noia_store_delete_with_str(NoiaStore* self, char* key);
         NoiaItemId: noia_store_delete_with_id, \
         char*:      noia_store_delete_with_str) (store, key)
 
-#endif // __NOIA_STORE_H__
+#endif // NOIA_STORE_H
 

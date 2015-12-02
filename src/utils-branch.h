@@ -1,8 +1,8 @@
 // file: utils-branch.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_UTILS_BRANCH_H__
-#define __NOIA_UTILS_BRANCH_H__
+#ifndef NOIA_UTILS_BRANCH_H
+#define NOIA_UTILS_BRANCH_H
 
 #include "utils-chain.h"
 
@@ -24,7 +24,7 @@ struct NoiaBranch {
 typedef int (*NoiaBranchCompare) (void*, void*);
 
 /// Branch constructor.
-NoiaBranch* noia_branch_new();
+NoiaBranch* noia_branch_new(void);
 
 /// Branch destructor.
 /// Destructs whole tree and free all data.
@@ -65,5 +65,5 @@ static inline NoiaBranch* noia_branch_get_previous(NoiaBranch* self)
     return (NoiaBranch*) self->base.prev;
 }
 
-#endif // __NOIA_UTILS_BRANCH_H__
+#endif // NOIA_UTILS_BRANCH_H
 

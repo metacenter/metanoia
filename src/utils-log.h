@@ -1,8 +1,8 @@
 // file: utils-log.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_UTILS_LOG_H__
-#define __NOIA_UTILS_LOG_H__
+#ifndef NOIA_UTILS_LOG_H
+#define NOIA_UTILS_LOG_H
 
 #include "global-constants.h"
 
@@ -113,5 +113,5 @@ void noia_print_backtrace(void);
 /// @todo Move elsewhere.
 int noia_log_get_miliseconds(void);
 
-#endif // __NOIA_UTILS_LOG_H__
+#endif // NOIA_UTILS_LOG_H
 

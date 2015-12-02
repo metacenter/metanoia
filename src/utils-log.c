@@ -141,7 +141,7 @@ void noia_log_begin(char* string)
 
 //------------------------------------------------------------------------------
 
-void noia_log_end()
+void noia_log_end(void)
 {
     noia_log_print_delimiter("");
     pthread_mutex_unlock(&mutex);

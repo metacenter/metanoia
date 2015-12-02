@@ -184,7 +184,7 @@ NoiaResult noia_dbus_session_get_session_by_pid(int pid, const char** sid_out)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_dbus_session_take_control()
+NoiaResult noia_dbus_session_take_control(void)
 {
     static const char* const cMessageName = "TakeControl";
 
@@ -226,7 +226,7 @@ NoiaResult noia_dbus_session_take_control()
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_dbus_session_release_control()
+NoiaResult noia_dbus_session_release_control(void)
 {
     static const char* const cMessageName = "ReleaseControl";
 

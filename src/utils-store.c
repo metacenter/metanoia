@@ -83,7 +83,7 @@ NoiaStore* noia_store_new(NoiaStoreValueCompareFunc value_compare_func,
 //------------------------------------------------------------------------------
 
 /// Allocate memory for new NoiaStore that uses IDs to distinguish items.
-NoiaStore* noia_store_new_for_id()
+NoiaStore* noia_store_new_for_id(void)
 {
     return noia_store_new(noia_store_id_compare, noia_store_destroy_id_key);
 }
@@ -91,7 +91,7 @@ NoiaStore* noia_store_new_for_id()
 //------------------------------------------------------------------------------
 
 /// Allocate memory for new NoiaStore that uses strings to distinguish items.
-NoiaStore* noia_store_new_for_str()
+NoiaStore* noia_store_new_for_str(void)
 {
     return noia_store_new(noia_store_str_compare,
                           noia_store_destroy_string_key);
@@ -147,7 +147,7 @@ NoiaItemId noia_store_generate_new_id(NoiaStore* self)
     pthread_mutex_lock(&self->mutex);
     NoiaItem item;
     do {
-        item.id = (NoiaItemId) rand();
+        item.id = (NoiaItemId) rand() & NOIA_RANDOM_MASK;
     } while (item.id == scInvalidItemId
           || tfind((void *) &item, &self->root, self->compare_value) != NULL);
 

@@ -12,7 +12,7 @@ typedef struct Elem {
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_correctly_store_data_for_id()
+NoiaTestResult should_correctly_store_data_for_id(void)
 {
     NoiaItemId key1 = 4;
     NoiaItemId key2 = 7;
@@ -53,7 +53,7 @@ NoiaTestResult should_correctly_store_data_for_id()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_correctly_delete_data_for_id()
+NoiaTestResult should_correctly_delete_data_for_id(void)
 {
     NoiaItemId key1 = 4;
     NoiaItemId key2 = 7;
@@ -93,7 +93,7 @@ NoiaTestResult should_correctly_delete_data_for_id()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_correctly_store_data_for_str()
+NoiaTestResult should_correctly_store_data_for_str(void)
 {
     char* key1 = "key_str_1";
     char* key2 = "key_str_2";
@@ -134,7 +134,7 @@ NoiaTestResult should_correctly_store_data_for_str()
 
 //------------------------------------------------------------------------------
 
-NoiaTestResult should_correctly_delete_data_for_str()
+NoiaTestResult should_correctly_delete_data_for_str(void)
 {
     char* key1 = "key_str_1";
     char* key2 = "key_str_2";
@@ -178,7 +178,7 @@ NoiaTestResult should_correctly_delete_data_for_str()
 
 int main(int argc, char** argv)
 {
-    NOIA_INIT_TESTS();
+    NOIA_INIT_TESTS;
 
     NoiaTest test[] = {
             NOIA_TEST(should_correctly_store_data_for_id),

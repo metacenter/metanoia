@@ -1,8 +1,8 @@
 // file: global-types.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef __NOIA_GLOBAL_TYPES_H__
-#define __NOIA_GLOBAL_TYPES_H__
+#ifndef NOIA_GLOBAL_TYPES_H
+#define NOIA_GLOBAL_TYPES_H
 
 #include <stdint.h>
 #include <limits.h>
@@ -99,5 +99,5 @@ NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area);
 /// Clear the action.
 void noia_action_clean(NoiaAction* action);
 
-#endif // __NOIA_GLOBAL_TYPES_H__
+#endif // NOIA_GLOBAL_TYPES_H
 

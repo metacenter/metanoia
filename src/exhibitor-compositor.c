@@ -12,7 +12,7 @@
 
 //------------------------------------------------------------------------------
 
-NoiaCompositor* noia_compositor_new()
+NoiaCompositor* noia_compositor_new(void)
 {
     NoiaCompositor* self = malloc(sizeof(NoiaCompositor));
     NOIA_ENSURE(self, abort());
@@ -220,7 +220,7 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(frame, return);
 
-    NOIA_TRY {
+    NOIA_BLOCK {
         if (!noia_frame_has_type(self->selection, NOIA_FRAME_TYPE_FLOATING)) {
             break;
         }
