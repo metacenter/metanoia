@@ -5,6 +5,7 @@
 #include "exhibitor.h"
 
 #include "surface-manager.h"
+#include "event-signals.h"
 #include "utils-log.h"
 
 #include <malloc.h>
@@ -39,6 +40,20 @@ void noia_compositor_free(NoiaCompositor* self)
 
 //------------------------------------------------------------------------------
 
+void noia_compositor_set_selection(NoiaCompositor* self, NoiaFrame* frame)
+{
+    NOIA_ENSURE(frame, return);
+
+    self->selection = frame;
+
+    if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
+        NoiaSurfaceId sid = noia_frame_get_sid(frame);
+        noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
                                                 NoiaSize size)
 {
@@ -49,7 +64,7 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
     noia_frame_append(self->root, workspace);
 
     /// @todo This should be configurable
-    self->selection = workspace;
+    noia_compositor_set_selection(self, workspace);
     return workspace;
 }
 
@@ -80,7 +95,7 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 
     noia_frame_append(self->selection, frame);
     /// @todo This should be configurable
-    self->selection = frame;
+    noia_compositor_set_selection(self, frame);
 
     noia_compositor_log_frame(self);
 
@@ -120,7 +135,7 @@ void noia_compositor_pop_surface(NoiaCompositor* self,
     noia_list_prepend(exhibitor->surface_history, (void*) sid);
 
     // Update selection.
-    self->selection = frame;
+    noia_compositor_set_selection(self, frame);
 }
 
 //------------------------------------------------------------------------------
@@ -163,7 +178,7 @@ void noia_compositor_focus(NoiaCompositor* self,
         NoiaFrame* new_selection =
                    noia_frame_find_adjacent(self->selection, argmand, position);
         if (new_selection) {
-            self->selection = new_selection;
+            noia_compositor_set_selection(self, new_selection);
         }
     }
 

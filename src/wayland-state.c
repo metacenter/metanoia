@@ -191,7 +191,7 @@ void noia_wayland_state_keyboard_focus_update(NoiaSurfaceId new_sid)
             struct wl_client* rc_client = wl_resource_get_client(rc);
 
             if (rc_client == old_client) {
-                /// @todo: wl_keyboard_send_leave
+                wl_keyboard_send_leave(rc, 0, old_resource);
             }
             if (rc_client == new_client) {
                 wl_keyboard_send_enter(rc, 0, new_resource, &array);

@@ -313,6 +313,14 @@ bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type)
 
 //------------------------------------------------------------------------------
 
+NoiaSurfaceId noia_frame_get_sid(NoiaFrame* self)
+{
+    NoiaFrameParams* params = noia_frame_get_params(self);
+    return params->sid;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaArea noia_frame_get_area(NoiaFrame* self)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
@@ -323,6 +331,9 @@ NoiaArea noia_frame_get_area(NoiaFrame* self)
 
 void noia_frame_append(NoiaFrame* self, NoiaFrame* other)
 {
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(other, return);
+
     if (noia_frame_get_params(self)->sid == scInvalidSurfaceId) {
         noia_branch_append(self, other);
     } else {
@@ -624,6 +635,7 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self)
 NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame, NoiaFrameType type)
 {
     NOIA_ENSURE(frame, return NULL);
+    NOIA_ENSURE(frame->trunk, return NULL);
 
     if (noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_FLOATING
     ||  noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_SPECIAL

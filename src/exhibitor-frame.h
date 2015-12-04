@@ -64,6 +64,9 @@ void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces);
 /// Check if frame has compatible type.
 bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type);
 
+/// Get frame surface ID
+NoiaSurfaceId noia_frame_get_sid(NoiaFrame* self);
+
 /// Get frame area
 NoiaArea noia_frame_get_area(NoiaFrame* self);
 
