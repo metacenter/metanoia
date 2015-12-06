@@ -9,6 +9,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/// C++-style `and`.
+#define and &&
+
+/// C++-style `or`.
+#define or ||
+
+/// C++-style `not`.
+#define not !
+
 /// Mark variable as unused.
 #define NOIA_UNUSED __attribute__((unused))
 
