@@ -80,7 +80,7 @@ void noia_environment_async_signal_handler(int sig,
         case SIGSEGV:
         case SIGABRT:
             LOG_INFO1("Signal '%d' received asynchronously", sig);
-            noia_print_backtrace();
+            noia_log_backtrace();
             exit(1);
         default:
             LOG_INFO2("Unhandled signal: '%d'", sig);

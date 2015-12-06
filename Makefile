@@ -54,6 +54,7 @@ build/metanoia: Makefile \
                 build/utils-branch.o \
                 build/utils-chain.o \
                 build/utils-dbus.o \
+                build/utils-debug.o \
                 build/utils-environment.o \
                 build/utils-gl.o \
                 build/utils-keymap.o \
@@ -85,7 +86,7 @@ build/metanoia: Makefile \
 	@mkdir -p build
 	@echo "  LD   metanoia"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/metanoia \
-	       build/config.o build/global-enums.o build/global-types.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/wayland-protocol-screenshooter.o gen/screenshooter-protocol.c build/bind-egl-wayland.o build/backend-offscreen.o build/metanoia.o \
+	       build/config.o build/global-enums.o build/global-types.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-debug.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/wayland-protocol-screenshooter.o gen/screenshooter-protocol.c build/bind-egl-wayland.o build/backend-offscreen.o build/metanoia.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -ldrm -ludev -lwayland-server -lxkbcommon
 
 build/metanoiactl-gtk: Makefile \
@@ -98,12 +99,13 @@ build/metanoiactl-gtk: Makefile \
                        build/controller-wayland.o \
                        build/metanoiactl-gtk.o \
                        build/screenshooter-protocol.o \
+                       build/utils-debug.o \
                        build/utils-environment.o \
                        build/utils-log.o
 	@mkdir -p build
 	@echo "  LD   metanoiactl-gtk"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/metanoiactl-gtk \
-	       build/controller-defs.o build/controller-output.o build/controller-gtk-res.o build/controller-gtk-display.o build/controller-gtk-win.o build/controller-gtk-app.o build/controller-wayland.o build/metanoiactl-gtk.o build/utils-log.o build/utils-environment.o build/screenshooter-protocol.o \
+	       build/controller-defs.o build/controller-output.o build/controller-gtk-res.o build/controller-gtk-display.o build/controller-gtk-win.o build/controller-gtk-app.o build/controller-wayland.o build/metanoiactl-gtk.o build/utils-debug.o build/utils-log.o build/utils-environment.o build/screenshooter-protocol.o \
 	       -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -lwayland-client
 
 gen/xdg-shell-server-protocol.h: Makefile \
@@ -179,6 +181,7 @@ build/config.o: Makefile \
                 src/keyboard-context.h \
                 src/keyboard-functions.h \
                 src/utils-chain.h \
+                src/utils-debug.h \
                 src/utils-keymap.h \
                 src/utils-list.h \
                 src/utils-log.h
@@ -199,7 +202,8 @@ build/global-types.o: Makefile \
                       src/global-enums.h \
                       src/global-macros.h \
                       src/global-types.c \
-                      src/global-types.h
+                      src/global-types.h \
+                      src/utils-debug.h
 	@mkdir -p build
 	@echo "  CC   global-types.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/global-types.o -Isrc -Igen \
@@ -236,6 +240,7 @@ build/global-functions.o: Makefile \
                           src/renderer.h \
                           src/utils-branch.h \
                           src/utils-chain.h \
+                          src/utils-debug.h \
                           src/utils-list.h \
                           src/utils-log.h \
                           src/utils-object.h \
@@ -260,6 +265,7 @@ build/utils-pool.o: Makefile \
                     src/global-enums.h \
                     src/global-macros.h \
                     src/global-types.h \
+                    src/utils-debug.h \
                     src/utils-pool.c \
                     src/utils-pool.h
 	@mkdir -p build
@@ -284,6 +290,7 @@ build/utils-list.o: Makefile \
                     src/global-macros.h \
                     src/global-types.h \
                     src/utils-chain.h \
+                    src/utils-debug.h \
                     src/utils-list.c \
                     src/utils-list.h
 	@mkdir -p build
@@ -309,6 +316,7 @@ build/utils-store.o: Makefile \
                      src/global-enums.h \
                      src/global-macros.h \
                      src/global-types.h \
+                     src/utils-debug.h \
                      src/utils-log.h \
                      src/utils-store.c \
                      src/utils-store.h
@@ -356,11 +364,22 @@ build/utils-keymap.o: Makefile \
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-keymap.o -Isrc -Igen \
 	       -c src/utils-keymap.c
 
+build/utils-debug.o: Makefile \
+                     src/global-enums.h \
+                     src/global-types.h \
+                     src/utils-debug.c \
+                     src/utils-debug.h
+	@mkdir -p build
+	@echo "  CC   utils-debug.o"
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-debug.o -Isrc -Igen \
+	       -c src/utils-debug.c
+
 build/utils-log.o: Makefile \
                    gen/version.h \
                    src/global-constants.h \
                    src/global-enums.h \
                    src/global-types.h \
+                   src/utils-debug.h \
                    src/utils-environment.h \
                    src/utils-log.c \
                    src/utils-log.h
@@ -374,6 +393,7 @@ build/utils-environment.o: Makefile \
                            src/global-enums.h \
                            src/global-macros.h \
                            src/global-types.h \
+                           src/utils-debug.h \
                            src/utils-environment.c \
                            src/utils-environment.h \
                            src/utils-log.h
@@ -390,6 +410,7 @@ build/event-dispatcher.o: Makefile \
                           src/global-macros.h \
                           src/global-types.h \
                           src/utils-chain.h \
+                          src/utils-debug.h \
                           src/utils-list.h \
                           src/utils-log.h
 	@mkdir -p build
@@ -420,6 +441,7 @@ build/event-signals.o: Makefile \
                        src/global-objects.h \
                        src/global-types.h \
                        src/utils-chain.h \
+                       src/utils-debug.h \
                        src/utils-list.h \
                        src/utils-log.h \
                        src/utils-object.h
@@ -437,6 +459,7 @@ build/event-loop.o: Makefile \
                     src/global-macros.h \
                     src/global-types.h \
                     src/utils-chain.h \
+                    src/utils-debug.h \
                     src/utils-environment.h \
                     src/utils-list.h \
                     src/utils-log.h \
@@ -481,6 +504,7 @@ build/event-factory.o: Makefile \
                        src/renderer.h \
                        src/utils-branch.h \
                        src/utils-chain.h \
+                       src/utils-debug.h \
                        src/utils-environment.h \
                        src/utils-list.h \
                        src/utils-object.h \
@@ -518,6 +542,7 @@ build/renderer-mmap.o: Makefile \
                        src/surface-manager.h \
                        src/utils-branch.h \
                        src/utils-chain.h \
+                       src/utils-debug.h \
                        src/utils-list.h \
                        src/utils-log.h \
                        src/utils-object.h \
@@ -543,6 +568,7 @@ build/renderer-gl.o: Makefile \
                      src/surface-manager.h \
                      src/utils-branch.h \
                      src/utils-chain.h \
+                     src/utils-debug.h \
                      src/utils-gl.h \
                      src/utils-list.h \
                      src/utils-log.h \
@@ -559,9 +585,10 @@ build/device-common.o: Makefile \
                        src/device-common.h \
                        src/global-constants.h \
                        src/global-enums.h \
+                       src/global-macros.h \
                        src/global-types.h \
                        src/utils-dbus.h \
-                       src/utils-log.h
+                       src/utils-debug.h
 	@mkdir -p build
 	@echo "  CC   device-common.o"
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-common.o -Isrc -Igen \
@@ -579,6 +606,7 @@ build/device-fb.o: Makefile \
                    src/renderer-mmap.h \
                    src/renderer.h \
                    src/utils-chain.h \
+                   src/utils-debug.h \
                    src/utils-list.h \
                    src/utils-log.h \
                    src/utils-object.h \
@@ -601,6 +629,7 @@ build/device-drm.o: Makefile \
                     src/renderer-mmap.h \
                     src/renderer.h \
                     src/utils-chain.h \
+                    src/utils-debug.h \
                     src/utils-gl.h \
                     src/utils-keymap.h \
                     src/utils-list.h \
@@ -630,6 +659,7 @@ build/device-evdev.o: Makefile \
                       src/keyboard-context.h \
                       src/utils-chain.h \
                       src/utils-dbus.h \
+                      src/utils-debug.h \
                       src/utils-list.h \
                       src/utils-log.h \
                       src/utils-object.h
@@ -662,6 +692,7 @@ build/output.o: Makefile \
                 src/output.c \
                 src/output.h \
                 src/renderer.h \
+                src/utils-debug.h \
                 src/utils-object.h \
                 src/utils-pool.h
 	@mkdir -p build
@@ -686,6 +717,7 @@ build/output-collector.o: Makefile \
                           src/output.h \
                           src/renderer.h \
                           src/utils-chain.h \
+                          src/utils-debug.h \
                           src/utils-keymap.h \
                           src/utils-list.h \
                           src/utils-log.h \
@@ -707,6 +739,7 @@ build/surface-data.o: Makefile \
                       src/surface-data.h \
                       src/utils-branch.h \
                       src/utils-chain.h \
+                      src/utils-debug.h \
                       src/utils-list.h \
                       src/utils-log.h \
                       src/utils-pool.h \
@@ -731,6 +764,7 @@ build/surface-manager.o: Makefile \
                          src/surface-manager.h \
                          src/utils-branch.h \
                          src/utils-chain.h \
+                         src/utils-debug.h \
                          src/utils-list.h \
                          src/utils-log.h \
                          src/utils-object.h \
@@ -761,6 +795,7 @@ build/keyboard-functions.o: Makefile \
                             src/renderer.h \
                             src/utils-branch.h \
                             src/utils-chain.h \
+                            src/utils-debug.h \
                             src/utils-list.h \
                             src/utils-log.h \
                             src/utils-object.h \
@@ -779,6 +814,7 @@ build/keyboard-binding.o: Makefile \
                           src/keyboard-binding.h \
                           src/keyboard-context.h \
                           src/utils-chain.h \
+                          src/utils-debug.h \
                           src/utils-list.h \
                           src/utils-log.h
 	@mkdir -p build
@@ -797,6 +833,7 @@ build/keyboard-bindings.o: Makefile \
                            src/keyboard-context.h \
                            src/keyboard-mode.h \
                            src/utils-chain.h \
+                           src/utils-debug.h \
                            src/utils-list.h \
                            src/utils-log.h
 	@mkdir -p build
@@ -814,6 +851,7 @@ build/keyboard-mode.o: Makefile \
                        src/keyboard-mode.c \
                        src/keyboard-mode.h \
                        src/utils-chain.h \
+                       src/utils-debug.h \
                        src/utils-list.h \
                        src/utils-log.h
 	@mkdir -p build
@@ -844,6 +882,7 @@ build/exhibitor.o: Makefile \
                    src/surface-manager.h \
                    src/utils-branch.h \
                    src/utils-chain.h \
+                   src/utils-debug.h \
                    src/utils-list.h \
                    src/utils-log.h \
                    src/utils-object.h \
@@ -874,6 +913,7 @@ build/exhibitor-display.o: Makefile \
                            src/surface-manager.h \
                            src/utils-branch.h \
                            src/utils-chain.h \
+                           src/utils-debug.h \
                            src/utils-environment.h \
                            src/utils-list.h \
                            src/utils-log.h \
@@ -887,6 +927,7 @@ build/exhibitor-display.o: Makefile \
 
 build/exhibitor-compositor.o: Makefile \
                               src/event-loop.h \
+                              src/event-signals.h \
                               src/event-task.h \
                               src/exhibitor-compositor.c \
                               src/exhibitor-compositor.h \
@@ -903,6 +944,7 @@ build/exhibitor-compositor.o: Makefile \
                               src/surface-manager.h \
                               src/utils-branch.h \
                               src/utils-chain.h \
+                              src/utils-debug.h \
                               src/utils-list.h \
                               src/utils-log.h \
                               src/utils-object.h \
@@ -927,6 +969,7 @@ build/exhibitor-frame.o: Makefile \
                          src/surface-manager.h \
                          src/utils-branch.h \
                          src/utils-chain.h \
+                         src/utils-debug.h \
                          src/utils-list.h \
                          src/utils-object.h \
                          src/utils-pool.h \
@@ -954,6 +997,7 @@ build/exhibitor-strategist.o: Makefile \
                               src/renderer.h \
                               src/utils-branch.h \
                               src/utils-chain.h \
+                              src/utils-debug.h \
                               src/utils-list.h \
                               src/utils-log.h \
                               src/utils-object.h \
@@ -984,6 +1028,7 @@ build/exhibitor-pointer.o: Makefile \
                            src/surface-manager.h \
                            src/utils-branch.h \
                            src/utils-chain.h \
+                           src/utils-debug.h \
                            src/utils-list.h \
                            src/utils-log.h \
                            src/utils-object.h \
@@ -1042,6 +1087,7 @@ build/wayland-cache.o: Makefile \
                        src/global-macros.h \
                        src/global-types.h \
                        src/utils-chain.h \
+                       src/utils-debug.h \
                        src/utils-list.h \
                        src/utils-log.h \
                        src/utils-store.h \
@@ -1069,6 +1115,7 @@ build/wayland-state.o: Makefile \
                        src/surface-manager.h \
                        src/utils-branch.h \
                        src/utils-chain.h \
+                       src/utils-debug.h \
                        src/utils-list.h \
                        src/utils-log.h \
                        src/utils-object.h \
@@ -1102,6 +1149,7 @@ build/wayland.o: Makefile \
                  src/output.h \
                  src/renderer.h \
                  src/utils-chain.h \
+                 src/utils-debug.h \
                  src/utils-environment.h \
                  src/utils-keymap.h \
                  src/utils-list.h \
@@ -1140,6 +1188,7 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/surface-manager.h \
                                      src/utils-branch.h \
                                      src/utils-chain.h \
+                                     src/utils-debug.h \
                                      src/utils-list.h \
                                      src/utils-log.h \
                                      src/utils-object.h \
@@ -1172,6 +1221,7 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/surface-manager.h \
                                   src/utils-branch.h \
                                   src/utils-chain.h \
+                                  src/utils-debug.h \
                                   src/utils-list.h \
                                   src/utils-log.h \
                                   src/utils-object.h \
@@ -1195,6 +1245,7 @@ build/wayland-protocol-region.o: Makefile \
                                  src/global-macros.h \
                                  src/global-types.h \
                                  src/utils-chain.h \
+                                 src/utils-debug.h \
                                  src/utils-list.h \
                                  src/utils-log.h \
                                  src/utils-store.h \
@@ -1220,6 +1271,7 @@ build/wayland-protocol-shell.o: Makefile \
                                 src/surface-manager.h \
                                 src/utils-branch.h \
                                 src/utils-chain.h \
+                                src/utils-debug.h \
                                 src/utils-list.h \
                                 src/utils-log.h \
                                 src/utils-pool.h \
@@ -1241,6 +1293,7 @@ build/wayland-protocol-shell-surface.o: Makefile \
                                         src/global-enums.h \
                                         src/global-macros.h \
                                         src/global-types.h \
+                                        src/utils-debug.h \
                                         src/utils-log.h \
                                         src/wayland-protocol-shell-surface.c \
                                         src/wayland-protocol-shell-surface.h
@@ -1261,6 +1314,7 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/surface-manager.h \
                                     src/utils-branch.h \
                                     src/utils-chain.h \
+                                    src/utils-debug.h \
                                     src/utils-list.h \
                                     src/utils-log.h \
                                     src/utils-pool.h \
@@ -1288,6 +1342,7 @@ build/wayland-protocol-xdg-surface.o: Makefile \
                                       src/surface-manager.h \
                                       src/utils-branch.h \
                                       src/utils-chain.h \
+                                      src/utils-debug.h \
                                       src/utils-list.h \
                                       src/utils-log.h \
                                       src/utils-pool.h \
@@ -1313,6 +1368,7 @@ build/wayland-protocol-output.o: Makefile \
                                  src/global-types.h \
                                  src/output.h \
                                  src/renderer.h \
+                                 src/utils-debug.h \
                                  src/utils-log.h \
                                  src/utils-object.h \
                                  src/utils-pool.h \
@@ -1332,6 +1388,7 @@ build/wayland-protocol-seat.o: Makefile \
                                src/output.h \
                                src/renderer.h \
                                src/utils-chain.h \
+                               src/utils-debug.h \
                                src/utils-keymap.h \
                                src/utils-list.h \
                                src/utils-log.h \
@@ -1359,6 +1416,7 @@ build/wayland-protocol-pointer.o: Makefile \
                                   src/global-types.h \
                                   src/output.h \
                                   src/renderer.h \
+                                  src/utils-debug.h \
                                   src/utils-log.h \
                                   src/utils-object.h \
                                   src/utils-pool.h \
@@ -1378,6 +1436,7 @@ build/wayland-protocol-keyboard.o: Makefile \
                                    src/global-enums.h \
                                    src/global-macros.h \
                                    src/global-types.h \
+                                   src/utils-debug.h \
                                    src/utils-log.h \
                                    src/wayland-protocol-keyboard.c \
                                    src/wayland-protocol-keyboard.h
@@ -1394,6 +1453,7 @@ build/wayland-protocol-screenshooter.o: Makefile \
                                         src/global-types.h \
                                         src/output.h \
                                         src/renderer.h \
+                                        src/utils-debug.h \
                                         src/utils-log.h \
                                         src/utils-object.h \
                                         src/utils-pool.h \
@@ -1438,6 +1498,7 @@ build/backend-offscreen.o: Makefile \
                            src/renderer-mmap.h \
                            src/renderer.h \
                            src/utils-chain.h \
+                           src/utils-debug.h \
                            src/utils-gl.h \
                            src/utils-list.h \
                            src/utils-log.h \
@@ -1467,6 +1528,7 @@ build/metanoia.o: Makefile \
                   src/utils-branch.h \
                   src/utils-chain.h \
                   src/utils-dbus.h \
+                  src/utils-debug.h \
                   src/utils-environment.h \
                   src/utils-keymap.h \
                   src/utils-list.h \
@@ -1583,25 +1645,28 @@ checks/check-globals: Makefile \
                       src/global-macros.h \
                       src/global-types.c \
                       src/global-types.h \
+                      src/utils-debug.h \
                       tests/test-globals.c \
                       tests/tests-suit.h
 	@mkdir -p checks
 	@echo "  CC   check-globals"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-globals -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-globals -Isrc -Igen \
 	      tests/test-globals.c src/global-types.c
 
 checks/check-pool: Makefile \
                    src/global-enums.h \
                    src/global-macros.h \
                    src/global-types.h \
+                   src/utils-debug.c \
+                   src/utils-debug.h \
                    src/utils-pool.c \
                    src/utils-pool.h \
                    tests/test-pool.c \
                    tests/tests-suit.h
 	@mkdir -p checks
 	@echo "  CC   check-pool"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-pool -Isrc -Igen \
-	      tests/test-pool.c src/utils-pool.c
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-pool -Isrc -Igen \
+	      tests/test-pool.c src/utils-debug.c src/utils-pool.c
 
 checks/check-chain: Makefile \
                     src/global-constants.h \
@@ -1613,7 +1678,7 @@ checks/check-chain: Makefile \
                     tests/tests-suit.h
 	@mkdir -p checks
 	@echo "  CC   check-chain"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-chain -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-chain -Isrc -Igen \
 	      tests/test-chain.c src/utils-chain.c
 
 checks/check-list: Makefile \
@@ -1623,14 +1688,16 @@ checks/check-list: Makefile \
                    src/global-types.h \
                    src/utils-chain.c \
                    src/utils-chain.h \
+                   src/utils-debug.c \
+                   src/utils-debug.h \
                    src/utils-list.c \
                    src/utils-list.h \
                    tests/test-list.c \
                    tests/tests-suit.h
 	@mkdir -p checks
 	@echo "  CC   check-list"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-list -Isrc -Igen \
-	      tests/test-list.c src/utils-chain.c src/utils-list.c
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-list -Isrc -Igen \
+	      tests/test-list.c src/utils-debug.c src/utils-chain.c src/utils-list.c
 
 checks/check-branch: Makefile \
                      src/global-constants.h \
@@ -1645,7 +1712,7 @@ checks/check-branch: Makefile \
                      tests/tests-suit.h
 	@mkdir -p checks
 	@echo "  CC   check-branch"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-branch -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-branch -Isrc -Igen \
 	      tests/test-branch.c src/utils-chain.c src/utils-branch.c
 
 checks/check-store: Makefile \
@@ -1655,6 +1722,7 @@ checks/check-store: Makefile \
                     src/global-types.h \
                     src/utils-chain.c \
                     src/utils-chain.h \
+                    src/utils-debug.h \
                     src/utils-log.h \
                     src/utils-store.c \
                     src/utils-store.h \
@@ -1662,7 +1730,7 @@ checks/check-store: Makefile \
                     tests/tests-suit.h
 	@mkdir -p checks
 	@echo "  CC   check-store"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-store -Isrc -Igen \
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-store -Isrc -Igen \
 	      tests/test-store.c src/utils-chain.c src/utils-store.c
 
 checks/check-frame: Makefile \
@@ -1683,6 +1751,8 @@ checks/check-frame: Makefile \
                     src/utils-branch.h \
                     src/utils-chain.c \
                     src/utils-chain.h \
+                    src/utils-debug.c \
+                    src/utils-debug.h \
                     src/utils-list.h \
                     src/utils-log.h \
                     src/utils-object.h \
@@ -1690,13 +1760,12 @@ checks/check-frame: Makefile \
                     src/utils-pool.h \
                     src/utils-store.c \
                     src/utils-store.h \
-                    tests/fake-utils-log.c \
                     tests/mock-surface-manager.c \
                     tests/mock-surface-manager.h \
                     tests/test-frame.c \
                     tests/tests-suit.h
 	@mkdir -p checks
 	@echo "  CC   check-frame"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o checks/check-frame -Isrc -Igen \
-	      tests/test-frame.c tests/fake-utils-log.c tests/mock-surface-manager.c src/utils-chain.c src/utils-branch.c src/utils-store.c src/utils-pool.c src/global-enums.c src/global-types.c src/exhibitor-frame.c
+	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-frame -Isrc -Igen \
+	      tests/test-frame.c tests/mock-surface-manager.c src/utils-chain.c src/utils-branch.c src/utils-store.c src/utils-pool.c src/utils-debug.c src/global-enums.c src/global-types.c src/exhibitor-frame.c
 

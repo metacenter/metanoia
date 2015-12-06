@@ -191,9 +191,10 @@ class Make:
                 inputs.extend(t.deps)
                 wr('\n\t@mkdir -p {0}'.format(self.checkdir))
                 wr('\t@echo "  CC   {0}"'.format(t.name))
-                wr('\t@{0} {1} {2} -o {3} -I{4} -I{5} \\'
-                    .format(self.cc, ' '.join(self.cflags),
-                     ' '.join(self.oflags), t.output, self.srcdir, self.gendir))
+                wr('\t@{0} {1} {2} {3} -o {4} -I{5} -I{6} \\'
+                   .format(self.cc, ' '.join(self.cflags),
+                   ' '.join(self.lflags), ' '.join(self.oflags),
+                   t.output, self.srcdir, self.gendir))
                 wr('\t      {0}'.format(' '.join(inputs)), end='')
 
             print('  >> Makefile')

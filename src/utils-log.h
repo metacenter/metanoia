@@ -28,7 +28,7 @@
 #define LEVEL_EVNT2 0
 #define LEVEL_WARN3 "WARN3"
 #define LEVEL_INFO3 0
-#define LEVEL_WAYL3 0
+#define LEVEL_WAYL3 "WAYL3"
 #define LEVEL_EVNT3 0
 #define LEVEL_WARN4 0
 #define LEVEL_INFO4 0
@@ -74,7 +74,7 @@
             fprintf(stderr, "Noia: %s: %d: Ensurence '%s' failed!\n", \
                     __FILE__, __LINE__, #COND); \
             LOG_ERROR("Ensurence failed: >> %s <<", #COND); \
-            noia_print_backtrace(); \
+            noia_log_backtrace(); \
             EXPR; }
 #else
     #define NOIA_ENSURE(COND,EXPR) ((void) 0)
@@ -104,10 +104,10 @@ void noia_log_end(void);
 /// Prints single simple line without additional info.
 /// @note This function must be used between `noia_log_begin` and
 ///       `noia_log_end` to avoid printing in the same time from many threads.
-void noia_log_print(const char* format, ...);
+int noia_log_print(const char* format, ...);
 
 /// Print backtrace.
-void noia_print_backtrace(void);
+void noia_log_backtrace(void);
 
 /// Return number of miliseconds since Epoch.
 /// @todo Move elsewhere.

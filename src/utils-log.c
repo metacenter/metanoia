@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "utils-log.h"
+#include "utils-debug.h"
 #include "utils-environment.h"
 #include "version.h"
 
@@ -149,7 +150,7 @@ void noia_log_end(void)
 
 //------------------------------------------------------------------------------
 
-void noia_log_print(const char* format, ...)
+int noia_log_print(const char* format, ...)
 {
     char buff[128];
 
@@ -159,29 +160,15 @@ void noia_log_print(const char* format, ...)
     va_end(argptr);
 
     write(sLogFD, buff, n);
+    return n;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_print_backtrace(void)
+void noia_log_backtrace(void)
 {
-    size_t size;
-    void *array[128];
-    char buff[128];
-    Dl_info info;
-
     noia_log_begin("BACKTRACE");
-
-    size = backtrace(array, sizeof(array));
-
-    for (size_t i = 0; i < size; i++) {
-        dladdr(array[i], &info);
-        size_t n = snprintf(buff, sizeof(buff), "%015lx | %-45s | %s\n",
-                            (long) array[i], info.dli_fname,
-                            info.dli_sname ? info.dli_sname : "---");
-        write(sLogFD, buff, n);
-    }
-
+    noia_print_backtrace(noia_log_print);
     noia_log_end();
 }
 

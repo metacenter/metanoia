@@ -4,6 +4,8 @@
 #ifndef NOIA_GLOBAL_MACROS_H
 #define NOIA_GLOBAL_MACROS_H
 
+#include "utils-debug.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -40,6 +42,7 @@
             if (!(COND)) { \
                 fprintf(stderr, "Noia: %s: %d: Ensurence '%s' failed!\n", \
                         __FILE__, __LINE__, #COND); \
+                noia_print_backtrace(printf); \
                 EXPR; }
     #else
         #define NOIA_ENSURE(COND,EXPR) ((void) 0)

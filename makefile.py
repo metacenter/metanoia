@@ -226,6 +226,12 @@ t = m.add_compile_target(
     )
 metanoia.add_input(t)
 
+target_utils_debug = m.add_compile_target(
+        output='utils-debug.o',
+        inputs=['utils-debug.c'],
+    )
+metanoia.add_input(target_utils_debug)
+
 target_utils_log = m.add_compile_target(
         output='utils-log.o',
         inputs=['utils-log.c'],
@@ -637,6 +643,7 @@ t = m.add_compile_target(
     )
 metanoiactl_gtk.add_input(t)
 
+metanoiactl_gtk.add_input(target_utils_debug)
 metanoiactl_gtk.add_input(target_utils_log)
 metanoiactl_gtk.add_input(target_utils_environment)
 metanoiactl_gtk.add_input(target_screenshooter_protocol)
@@ -650,7 +657,7 @@ m.add_test(output='check-globals',
 
 m.add_test(output='check-pool',
            inputs=['test-pool.c'],
-           deps=['utils-pool.c'])
+           deps=['utils-debug.c', 'utils-pool.c'])
 
 m.add_test(output='check-chain',
            inputs=['test-chain.c'],
@@ -658,7 +665,7 @@ m.add_test(output='check-chain',
 
 m.add_test(output='check-list',
            inputs=['test-list.c'],
-           deps=['utils-chain.c', 'utils-list.c'])
+           deps=['utils-debug.c', 'utils-chain.c', 'utils-list.c'])
 
 m.add_test(output='check-branch',
            inputs=['test-branch.c'],
@@ -669,10 +676,10 @@ m.add_test(output='check-store',
            deps=['utils-chain.c', 'utils-store.c'])
 
 m.add_test(output='check-frame',
-           inputs=['test-frame.c', 'fake-utils-log.c',
-                   'mock-surface-manager.c'],
+           inputs=['test-frame.c', 'mock-surface-manager.c'],
            deps=['utils-chain.c', 'utils-branch.c', 'utils-store.c',
-                 'utils-pool.c', 'global-enums.c', 'global-types.c',
+                 'utils-pool.c', 'utils-debug.c',
+                 'global-enums.c', 'global-types.c',
                  'exhibitor-frame.c'])
 
 #-------------------------------------------------------------------------------
