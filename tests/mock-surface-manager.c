@@ -45,7 +45,20 @@ void noia_surface_set_desired_size(NoiaSurfaceId sid, NoiaSize size)
     if (!data) {
         data = noia_mock_surface_manager_data_create(size);
     }
+    data->size = size;
     noia_store_add_with_id(sSurfaceStore, sid, data);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaSize noia_mock_surface_get_desired_size(NoiaSurfaceId sid)
+{
+    NoiaSize size = {0, 0};
+    NoiaMockSurfaceData* data = noia_store_find(sSurfaceStore, sid);
+    if (data) {
+        size = data->size;
+    }
+    return size;
 }
 
 //------------------------------------------------------------------------------

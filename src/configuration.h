@@ -26,14 +26,15 @@ static const NoiaBinding scBindingsNormal[] = {
         // modes
         {KEY_I, NOIA_KEY_NONE, noia_swap_mode_normal_to_insert},
         // actions
-        {KEY_F, NOIA_KEY_NONE, noia_put_focus},
-        {KEY_M, NOIA_KEY_NONE, noia_put_move},
-        {KEY_R, NOIA_KEY_NONE, noia_put_resize},
-        {KEY_A, NOIA_KEY_NONE, noia_anchorize},
-        {KEY_S, NOIA_KEY_NONE, noia_stackedize},
-        {KEY_V, NOIA_KEY_NONE, noia_verticalize},
-        {KEY_H, NOIA_KEY_NONE, noia_horizontalize},
-        {KEY_P, NOIA_KEY_NONE, noia_select_trunk},
+        {KEY_F, NOIA_KEY_NONE,  noia_put_focus},
+        {KEY_F, NOIA_KEY_SHIFT, noia_put_swap},
+        {KEY_M, NOIA_KEY_NONE,  noia_put_move},
+        {KEY_R, NOIA_KEY_NONE,  noia_put_resize},
+        {KEY_A, NOIA_KEY_NONE,  noia_anchorize},
+        {KEY_S, NOIA_KEY_NONE,  noia_stackedize},
+        {KEY_V, NOIA_KEY_NONE,  noia_verticalize},
+        {KEY_H, NOIA_KEY_NONE,  noia_horizontalize},
+        {KEY_P, NOIA_KEY_NONE,  noia_select_trunk},
         // directions
         {KEY_RIGHT,    NOIA_KEY_NONE, noia_right},
         {KEY_LEFT,     NOIA_KEY_NONE, noia_left},

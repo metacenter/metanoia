@@ -356,6 +356,29 @@ void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other)
 
 //------------------------------------------------------------------------------
 
+NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame)
+{
+    NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
+    NOIA_ENSURE(frame, return NOIA_RESULT_INCORRECT_ARGUMENT);
+
+    NoiaFrameParams* param1 = noia_frame_get_params(self);
+    NoiaFrameParams* param2 = noia_frame_get_params(frame);
+
+    NoiaSurfaceId sid = param1->sid;
+    param1->sid = param2->sid;
+    param2->sid = sid;
+
+    if ((param1->area.size.width  != param2->area.size.width)
+    or  (param1->area.size.height != param2->area.size.height)) {
+        noia_frame_set_size(self,  param1->area.size);
+        noia_frame_set_size(frame, param2->area.size);
+    }
+
+    return NOIA_RESULT_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target)
 {
     NoiaResult result = NOIA_RESULT_SUCCESS;

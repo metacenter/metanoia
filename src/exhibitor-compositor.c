@@ -187,6 +187,29 @@ void noia_compositor_focus(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
+void noia_compositor_swap(NoiaCompositor* self,
+                          NoiaArgmand argmand,
+                          int position)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
+
+    if (position < 0) {
+        argmand = noia_argmand_reverse_directed(argmand);
+        position = -position;
+    }
+
+    if (self->selection) {
+        NoiaFrame* frame =
+                   noia_frame_find_adjacent(self->selection, argmand, position);
+        if (frame) {
+            noia_frame_swap(self->selection, frame);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void noia_compositor_configure(NoiaCompositor* self,
                                NoiaFrame* frame,
                                NoiaArgmand direction)
@@ -273,6 +296,9 @@ void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
         break;
     case NOIA_ARGMAND_FOCUS:
         noia_compositor_focus(self, a->direction, a->magnitude);
+        break;
+    case NOIA_ARGMAND_SWAP:
+        noia_compositor_swap(self, a->direction, a->magnitude);
         break;
     case NOIA_ARGMAND_CONF:
         noia_compositor_configure(self, self->selection, a->direction);

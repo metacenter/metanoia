@@ -569,6 +569,63 @@ NoiaTestResult should_resettle_frame_with_subframes(void)
 
 //------------------------------------------------------------------------------
 
+/// Test swapping surfaces.
+///
+///
+///     ┌───────────────────────┐
+///     │┌───────┬─────────────┐│
+///     ││┌─────┐│┌─────┬─────┐││
+///     │││ ABC │││  D  │  E  │││
+///     ││└─────┘│└─────┴─────┘││
+///     │└───────┴─────────────┘│
+///     ├───────────────────────┤
+///     │┌────────────────┐     │
+///     ││        F       │     │
+///     │└────────────────┘     │
+///     └───────────────────────┘
+///
+NoiaTestResult should_swap_frames(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_POSITIONED;
+
+    NoiaSize size_b = noia_frame_get_area(b).size;
+    NoiaSize size_f = noia_frame_get_area(f).size;
+
+    noia_frame_swap(b, f);
+
+    NOIA_ASSERT_TRUNK(b, abc);
+    NOIA_ASSERT_TRUNK(f, r);
+
+    NOIA_ASSERT(noia_frame_get_sid(b) == 6,
+                "SID of frame B should be 6 (is '%lu')",
+                noia_frame_get_sid(b));
+    NOIA_ASSERT(noia_frame_get_sid(f) == 2,
+                "SID of frame B should be 2 (is '%lu')",
+                noia_frame_get_sid(f));
+
+    NoiaSize size_2 = noia_mock_surface_get_desired_size(2);
+    NoiaSize size_6 = noia_mock_surface_get_desired_size(6);
+
+    NOIA_ASSERT(((size_b.width  == size_6.width)
+             and (size_b.height == size_6.height)),
+                "Frame size should be {'%d', '%d'} (is {'%d', '%d'})",
+                size_b.width, size_b.height, size_6.width, size_6.height);
+
+    NOIA_ASSERT(((size_f.width  == size_2.width)
+             and (size_f.height == size_2.height)),
+                "Frame size should be {'%d', '%d'} (is {'%d', '%d'})",
+                size_f.width, size_f.height, size_2.width, size_2.height);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 /// Check if `noia_frame_find_with_sid` returns correct frames.
 NoiaTestResult should_find_with_sid(void)
 {
@@ -1357,6 +1414,7 @@ int main(int argc, char** argv)
             NOIA_TEST(should_remove_frame_with_subframes),
             NOIA_TEST(should_resettle_one_frame),
             NOIA_TEST(should_resettle_frame_with_subframes),
+            NOIA_TEST(should_swap_frames),
 
             NOIA_TEST(should_find_with_sid),
             NOIA_TEST(should_find_contiguous_on_the_same_level_one_further),

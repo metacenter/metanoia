@@ -14,6 +14,8 @@ void noia_cicle_history_back(NoiaBindingContext* context);
 
 void noia_put_focus(NoiaBindingContext* context);
 
+void noia_put_swap(NoiaBindingContext* context);
+
 void noia_put_move(NoiaBindingContext* context);
 
 void noia_put_resize(NoiaBindingContext* context);

@@ -82,6 +82,14 @@ void noia_put_focus(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
+void noia_put_swap(NoiaBindingContext* context)
+{
+    NOIA_ENSURE(context, return);
+    noia_action(&context->action, NOIA_ARGMAND_SWAP);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_put_move(NoiaBindingContext* context)
 {
     NOIA_ENSURE(context, return);
@@ -237,7 +245,7 @@ void noia_forward(NoiaBindingContext* context)
 void noia_swap_mode_normal_to_insert(NoiaBindingContext* context)
 {
     NOIA_ENSURE(context, return);
-    LOG_INFO2("Swap mode from normal to swap");
+    LOG_INFO2("Swap mode from normal to insert");
     FOR_EACH (context->modes, link) {
         NoiaMode* mode = (NoiaMode*) link->data;
         if (mode->modeid == NOIA_MODE_NORMAL) {

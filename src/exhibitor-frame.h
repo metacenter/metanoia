@@ -95,6 +95,10 @@ void noia_frame_append(NoiaFrame* self, NoiaFrame* other);
 /// If not, add to subframes of its trunk.
 void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other);
 
+/// Swap surface ID of given frames.
+/// This does not rearrange frames.
+NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame);
+
 /// Remove frame `self` from its current trunk and prepend to frame `target`.
 NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target);
 

@@ -39,6 +39,7 @@ typedef enum {
     NOIA_ARGMAND_ANCHOR,  ///< Anchorize; de-anchorize
     NOIA_ARGMAND_CONF,    ///< Change configuration
     NOIA_ARGMAND_FOCUS,   ///< Change focus
+    NOIA_ARGMAND_SWAP,    ///< Swap
     NOIA_ARGMAND_MOVE,    ///< Change position
     NOIA_ARGMAND_JUMP,    ///< Change placement in tree structure
     NOIA_ARGMAND_RESIZE,  ///< Change size

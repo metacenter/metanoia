@@ -29,6 +29,7 @@ bool noia_argmand_is_actionable(NoiaArgmand argmand)
 {
     switch (argmand) {
     case NOIA_ARGMAND_FOCUS:
+    case NOIA_ARGMAND_SWAP:
     case NOIA_ARGMAND_MOVE:
     case NOIA_ARGMAND_JUMP:
     case NOIA_ARGMAND_RESIZE:
