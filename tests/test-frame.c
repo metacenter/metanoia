@@ -119,6 +119,67 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_configure(abcde, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
                          (NoiaPosition) { 0,  0}, (NoiaSize) {100,  60});
 
+#define NOIA_MAKE_FRAMES_FOR_ITERATION \
+    NoiaFrame* r     = noia_frame_new(); \
+    NoiaFrame* a     = noia_frame_new(); \
+    NoiaFrame* b     = noia_frame_new(); \
+    NoiaFrame* c     = noia_frame_new(); \
+    NoiaFrame* d     = noia_frame_new(); \
+    NoiaFrame* e     = noia_frame_new(); \
+    NoiaFrame* f     = noia_frame_new(); \
+    NoiaFrame* g     = noia_frame_new(); \
+    NoiaFrame* h     = noia_frame_new(); \
+    NoiaFrame* i     = noia_frame_new(); \
+    NoiaFrame* bcd   = noia_frame_new(); \
+    NoiaFrame* bcde  = noia_frame_new(); \
+    NoiaFrame* abcde = noia_frame_new(); \
+    NoiaFrame* ghi   = noia_frame_new(); \
+    NoiaFrame* fghi  = noia_frame_new(); \
+    noia_frame_append(bcd,   b); \
+    noia_frame_append(bcd,   c); \
+    noia_frame_append(bcd,   d); \
+    noia_frame_append(bcde,  bcd); \
+    noia_frame_append(bcde,  e); \
+    noia_frame_append(abcde, a); \
+    noia_frame_append(abcde, bcde); \
+    noia_frame_append(ghi,   g); \
+    noia_frame_append(ghi,   h); \
+    noia_frame_append(ghi,   i); \
+    noia_frame_append(fghi,  f); \
+    noia_frame_append(fghi,  ghi); \
+    noia_frame_append(r,     abcde); \
+    noia_frame_append(r,     fghi); \
+    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  40}); \
+    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}); \
+    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}); \
+    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}); \
+    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
+                         (NoiaPosition) {80,  0}, (NoiaSize) { 40,  40}); \
+    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
+                         (NoiaPosition) { 0, 40}, (NoiaSize) {120,  40}); \
+    noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 6, \
+                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}); \
+    noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 6, \
+                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}); \
+    noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 6, \
+                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}); \
+    noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) {120, 120}); \
+    noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId, \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}); \
+    noia_frame_configure(bcde, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 80,  40}); \
+    noia_frame_configure(abcde, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
+                         (NoiaPosition) { 0,  0}, (NoiaSize) {120,  40}); \
+    noia_frame_configure(ghi, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId,\
+                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}); \
+    noia_frame_configure(fghi, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId,\
+                         (NoiaPosition) { 0, 40}, (NoiaSize) {120,  80});
+
 #define NOIA_ASSERT_FRAME_ARRAY(ARRAY, POOL) \
     NOIA_ASSERT(NOIA_SIZEOF_ARRAY(ARRAY) == noia_pool_get_size(POOL), \
                 "Number of elements should be '%lu' (is '%u')", \
@@ -136,8 +197,14 @@ void noia_test_frame_config(NoiaFrame* frame,
 
 #define NOIA_ASSERT_FRAME_POINTER(FRAME1, FRAME2) \
     NOIA_ASSERT(FRAME1 == FRAME2, \
-                "Frame should be '%p', (is '%p')", \
-                (void*) FRAME1, (void*) FRAME2); \
+                "Frame should be '%p' (is '%p')", \
+                (void*) FRAME2, (void*) FRAME1); \
+
+#define NOIA_ASSERT_FRAME_ITERATOR(ITER, FRAME, POSITION) \
+    NOIA_ASSERT_FRAME_POINTER(ITER.frame, FRAME); \
+    NOIA_ASSERT(ITER.position == POSITION, \
+                "Position should be '%d'` (is '%d')", \
+                POSITION, ITER.position);
 
 //------------------------------------------------------------------------------
 
@@ -509,27 +576,27 @@ NoiaTestResult should_find_with_sid(void)
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
-    NOIA_ASSERT_FRAME_POINTER(NULL, noia_frame_find_with_sid(r, 666))
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 666), NULL)
 
-    NOIA_ASSERT_FRAME_POINTER(v1, noia_frame_find_with_sid(r, 11))
-    NOIA_ASSERT_FRAME_POINTER(v2, noia_frame_find_with_sid(r, 12))
-    NOIA_ASSERT_FRAME_POINTER(v3, noia_frame_find_with_sid(r, 13))
-    NOIA_ASSERT_FRAME_POINTER(v4, noia_frame_find_with_sid(r, 14))
-    NOIA_ASSERT_FRAME_POINTER(v5, noia_frame_find_with_sid(r, 15))
-    NOIA_ASSERT_FRAME_POINTER(h1, noia_frame_find_with_sid(r, 21))
-    NOIA_ASSERT_FRAME_POINTER(h2, noia_frame_find_with_sid(r, 22))
-    NOIA_ASSERT_FRAME_POINTER(h3, noia_frame_find_with_sid(r, 23))
-    NOIA_ASSERT_FRAME_POINTER(h4, noia_frame_find_with_sid(r, 24))
-    NOIA_ASSERT_FRAME_POINTER(h5, noia_frame_find_with_sid(r, 25))
-    NOIA_ASSERT_FRAME_POINTER(s1, noia_frame_find_with_sid(r, 31))
-    NOIA_ASSERT_FRAME_POINTER(s2, noia_frame_find_with_sid(r, 32))
-    NOIA_ASSERT_FRAME_POINTER(s3, noia_frame_find_with_sid(r, 33))
-    NOIA_ASSERT_FRAME_POINTER(s4, noia_frame_find_with_sid(r, 34))
-    NOIA_ASSERT_FRAME_POINTER(s5, noia_frame_find_with_sid(r, 35))
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 11), v1);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 12), v2);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 13), v3);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 14), v4);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 15), v5);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 21), h1);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 22), h2);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 23), h3);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 24), h4);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 25), h5);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 31), s1);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 32), s2);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 33), s3);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 34), s4);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 35), s5);
 
-    NOIA_ASSERT_FRAME_POINTER(NULL, noia_frame_find_with_sid(s, 11))
-    NOIA_ASSERT_FRAME_POINTER(NULL, noia_frame_find_with_sid(s, 13))
-    NOIA_ASSERT_FRAME_POINTER(NULL, noia_frame_find_with_sid(s, 22))
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(s, 11), NULL);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(s, 13), NULL);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(s, 22), NULL);
 
     noia_frame_free(r);
 
@@ -974,6 +1041,7 @@ NoiaTestResult should_find_frame_in_empty_space(void)
 /// - 1*South from C should be E
 /// - 2*South from A should be F
 /// - 1*South from CD should be F
+/// - 1*North from AB should be NULL
 ///
 ///
 ///     ┌─────────────────────┐
@@ -1047,6 +1115,209 @@ NoiaTestResult should_find_adjacent_frames(void)
     p = noia_frame_find_adjacent(cd, NOIA_ARGMAND_S, 1);
     NOIA_ASSERT(p == f, "1*South from CD should be F");
 
+    p = noia_frame_find_adjacent(ab, NOIA_ARGMAND_N, 1);
+    NOIA_ASSERT(p == NULL, "1*North from AB should be NULL");
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Iterate through frames east.
+///
+///
+///     ┌───────────────────────┐
+///     │┌───────┬─────────────┐│
+///     ││       │┌─────┬─────┐││
+///     ││   A   ││ BCD │  E  │││
+///     ││       │└─────┴─────┘││
+///     │└───────┴─────────────┘│
+///     ├───────────────────────┤
+///     │┌─────────────────────┐│
+///     ││          F          ││
+///     │├─────────────────────┤│
+///     ││         GHI         ││
+///     │└─────────────────────┘│
+///     └───────────────────────┘
+///
+NoiaTestResult should_correctly_iterate_east(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_ITERATION;
+
+    NoiaFrameIterator iter;
+
+    noia_frame_start_iteration(&iter, a, NOIA_ARGMAND_E);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_AFTER);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_BEFORE);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_AFTER);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_AFTER);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Iterate through frames west.
+///
+///
+///     ┌───────────────────────┐
+///     │┌───────┬─────────────┐│
+///     ││       │┌─────┬─────┐││
+///     ││   A   ││ BCD │  E  │││
+///     ││       │└─────┴─────┘││
+///     │└───────┴─────────────┘│
+///     ├───────────────────────┤
+///     │┌─────────────────────┐│
+///     ││          F          ││
+///     │├─────────────────────┤│
+///     ││         GHI         ││
+///     │└─────────────────────┘│
+///     └───────────────────────┘
+///
+NoiaTestResult should_correctly_iterate_west(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_ITERATION;
+
+    NoiaFrameIterator iter;
+
+    noia_frame_start_iteration(&iter, e, NOIA_ARGMAND_W);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_BEFORE);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_BEFORE);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_AFTER);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_BEFORE);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Iterate through frames south.
+///
+///
+///     ┌───────────────────────┐
+///     │┌───────┬─────────────┐│
+///     ││       │┌─────┬─────┐││
+///     ││   A   ││ BCD │  E  │││
+///     ││       │└─────┴─────┘││
+///     │└───────┴─────────────┘│
+///     ├───────────────────────┤
+///     │┌─────────────────────┐│
+///     ││          F          ││
+///     │├─────────────────────┤│
+///     ││         GHI         ││
+///     │└─────────────────────┘│
+///     └───────────────────────┘
+///
+NoiaTestResult should_correctly_iterate_south(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_ITERATION;
+
+    NoiaFrameIterator iter;
+
+    noia_frame_start_iteration(&iter, e, NOIA_ARGMAND_S);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_AFTER);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_BEFORE);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_AFTER);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, ghi, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, ghi, NOIA_FRAME_POSITION_AFTER);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Iterate through frames north.
+///
+///
+///     ┌───────────────────────┐
+///     │┌───────┬─────────────┐│
+///     ││       │┌─────┬─────┐││
+///     ││   A   ││ BCD │  E  │││
+///     ││       │└─────┴─────┘││
+///     │└───────┴─────────────┘│
+///     ├───────────────────────┤
+///     │┌─────────────────────┐│
+///     ││          F          ││
+///     │├─────────────────────┤│
+///     ││         GHI         ││
+///     │└─────────────────────┘│
+///     └───────────────────────┘
+///
+NoiaTestResult should_correctly_iterate_north(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_ITERATION;
+
+    NoiaFrameIterator iter;
+
+    noia_frame_start_iteration(&iter, h, NOIA_ARGMAND_N);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, ghi, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, ghi, NOIA_FRAME_POSITION_BEFORE);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_BEFORE);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, abcde, NOIA_FRAME_POSITION_AFTER);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, abcde, NOIA_FRAME_POSITION_ON);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_ITERATOR(iter, abcde, NOIA_FRAME_POSITION_BEFORE);
+    noia_frame_iterate(&iter);
+    NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
+
     noia_frame_free(r);
 
     noia_mock_surface_manager_finalize();
@@ -1101,6 +1372,10 @@ int main(int argc, char** argv)
             NOIA_TEST(should_find_frame_in_empty_space),
 
             NOIA_TEST(should_find_adjacent_frames),
+            NOIA_TEST(should_correctly_iterate_east),
+            NOIA_TEST(should_correctly_iterate_west),
+            NOIA_TEST(should_correctly_iterate_south),
+            NOIA_TEST(should_correctly_iterate_north),
         };
 
     return noia_test_run("Frame", test, NOIA_NUM_TESTS(test));

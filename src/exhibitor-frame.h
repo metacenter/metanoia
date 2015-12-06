@@ -30,6 +30,21 @@ typedef struct {
     NoiaArea area;
 } NoiaFrameParams;
 
+/// Enum type defining relative position to a frame.
+typedef enum {
+    NOIA_FRAME_POSITION_ON,
+    NOIA_FRAME_POSITION_BEFORE,
+    NOIA_FRAME_POSITION_AFTER,
+} NoiaFramePosition;
+
+/// `NoiaFrame` iterator.
+typedef struct {
+    unsigned num;
+    NoiaFrame* frame;
+    NoiaArgmand direction;
+    NoiaFramePosition position;
+} NoiaFrameIterator;
+
 /// Compare frame parameters.
 /// @return True if parameters are equivalent, else false.
 bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
@@ -110,7 +125,7 @@ NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid);
 /// one if `point` lies outside `self`.
 NoiaFrame* noia_frame_find_pointed(NoiaFrame* self, NoiaPosition point);
 
-/// Find find top-most frame bordering with frame `self` in given direction.
+/// Find top-most frame bordering with frame `self` in given direction.
 NoiaFrame* noia_frame_find_contiguous(NoiaFrame* self,
                                       NoiaArgmand direction,
                                       unsigned distance);
@@ -128,6 +143,14 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self);
 /// @see noia_frame_resize
 NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame,
                                            NoiaFrameType type);
+
+/// Initialize iterator.
+void noia_frame_start_iteration(NoiaFrameIterator* iter,
+                                NoiaFrame* frame,
+                                NoiaArgmand direction);
+
+/// Iterate through Frames.
+void noia_frame_iterate(NoiaFrameIterator* iter);
 
 /// Print frame tree to log file.
 void noia_frame_log(NoiaFrame* self, NoiaPrintFunc print, NoiaFrame* selection);

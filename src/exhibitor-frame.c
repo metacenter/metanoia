@@ -308,6 +308,7 @@ void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces)
 
 bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type)
 {
+    NOIA_ENSURE(self, return false);
     return !!(noia_frame_get_params(self)->type & type);
 }
 
@@ -315,16 +316,17 @@ bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type)
 
 NoiaSurfaceId noia_frame_get_sid(NoiaFrame* self)
 {
-    NoiaFrameParams* params = noia_frame_get_params(self);
-    return params->sid;
+    NOIA_ENSURE(self, return scInvalidSurfaceId);
+    return noia_frame_get_params(self)->sid;
 }
 
 //------------------------------------------------------------------------------
 
 NoiaArea noia_frame_get_area(NoiaFrame* self)
 {
-    NoiaFrameParams* params = noia_frame_get_params(self);
-    return params->area;
+    NoiaArea invalid_area = {{0, 0}, {0, 0}};
+    NOIA_ENSURE(self, return invalid_area);
+    return noia_frame_get_params(self)->area;
 }
 
 //------------------------------------------------------------------------------
@@ -533,7 +535,7 @@ NoiaFrame* noia_frame_find_pointed(NoiaFrame* self, NoiaPosition point)
         frame = (NoiaFrame*) self->twigs->first;
     }
 
-    return ((frame == self) || noia_frame_has_type(frame,NOIA_FRAME_TYPE_LEAF))
+    return ((frame == self) or noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF))
          ? frame : noia_frame_find_pointed(frame, point);
 }
 
@@ -544,6 +546,7 @@ NoiaFrame* noia_frame_find_contiguous(NoiaFrame* self,
                                       unsigned distance)
 {
     NOIA_ENSURE(self, return NULL);
+    NOIA_ENSURE(self->trunk, return NULL);
     NOIA_ENSURE(noia_argmand_is_directed(direction), return NULL);
 
     // If distance is zero, this is the last step of recurrence.
@@ -552,34 +555,35 @@ NoiaFrame* noia_frame_find_contiguous(NoiaFrame* self,
     }
 
     // Find new frame which is farther.
-    NoiaFrame* new_frame = NULL;
+    NoiaFrame* frame = NULL;
     int new_distance = distance;
 
     if (noia_frame_has_type(self->trunk, NOIA_FRAME_TYPE_VERTICAL)) {
         if (direction == NOIA_ARGMAND_N) {
-            new_frame = noia_branch_get_previous(self);
+            frame = noia_branch_get_previous(self);
         } else if (direction == NOIA_ARGMAND_S) {
-            new_frame = noia_branch_get_next(self);
+            frame = noia_branch_get_next(self);
         }
     } else if (noia_frame_has_type(self->trunk, NOIA_FRAME_TYPE_HORIZONTAL)) {
         if (direction == NOIA_ARGMAND_W) {
-            new_frame = noia_branch_get_previous(self);
+            frame = noia_branch_get_previous(self);
         } else if (direction == NOIA_ARGMAND_E) {
-            new_frame = noia_branch_get_next(self);
+            frame = noia_branch_get_next(self);
         }
     }
 
     // If there is nothing farther go higher. If it is, decrease distance.
-    if (new_frame || direction == NOIA_ARGMAND_TRUNK) {
+    if (frame or (direction == NOIA_ARGMAND_TRUNK)) {
         new_distance = distance - 1;
     }
-    if (!new_frame) {
-        new_frame = self->trunk;
+    if (not frame) {
+        frame = self->trunk;
     }
 
     // Next recurrence step if possible.
-    if (!noia_frame_has_type(new_frame, NOIA_FRAME_TYPE_SPECIAL)) {
-        return noia_frame_find_contiguous(new_frame, direction, new_distance);
+    if (frame and frame->trunk
+    and (not noia_frame_has_type(frame, NOIA_FRAME_TYPE_SPECIAL))) {
+        return noia_frame_find_contiguous(frame, direction, new_distance);
     } else {
         return NULL;
     }
@@ -610,9 +614,9 @@ NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
     NoiaFrame* frame = self;
     for (unsigned i = 0; i < distance; ++i) {
         frame = noia_frame_find_contiguous(frame, direction, 1);
-        if (!frame) break;
+        if (not frame) break;
         frame = noia_frame_find_pointed(frame, point);
-        if (!frame) break;
+        if (not frame) break;
     }
     return frame;
 }
@@ -637,12 +641,86 @@ NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame, NoiaFrameType type)
     NOIA_ENSURE(frame, return NULL);
     NOIA_ENSURE(frame->trunk, return NULL);
 
-    if (noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_FLOATING
-    ||  noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_SPECIAL
-    ||  noia_frame_get_params(frame->trunk)->type & type) {
+    if ((noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_FLOATING)
+    or  (noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_SPECIAL)
+    or  (noia_frame_get_params(frame->trunk)->type & type)) {
         return frame;
     }
     return noia_frame_find_trunk_with_type(frame->trunk, type);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_frame_start_iteration(NoiaFrameIterator* iter,
+                                NoiaFrame* frame,
+                                NoiaArgmand direction)
+{
+    NOIA_ENSURE(iter, return);
+
+    iter->num = 0;
+    iter->direction = direction;
+    iter->position = NOIA_FRAME_POSITION_ON;
+    iter->frame = noia_frame_find_trunk_with_type
+                                            (frame, NOIA_FRAME_TYPE_VERTICAL
+                                                  | NOIA_FRAME_TYPE_HORIZONTAL);
+}
+
+//------------------------------------------------------------------------------
+
+/// @todo Add support for NOIA_ARGMAND_END which means to incorporate current
+///       frame to the one below in stacked frame.
+void noia_frame_iterate(NoiaFrameIterator* iter)
+{
+    NOIA_ENSURE(iter, return);
+    NOIA_ENSURE(iter->frame, return);
+
+    NoiaFrame* next_frame = iter->frame;
+
+    NOIA_BLOCK {
+        NoiaFrame* simple_next = NULL;
+        if ((iter->direction == NOIA_ARGMAND_N)
+        or  (iter->direction == NOIA_ARGMAND_W)) {
+            simple_next = (NoiaFrame*) iter->frame->base.prev;
+            if (iter->position == NOIA_FRAME_POSITION_ON) {
+                iter->position = NOIA_FRAME_POSITION_BEFORE;
+                break;
+            } else if (iter->position == NOIA_FRAME_POSITION_AFTER) {
+                iter->position = NOIA_FRAME_POSITION_ON;
+                break;
+            } else {
+                iter->position = NOIA_FRAME_POSITION_AFTER;
+            }
+        } else if ((iter->direction == NOIA_ARGMAND_S)
+               or  (iter->direction == NOIA_ARGMAND_E)) {
+            simple_next = (NoiaFrame*) iter->frame->base.next;
+            if (iter->position == NOIA_FRAME_POSITION_ON) {
+                iter->position = NOIA_FRAME_POSITION_AFTER;
+                break;
+            } else if (iter->position == NOIA_FRAME_POSITION_BEFORE) {
+                iter->position = NOIA_FRAME_POSITION_ON;
+                break;
+            } else {
+                iter->position = NOIA_FRAME_POSITION_BEFORE;
+            }
+        }
+
+        next_frame = noia_frame_find_adjacent(iter->frame, iter->direction, 1);
+        if (not next_frame) {
+            break;
+        }
+        next_frame = noia_frame_find_trunk_with_type
+             (next_frame, NOIA_FRAME_TYPE_VERTICAL | NOIA_FRAME_TYPE_HORIZONTAL);
+        if (not next_frame) {
+            break;
+        }
+
+        if (simple_next == next_frame) {
+            iter->position = NOIA_FRAME_POSITION_ON;
+        }
+    }
+
+    iter->num += 1;
+    iter->frame = next_frame;
 }
 
 //------------------------------------------------------------------------------
