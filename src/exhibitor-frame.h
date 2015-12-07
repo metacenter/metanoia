@@ -104,7 +104,7 @@ NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target);
 
 /// Resize the frame.
 void noia_frame_resize(NoiaFrame* self,
-                       NoiaArgmand direction,
+                       NoiaArgmand border,
                        int magnitude);
 
 /// Move the frame.
