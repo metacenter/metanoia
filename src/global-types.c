@@ -49,7 +49,7 @@ void noia_action_clean(NoiaAction* action)
     action->action     = NOIA_ARGMAND_NONE;
     action->direction  = NOIA_ARGMAND_NONE;
     action->frame_type = NOIA_FRAME_TYPE_NONE;
-    action->magnitude  = 1;
+    action->magnitude  = 0;
 }
 
 //------------------------------------------------------------------------------

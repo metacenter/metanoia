@@ -19,6 +19,9 @@ static inline void noia_action(NoiaAction* action,
 
     action->action = argmand;
     if (action->direction != NOIA_ARGMAND_NONE) {
+        if (action->magnitude == 0) {
+            action->magnitude = 1;
+        }
         noia_exhibitor_execute(action);
         noia_action_clean(action);
     }
@@ -34,6 +37,9 @@ static inline void noia_direction(NoiaAction* action,
 
     action->direction = argmand;
     if (action->action != NOIA_ARGMAND_NONE) {
+        if (action->magnitude == 0) {
+            action->magnitude = 1;
+        }
         noia_exhibitor_execute(action);
         noia_action_clean(action);
     }
@@ -126,7 +132,13 @@ void noia_put_number(NoiaBindingContext* context)
         case KEY_9: case KEY_NUMERIC_9: number = 9; break;
     }
 
-    context->action.magnitude = 10 * context->action.magnitude + number;
+    if (context->action.magnitude == 0) {
+        context->action.magnitude = number;
+    } else if (number < 0) {
+        context->action.magnitude = context->action.magnitude * number;
+    } else {
+        context->action.magnitude = 10 * context->action.magnitude + number;
+    }
 }
 
 //------------------------------------------------------------------------------
