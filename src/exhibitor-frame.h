@@ -19,15 +19,14 @@ typedef struct {
     /// Type of the frame.
     NoiaFrameType type;
 
-    /// Unused.
-    /// @todo Remove?
-    char* title;
-
     /// Surface ID.
     NoiaSurfaceId sid;
 
     /// Position in workspace coordinates and size of the frame.
     NoiaArea area;
+
+    /// Title if frame; ID of workspace.
+    char* title;
 } NoiaFrameParams;
 
 /// Enum type defining relative position to a frame.
@@ -66,11 +65,13 @@ void noia_frame_configure(NoiaFrame* self,
                           NoiaFrameType type,
                           NoiaSurfaceId sid,
                           NoiaPosition pos,
-                          NoiaSize size);
+                          NoiaSize size,
+                          const char* title);
 
 /// Configure frame to be a workspace.
 void noia_frame_configure_as_workspace(NoiaFrame* self,
-                                       NoiaSize size);
+                                       NoiaSize size,
+                                       const char* title);
 
 /// Append self and all children surface context to array `surfaces`.
 /// @see noia_display_redraw_all
@@ -79,10 +80,13 @@ void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces);
 /// Check if frame has compatible type.
 bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type);
 
-/// Get frame surface ID
+/// Get frame title.
+const char* noia_frame_get_title(NoiaFrame* self);
+
+/// Get frame surface ID.
 NoiaSurfaceId noia_frame_get_sid(NoiaFrame* self);
 
-/// Get frame area
+/// Get frame area.
 NoiaArea noia_frame_get_area(NoiaFrame* self);
 
 /// Add child frame to ending.

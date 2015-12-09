@@ -12,6 +12,23 @@
 #include <memory.h>
 
 //------------------------------------------------------------------------------
+// INTERNAL
+
+NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
+                                          const char* title)
+{
+    NoiaFrame* workspace = NULL;
+    FOR_EACH_TWIG(self->root, twig) {
+        if (strcmp(title, noia_frame_get_title(twig)) == 0) {
+            workspace = twig;
+            break;
+        }
+    }
+    return workspace;
+}
+
+//------------------------------------------------------------------------------
+// PUBLIC
 
 NoiaCompositor* noia_compositor_new(void)
 {
@@ -22,7 +39,7 @@ NoiaCompositor* noia_compositor_new(void)
     NoiaSize size = {-1, -1};
     self->root = noia_frame_new();
     noia_frame_configure(self->root, NOIA_FRAME_TYPE_STACKED,
-                         scInvalidSurfaceId, pos, size);
+                         scInvalidSurfaceId, pos, size, "METANOIA");
     return self;
 }
 
@@ -59,8 +76,21 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
 {
     NOIA_ENSURE(self, return NULL);
 
+    // Generate title for workspace
+    char title[4] = {'\0'};
+    for (int i = 1; i < 1000; ++i) {
+        snprintf(title, sizeof(title), "%d", i);
+        if (not noia_compositor_find_workspace(self, title)) {
+            break;
+        }
+        title[0] = '\0';
+    }
+
+    NOIA_ENSURE(strlen(title) > 0, return NULL);
+
+    // Create and configure workspace
     NoiaFrame* workspace = noia_frame_new();
-    noia_frame_configure_as_workspace(workspace, size);
+    noia_frame_configure_as_workspace(workspace, size, title);
     noia_frame_append(self->root, workspace);
 
     /// @todo This should be configurable
@@ -91,7 +121,8 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     /// @todo Frame type, size and position should be configurable.
     NoiaFrame* frame = noia_frame_new();
     noia_frame_configure(frame, NOIA_FRAME_TYPE_FLOATING | NOIA_FRAME_TYPE_LEAF,
-                         sid, (NoiaPosition) {0,0}, surface->requested_size);
+                         sid, (NoiaPosition) {0,0}, surface->requested_size,
+                         NULL);
 
     noia_frame_append(self->selection, frame);
     /// @todo This should be configurable
@@ -210,6 +241,38 @@ void noia_compositor_swap(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
+void noia_compositor_focus_workspace(NoiaCompositor* self, char* title)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(title, return);
+
+    LOG_INFO1("Compositor: Change workspace to '%s'", title);
+
+    NoiaFrame* workspace = noia_compositor_find_workspace(self, title);
+    if (not workspace) {
+        LOG_WARN1("Compositor: Workspace '%s' not found!", title);
+        return;
+    }
+
+    /// Searching for new selection is done by iterating through surface history
+    /// and checking if surface with given ID is somewhere in workspace three.
+    /// Not the most efficient...
+    /// Any ideas for improvement?
+    NoiaFrame* frame = NULL;
+    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+    FOR_EACH(exhibitor->surface_history, link) {
+        NoiaSurfaceId sid = (NoiaSurfaceId) link->data;
+        frame = noia_frame_find_with_sid(workspace, sid);
+        if (frame) {
+            break;
+        }
+    }
+
+    self->selection = (frame ? frame : workspace);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_compositor_configure(NoiaCompositor* self,
                                NoiaFrame* frame,
                                NoiaArgmand direction)
@@ -295,7 +358,11 @@ void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
         noia_compositor_jump(self, self->selection, a->direction);
         break;
     case NOIA_ARGMAND_FOCUS:
-        noia_compositor_focus(self, a->direction, a->magnitude);
+        if (a->direction == NOIA_ARGMAND_WORKSPACE) {
+            noia_compositor_focus_workspace(self, a->str);
+        } else {
+            noia_compositor_focus(self, a->direction, a->magnitude);
+        }
         break;
     case NOIA_ARGMAND_SWAP:
         noia_compositor_swap(self, a->direction, a->magnitude);

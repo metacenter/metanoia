@@ -15,7 +15,7 @@ void noia_test_frame_config(NoiaFrame* frame,
 {
     NoiaPosition pos = {0,0};
     NoiaSize size = {0,0};
-    noia_frame_configure(frame, type, sid, pos, size);
+    noia_frame_configure(frame, type, sid, pos, size, "");
 }
 
 //------------------------------------------------------------------------------
@@ -114,25 +114,25 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(r,     abcde); \
     noia_frame_append(r,     f); \
     noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}); \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}, ""); \
     noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}); \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}, ""); \
     noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}); \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}, ""); \
     noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
-                         (NoiaPosition) {40,  0}, (NoiaSize) { 30,  60}); \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 30,  60}, ""); \
     noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
-                         (NoiaPosition) {40,  0}, (NoiaSize) { 30,  60}); \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 30,  60}, ""); \
     noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
-                         (NoiaPosition) { 0, 60}, (NoiaSize) { 70,  60}); \
+                         (NoiaPosition) { 0, 60}, (NoiaSize) { 70,  60}, ""); \
     noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) {100, 120}); \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) {100, 120}, ""); \
     noia_frame_configure(abc, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}); \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}, ""); \
     noia_frame_configure(de,    NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
-                         (NoiaPosition) {40,  0}, (NoiaSize) { 60,  60}); \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 60,  60}, ""); \
     noia_frame_configure(abcde, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
-                         (NoiaPosition) { 0,  0}, (NoiaSize) {100,  60});
+                         (NoiaPosition) { 0,  0}, (NoiaSize) {100,  60}, "");
 
 /// Frame set for testing iteration.
 ///
@@ -182,35 +182,35 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(r,     abcde); \
     noia_frame_append(r,     fghi); \
     noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  40}); \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  40}, ""); \
     noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
-                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}); \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}, ""); \
     noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
-                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}); \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}, ""); \
     noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
-                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}); \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}, ""); \
     noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
-                         (NoiaPosition) {80,  0}, (NoiaSize) { 40,  40}); \
+                         (NoiaPosition) {80,  0}, (NoiaSize) { 40,  40}, ""); \
     noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
-                         (NoiaPosition) { 0, 40}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) { 0, 40}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 7, \
-                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 8, \
-                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 9, \
-                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) {120, 120}); \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) {120, 120}, ""); \
     noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId, \
-                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}); \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 40,  40}, ""); \
     noia_frame_configure(bcde, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
-                         (NoiaPosition) {40,  0}, (NoiaSize) { 80,  40}); \
+                         (NoiaPosition) {40,  0}, (NoiaSize) { 80,  40}, ""); \
     noia_frame_configure(abcde, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
-                         (NoiaPosition) { 0,  0}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) { 0,  0}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(ghi, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId,\
-                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) { 0, 80}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(fghi, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId,\
-                         (NoiaPosition) { 0, 40}, (NoiaSize) {120,  80});
+                         (NoiaPosition) { 0, 40}, (NoiaSize) {120,  80}, "");
 
 /// Frame set for testing resizing with horizontal floating.
 ///
@@ -256,34 +256,34 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(r,      g); \
     noia_frame_append(r,      hi); \
     noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
-                         (NoiaPosition) {  0,  0}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) {  0,  0}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
-                         (NoiaPosition) {  0, 40}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) {  0, 40}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
-                         (NoiaPosition) {  0, 40}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) {  0, 40}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
-                         (NoiaPosition) {  0, 40}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) {  0, 40}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
-                         (NoiaPosition) {  0, 80}, (NoiaSize) { 60,  40}); \
+                         (NoiaPosition) {  0, 80}, (NoiaSize) { 60,  40}, ""); \
     noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
-                         (NoiaPosition) { 60, 80}, (NoiaSize) { 60,  40}); \
+                         (NoiaPosition) { 60, 80}, (NoiaSize) { 60,  40}, ""); \
     noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 7, \
-                         (NoiaPosition) {120,  0}, (NoiaSize) { 60, 120}); \
+                         (NoiaPosition) {120,  0}, (NoiaSize) { 60, 120}, ""); \
     noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 8, \
-                         (NoiaPosition) {180,  0}, (NoiaSize) { 60, 120}); \
+                         (NoiaPosition) {180,  0}, (NoiaSize) { 60, 120}, ""); \
     noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 9, \
-                         (NoiaPosition) {240,  0}, (NoiaSize) { 60, 120}); \
+                         (NoiaPosition) {240,  0}, (NoiaSize) { 60, 120}, ""); \
     noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId, \
-                         (NoiaPosition) {  0, 40}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) {  0, 40}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(ef, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId, \
-                         (NoiaPosition) {  0, 80}, (NoiaSize) {120,  40}); \
+                         (NoiaPosition) {  0, 80}, (NoiaSize) {120,  40}, ""); \
     noia_frame_configure(abcdef, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
-                         (NoiaPosition) {  0,  0}, (NoiaSize) {120, 120}); \
+                         (NoiaPosition) {  0,  0}, (NoiaSize) {120, 120}, ""); \
     noia_frame_configure(hi, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId, \
-                         (NoiaPosition) {180,  0}, (NoiaSize) {120, 120}); \
+                         (NoiaPosition) {180,  0}, (NoiaSize) {120, 120}, ""); \
     noia_frame_configure(r, NOIA_FRAME_TYPE_HORIZONTAL \
                          | NOIA_FRAME_TYPE_FLOATING, scInvalidSurfaceId, \
-                         (NoiaPosition) {  0,  0}, (NoiaSize) {300, 120}); \
+                         (NoiaPosition) {  0,  0}, (NoiaSize) {300, 120}, ""); \
 
 /// Frame set for testing resizing with vertical floating.
 ///
@@ -335,34 +335,34 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(r,      g); \
     noia_frame_append(r,      hi); \
     noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
-                         (NoiaPosition) {  0,   0}, (NoiaSize) { 40, 120}); \
+                         (NoiaPosition) {  0,   0}, (NoiaSize) { 40, 120}, "");\
     noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
-                         (NoiaPosition) { 40,   0}, (NoiaSize) { 40, 120}); \
+                         (NoiaPosition) { 40,   0}, (NoiaSize) { 40, 120}, "");\
     noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
-                         (NoiaPosition) { 40,   0}, (NoiaSize) { 40, 120}); \
+                         (NoiaPosition) { 40,   0}, (NoiaSize) { 40, 120}, "");\
     noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
-                         (NoiaPosition) { 40,   0}, (NoiaSize) { 40, 120}); \
+                         (NoiaPosition) { 40,   0}, (NoiaSize) { 40, 120}, "");\
     noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
-                         (NoiaPosition) { 80,   0}, (NoiaSize) { 40,  60}); \
+                         (NoiaPosition) { 80,   0}, (NoiaSize) { 40,  60}, "");\
     noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
-                         (NoiaPosition) { 80,  60}, (NoiaSize) { 40,  60}); \
+                         (NoiaPosition) { 80,  60}, (NoiaSize) { 40,  60}, "");\
     noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 7, \
-                         (NoiaPosition) {  0, 120}, (NoiaSize) {120,  60}); \
+                         (NoiaPosition) {  0, 120}, (NoiaSize) {120,  60}, "");\
     noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 8, \
-                         (NoiaPosition) {  0, 180}, (NoiaSize) {120,  60}); \
+                         (NoiaPosition) {  0, 180}, (NoiaSize) {120,  60}, "");\
     noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 9, \
-                         (NoiaPosition) {  0, 240}, (NoiaSize) {120,  60}); \
+                         (NoiaPosition) {  0, 240}, (NoiaSize) {120,  60}, "");\
     noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId, \
-                         (NoiaPosition) { 40,   0}, (NoiaSize) { 40, 120}); \
+                         (NoiaPosition) { 40,   0}, (NoiaSize) { 40, 120}, "");\
     noia_frame_configure(ef, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
-                         (NoiaPosition) { 80,   0}, (NoiaSize) { 40, 120}); \
-    noia_frame_configure(abcdef, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId, \
-                         (NoiaPosition) {  0,   0}, (NoiaSize) {120, 120}); \
+                         (NoiaPosition) { 80,   0}, (NoiaSize) { 40, 120}, "");\
+    noia_frame_configure(abcdef, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
+                         (NoiaPosition) {  0,   0}, (NoiaSize) {120, 120}, "");\
     noia_frame_configure(hi, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
-                         (NoiaPosition) {  0, 180}, (NoiaSize) {120, 120}); \
+                         (NoiaPosition) {  0, 180}, (NoiaSize) {120, 120}, "");\
     noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL \
                          | NOIA_FRAME_TYPE_FLOATING, scInvalidSurfaceId, \
-                         (NoiaPosition) {  0,   0}, (NoiaSize) {120, 300}); \
+                         (NoiaPosition) {  0,   0}, (NoiaSize) {120, 300}, "");
 
 #define NOIA_ASSERT_FRAME_ARRAY(ARRAY, POOL) \
     NOIA_ASSERT(NOIA_SIZEOF_ARRAY(ARRAY) == noia_pool_get_size(POOL), \
@@ -1345,26 +1345,26 @@ NoiaTestResult should_find_adjacent_frames(void)
     noia_frame_append(r, ab);
     noia_frame_append(r, cd);
     noia_frame_append(r, ef);
-    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) { 70,  10}); \
-    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
-                         (NoiaPosition) {70,  0}, (NoiaSize) { 30,  10}); \
-    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
-                         (NoiaPosition) { 0, 10}, (NoiaSize) { 50,  10}); \
-    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
-                         (NoiaPosition) {50, 10}, (NoiaSize) { 50,  10}); \
-    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
-                         (NoiaPosition) { 0, 20}, (NoiaSize) { 30,  10}); \
-    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
-                         (NoiaPosition) {30, 20}, (NoiaSize) { 70,  10}); \
-    noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) {100, 30}); \
-    noia_frame_configure(ab, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId, \
-                         (NoiaPosition) { 0,  0}, (NoiaSize) {100, 10}); \
-    noia_frame_configure(cd, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
-                         (NoiaPosition) { 0, 10}, (NoiaSize) {100, 10}); \
-    noia_frame_configure(ef, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,\
-                         (NoiaPosition) { 0, 20}, (NoiaSize) {100, 10});
+    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1,
+                         (NoiaPosition) { 0,  0}, (NoiaSize) { 70,  10}, "");
+    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2,
+                         (NoiaPosition) {70,  0}, (NoiaSize) { 30,  10}, "");
+    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3,
+                         (NoiaPosition) { 0, 10}, (NoiaSize) { 50,  10}, "");
+    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4,
+                         (NoiaPosition) {50, 10}, (NoiaSize) { 50,  10}, "");
+    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5,
+                         (NoiaPosition) { 0, 20}, (NoiaSize) { 30,  10}, "");
+    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6,
+                         (NoiaPosition) {30, 20}, (NoiaSize) { 70,  10}, "");
+    noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId,
+                         (NoiaPosition) { 0,  0}, (NoiaSize) {100, 30}, "");
+    noia_frame_configure(ab, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,
+                         (NoiaPosition) { 0,  0}, (NoiaSize) {100, 10}, "");
+    noia_frame_configure(cd, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,
+                         (NoiaPosition) { 0, 10}, (NoiaSize) {100, 10}, "");
+    noia_frame_configure(ef, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId,
+                         (NoiaPosition) { 0, 20}, (NoiaSize) {100, 10}, "");
 
     p = noia_frame_find_adjacent(a, NOIA_ARGMAND_S, 1);
     NOIA_ASSERT(p == c, "1*South from A should be C");

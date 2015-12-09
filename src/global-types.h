@@ -85,7 +85,7 @@ typedef struct {
 typedef struct {
     NoiaArgmand action;
     NoiaArgmand direction;
-    NoiaFrameType frame_type;
+    char* str;
     int magnitude;
 } NoiaAction;
 

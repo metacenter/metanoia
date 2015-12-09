@@ -22,6 +22,8 @@ void noia_put_resize(NoiaBindingContext* context);
 
 void noia_put_number(NoiaBindingContext* context);
 
+void noia_focus_workspace(NoiaBindingContext* context);
+
 void noia_anchorize(NoiaBindingContext* context);
 
 void noia_stackedize(NoiaBindingContext* context);

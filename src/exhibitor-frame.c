@@ -228,10 +228,10 @@ static inline void noia_frame_log_internal(NoiaFrame* self,
     }
 
     print("NoiaFrame(type='0x%x', sid='%d', len='%d'"
-          "x='%d', y='%d', w='%d', h='%d')%s\n",
+          "x='%d', y='%d', w='%d', h='%d', title='%s')%s\n",
           params->type, params->sid, noia_chain_len(self->twigs),
           params->area.pos.x, params->area.pos.y,
-          params->area.size.width, params->area.size.height,
+          params->area.size.width, params->area.size.height, params->title,
           (self == selection) ? " <== FOCUS" : "");
 
     FOR_EACH_TWIG(self, twig) {
@@ -288,7 +288,7 @@ NoiaFrame* noia_frame_create_child(NoiaFrame* self, NoiaFrameType type)
 
     NoiaFrame* frame = noia_frame_new();
     noia_frame_configure(frame, type, scInvalidSurfaceId,
-                         params->area.pos, params->area.size);
+                         params->area.pos, params->area.size, NULL);
     noia_frame_append(self, frame);
 
     return frame;
@@ -311,22 +311,25 @@ void noia_frame_configure(NoiaFrame* self,
                           NoiaFrameType type,
                           NoiaSurfaceId sid,
                           NoiaPosition pos,
-                          NoiaSize size)
+                          NoiaSize size,
+                          const char* title)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
     params->type = type;
     params->area.pos = pos;
     params->area.size = size;
+    params->title = (title ? strdup(title) : NULL);
     noia_frame_set_surface(self, sid);
 }
 
 //------------------------------------------------------------------------------
 
 void noia_frame_configure_as_workspace(NoiaFrame* self,
-                                       NoiaSize size)
+                                       NoiaSize size,
+                                       const char* title)
 {
     noia_frame_configure(self, NOIA_FRAME_TYPE_WORKSPACE,
-                         scInvalidSurfaceId, (NoiaPosition) {0,0}, size);
+                         scInvalidSurfaceId, (NoiaPosition) {0,0}, size, title);
 }
 
 //------------------------------------------------------------------------------
@@ -351,6 +354,14 @@ bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type)
 {
     NOIA_ENSURE(self, return false);
     return !!(noia_frame_get_params(self)->type & type);
+}
+
+//------------------------------------------------------------------------------
+
+const char* noia_frame_get_title(NoiaFrame* self)
+{
+    NOIA_ENSURE(self, return "");
+    return noia_frame_get_params(self)->title;
 }
 
 //------------------------------------------------------------------------------

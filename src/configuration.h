@@ -72,6 +72,27 @@ static const NoiaBinding scBindingsInsert[] = {
         // changing focus
         {KEY_TAB, NOIA_KEY_META,                noia_cicle_history_forward},
         {KEY_TAB, NOIA_KEY_META|NOIA_KEY_SHIFT, noia_cicle_history_back},
+        // workspaces
+        {KEY_0,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_1,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_2,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_3,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_4,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_5,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_6,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_7,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_8,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_9,         NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_0, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_1, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_2, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_3, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_4, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_5, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_6, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_7, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_8, NOIA_KEY_META, noia_focus_workspace},
+        {KEY_NUMERIC_9, NOIA_KEY_META, noia_focus_workspace},
     };
 
 #endif // NOIA_CONFIGURATION_H

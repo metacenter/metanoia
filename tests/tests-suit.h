@@ -136,7 +136,7 @@ void noia_test_init(int argc, char** argv)
 int noia_test_run(const char* suit_name, NoiaTest* test, int N)
 {
     int result = 0;
-    printf("Run test suit '%s'\n\n", suit_name);
+    printf("============ Run test suit '%s' ============\n\n", suit_name);
     for(int n = 0; n < N; ++n) {
         NOIA_TEST_PRINTF("Run test %d - '%s'\n", n+1, test[n].name);
         NoiaTestResult check = test[n].check();

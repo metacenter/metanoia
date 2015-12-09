@@ -18,7 +18,7 @@ typedef struct {
 
 /// Initializer of `NoiaBindingContext`.
 #define NOIA_BINDING_CONTEXT_INIT { \
-        { NOIA_ARGMAND_NONE, NOIA_ARGMAND_NONE, NOIA_FRAME_TYPE_NONE, 0 }, \
+        { NOIA_ARGMAND_NONE, NOIA_ARGMAND_NONE, NULL, 0 }, \
         NULL, 0, 0x0, NOIA_KEY_RELEASED }
 
 #endif // NOIA_KEYBOARD_CONTEXT_H

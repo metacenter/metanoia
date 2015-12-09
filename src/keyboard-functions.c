@@ -7,7 +7,29 @@
 #include "exhibitor.h"
 #include "global-macros.h"
 
+#include <string.h>
 #include <linux/input.h>
+
+//------------------------------------------------------------------------------
+
+int noia_get_number_from_key(int code)
+{
+    int number = -2;
+    switch (code) {
+        case KEY_MINUS: number = -1; break;
+        case KEY_0: case KEY_NUMERIC_0: number = 0; break;
+        case KEY_1: case KEY_NUMERIC_1: number = 1; break;
+        case KEY_2: case KEY_NUMERIC_2: number = 2; break;
+        case KEY_3: case KEY_NUMERIC_3: number = 3; break;
+        case KEY_4: case KEY_NUMERIC_4: number = 4; break;
+        case KEY_5: case KEY_NUMERIC_5: number = 5; break;
+        case KEY_6: case KEY_NUMERIC_6: number = 6; break;
+        case KEY_7: case KEY_NUMERIC_7: number = 7; break;
+        case KEY_8: case KEY_NUMERIC_8: number = 8; break;
+        case KEY_9: case KEY_NUMERIC_9: number = 9; break;
+    }
+    return number;
+}
 
 //------------------------------------------------------------------------------
 
@@ -116,22 +138,7 @@ void noia_put_number(NoiaBindingContext* context)
 {
     NOIA_ENSURE(context, return);
 
-    /// @todo Move elsewhere.
-    int number = 0;
-    switch (context->code) {
-        case KEY_MINUS: number = -1; break;
-        case KEY_0: case KEY_NUMERIC_0: number = 0; break;
-        case KEY_1: case KEY_NUMERIC_1: number = 1; break;
-        case KEY_2: case KEY_NUMERIC_2: number = 2; break;
-        case KEY_3: case KEY_NUMERIC_3: number = 3; break;
-        case KEY_4: case KEY_NUMERIC_4: number = 4; break;
-        case KEY_5: case KEY_NUMERIC_5: number = 5; break;
-        case KEY_6: case KEY_NUMERIC_6: number = 6; break;
-        case KEY_7: case KEY_NUMERIC_7: number = 7; break;
-        case KEY_8: case KEY_NUMERIC_8: number = 8; break;
-        case KEY_9: case KEY_NUMERIC_9: number = 9; break;
-    }
-
+    int number = noia_get_number_from_key(context->code);
     if (context->action.magnitude == 0) {
         context->action.magnitude = number;
     } else if (number < 0) {
@@ -139,6 +146,25 @@ void noia_put_number(NoiaBindingContext* context)
     } else {
         context->action.magnitude = 10 * context->action.magnitude + number;
     }
+}
+
+//------------------------------------------------------------------------------
+
+void noia_focus_workspace(NoiaBindingContext* context)
+{
+    NOIA_ENSURE(context, return);
+
+    char str[3];
+    int number = noia_get_number_from_key(context->code);
+    snprintf(str, sizeof(str), "%d", number);
+
+    NoiaAction* action = &context->action;
+    noia_action_clean(action);
+    action->action = NOIA_ARGMAND_FOCUS;
+    action->direction = NOIA_ARGMAND_WORKSPACE;
+    action->str = strdup(str);
+    noia_exhibitor_execute(action);
+    noia_action_clean(action);
 }
 
 //------------------------------------------------------------------------------

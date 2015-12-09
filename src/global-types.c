@@ -48,8 +48,11 @@ void noia_action_clean(NoiaAction* action)
 {
     action->action     = NOIA_ARGMAND_NONE;
     action->direction  = NOIA_ARGMAND_NONE;
-    action->frame_type = NOIA_FRAME_TYPE_NONE;
     action->magnitude  = 0;
+    if (action->str) {
+        free(action->str);
+        action->str = NULL;
+    }
 }
 
 //------------------------------------------------------------------------------
