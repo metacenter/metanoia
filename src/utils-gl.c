@@ -215,6 +215,9 @@ NoiaResult noia_gl_initialize(NoiaEGLBundle* egl,
 
     LOG_INFO2("EGL Version: '%s'", eglQueryString(egl->display, EGL_VERSION));
     LOG_INFO2("EGL Vendor:  '%s'", eglQueryString(egl->display, EGL_VENDOR));
+    LOG_INFO2("GL_TEXTURE0: '%d'", GL_TEXTURE0);
+    LOG_INFO2("GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: '%d'",
+              GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
 
     // Bind API
     if (!eglBindAPI(EGL_OPENGL_ES_API)) {

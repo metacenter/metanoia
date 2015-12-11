@@ -16,7 +16,6 @@ cppcheck:
 
 build/metanoia: Makefile \
                 build/backend-offscreen.o \
-                build/bind-egl-wayland.o \
                 build/config.o \
                 build/device-common.o \
                 build/device-drm.o \
@@ -86,7 +85,7 @@ build/metanoia: Makefile \
 	@mkdir -p build
 	@echo "  LD   metanoia"
 	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/metanoia \
-	       build/config.o build/global-enums.o build/global-types.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-debug.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/wayland-protocol-screenshooter.o gen/screenshooter-protocol.c build/bind-egl-wayland.o build/backend-offscreen.o build/metanoia.o \
+	       build/config.o build/global-enums.o build/global-types.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-debug.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/wayland-protocol-screenshooter.o gen/screenshooter-protocol.c build/backend-offscreen.o build/metanoia.o \
 	       -ldbus-1 -lEGL -lgbm -lGL -ldrm -ludev -lwayland-server -lxkbcommon
 
 build/metanoiactl-gtk: Makefile \
@@ -554,7 +553,6 @@ build/renderer-mmap.o: Makefile \
 	       -c src/renderer-mmap.c
 
 build/renderer-gl.o: Makefile \
-                     src/bind-egl-wayland.h \
                      src/exhibitor-compositor.h \
                      src/exhibitor-frame.h \
                      src/global-constants.h \
@@ -956,8 +954,6 @@ build/exhibitor-compositor.o: Makefile \
 	       -c src/exhibitor-compositor.c
 
 build/exhibitor-frame.o: Makefile \
-                         src/event-signals.h \
-                         src/event-task.h \
                          src/exhibitor-compositor.h \
                          src/exhibitor-frame.c \
                          src/exhibitor-frame.h \
@@ -971,7 +967,6 @@ build/exhibitor-frame.o: Makefile \
                          src/utils-chain.h \
                          src/utils-debug.h \
                          src/utils-list.h \
-                         src/utils-object.h \
                          src/utils-pool.h \
                          src/utils-store.h
 	@mkdir -p build
@@ -1464,25 +1459,6 @@ build/wayland-protocol-screenshooter.o: Makefile \
 	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-screenshooter.o -Isrc -Igen \
 	       -c src/wayland-protocol-screenshooter.c
 
-build/bind-egl-wayland.o: Makefile \
-                          src/bind-egl-wayland.c \
-                          src/event-loop.h \
-                          src/event-task.h \
-                          src/global-constants.h \
-                          src/global-enums.h \
-                          src/global-types.h \
-                          src/renderer-gl.h \
-                          src/renderer.h \
-                          src/utils-gl.h \
-                          src/utils-log.h \
-                          src/utils-object.h \
-                          src/utils-pool.h \
-                          src/wayland.h
-	@mkdir -p build
-	@echo "  CC   bind-egl-wayland.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/bind-egl-wayland.o -Isrc -Igen \
-	       -c src/bind-egl-wayland.c
-
 build/backend-offscreen.o: Makefile \
                            src/backend-offscreen.c \
                            src/backend-offscreen.h \
@@ -1734,8 +1710,6 @@ checks/check-store: Makefile \
 	      tests/test-store.c src/utils-chain.c src/utils-store.c
 
 checks/check-frame: Makefile \
-                    src/event-signals.h \
-                    src/event-task.h \
                     src/exhibitor-compositor.h \
                     src/exhibitor-frame.c \
                     src/exhibitor-frame.h \
@@ -1755,7 +1729,6 @@ checks/check-frame: Makefile \
                     src/utils-debug.h \
                     src/utils-list.h \
                     src/utils-log.h \
-                    src/utils-object.h \
                     src/utils-pool.c \
                     src/utils-pool.h \
                     src/utils-store.c \

@@ -71,10 +71,10 @@ void noia_surface_clear_all(void)
 //------------------------------------------------------------------------------
 
 void noia_surface_attach_egl(NoiaSurfaceId sid,
-                             void* resource NOIA_UNUSED)
+                             void* resource)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
-
+    surface->buffer.resource = resource;
     /// @todo Log at init if renderer supports egl
     /// @todo Move 'attach' out from renderer
     //if (renderer && renderer->attach) {
@@ -85,38 +85,46 @@ void noia_surface_attach_egl(NoiaSurfaceId sid,
 //------------------------------------------------------------------------------
 
 /// Buffer data is copied.
-void noia_surface_commit(NoiaSurfaceId sid,
+void noia_surface_attach(NoiaSurfaceId sid,
                          int width,
                          int height,
                          int stride,
-                         uint8_t* data)
+                         uint8_t* data,
+                         void* resource)
 {
+    NOIA_ENSURE(data or resource, return);
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
     noia_surface_lock();
 
-    int is_first_time_commited = !surface->buffer.data;
-
-    // Prepare space for data if its size changed
-    size_t size = stride * height;
-    size_t old_size = surface->buffer.stride * surface->buffer.height;
-    if (size != old_size) {
-        if (surface->buffer.data) {
-            free(surface->buffer.data);
-        }
-        surface->buffer.data = malloc(size);
-    }
+    int is_first_time_attached = (not surface->buffer.data)
+                             and (not surface->buffer.resource);
 
     // Copy buffer
+    if (data) {
+        size_t size = stride * height;
+        size_t old_size = surface->buffer.stride * surface->buffer.height;
+        if (size != old_size) {
+            if (surface->buffer.data) {
+                free(surface->buffer.data);
+            }
+            surface->buffer.data = malloc(size);
+        }
+        memcpy(surface->buffer.data, data, size);
+        surface->buffer.resource = NULL;
+    } else if (resource) {
+        surface->buffer.data = NULL;
+        surface->buffer.resource = resource;
+    }
+
     surface->buffer.width  = width;
     surface->buffer.height = height;
     surface->buffer.stride = stride;
-    memcpy(surface->buffer.data, data, size);
 
     // If surface was just created - inform others
-    if (is_first_time_commited) {
+    if (is_first_time_attached) {
         /// @todo Size should not be set here.
-        if (surface->requested_size.width  == 0
-        ||  surface->requested_size.height == 0) {
+        if ((surface->requested_size.width  == 0)
+        or  (surface->requested_size.height == 0)) {
             surface->requested_size.width  = width;
             surface->requested_size.height = height;
         }

@@ -266,7 +266,6 @@ NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output)
     noia_renderer_initialize(&mine->base,
                              noia_renderer_mmap_initialize,
                              noia_renderer_mmap_finalize,
-                             NULL, /// @todo Implement attach function
                              noia_renderer_mmap_draw,
                              noia_renderer_mmap_swap_buffers,
                              noia_renderer_mmap_copy_buffer,

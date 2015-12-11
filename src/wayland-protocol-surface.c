@@ -49,17 +49,11 @@ void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
         stride = wl_shm_buffer_get_stride(shm_buffer);
         data   = wl_shm_buffer_get_data(shm_buffer);
     } else {
-        LOG_WARN3("Wrong shared memory buffer!");
+        LOG_WARN3("Wayland: wrong shared memory buffer!");
     }
 
     noia_wayland_state_surface_attach(sid, buffer_resource);
-
-    if (!data) {
-        noia_surface_attach_egl(sid, buffer_resource);
-    } else {
-        /// @todo Do this on commit
-        noia_surface_commit(sid, width, height, stride, data);
-    }
+    noia_surface_attach(sid, width, height, stride, data, resource);
 }
 
 //------------------------------------------------------------------------------

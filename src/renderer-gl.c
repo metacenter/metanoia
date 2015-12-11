@@ -16,9 +16,6 @@
 #include <string.h>
 #include <pthread.h>
 
-/// @todo remove
-#include "bind-egl-wayland.h"
-
 //------------------------------------------------------------------------------
 
 pthread_mutex_t mutex_renderer_gl = PTHREAD_MUTEX_INITIALIZER;
@@ -30,58 +27,6 @@ GLint location_texture;
 GLint location_screen_size;
 GLuint vbo_vertices;
 GLuint vbo_texture[2];
-
-/// @todo Store resources properly
-void* xxxx_resource = NULL;
-
-//------------------------------------------------------------------------------
-
-/// @todo Finnish.
-void noia_renderer_gl_attach(NoiaRenderer* self,
-                             NoiaSurfaceId surfaceId,
-                             void* resource)
-{
-    xxxx_resource = resource;
-
-    if (!self) {
-        LOG_ERROR("Wrong renderer!");
-        return;
-    }
-    NoiaRendererGL* mine = (NoiaRendererGL*) self;
-
-    GLint format;
-    int ret = mine->query_buffer(mine->egl.display, resource,
-                                 EGL_TEXTURE_FORMAT, &format);
-    LOG_DEBUG("FORMAT: %d %d %d", format, ret, EGL_TEXTURE_RGBA);
-
-    EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
-
-    NoiaSurfaceData* surface = noia_surface_get(surfaceId);
-
-    //glBindTexture(GL_TEXTURE_2D, surface->buffer.texture);
-    //glGenTextures(1, &surface->buffer.texture);
-    //glBindTexture(GL_TEXTURE_2D, surface->buffer.texture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    surface->buffer.image = mine->create_image(mine->egl.display,
-                                               EGL_NO_CONTEXT,
-                                               EGL_WAYLAND_BUFFER_WL,
-                                               resource,
-                                               attribs);
-
-    if (surface->buffer.image == EGL_NO_IMAGE_KHR) {
-        LOG_DEBUG("KHR: %d", eglGetError());
-        LOG_WARN1("Could not create KHR image!");
-        return;
-    }
-
-    /*PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d =
-        (void*) eglGetProcAddress("glEGLImageTargetTexture2DOES");
-
-    image_target_texture_2d(GL_TEXTURE_2D, surface->buffer.image);*/
-
-    LOG_DEBUG("ATT: %d", eglGetError());
-}
 
 //------------------------------------------------------------------------------
 
@@ -106,22 +51,20 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
 
     // Setup EGL extensions
     const char* extensions =
-            (const char *) eglQueryString(mine->egl.display, EGL_EXTENSIONS);
-    if (!extensions) {
+                (const char*) eglQueryString(mine->egl.display, EGL_EXTENSIONS);
+    if (not extensions) {
         LOG_WARN1("Retrieving EGL extension string failed!");
     } else if (strstr(extensions, "EGL_WL_bind_wayland_display")) {
-        /// @todo Wayland support in GL renderer
-        //mine->bind_display =
-        //            (void*) eglGetProcAddress("eglBindWaylandDisplayWL");
-        //mine->unbind_display =
-        //            (void*) eglGetProcAddress("eglUnbindWaylandDisplayWL");
-        //mine->create_image =
-        //            (void*) eglGetProcAddress("eglCreateImageKHR");
-        //mine->destroy_image =
-        //            (void*) eglGetProcAddress("eglDestroyImageKHR");
-        //mine->query_buffer =
-        //            (void*) eglGetProcAddress("eglQueryWaylandBufferWL");*/
-        //mine->has_wayland_support = 1;
+        mine->create_image_khr =
+                              (PFNEGLCREATEIMAGEKHRPROC)
+                              eglGetProcAddress("eglCreateImageKHR");
+        mine->destroy_image_khr =
+                              (PFNEGLDESTROYIMAGEKHRPROC)
+                              eglGetProcAddress("eglDestroyImageKHR");
+        mine->image_target_texture_2does =
+                              (PFNGLEGLIMAGETARGETTEXTURE2DOESPROC)
+                              eglGetProcAddress("glEGLImageTargetTexture2DOES");
+        mine->has_wayland_support = 1;
     }
 
     // Make context current
@@ -135,9 +78,9 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
     location_texture = noia_gl_get_uniform_location(program, "texture");
     location_screen_size = noia_gl_get_uniform_location(program, "screen_size");
     if (program == scInvalidGLObject
-    ||  location_vertices == scInvalidGLLocation
-    ||  location_texture == scInvalidGLLocation
-    ||  location_screen_size == scInvalidGLLocation) {
+    or  location_vertices == scInvalidGLLocation
+    or  location_texture == scInvalidGLLocation
+    or  location_screen_size == scInvalidGLLocation) {
         goto clear_context;
     }
 
@@ -213,31 +156,50 @@ void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine NOIA_UNUSED)
 /// Load textures to memory and save vertices coordinates for given surface.
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
-void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaSurfaceId sid,
+void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaRendererGL* mine,
+                                                        NoiaSurfaceId sid,
                                                         int i,
                                                         GLfloat* vertices)
 {
     NoiaSurfaceData* surface = noia_surface_get(sid);
-    if (!surface) {
-        return;
-    }
+    NOIA_ENSURE(surface, return);
 
     uint8_t* data = surface->buffer.data;
     int width = surface->buffer.width;
     int height = surface->buffer.height;
+    void* resource = surface->buffer.resource;
 
-    if (data != NULL) {
-        glActiveTexture(i==0 ? GL_TEXTURE0:GL_TEXTURE1);
+    if (data) {
+        glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, vbo_texture[i]);
         glTexImage2D(GL_TEXTURE_2D,    // target
-                     0,                // level, 0 = base, no minimap,
-                     GL_RGBA,          // internalformat
+                     0,                // level, 0 = base, no mipmap,
+                     GL_RGBA,          // internal format
                      width,            // width
                      height,           // height
                      0,                // border, always 0 in OpenGL ES
                      GL_RGBA,          // format
                      GL_UNSIGNED_BYTE, // type
                      data);
+    } else if (resource) {
+        EGLint attribs[] = { EGL_WAYLAND_PLANE_WL, 0, EGL_NONE };
+
+        glActiveTexture(GL_TEXTURE0 + i);
+        surface->buffer.image = mine->create_image_khr(mine->egl.display,
+                                                       mine->egl.context,
+                                                       EGL_WAYLAND_BUFFER_WL,
+                                                       resource,
+                                                       attribs);
+
+        if (surface->buffer.image != EGL_NO_IMAGE_KHR) {
+            mine->image_target_texture_2does(GL_TEXTURE_2D,
+                                             surface->buffer.image);
+        } else {
+            LOG_WARN1("Could not create KHR image! (%d)", eglGetError());
+        }
+    } else {
+        LOG_WARN1("RendererGL: surface '%d' does not have data nor resource!");
+        return;
     }
 
     vertices[ 0] = 0;      vertices[ 1] = 0;
@@ -254,7 +216,7 @@ void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaSurfaceId sid,
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
 ///      noia_renderer_gl_load_texture_and_prepare_vertices
-void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine NOIA_UNUSED,
+void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine,
                                     NoiaPool* surfaces)
 {
     if (surfaces == NULL || noia_pool_get_size(surfaces) == 0) {
@@ -267,12 +229,12 @@ void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine NOIA_UNUSED,
     /// @todo Do not malloc here.
     GLfloat* vertices = malloc(vertices_size);
 
-    /// @todo Upload textures only if realy needed
+    /// @todo Upload textures only if really needed
     unsigned i = 0;
     NoiaSurfaceContext* context;
     NOIA_ITERATE_POOL(surfaces, i, context) {
         noia_renderer_gl_load_texture_and_prepare_vertices
-                                             (context->sid, i, &vertices[12*i]);
+                                       (mine, context->sid, i, &vertices[12*i]);
     }
 
     // Upload positions to vertex buffer object
@@ -309,12 +271,12 @@ void noia_renderer_gl_draw_pointer(NoiaRendererGL* mine     NOIA_UNUSED,
 //------------------------------------------------------------------------------
 
 /// Finalize drawing.
-/// Undind framebuffer and release context.
+/// Unbind framebuffer and release context.
 /// This is subroutine of `noia_renderer_gl_draw`
 /// @see noia_renderer_gl_draw
 void noia_renderer_gl_release_view(NoiaRendererGL* mine)
 {
-    // Ubind framebuffer and program
+    // Unbind framebuffer and program
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glUseProgram(0);
 
@@ -430,14 +392,11 @@ NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
                                       NoiaSize size)
 {
     NoiaRendererGL* mine = calloc(1, sizeof(NoiaRendererGL));
-    if (mine == NULL) {
-        return NULL;
-    }
+    NOIA_ENSURE(mine, abort());
 
     noia_renderer_initialize(&mine->base,
                              noia_renderer_gl_initialize,
                              noia_renderer_gl_finalize,
-                             noia_renderer_gl_attach,
                              noia_renderer_gl_draw,
                              noia_renderer_gl_swap_buffers,
                              noia_renderer_gl_copy_buffer,
@@ -450,12 +409,10 @@ NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
 
     mine->size = size;
 
-    mine->bind_display   = NULL;
-    mine->unbind_display = NULL;
-    mine->create_image   = NULL;
-    mine->destroy_image  = NULL;
-    mine->query_buffer   = NULL;
-    mine->has_wayland_support = 0;
+    mine->create_image_khr           = NULL;
+    mine->destroy_image_khr          = NULL;
+    mine->image_target_texture_2does = NULL;
+    mine->has_wayland_support        = false;
 
     return (NoiaRenderer*) mine;
 }

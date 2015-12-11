@@ -76,12 +76,12 @@ void noia_display_redraw_all(NoiaDisplay* self)
                                  self->visible_surfaces,
                                  &layover_context);
 
-    if (self->output->begin_drawing) {
-        self->output->begin_drawing(self->output);
-    }
-
     if (self->output->renderer->swap_buffers) {
         self->output->renderer->swap_buffers(self->output->renderer);
+    }
+
+    if (self->output->begin_drawing) {
+        self->output->begin_drawing(self->output);
     }
 
     if (self->output->end_drawing) {

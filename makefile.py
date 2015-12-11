@@ -558,15 +558,6 @@ metanoia.add_input(t)
 metanoia.add_input(target_screenshooter_protocol_code)
 
 #-------------------------------------------------------------------------------
-#
-
-t = m.add_compile_target(
-        output='bind-egl-wayland.o',
-        inputs=['bind-egl-wayland.c'],
-    )
-metanoia.add_input(t)
-
-#-------------------------------------------------------------------------------
 # OFFSCREEN BACKEND
 
 t = m.add_compile_target(

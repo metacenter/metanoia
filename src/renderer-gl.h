@@ -7,6 +7,8 @@
 #include "renderer.h"
 #include "utils-gl.h"
 
+#include <GL/gl.h>
+
 /// Implementation of rendering strategy for GL backend.
 /// @todo Move to renderer-gl.c
 /// @see NoiaRenderer, NoiaRendererMMap
@@ -15,11 +17,9 @@ typedef struct {
     NoiaEGLBundle egl;
     NoiaSize size;
 
-    PFNEGLBINDWAYLANDDISPLAYWL   bind_display;
-    PFNEGLUNBINDWAYLANDDISPLAYWL unbind_display;
-    PFNEGLCREATEIMAGEKHRPROC     create_image;
-    PFNEGLDESTROYIMAGEKHRPROC    destroy_image;
-    PFNEGLQUERYWAYLANDBUFFERWL   query_buffer;
+    PFNEGLCREATEIMAGEKHRPROC            create_image_khr;
+    PFNEGLDESTROYIMAGEKHRPROC           destroy_image_khr;
+    PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2does;
     int has_wayland_support;
 } NoiaRendererGL;
 

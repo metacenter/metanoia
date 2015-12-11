@@ -12,13 +12,14 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-/// Containter for all data requred to draw the surface.
+/// Container for all data required to draw the surface.
 typedef struct {
     int width;
     int height;
     int stride;
     uint8_t* data;
     GLuint texture;
+    void* resource;
     EGLImageKHR image;
 } NoiaDrawBuffer;
 

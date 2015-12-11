@@ -15,11 +15,12 @@ NoiaSurfaceData* noia_surface_get(NoiaSurfaceId sid);
 void noia_surface_attach_egl(NoiaSurfaceId sid,
                              void* resource);
 
-void noia_surface_commit(NoiaSurfaceId sid,
+void noia_surface_attach(NoiaSurfaceId sid,
                          int width,
                          int height,
                          int stride,
-                         uint8_t* buffer);
+                         uint8_t* buffer,
+                         void* resource);
 
 void noia_surface_show(NoiaSurfaceId sid);
 
