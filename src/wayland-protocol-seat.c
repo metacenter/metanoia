@@ -118,7 +118,7 @@ void noia_wayland_seat_bind(struct wl_client* client,
 {
     struct wl_resource* rc;
 
-    LOG_NYIMP("Binding Wayland seat (version: %d, id: %d)", version, id);
+    LOG_WAYL2("Binding Wayland seat (version: %d, id: %d)", version, id);
 
     rc = wl_resource_create(client, &wl_seat_interface, version, id);
     if (!rc) {
@@ -132,7 +132,10 @@ void noia_wayland_seat_bind(struct wl_client* client,
     /// @todo Add more capabilities
     wl_seat_send_capabilities(rc, WL_SEAT_CAPABILITY_POINTER
                                 | WL_SEAT_CAPABILITY_KEYBOARD);
-    wl_seat_send_name(rc, "seat0");
+
+    if (version >= WL_SEAT_NAME_SINCE_VERSION) {
+        wl_seat_send_name(rc, "seat0");
+    }
 }
 
 //------------------------------------------------------------------------------

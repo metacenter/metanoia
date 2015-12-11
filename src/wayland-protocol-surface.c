@@ -103,14 +103,19 @@ void noia_wayland_surface_frame(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-/// #todo: Wayland protocol: setsurface opaque region.
+/// #todo: Wayland protocol: set surface opaque region.
 void noia_wayland_surface_set_opaque_region
                                           (struct wl_client* client NOIA_UNUSED,
                                            struct wl_resource* resource,
                                            struct wl_resource* region_resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
-    NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
+    NoiaItemId rid = scInvalidItemId;
+    if (region_resource) {
+        rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
+    } else {
+        /// @todo Clear opaque region.
+    }
 
     LOG_NYIMP("Wayland: set opaque region (sid: %d, rid: %d)", sid, rid);
 }
