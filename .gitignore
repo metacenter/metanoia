@@ -2,5 +2,8 @@ build/
 checks/
 doc/
 gen/
+inter/
+.ninja_deps
+.ninja_log
 session.vim
 tags

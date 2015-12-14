@@ -1,172 +1,449 @@
-all: build/metanoia build/metanoiactl-gtk
+default: build/metanoia build/metanoiactl-gtk
 
-res/force:
+all: build/metanoia build/metanoiactl-gtk checks/check-globals checks/check-pool checks/check-store checks/check-chain checks/check-list checks/check-branch checks/check-frame
+
+checks: checks/check-globals checks/check-pool checks/check-store checks/check-chain checks/check-list checks/check-branch checks/check-frame
+
+check: checks
+	@./checks/check-globals
+	@./checks/check-pool
+	@./checks/check-store
+	@./checks/check-chain
+	@./checks/check-list
+	@./checks/check-branch
+	@./checks/check-frame
 
 clean:
-	rm -rf doc build gen checks callgrind* *plist*
+	rm -rf build checks doc gen inter callgrind* *plist* .ninja*
 
-checks: checks/check-globals checks/check-pool checks/check-chain checks/check-list checks/check-branch checks/check-store checks/check-frame
-check: checks
-	@time (echo; for c in checks/check*; do $$c; done)
-memcheck: checks
-	@time (echo; for c in checks/check*; do valgrind --leak-check=full --show-leak-kinds=all --log-file=valgrind.log $$c -q; if ! cat valgrind.log | grep "All heap blocks were freed -- no leaks are possible"; then cat valgrind.log; fi; rm -f valgrind.log; echo; done)
-cppcheck:
-	cppcheck -q --enable=all --template="[{severity}] {file} ({line}): {id} - {message}" --suppress=incorrectStringBooleanError .
+force:
 
+cppcheck: Makefile \
+          checks
+	@python -B ./share/build/make.py cppcheck
+
+make: force
+	@python -B ./share/build/make.py make
+
+memcheck: Makefile \
+          checks
+	@python -B ./share/build/make.py memcheck
+
+ninja: force
+	@python -B ./share/build/make.py ninja
 
 build/metanoia: Makefile \
-                build/backend-offscreen.o \
-                build/config.o \
-                build/device-common.o \
-                build/device-drm.o \
-                build/device-evdev.o \
-                build/device-fb.o \
-                build/device-udev.o \
-                build/event-dispatcher.o \
-                build/event-factory.o \
-                build/event-loop.o \
-                build/event-signals.o \
-                build/event-task.o \
-                build/event-timer.o \
-                build/exhibitor-compositor.o \
-                build/exhibitor-display.o \
-                build/exhibitor-frame.o \
-                build/exhibitor-pointer.o \
-                build/exhibitor-strategist.o \
-                build/exhibitor.o \
-                build/global-enums.o \
-                build/global-functions.o \
-                build/global-objects.o \
-                build/global-types.o \
-                build/keyboard-binding.o \
-                build/keyboard-bindings.o \
-                build/keyboard-functions.o \
-                build/keyboard-mode.o \
-                build/metanoia.o \
-                build/output-collector.o \
-                build/output.o \
-                build/renderer-gl.o \
-                build/renderer-mmap.o \
-                build/renderer.o \
-                build/surface-data.o \
-                build/surface-manager.o \
-                build/utils-branch.o \
-                build/utils-chain.o \
-                build/utils-dbus.o \
-                build/utils-debug.o \
-                build/utils-environment.o \
-                build/utils-gl.o \
-                build/utils-keymap.o \
-                build/utils-list.o \
-                build/utils-log.o \
-                build/utils-object.o \
-                build/utils-pool.o \
-                build/utils-store.o \
-                build/wayland-cache.o \
-                build/wayland-output.o \
-                build/wayland-protocol-compositor.o \
-                build/wayland-protocol-keyboard.o \
-                build/wayland-protocol-output.o \
-                build/wayland-protocol-pointer.o \
-                build/wayland-protocol-region.o \
-                build/wayland-protocol-screenshooter.o \
-                build/wayland-protocol-seat.o \
-                build/wayland-protocol-shell-surface.o \
-                build/wayland-protocol-shell.o \
-                build/wayland-protocol-surface.o \
-                build/wayland-protocol-xdg-shell.o \
-                build/wayland-protocol-xdg-surface.o \
-                build/wayland-region.o \
-                build/wayland-state.o \
-                build/wayland-surface.o \
-                build/wayland.o \
-                build/xdg-shell-protocol.o \
-                gen/screenshooter-protocol.c
+                inter/config.o \
+                inter/global-enums.o \
+                inter/global-types.o \
+                inter/global-objects.o \
+                inter/global-functions.o \
+                inter/utils-debug.o \
+                inter/utils-object.o \
+                inter/utils-pool.o \
+                inter/utils-store.o \
+                inter/utils-chain.o \
+                inter/utils-list.o \
+                inter/utils-branch.o \
+                inter/utils-log.o \
+                inter/utils-environment.o \
+                inter/utils-dbus.o \
+                inter/utils-gl.o \
+                inter/utils-keymap.o \
+                inter/event-dispatcher.o \
+                inter/event-factory.o \
+                inter/event-loop.o \
+                inter/event-signals.o \
+                inter/event-task.o \
+                inter/event-timer.o \
+                inter/renderer.o \
+                inter/renderer-mmap.o \
+                inter/renderer-gl.o \
+                inter/device-common.o \
+                inter/device-fb.o \
+                inter/device-drm.o \
+                inter/device-evdev.o \
+                inter/device-udev.o \
+                inter/output.o \
+                inter/output-collector.o \
+                inter/surface-data.o \
+                inter/surface-manager.o \
+                inter/keyboard-binding.o \
+                inter/keyboard-bindings.o \
+                inter/keyboard-functions.o \
+                inter/keyboard-mode.o \
+                inter/exhibitor-frame.o \
+                inter/exhibitor-strategist.o \
+                inter/exhibitor-compositor.o \
+                inter/exhibitor-display.o \
+                inter/exhibitor-pointer.o \
+                inter/exhibitor.o \
+                inter/wayland-region.o \
+                inter/wayland-surface.o \
+                inter/wayland-output.o \
+                inter/wayland-cache.o \
+                inter/wayland-state.o \
+                inter/wayland.o \
+                inter/xdg-shell-protocol.o \
+                inter/screenshooter-protocol.o \
+                inter/wayland-protocol-compositor.o \
+                inter/wayland-protocol-keyboard.o \
+                inter/wayland-protocol-output.o \
+                inter/wayland-protocol-pointer.o \
+                inter/wayland-protocol-region.o \
+                inter/wayland-protocol-screenshooter.o \
+                inter/wayland-protocol-seat.o \
+                inter/wayland-protocol-shell-surface.o \
+                inter/wayland-protocol-shell.o \
+                inter/wayland-protocol-surface.o \
+                inter/wayland-protocol-xdg-shell.o \
+                inter/wayland-protocol-xdg-surface.o \
+                inter/backend-offscreen.o \
+                inter/metanoia.o
 	@mkdir -p build
-	@echo "  LD   metanoia"
-	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/metanoia \
-	       build/config.o build/global-enums.o build/global-types.o build/global-objects.o build/global-functions.o build/utils-object.o build/utils-pool.o build/utils-chain.o build/utils-list.o build/utils-branch.o build/utils-store.o build/utils-dbus.o build/utils-gl.o build/utils-keymap.o build/utils-debug.o build/utils-log.o build/utils-environment.o build/event-dispatcher.o build/event-timer.o build/event-signals.o build/event-loop.o build/event-task.o build/event-factory.o build/renderer.o build/renderer-mmap.o build/renderer-gl.o build/device-common.o build/device-fb.o build/device-drm.o build/device-evdev.o build/device-udev.o build/output.o build/output-collector.o build/surface-data.o build/surface-manager.o build/keyboard-functions.o build/keyboard-binding.o build/keyboard-bindings.o build/keyboard-mode.o build/exhibitor.o build/exhibitor-display.o build/exhibitor-compositor.o build/exhibitor-frame.o build/exhibitor-strategist.o build/exhibitor-pointer.o build/wayland-region.o build/wayland-surface.o build/wayland-output.o build/wayland-cache.o build/wayland-state.o build/wayland.o build/wayland-protocol-compositor.o build/wayland-protocol-surface.o build/wayland-protocol-region.o build/wayland-protocol-shell.o build/wayland-protocol-shell-surface.o build/wayland-protocol-xdg-shell.o build/wayland-protocol-xdg-surface.o build/xdg-shell-protocol.o build/wayland-protocol-output.o build/wayland-protocol-seat.o build/wayland-protocol-pointer.o build/wayland-protocol-keyboard.o build/wayland-protocol-screenshooter.o gen/screenshooter-protocol.c build/backend-offscreen.o build/metanoia.o \
-	       -ldbus-1 -lEGL -lgbm -lGL -ldrm -ludev -lwayland-server -lxkbcommon
+	@echo "  LD   build/metanoia"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -lEGL -lGL -ldbus-1 -ldrm -lgbm -ludev -lwayland-server -lxkbcommon -o build/metanoia \
+	    inter/config.o \
+	    inter/global-enums.o \
+	    inter/global-types.o \
+	    inter/global-objects.o \
+	    inter/global-functions.o \
+	    inter/utils-debug.o \
+	    inter/utils-object.o \
+	    inter/utils-pool.o \
+	    inter/utils-store.o \
+	    inter/utils-chain.o \
+	    inter/utils-list.o \
+	    inter/utils-branch.o \
+	    inter/utils-log.o \
+	    inter/utils-environment.o \
+	    inter/utils-dbus.o \
+	    inter/utils-gl.o \
+	    inter/utils-keymap.o \
+	    inter/event-dispatcher.o \
+	    inter/event-factory.o \
+	    inter/event-loop.o \
+	    inter/event-signals.o \
+	    inter/event-task.o \
+	    inter/event-timer.o \
+	    inter/renderer.o \
+	    inter/renderer-mmap.o \
+	    inter/renderer-gl.o \
+	    inter/device-common.o \
+	    inter/device-fb.o \
+	    inter/device-drm.o \
+	    inter/device-evdev.o \
+	    inter/device-udev.o \
+	    inter/output.o \
+	    inter/output-collector.o \
+	    inter/surface-data.o \
+	    inter/surface-manager.o \
+	    inter/keyboard-binding.o \
+	    inter/keyboard-bindings.o \
+	    inter/keyboard-functions.o \
+	    inter/keyboard-mode.o \
+	    inter/exhibitor-frame.o \
+	    inter/exhibitor-strategist.o \
+	    inter/exhibitor-compositor.o \
+	    inter/exhibitor-display.o \
+	    inter/exhibitor-pointer.o \
+	    inter/exhibitor.o \
+	    inter/wayland-region.o \
+	    inter/wayland-surface.o \
+	    inter/wayland-output.o \
+	    inter/wayland-cache.o \
+	    inter/wayland-state.o \
+	    inter/wayland.o \
+	    inter/xdg-shell-protocol.o \
+	    inter/screenshooter-protocol.o \
+	    inter/wayland-protocol-compositor.o \
+	    inter/wayland-protocol-keyboard.o \
+	    inter/wayland-protocol-output.o \
+	    inter/wayland-protocol-pointer.o \
+	    inter/wayland-protocol-region.o \
+	    inter/wayland-protocol-screenshooter.o \
+	    inter/wayland-protocol-seat.o \
+	    inter/wayland-protocol-shell-surface.o \
+	    inter/wayland-protocol-shell.o \
+	    inter/wayland-protocol-surface.o \
+	    inter/wayland-protocol-xdg-shell.o \
+	    inter/wayland-protocol-xdg-surface.o \
+	    inter/backend-offscreen.o \
+	    inter/metanoia.o
 
 build/metanoiactl-gtk: Makefile \
-                       build/controller-defs.o \
-                       build/controller-gtk-app.o \
-                       build/controller-gtk-display.o \
-                       build/controller-gtk-res.o \
-                       build/controller-gtk-win.o \
-                       build/controller-output.o \
-                       build/controller-wayland.o \
-                       build/metanoiactl-gtk.o \
-                       build/screenshooter-protocol.o \
-                       build/utils-debug.o \
-                       build/utils-environment.o \
-                       build/utils-log.o
+                       inter/utils-debug.o \
+                       inter/utils-log.o \
+                       inter/utils-environment.o \
+                       gen/screenshooter-protocol.c \
+                       inter/controller-defs.o \
+                       inter/controller-output.o \
+                       inter/controller-gtk-res.o \
+                       inter/controller-gtk-display.o \
+                       inter/controller-gtk-win.o \
+                       inter/controller-gtk-app.o \
+                       inter/controller-wayland.o \
+                       inter/metanoiactl-gtk.o
 	@mkdir -p build
-	@echo "  LD   metanoiactl-gtk"
-	@gcc -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o build/metanoiactl-gtk \
-	       build/controller-defs.o build/controller-output.o build/controller-gtk-res.o build/controller-gtk-display.o build/controller-gtk-win.o build/controller-gtk-app.o build/controller-wayland.o build/metanoiactl-gtk.o build/utils-debug.o build/utils-log.o build/utils-environment.o build/screenshooter-protocol.o \
-	       -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -lwayland-client
+	@echo "  LD   build/metanoiactl-gtk"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -latk-1.0 -lcairo -lcairo-gobject -lgdk-3 -lgdk_pixbuf-2.0 -lgio-2.0 -lglib-2.0 -lgobject-2.0 -lgtk-3 -lpango-1.0 -lpangocairo-1.0 -lwayland-client -o build/metanoiactl-gtk \
+	    inter/utils-debug.o \
+	    inter/utils-log.o \
+	    inter/utils-environment.o \
+	    gen/screenshooter-protocol.c \
+	    inter/controller-defs.o \
+	    inter/controller-output.o \
+	    inter/controller-gtk-res.o \
+	    inter/controller-gtk-display.o \
+	    inter/controller-gtk-win.o \
+	    inter/controller-gtk-app.o \
+	    inter/controller-wayland.o \
+	    inter/metanoiactl-gtk.o
+
+checks/check-globals: Makefile \
+                      inter/test-globals.o \
+                      inter/global-types.o
+	@mkdir -p checks
+	@echo "  LD   checks/check-globals"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-globals \
+	    inter/test-globals.o \
+	    inter/global-types.o
+
+checks/check-pool: Makefile \
+                   inter/test-pool.o \
+                   inter/utils-debug.o \
+                   inter/utils-pool.o
+	@mkdir -p checks
+	@echo "  LD   checks/check-pool"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-pool \
+	    inter/test-pool.o \
+	    inter/utils-debug.o \
+	    inter/utils-pool.o
+
+checks/check-store: Makefile \
+                    inter/test-store.o \
+                    inter/utils-store.o
+	@mkdir -p checks
+	@echo "  LD   checks/check-store"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-store \
+	    inter/test-store.o \
+	    inter/utils-store.o
+
+checks/check-chain: Makefile \
+                    inter/test-chain.o \
+                    inter/utils-chain.o
+	@mkdir -p checks
+	@echo "  LD   checks/check-chain"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-chain \
+	    inter/test-chain.o \
+	    inter/utils-chain.o
+
+checks/check-list: Makefile \
+                   inter/test-list.o \
+                   inter/utils-debug.o \
+                   inter/utils-chain.o \
+                   inter/utils-list.o
+	@mkdir -p checks
+	@echo "  LD   checks/check-list"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-list \
+	    inter/test-list.o \
+	    inter/utils-debug.o \
+	    inter/utils-chain.o \
+	    inter/utils-list.o
+
+checks/check-branch: Makefile \
+                     inter/test-branch.o \
+                     inter/utils-chain.o \
+                     inter/utils-branch.o
+	@mkdir -p checks
+	@echo "  LD   checks/check-branch"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-branch \
+	    inter/test-branch.o \
+	    inter/utils-chain.o \
+	    inter/utils-branch.o
+
+checks/check-frame: Makefile \
+                    inter/test-frame.o \
+                    inter/mock-surface-manager.o \
+                    inter/utils-pool.o \
+                    inter/utils-debug.o \
+                    inter/utils-store.o \
+                    inter/utils-chain.o \
+                    inter/utils-branch.o \
+                    inter/global-enums.o \
+                    inter/global-types.o \
+                    inter/exhibitor-frame.o
+	@mkdir -p checks
+	@echo "  LD   checks/check-frame"
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-frame \
+	    inter/test-frame.o \
+	    inter/mock-surface-manager.o \
+	    inter/utils-pool.o \
+	    inter/utils-debug.o \
+	    inter/utils-store.o \
+	    inter/utils-chain.o \
+	    inter/utils-branch.o \
+	    inter/global-enums.o \
+	    inter/global-types.o \
+	    inter/exhibitor-frame.o
+
+gen/version.h: force
+	@mkdir -p gen
+	@echo "  GEN  gen/version.h"
+	@python -B ./share/build/make.py version
 
 gen/xdg-shell-server-protocol.h: Makefile \
                                  res/xdg-shell.xml
 	@mkdir -p gen
-	@echo "  GEN  xdg-shell-server-protocol.h"
-	@wayland-scanner server-header "res/xdg-shell.xml" "gen/xdg-shell-server-protocol.h"
-
-gen/xdg-shell-protocol.c: Makefile \
-                          res/xdg-shell.xml
-	@mkdir -p gen
-	@echo "  GEN  xdg-shell-protocol.c"
-	@wayland-scanner code "res/xdg-shell.xml" "gen/xdg-shell-protocol.c"
+	@echo "  GEN  gen/xdg-shell-server-protocol.h"
+	@wayland-scanner server-header res/xdg-shell.xml gen/xdg-shell-server-protocol.h
 
 gen/screenshooter-server-protocol.h: Makefile \
                                      res/screenshooter.xml
 	@mkdir -p gen
-	@echo "  GEN  screenshooter-server-protocol.h"
-	@wayland-scanner server-header "res/screenshooter.xml" "gen/screenshooter-server-protocol.h"
+	@echo "  GEN  gen/screenshooter-server-protocol.h"
+	@wayland-scanner server-header res/screenshooter.xml gen/screenshooter-server-protocol.h
 
 gen/screenshooter-client-protocol.h: Makefile \
                                      res/screenshooter.xml
 	@mkdir -p gen
-	@echo "  GEN  screenshooter-client-protocol.h"
-	@wayland-scanner client-header "res/screenshooter.xml" "gen/screenshooter-client-protocol.h"
+	@echo "  GEN  gen/screenshooter-client-protocol.h"
+	@wayland-scanner client-header res/screenshooter.xml gen/screenshooter-client-protocol.h
+
+gen/xdg-shell-protocol.c: Makefile \
+                          res/xdg-shell.xml
+	@mkdir -p gen
+	@echo "  GEN  gen/xdg-shell-protocol.c"
+	@wayland-scanner code res/xdg-shell.xml gen/xdg-shell-protocol.c
 
 gen/screenshooter-protocol.c: Makefile \
                               res/screenshooter.xml
 	@mkdir -p gen
-	@echo "  GEN  screenshooter-protocol.c"
-	@wayland-scanner code "res/screenshooter.xml" "gen/screenshooter-protocol.c"
-
-gen/backend-gtk-res.c: Makefile \
-                       res/backend-gtk-area.ui \
-                       res/backend-gtk-main.ui \
-                       res/backend-gtk-menu.ui \
-                       res/metanoia.gresource.xml
-	@mkdir -p gen
-	@echo "  GEN  backend-gtk-res.c"
-	@glib-compile-resources res/metanoia.gresource.xml --target=gen/backend-gtk-res.c --generate-source
+	@echo "  GEN  gen/screenshooter-protocol.c"
+	@wayland-scanner code res/screenshooter.xml gen/screenshooter-protocol.c
 
 gen/controller-gtk-res.c: Makefile \
                           res/metanoiactl-gtk-main.ui \
                           res/metanoiactl.gresource.xml
 	@mkdir -p gen
-	@echo "  GEN  controller-gtk-res.c"
+	@echo "  GEN  gen/controller-gtk-res.c"
 	@glib-compile-resources res/metanoiactl.gresource.xml --target=gen/controller-gtk-res.c --generate-source
 
-gen/version.h: Makefile \
-               res/force
-	@mkdir -p gen
-	@echo "  GEN  version.h"
-	@desc=`git describe --always`; if ! grep -q "$$desc" gen/version.h 2> /dev/null; then echo -e "#ifndef NOIA_VERSION\n#define NOIA_VERSION \"$$desc\"\n#endif\n" > gen/version.h; fi
+inter/global-types.o: Makefile \
+                      src/global-enums.h \
+                      src/global-macros.h \
+                      src/global-types.c \
+                      src/global-types.h \
+                      src/utils-debug.h
+	@mkdir -p inter
+	@echo "  CC   inter/global-types.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/global-types.o \
+	    src/global-types.c
 
-build/screenshooter-protocol.o: Makefile \
-                                gen/screenshooter-protocol.c
-	@mkdir -p build
-	@echo "  CC   screenshooter-protocol.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/screenshooter-protocol.o -Isrc -Igen \
-	       -c gen/screenshooter-protocol.c
+inter/utils-debug.o: Makefile \
+                     src/global-enums.h \
+                     src/global-types.h \
+                     src/utils-debug.c \
+                     src/utils-debug.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-debug.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-debug.o \
+	    src/utils-debug.c
 
-build/config.o: Makefile \
+inter/utils-pool.o: Makefile \
+                    src/global-enums.h \
+                    src/global-macros.h \
+                    src/global-types.h \
+                    src/utils-debug.h \
+                    src/utils-pool.c \
+                    src/utils-pool.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-pool.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-pool.o \
+	    src/utils-pool.c
+
+inter/utils-store.o: Makefile \
+                     src/global-constants.h \
+                     src/global-enums.h \
+                     src/global-macros.h \
+                     src/global-types.h \
+                     src/utils-debug.h \
+                     src/utils-log.h \
+                     src/utils-store.c \
+                     src/utils-store.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-store.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-store.o \
+	    src/utils-store.c
+
+inter/utils-chain.o: Makefile \
+                     src/global-constants.h \
+                     src/global-enums.h \
+                     src/global-types.h \
+                     src/utils-chain.c \
+                     src/utils-chain.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-chain.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-chain.o \
+	    src/utils-chain.c
+
+inter/utils-list.o: Makefile \
+                    src/global-constants.h \
+                    src/global-enums.h \
+                    src/global-macros.h \
+                    src/global-types.h \
+                    src/utils-chain.h \
+                    src/utils-debug.h \
+                    src/utils-list.c \
+                    src/utils-list.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-list.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-list.o \
+	    src/utils-list.c
+
+inter/utils-branch.o: Makefile \
+                      src/global-constants.h \
+                      src/global-enums.h \
+                      src/global-types.h \
+                      src/utils-branch.c \
+                      src/utils-branch.h \
+                      src/utils-chain.h \
+                      src/utils-log.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-branch.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-branch.o \
+	    src/utils-branch.c
+
+inter/global-enums.o: Makefile \
+                      src/global-enums.c \
+                      src/global-enums.h
+	@mkdir -p inter
+	@echo "  CC   inter/global-enums.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/global-enums.o \
+	    src/global-enums.c
+
+inter/exhibitor-frame.o: Makefile \
+                         src/exhibitor-compositor.h \
+                         src/exhibitor-frame.c \
+                         src/exhibitor-frame.h \
+                         src/global-constants.h \
+                         src/global-enums.h \
+                         src/global-macros.h \
+                         src/global-types.h \
+                         src/surface-data.h \
+                         src/surface-manager.h \
+                         src/utils-branch.h \
+                         src/utils-chain.h \
+                         src/utils-debug.h \
+                         src/utils-list.h \
+                         src/utils-pool.h \
+                         src/utils-store.h
+	@mkdir -p inter
+	@echo "  CC   inter/exhibitor-frame.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-frame.o \
+	    src/exhibitor-frame.c
+
+inter/config.o: Makefile \
                 src/config.c \
                 src/config.h \
                 src/configuration.h \
@@ -184,31 +461,12 @@ build/config.o: Makefile \
                 src/utils-keymap.h \
                 src/utils-list.h \
                 src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   config.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/config.o -Isrc -Igen \
-	       -c src/config.c
+	@mkdir -p inter
+	@echo "  CC   inter/config.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/config.o \
+	    src/config.c
 
-build/global-enums.o: Makefile \
-                      src/global-enums.c \
-                      src/global-enums.h
-	@mkdir -p build
-	@echo "  CC   global-enums.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/global-enums.o -Isrc -Igen \
-	       -c src/global-enums.c
-
-build/global-types.o: Makefile \
-                      src/global-enums.h \
-                      src/global-macros.h \
-                      src/global-types.c \
-                      src/global-types.h \
-                      src/utils-debug.h
-	@mkdir -p build
-	@echo "  CC   global-types.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/global-types.o -Isrc -Igen \
-	       -c src/global-types.c
-
-build/global-objects.o: Makefile \
+inter/global-objects.o: Makefile \
                         src/global-constants.h \
                         src/global-enums.h \
                         src/global-objects.c \
@@ -216,12 +474,12 @@ build/global-objects.o: Makefile \
                         src/global-types.h \
                         src/utils-log.h \
                         src/utils-object.h
-	@mkdir -p build
-	@echo "  CC   global-objects.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/global-objects.o -Isrc -Igen \
-	       -c src/global-objects.c
+	@mkdir -p inter
+	@echo "  CC   inter/global-objects.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/global-objects.o \
+	    src/global-objects.c
 
-build/global-functions.o: Makefile \
+inter/global-functions.o: Makefile \
                           src/event-loop.h \
                           src/event-signals.h \
                           src/event-task.h \
@@ -244,136 +502,23 @@ build/global-functions.o: Makefile \
                           src/utils-log.h \
                           src/utils-object.h \
                           src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   global-functions.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/global-functions.o -Isrc -Igen \
-	       -c src/global-functions.c
+	@mkdir -p inter
+	@echo "  CC   inter/global-functions.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/global-functions.o \
+	    src/global-functions.c
 
-build/utils-object.o: Makefile \
+inter/utils-object.o: Makefile \
                       src/global-constants.h \
                       src/global-enums.h \
                       src/global-types.h \
                       src/utils-object.c \
                       src/utils-object.h
-	@mkdir -p build
-	@echo "  CC   utils-object.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-object.o -Isrc -Igen \
-	       -c src/utils-object.c
+	@mkdir -p inter
+	@echo "  CC   inter/utils-object.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-object.o \
+	    src/utils-object.c
 
-build/utils-pool.o: Makefile \
-                    src/global-enums.h \
-                    src/global-macros.h \
-                    src/global-types.h \
-                    src/utils-debug.h \
-                    src/utils-pool.c \
-                    src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   utils-pool.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-pool.o -Isrc -Igen \
-	       -c src/utils-pool.c
-
-build/utils-chain.o: Makefile \
-                     src/global-constants.h \
-                     src/global-enums.h \
-                     src/global-types.h \
-                     src/utils-chain.c \
-                     src/utils-chain.h
-	@mkdir -p build
-	@echo "  CC   utils-chain.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-chain.o -Isrc -Igen \
-	       -c src/utils-chain.c
-
-build/utils-list.o: Makefile \
-                    src/global-constants.h \
-                    src/global-enums.h \
-                    src/global-macros.h \
-                    src/global-types.h \
-                    src/utils-chain.h \
-                    src/utils-debug.h \
-                    src/utils-list.c \
-                    src/utils-list.h
-	@mkdir -p build
-	@echo "  CC   utils-list.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-list.o -Isrc -Igen \
-	       -c src/utils-list.c
-
-build/utils-branch.o: Makefile \
-                      src/global-constants.h \
-                      src/global-enums.h \
-                      src/global-types.h \
-                      src/utils-branch.c \
-                      src/utils-branch.h \
-                      src/utils-chain.h \
-                      src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   utils-branch.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-branch.o -Isrc -Igen \
-	       -c src/utils-branch.c
-
-build/utils-store.o: Makefile \
-                     src/global-constants.h \
-                     src/global-enums.h \
-                     src/global-macros.h \
-                     src/global-types.h \
-                     src/utils-debug.h \
-                     src/utils-log.h \
-                     src/utils-store.c \
-                     src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   utils-store.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-store.o -Isrc -Igen \
-	       -c src/utils-store.c
-
-build/utils-dbus.o: Makefile \
-                    src/global-constants.h \
-                    src/global-enums.h \
-                    src/global-types.h \
-                    src/utils-dbus.c \
-                    src/utils-dbus.h \
-                    src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   utils-dbus.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-dbus.o -Isrc -Igen \
-	       -c src/utils-dbus.c \
-	       -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
-
-build/utils-gl.o: Makefile \
-                  src/global-constants.h \
-                  src/global-enums.h \
-                  src/global-types.h \
-                  src/utils-gl.c \
-                  src/utils-gl.h \
-                  src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   utils-gl.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-gl.o -Isrc -Igen \
-	       -c src/utils-gl.c \
-	       -I/usr/include/libdrm
-
-build/utils-keymap.o: Makefile \
-                      src/global-constants.h \
-                      src/global-enums.h \
-                      src/global-types.h \
-                      src/utils-environment.h \
-                      src/utils-keymap.c \
-                      src/utils-keymap.h \
-                      src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   utils-keymap.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-keymap.o -Isrc -Igen \
-	       -c src/utils-keymap.c
-
-build/utils-debug.o: Makefile \
-                     src/global-enums.h \
-                     src/global-types.h \
-                     src/utils-debug.c \
-                     src/utils-debug.h
-	@mkdir -p build
-	@echo "  CC   utils-debug.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-debug.o -Isrc -Igen \
-	       -c src/utils-debug.c
-
-build/utils-log.o: Makefile \
+inter/utils-log.o: Makefile \
                    gen/version.h \
                    src/global-constants.h \
                    src/global-enums.h \
@@ -382,12 +527,12 @@ build/utils-log.o: Makefile \
                    src/utils-environment.h \
                    src/utils-log.c \
                    src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   utils-log.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-log.o -Isrc -Igen \
-	       -c src/utils-log.c
+	@mkdir -p inter
+	@echo "  CC   inter/utils-log.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-log.o \
+	    src/utils-log.c
 
-build/utils-environment.o: Makefile \
+inter/utils-environment.o: Makefile \
                            src/global-constants.h \
                            src/global-enums.h \
                            src/global-macros.h \
@@ -396,12 +541,49 @@ build/utils-environment.o: Makefile \
                            src/utils-environment.c \
                            src/utils-environment.h \
                            src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   utils-environment.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/utils-environment.o -Isrc -Igen \
-	       -c src/utils-environment.c
+	@mkdir -p inter
+	@echo "  CC   inter/utils-environment.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-environment.o \
+	    src/utils-environment.c
 
-build/event-dispatcher.o: Makefile \
+inter/utils-dbus.o: Makefile \
+                    src/global-constants.h \
+                    src/global-enums.h \
+                    src/global-types.h \
+                    src/utils-dbus.c \
+                    src/utils-dbus.h \
+                    src/utils-log.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-dbus.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -o inter/utils-dbus.o \
+	    src/utils-dbus.c
+
+inter/utils-gl.o: Makefile \
+                  src/global-constants.h \
+                  src/global-enums.h \
+                  src/global-types.h \
+                  src/utils-gl.c \
+                  src/utils-gl.h \
+                  src/utils-log.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-gl.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/libdrm -o inter/utils-gl.o \
+	    src/utils-gl.c
+
+inter/utils-keymap.o: Makefile \
+                      src/global-constants.h \
+                      src/global-enums.h \
+                      src/global-types.h \
+                      src/utils-environment.h \
+                      src/utils-keymap.c \
+                      src/utils-keymap.h \
+                      src/utils-log.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-keymap.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-keymap.o \
+	    src/utils-keymap.c
+
+inter/event-dispatcher.o: Makefile \
                           src/event-dispatcher.c \
                           src/event-dispatcher.h \
                           src/global-constants.h \
@@ -412,76 +594,12 @@ build/event-dispatcher.o: Makefile \
                           src/utils-debug.h \
                           src/utils-list.h \
                           src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   event-dispatcher.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-dispatcher.o -Isrc -Igen \
-	       -c src/event-dispatcher.c
+	@mkdir -p inter
+	@echo "  CC   inter/event-dispatcher.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/event-dispatcher.o \
+	    src/event-dispatcher.c
 
-build/event-timer.o: Makefile \
-                     src/event-timer.c \
-                     src/event-timer.h \
-                     src/global-constants.h \
-                     src/global-enums.h \
-                     src/global-types.h \
-                     src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   event-timer.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-timer.o -Isrc -Igen \
-	       -c src/event-timer.c
-
-build/event-signals.o: Makefile \
-                       src/event-loop.h \
-                       src/event-signals.c \
-                       src/event-signals.h \
-                       src/event-task.h \
-                       src/global-constants.h \
-                       src/global-enums.h \
-                       src/global-macros.h \
-                       src/global-objects.h \
-                       src/global-types.h \
-                       src/utils-chain.h \
-                       src/utils-debug.h \
-                       src/utils-list.h \
-                       src/utils-log.h \
-                       src/utils-object.h
-	@mkdir -p build
-	@echo "  CC   event-signals.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-signals.o -Isrc -Igen \
-	       -c src/event-signals.c
-
-build/event-loop.o: Makefile \
-                    src/event-loop.c \
-                    src/event-loop.h \
-                    src/event-task.h \
-                    src/global-constants.h \
-                    src/global-enums.h \
-                    src/global-macros.h \
-                    src/global-types.h \
-                    src/utils-chain.h \
-                    src/utils-debug.h \
-                    src/utils-environment.h \
-                    src/utils-list.h \
-                    src/utils-log.h \
-                    src/utils-object.h
-	@mkdir -p build
-	@echo "  CC   event-loop.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-loop.o -Isrc -Igen \
-	       -c src/event-loop.c
-
-build/event-task.o: Makefile \
-                    src/event-task.c \
-                    src/event-task.h \
-                    src/global-constants.h \
-                    src/global-enums.h \
-                    src/global-types.h \
-                    src/utils-log.h \
-                    src/utils-object.h
-	@mkdir -p build
-	@echo "  CC   event-task.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-task.o -Isrc -Igen \
-	       -c src/event-task.c
-
-build/event-factory.o: Makefile \
+inter/event-factory.o: Makefile \
                        src/backend-offscreen.h \
                        src/device-evdev.h \
                        src/device-udev.h \
@@ -509,24 +627,88 @@ build/event-factory.o: Makefile \
                        src/utils-object.h \
                        src/utils-pool.h \
                        src/wayland.h
-	@mkdir -p build
-	@echo "  CC   event-factory.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/event-factory.o -Isrc -Igen \
-	       -c src/event-factory.c
+	@mkdir -p inter
+	@echo "  CC   inter/event-factory.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/event-factory.o \
+	    src/event-factory.c
 
-build/renderer.o: Makefile \
+inter/event-loop.o: Makefile \
+                    src/event-loop.c \
+                    src/event-loop.h \
+                    src/event-task.h \
+                    src/global-constants.h \
+                    src/global-enums.h \
+                    src/global-macros.h \
+                    src/global-types.h \
+                    src/utils-chain.h \
+                    src/utils-debug.h \
+                    src/utils-environment.h \
+                    src/utils-list.h \
+                    src/utils-log.h \
+                    src/utils-object.h
+	@mkdir -p inter
+	@echo "  CC   inter/event-loop.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/event-loop.o \
+	    src/event-loop.c
+
+inter/event-signals.o: Makefile \
+                       src/event-loop.h \
+                       src/event-signals.c \
+                       src/event-signals.h \
+                       src/event-task.h \
+                       src/global-constants.h \
+                       src/global-enums.h \
+                       src/global-macros.h \
+                       src/global-objects.h \
+                       src/global-types.h \
+                       src/utils-chain.h \
+                       src/utils-debug.h \
+                       src/utils-list.h \
+                       src/utils-log.h \
+                       src/utils-object.h
+	@mkdir -p inter
+	@echo "  CC   inter/event-signals.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/event-signals.o \
+	    src/event-signals.c
+
+inter/event-task.o: Makefile \
+                    src/event-task.c \
+                    src/event-task.h \
+                    src/global-constants.h \
+                    src/global-enums.h \
+                    src/global-types.h \
+                    src/utils-log.h \
+                    src/utils-object.h
+	@mkdir -p inter
+	@echo "  CC   inter/event-task.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/event-task.o \
+	    src/event-task.c
+
+inter/event-timer.o: Makefile \
+                     src/event-timer.c \
+                     src/event-timer.h \
+                     src/global-constants.h \
+                     src/global-enums.h \
+                     src/global-types.h \
+                     src/utils-log.h
+	@mkdir -p inter
+	@echo "  CC   inter/event-timer.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/event-timer.o \
+	    src/event-timer.c
+
+inter/renderer.o: Makefile \
                   src/global-constants.h \
                   src/global-enums.h \
                   src/global-types.h \
                   src/renderer.c \
                   src/renderer.h \
                   src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   renderer.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/renderer.o -Isrc -Igen \
-	       -c src/renderer.c
+	@mkdir -p inter
+	@echo "  CC   inter/renderer.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/renderer.o \
+	    src/renderer.c
 
-build/renderer-mmap.o: Makefile \
+inter/renderer-mmap.o: Makefile \
                        src/exhibitor-compositor.h \
                        src/exhibitor-frame.h \
                        src/global-constants.h \
@@ -547,12 +729,12 @@ build/renderer-mmap.o: Makefile \
                        src/utils-object.h \
                        src/utils-pool.h \
                        src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   renderer-mmap.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/renderer-mmap.o -Isrc -Igen \
-	       -c src/renderer-mmap.c
+	@mkdir -p inter
+	@echo "  CC   inter/renderer-mmap.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/renderer-mmap.o \
+	    src/renderer-mmap.c
 
-build/renderer-gl.o: Makefile \
+inter/renderer-gl.o: Makefile \
                      src/exhibitor-compositor.h \
                      src/exhibitor-frame.h \
                      src/global-constants.h \
@@ -572,13 +754,12 @@ build/renderer-gl.o: Makefile \
                      src/utils-log.h \
                      src/utils-pool.h \
                      src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   renderer-gl.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/renderer-gl.o -Isrc -Igen \
-	       -c src/renderer-gl.c \
-	       -I/usr/include/libdrm
+	@mkdir -p inter
+	@echo "  CC   inter/renderer-gl.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/libdrm -o inter/renderer-gl.o \
+	    src/renderer-gl.c
 
-build/device-common.o: Makefile \
+inter/device-common.o: Makefile \
                        src/device-common.c \
                        src/device-common.h \
                        src/global-constants.h \
@@ -587,12 +768,12 @@ build/device-common.o: Makefile \
                        src/global-types.h \
                        src/utils-dbus.h \
                        src/utils-debug.h
-	@mkdir -p build
-	@echo "  CC   device-common.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-common.o -Isrc -Igen \
-	       -c src/device-common.c
+	@mkdir -p inter
+	@echo "  CC   inter/device-common.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/device-common.o \
+	    src/device-common.c
 
-build/device-fb.o: Makefile \
+inter/device-fb.o: Makefile \
                    src/device-common.h \
                    src/device-fb.c \
                    src/device-fb.h \
@@ -609,12 +790,12 @@ build/device-fb.o: Makefile \
                    src/utils-log.h \
                    src/utils-object.h \
                    src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   device-fb.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-fb.o -Isrc -Igen \
-	       -c src/device-fb.c
+	@mkdir -p inter
+	@echo "  CC   inter/device-fb.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/device-fb.o \
+	    src/device-fb.c
 
-build/device-drm.o: Makefile \
+inter/device-drm.o: Makefile \
                     src/config.h \
                     src/device-drm.c \
                     src/device-drm.h \
@@ -634,13 +815,12 @@ build/device-drm.o: Makefile \
                     src/utils-log.h \
                     src/utils-object.h \
                     src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   device-drm.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-drm.o -Isrc -Igen \
-	       -c src/device-drm.c \
-	       -I/usr/include/libdrm
+	@mkdir -p inter
+	@echo "  CC   inter/device-drm.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/libdrm -o inter/device-drm.o \
+	    src/device-drm.c
 
-build/device-evdev.o: Makefile \
+inter/device-evdev.o: Makefile \
                       src/device-common.h \
                       src/device-evdev.c \
                       src/device-evdev.h \
@@ -661,12 +841,12 @@ build/device-evdev.o: Makefile \
                       src/utils-list.h \
                       src/utils-log.h \
                       src/utils-object.h
-	@mkdir -p build
-	@echo "  CC   device-evdev.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-evdev.o -Isrc -Igen \
-	       -c src/device-evdev.c
+	@mkdir -p inter
+	@echo "  CC   inter/device-evdev.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/device-evdev.o \
+	    src/device-evdev.c
 
-build/device-udev.o: Makefile \
+inter/device-udev.o: Makefile \
                      src/device-udev.c \
                      src/device-udev.h \
                      src/event-dispatcher.h \
@@ -677,12 +857,12 @@ build/device-udev.o: Makefile \
                      src/global-types.h \
                      src/utils-log.h \
                      src/utils-object.h
-	@mkdir -p build
-	@echo "  CC   device-udev.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/device-udev.o -Isrc -Igen \
-	       -c src/device-udev.c
+	@mkdir -p inter
+	@echo "  CC   inter/device-udev.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/device-udev.o \
+	    src/device-udev.c
 
-build/output.o: Makefile \
+inter/output.o: Makefile \
                 src/global-constants.h \
                 src/global-enums.h \
                 src/global-macros.h \
@@ -693,12 +873,12 @@ build/output.o: Makefile \
                 src/utils-debug.h \
                 src/utils-object.h \
                 src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   output.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/output.o -Isrc -Igen \
-	       -c src/output.c
+	@mkdir -p inter
+	@echo "  CC   inter/output.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/output.o \
+	    src/output.c
 
-build/output-collector.o: Makefile \
+inter/output-collector.o: Makefile \
                           src/backend-offscreen.h \
                           src/config.h \
                           src/device-drm.h \
@@ -721,12 +901,12 @@ build/output-collector.o: Makefile \
                           src/utils-log.h \
                           src/utils-object.h \
                           src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   output-collector.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/output-collector.o -Isrc -Igen \
-	       -c src/output-collector.c
+	@mkdir -p inter
+	@echo "  CC   inter/output-collector.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/output-collector.o \
+	    src/output-collector.c
 
-build/surface-data.o: Makefile \
+inter/surface-data.o: Makefile \
                       src/exhibitor-compositor.h \
                       src/exhibitor-frame.h \
                       src/global-constants.h \
@@ -742,12 +922,12 @@ build/surface-data.o: Makefile \
                       src/utils-log.h \
                       src/utils-pool.h \
                       src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   surface-data.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/surface-data.o -Isrc -Igen \
-	       -c src/surface-data.c
+	@mkdir -p inter
+	@echo "  CC   inter/surface-data.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/surface-data.o \
+	    src/surface-data.c
 
-build/surface-manager.o: Makefile \
+inter/surface-manager.o: Makefile \
                          src/event-signals.h \
                          src/event-task.h \
                          src/event-timer.h \
@@ -768,12 +948,48 @@ build/surface-manager.o: Makefile \
                          src/utils-object.h \
                          src/utils-pool.h \
                          src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   surface-manager.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/surface-manager.o -Isrc -Igen \
-	       -c src/surface-manager.c
+	@mkdir -p inter
+	@echo "  CC   inter/surface-manager.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/surface-manager.o \
+	    src/surface-manager.c
 
-build/keyboard-functions.o: Makefile \
+inter/keyboard-binding.o: Makefile \
+                          src/global-constants.h \
+                          src/global-enums.h \
+                          src/global-macros.h \
+                          src/global-types.h \
+                          src/keyboard-binding.c \
+                          src/keyboard-binding.h \
+                          src/keyboard-context.h \
+                          src/utils-chain.h \
+                          src/utils-debug.h \
+                          src/utils-list.h \
+                          src/utils-log.h
+	@mkdir -p inter
+	@echo "  CC   inter/keyboard-binding.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-binding.o \
+	    src/keyboard-binding.c
+
+inter/keyboard-bindings.o: Makefile \
+                           src/global-constants.h \
+                           src/global-enums.h \
+                           src/global-macros.h \
+                           src/global-types.h \
+                           src/keyboard-binding.h \
+                           src/keyboard-bindings.c \
+                           src/keyboard-bindings.h \
+                           src/keyboard-context.h \
+                           src/keyboard-mode.h \
+                           src/utils-chain.h \
+                           src/utils-debug.h \
+                           src/utils-list.h \
+                           src/utils-log.h
+	@mkdir -p inter
+	@echo "  CC   inter/keyboard-bindings.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-bindings.o \
+	    src/keyboard-bindings.c
+
+inter/keyboard-functions.o: Makefile \
                             src/event-loop.h \
                             src/event-task.h \
                             src/exhibitor-compositor.h \
@@ -798,48 +1014,12 @@ build/keyboard-functions.o: Makefile \
                             src/utils-log.h \
                             src/utils-object.h \
                             src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   keyboard-functions.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-functions.o -Isrc -Igen \
-	       -c src/keyboard-functions.c
+	@mkdir -p inter
+	@echo "  CC   inter/keyboard-functions.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-functions.o \
+	    src/keyboard-functions.c
 
-build/keyboard-binding.o: Makefile \
-                          src/global-constants.h \
-                          src/global-enums.h \
-                          src/global-macros.h \
-                          src/global-types.h \
-                          src/keyboard-binding.c \
-                          src/keyboard-binding.h \
-                          src/keyboard-context.h \
-                          src/utils-chain.h \
-                          src/utils-debug.h \
-                          src/utils-list.h \
-                          src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   keyboard-binding.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-binding.o -Isrc -Igen \
-	       -c src/keyboard-binding.c
-
-build/keyboard-bindings.o: Makefile \
-                           src/global-constants.h \
-                           src/global-enums.h \
-                           src/global-macros.h \
-                           src/global-types.h \
-                           src/keyboard-binding.h \
-                           src/keyboard-bindings.c \
-                           src/keyboard-bindings.h \
-                           src/keyboard-context.h \
-                           src/keyboard-mode.h \
-                           src/utils-chain.h \
-                           src/utils-debug.h \
-                           src/utils-list.h \
-                           src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   keyboard-bindings.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-bindings.o -Isrc -Igen \
-	       -c src/keyboard-bindings.c
-
-build/keyboard-mode.o: Makefile \
+inter/keyboard-mode.o: Makefile \
                        src/global-constants.h \
                        src/global-enums.h \
                        src/global-macros.h \
@@ -852,12 +1032,134 @@ build/keyboard-mode.o: Makefile \
                        src/utils-debug.h \
                        src/utils-list.h \
                        src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   keyboard-mode.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/keyboard-mode.o -Isrc -Igen \
-	       -c src/keyboard-mode.c
+	@mkdir -p inter
+	@echo "  CC   inter/keyboard-mode.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-mode.o \
+	    src/keyboard-mode.c
 
-build/exhibitor.o: Makefile \
+inter/exhibitor-strategist.o: Makefile \
+                              src/event-loop.h \
+                              src/event-signals.h \
+                              src/event-task.h \
+                              src/exhibitor-compositor.h \
+                              src/exhibitor-display.h \
+                              src/exhibitor-frame.h \
+                              src/exhibitor-strategist.c \
+                              src/exhibitor-strategist.h \
+                              src/exhibitor.h \
+                              src/global-constants.h \
+                              src/global-enums.h \
+                              src/global-macros.h \
+                              src/global-types.h \
+                              src/output.h \
+                              src/renderer.h \
+                              src/utils-branch.h \
+                              src/utils-chain.h \
+                              src/utils-debug.h \
+                              src/utils-list.h \
+                              src/utils-log.h \
+                              src/utils-object.h \
+                              src/utils-pool.h
+	@mkdir -p inter
+	@echo "  CC   inter/exhibitor-strategist.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-strategist.o \
+	    src/exhibitor-strategist.c
+
+inter/exhibitor-compositor.o: Makefile \
+                              src/event-loop.h \
+                              src/event-signals.h \
+                              src/event-task.h \
+                              src/exhibitor-compositor.c \
+                              src/exhibitor-compositor.h \
+                              src/exhibitor-display.h \
+                              src/exhibitor-frame.h \
+                              src/exhibitor.h \
+                              src/global-constants.h \
+                              src/global-enums.h \
+                              src/global-macros.h \
+                              src/global-types.h \
+                              src/output.h \
+                              src/renderer.h \
+                              src/surface-data.h \
+                              src/surface-manager.h \
+                              src/utils-branch.h \
+                              src/utils-chain.h \
+                              src/utils-debug.h \
+                              src/utils-list.h \
+                              src/utils-log.h \
+                              src/utils-object.h \
+                              src/utils-pool.h \
+                              src/utils-store.h
+	@mkdir -p inter
+	@echo "  CC   inter/exhibitor-compositor.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-compositor.o \
+	    src/exhibitor-compositor.c
+
+inter/exhibitor-display.o: Makefile \
+                           src/event-loop.h \
+                           src/event-signals.h \
+                           src/event-task.h \
+                           src/event-timer.h \
+                           src/exhibitor-compositor.h \
+                           src/exhibitor-display.c \
+                           src/exhibitor-display.h \
+                           src/exhibitor-frame.h \
+                           src/exhibitor-pointer.h \
+                           src/global-constants.h \
+                           src/global-enums.h \
+                           src/global-macros.h \
+                           src/global-types.h \
+                           src/output.h \
+                           src/renderer.h \
+                           src/surface-data.h \
+                           src/surface-manager.h \
+                           src/utils-branch.h \
+                           src/utils-chain.h \
+                           src/utils-debug.h \
+                           src/utils-environment.h \
+                           src/utils-list.h \
+                           src/utils-log.h \
+                           src/utils-object.h \
+                           src/utils-pool.h \
+                           src/utils-store.h
+	@mkdir -p inter
+	@echo "  CC   inter/exhibitor-display.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-display.o \
+	    src/exhibitor-display.c
+
+inter/exhibitor-pointer.o: Makefile \
+                           src/event-loop.h \
+                           src/event-signals.h \
+                           src/event-task.h \
+                           src/exhibitor-compositor.h \
+                           src/exhibitor-display.h \
+                           src/exhibitor-frame.h \
+                           src/exhibitor-pointer.c \
+                           src/exhibitor-pointer.h \
+                           src/exhibitor.h \
+                           src/global-constants.h \
+                           src/global-enums.h \
+                           src/global-macros.h \
+                           src/global-objects.h \
+                           src/global-types.h \
+                           src/output.h \
+                           src/renderer.h \
+                           src/surface-data.h \
+                           src/surface-manager.h \
+                           src/utils-branch.h \
+                           src/utils-chain.h \
+                           src/utils-debug.h \
+                           src/utils-list.h \
+                           src/utils-log.h \
+                           src/utils-object.h \
+                           src/utils-pool.h \
+                           src/utils-store.h
+	@mkdir -p inter
+	@echo "  CC   inter/exhibitor-pointer.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-pointer.o \
+	    src/exhibitor-pointer.c
+
+inter/exhibitor.o: Makefile \
                    src/event-loop.h \
                    src/event-signals.h \
                    src/event-task.h \
@@ -886,167 +1188,24 @@ build/exhibitor.o: Makefile \
                    src/utils-object.h \
                    src/utils-pool.h \
                    src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   exhibitor.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor.o -Isrc -Igen \
-	       -c src/exhibitor.c
+	@mkdir -p inter
+	@echo "  CC   inter/exhibitor.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor.o \
+	    src/exhibitor.c
 
-build/exhibitor-display.o: Makefile \
-                           src/event-loop.h \
-                           src/event-signals.h \
-                           src/event-task.h \
-                           src/event-timer.h \
-                           src/exhibitor-compositor.h \
-                           src/exhibitor-display.c \
-                           src/exhibitor-display.h \
-                           src/exhibitor-frame.h \
-                           src/exhibitor-pointer.h \
-                           src/global-constants.h \
-                           src/global-enums.h \
-                           src/global-macros.h \
-                           src/global-types.h \
-                           src/output.h \
-                           src/renderer.h \
-                           src/surface-data.h \
-                           src/surface-manager.h \
-                           src/utils-branch.h \
-                           src/utils-chain.h \
-                           src/utils-debug.h \
-                           src/utils-environment.h \
-                           src/utils-list.h \
-                           src/utils-log.h \
-                           src/utils-object.h \
-                           src/utils-pool.h \
-                           src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   exhibitor-display.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-display.o -Isrc -Igen \
-	       -c src/exhibitor-display.c
-
-build/exhibitor-compositor.o: Makefile \
-                              src/event-loop.h \
-                              src/event-signals.h \
-                              src/event-task.h \
-                              src/exhibitor-compositor.c \
-                              src/exhibitor-compositor.h \
-                              src/exhibitor-display.h \
-                              src/exhibitor-frame.h \
-                              src/exhibitor.h \
-                              src/global-constants.h \
-                              src/global-enums.h \
-                              src/global-macros.h \
-                              src/global-types.h \
-                              src/output.h \
-                              src/renderer.h \
-                              src/surface-data.h \
-                              src/surface-manager.h \
-                              src/utils-branch.h \
-                              src/utils-chain.h \
-                              src/utils-debug.h \
-                              src/utils-list.h \
-                              src/utils-log.h \
-                              src/utils-object.h \
-                              src/utils-pool.h \
-                              src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   exhibitor-compositor.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-compositor.o -Isrc -Igen \
-	       -c src/exhibitor-compositor.c
-
-build/exhibitor-frame.o: Makefile \
-                         src/exhibitor-compositor.h \
-                         src/exhibitor-frame.c \
-                         src/exhibitor-frame.h \
-                         src/global-constants.h \
-                         src/global-enums.h \
-                         src/global-macros.h \
-                         src/global-types.h \
-                         src/surface-data.h \
-                         src/surface-manager.h \
-                         src/utils-branch.h \
-                         src/utils-chain.h \
-                         src/utils-debug.h \
-                         src/utils-list.h \
-                         src/utils-pool.h \
-                         src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   exhibitor-frame.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-frame.o -Isrc -Igen \
-	       -c src/exhibitor-frame.c
-
-build/exhibitor-strategist.o: Makefile \
-                              src/event-loop.h \
-                              src/event-signals.h \
-                              src/event-task.h \
-                              src/exhibitor-compositor.h \
-                              src/exhibitor-display.h \
-                              src/exhibitor-frame.h \
-                              src/exhibitor-strategist.c \
-                              src/exhibitor-strategist.h \
-                              src/exhibitor.h \
-                              src/global-constants.h \
-                              src/global-enums.h \
-                              src/global-macros.h \
-                              src/global-types.h \
-                              src/output.h \
-                              src/renderer.h \
-                              src/utils-branch.h \
-                              src/utils-chain.h \
-                              src/utils-debug.h \
-                              src/utils-list.h \
-                              src/utils-log.h \
-                              src/utils-object.h \
-                              src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   exhibitor-strategist.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-strategist.o -Isrc -Igen \
-	       -c src/exhibitor-strategist.c
-
-build/exhibitor-pointer.o: Makefile \
-                           src/event-loop.h \
-                           src/event-signals.h \
-                           src/event-task.h \
-                           src/exhibitor-compositor.h \
-                           src/exhibitor-display.h \
-                           src/exhibitor-frame.h \
-                           src/exhibitor-pointer.c \
-                           src/exhibitor-pointer.h \
-                           src/exhibitor.h \
-                           src/global-constants.h \
-                           src/global-enums.h \
-                           src/global-macros.h \
-                           src/global-objects.h \
-                           src/global-types.h \
-                           src/output.h \
-                           src/renderer.h \
-                           src/surface-data.h \
-                           src/surface-manager.h \
-                           src/utils-branch.h \
-                           src/utils-chain.h \
-                           src/utils-debug.h \
-                           src/utils-list.h \
-                           src/utils-log.h \
-                           src/utils-object.h \
-                           src/utils-pool.h \
-                           src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   exhibitor-pointer.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/exhibitor-pointer.o -Isrc -Igen \
-	       -c src/exhibitor-pointer.c
-
-build/wayland-region.o: Makefile \
+inter/wayland-region.o: Makefile \
                         src/global-constants.h \
                         src/global-enums.h \
                         src/global-types.h \
                         src/utils-log.h \
                         src/wayland-region.c \
                         src/wayland-region.h
-	@mkdir -p build
-	@echo "  CC   wayland-region.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-region.o -Isrc -Igen \
-	       -c src/wayland-region.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-region.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-region.o \
+	    src/wayland-region.c
 
-build/wayland-surface.o: Makefile \
+inter/wayland-surface.o: Makefile \
                          src/global-constants.h \
                          src/global-enums.h \
                          src/global-types.h \
@@ -1054,12 +1213,12 @@ build/wayland-surface.o: Makefile \
                          src/wayland-surface.c \
                          src/wayland-surface.h \
                          src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-surface.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-surface.o -Isrc -Igen \
-	       -c src/wayland-surface.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-surface.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-surface.o \
+	    src/wayland-surface.c
 
-build/wayland-output.o: Makefile \
+inter/wayland-output.o: Makefile \
                         src/global-constants.h \
                         src/global-enums.h \
                         src/global-types.h \
@@ -1071,12 +1230,12 @@ build/wayland-output.o: Makefile \
                         src/utils-store.h \
                         src/wayland-output.c \
                         src/wayland-output.h
-	@mkdir -p build
-	@echo "  CC   wayland-output.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-output.o -Isrc -Igen \
-	       -c src/wayland-output.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-output.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-output.o \
+	    src/wayland-output.c
 
-build/wayland-cache.o: Makefile \
+inter/wayland-cache.o: Makefile \
                        src/global-constants.h \
                        src/global-enums.h \
                        src/global-macros.h \
@@ -1091,12 +1250,12 @@ build/wayland-cache.o: Makefile \
                        src/wayland-region.h \
                        src/wayland-surface.h \
                        src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-cache.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-cache.o -Isrc -Igen \
-	       -c src/wayland-cache.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-cache.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-cache.o \
+	    src/wayland-cache.c
 
-build/wayland-state.o: Makefile \
+inter/wayland-state.o: Makefile \
                        gen/xdg-shell-server-protocol.h \
                        src/exhibitor-compositor.h \
                        src/exhibitor-frame.h \
@@ -1124,12 +1283,12 @@ build/wayland-state.o: Makefile \
                        src/wayland-state.h \
                        src/wayland-surface.h \
                        src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-state.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-state.o -Isrc -Igen \
-	       -c src/wayland-state.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-state.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-state.o \
+	    src/wayland-state.c
 
-build/wayland.o: Makefile \
+inter/wayland.o: Makefile \
                  gen/screenshooter-server-protocol.h \
                  gen/xdg-shell-server-protocol.h \
                  src/config.h \
@@ -1165,12 +1324,26 @@ build/wayland.o: Makefile \
                  src/wayland-types.h \
                  src/wayland.c \
                  src/wayland.h
-	@mkdir -p build
-	@echo "  CC   wayland.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland.o -Isrc -Igen \
-	       -c src/wayland.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland.o \
+	    src/wayland.c
 
-build/wayland-protocol-compositor.o: Makefile \
+inter/xdg-shell-protocol.o: Makefile \
+                            gen/xdg-shell-protocol.c
+	@mkdir -p inter
+	@echo "  CC   inter/xdg-shell-protocol.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/xdg-shell-protocol.o \
+	    gen/xdg-shell-protocol.c
+
+inter/screenshooter-protocol.o: Makefile \
+                                gen/screenshooter-protocol.c
+	@mkdir -p inter
+	@echo "  CC   inter/screenshooter-protocol.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/screenshooter-protocol.o \
+	    gen/screenshooter-protocol.c
+
+inter/wayland-protocol-compositor.o: Makefile \
                                      src/exhibitor-compositor.h \
                                      src/exhibitor-frame.h \
                                      src/global-constants.h \
@@ -1198,12 +1371,178 @@ build/wayland-protocol-compositor.o: Makefile \
                                      src/wayland-state.h \
                                      src/wayland-surface.h \
                                      src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-compositor.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-compositor.o -Isrc -Igen \
-	       -c src/wayland-protocol-compositor.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-compositor.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-compositor.o \
+	    src/wayland-protocol-compositor.c
 
-build/wayland-protocol-surface.o: Makefile \
+inter/wayland-protocol-keyboard.o: Makefile \
+                                   src/global-constants.h \
+                                   src/global-enums.h \
+                                   src/global-macros.h \
+                                   src/global-types.h \
+                                   src/utils-debug.h \
+                                   src/utils-log.h \
+                                   src/wayland-protocol-keyboard.c \
+                                   src/wayland-protocol-keyboard.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-keyboard.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-keyboard.o \
+	    src/wayland-protocol-keyboard.c
+
+inter/wayland-protocol-output.o: Makefile \
+                                 src/global-constants.h \
+                                 src/global-enums.h \
+                                 src/global-macros.h \
+                                 src/global-types.h \
+                                 src/output.h \
+                                 src/renderer.h \
+                                 src/utils-debug.h \
+                                 src/utils-log.h \
+                                 src/utils-object.h \
+                                 src/utils-pool.h \
+                                 src/wayland-protocol-output.c \
+                                 src/wayland-protocol-output.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-output.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-output.o \
+	    src/wayland-protocol-output.c
+
+inter/wayland-protocol-pointer.o: Makefile \
+                                  src/global-constants.h \
+                                  src/global-enums.h \
+                                  src/global-macros.h \
+                                  src/global-types.h \
+                                  src/output.h \
+                                  src/renderer.h \
+                                  src/utils-debug.h \
+                                  src/utils-log.h \
+                                  src/utils-object.h \
+                                  src/utils-pool.h \
+                                  src/utils-store.h \
+                                  src/wayland-protocol-keyboard.h \
+                                  src/wayland-protocol-pointer.c \
+                                  src/wayland-state.h \
+                                  src/wayland-surface.h \
+                                  src/wayland-types.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-pointer.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-pointer.o \
+	    src/wayland-protocol-pointer.c
+
+inter/wayland-protocol-region.o: Makefile \
+                                 src/global-constants.h \
+                                 src/global-enums.h \
+                                 src/global-macros.h \
+                                 src/global-types.h \
+                                 src/utils-chain.h \
+                                 src/utils-debug.h \
+                                 src/utils-list.h \
+                                 src/utils-log.h \
+                                 src/utils-store.h \
+                                 src/wayland-cache.h \
+                                 src/wayland-protocol-region.c \
+                                 src/wayland-protocol-region.h \
+                                 src/wayland-region.h \
+                                 src/wayland-surface.h \
+                                 src/wayland-types.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-region.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-region.o \
+	    src/wayland-protocol-region.c
+
+inter/wayland-protocol-screenshooter.o: Makefile \
+                                        gen/screenshooter-server-protocol.h \
+                                        src/global-constants.h \
+                                        src/global-enums.h \
+                                        src/global-macros.h \
+                                        src/global-types.h \
+                                        src/output.h \
+                                        src/renderer.h \
+                                        src/utils-debug.h \
+                                        src/utils-log.h \
+                                        src/utils-object.h \
+                                        src/utils-pool.h \
+                                        src/wayland-protocol-screenshooter.c \
+                                        src/wayland-protocol-screenshooter.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-screenshooter.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-screenshooter.o \
+	    src/wayland-protocol-screenshooter.c
+
+inter/wayland-protocol-seat.o: Makefile \
+                               src/config.h \
+                               src/global-constants.h \
+                               src/global-enums.h \
+                               src/global-macros.h \
+                               src/global-types.h \
+                               src/output.h \
+                               src/renderer.h \
+                               src/utils-chain.h \
+                               src/utils-debug.h \
+                               src/utils-keymap.h \
+                               src/utils-list.h \
+                               src/utils-log.h \
+                               src/utils-object.h \
+                               src/utils-pool.h \
+                               src/utils-store.h \
+                               src/wayland-cache.h \
+                               src/wayland-protocol-keyboard.h \
+                               src/wayland-protocol-pointer.h \
+                               src/wayland-protocol-seat.c \
+                               src/wayland-protocol-seat.h \
+                               src/wayland-region.h \
+                               src/wayland-state.h \
+                               src/wayland-surface.h \
+                               src/wayland-types.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-seat.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-seat.o \
+	    src/wayland-protocol-seat.c
+
+inter/wayland-protocol-shell-surface.o: Makefile \
+                                        src/global-constants.h \
+                                        src/global-enums.h \
+                                        src/global-macros.h \
+                                        src/global-types.h \
+                                        src/utils-debug.h \
+                                        src/utils-log.h \
+                                        src/wayland-protocol-shell-surface.c \
+                                        src/wayland-protocol-shell-surface.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-shell-surface.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-shell-surface.o \
+	    src/wayland-protocol-shell-surface.c
+
+inter/wayland-protocol-shell.o: Makefile \
+                                src/exhibitor-compositor.h \
+                                src/exhibitor-frame.h \
+                                src/global-constants.h \
+                                src/global-enums.h \
+                                src/global-macros.h \
+                                src/global-types.h \
+                                src/surface-data.h \
+                                src/surface-manager.h \
+                                src/utils-branch.h \
+                                src/utils-chain.h \
+                                src/utils-debug.h \
+                                src/utils-list.h \
+                                src/utils-log.h \
+                                src/utils-pool.h \
+                                src/utils-store.h \
+                                src/wayland-cache.h \
+                                src/wayland-protocol-shell-surface.h \
+                                src/wayland-protocol-shell.c \
+                                src/wayland-protocol-shell.h \
+                                src/wayland-region.h \
+                                src/wayland-surface.h \
+                                src/wayland-types.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-shell.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-shell.o \
+	    src/wayland-protocol-shell.c
+
+inter/wayland-protocol-surface.o: Makefile \
                                   src/exhibitor-compositor.h \
                                   src/exhibitor-frame.h \
                                   src/global-constants.h \
@@ -1229,75 +1568,12 @@ build/wayland-protocol-surface.o: Makefile \
                                   src/wayland-state.h \
                                   src/wayland-surface.h \
                                   src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-surface.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-surface.o -Isrc -Igen \
-	       -c src/wayland-protocol-surface.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-surface.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-surface.o \
+	    src/wayland-protocol-surface.c
 
-build/wayland-protocol-region.o: Makefile \
-                                 src/global-constants.h \
-                                 src/global-enums.h \
-                                 src/global-macros.h \
-                                 src/global-types.h \
-                                 src/utils-chain.h \
-                                 src/utils-debug.h \
-                                 src/utils-list.h \
-                                 src/utils-log.h \
-                                 src/utils-store.h \
-                                 src/wayland-cache.h \
-                                 src/wayland-protocol-region.c \
-                                 src/wayland-protocol-region.h \
-                                 src/wayland-region.h \
-                                 src/wayland-surface.h \
-                                 src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-region.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-region.o -Isrc -Igen \
-	       -c src/wayland-protocol-region.c
-
-build/wayland-protocol-shell.o: Makefile \
-                                src/exhibitor-compositor.h \
-                                src/exhibitor-frame.h \
-                                src/global-constants.h \
-                                src/global-enums.h \
-                                src/global-macros.h \
-                                src/global-types.h \
-                                src/surface-data.h \
-                                src/surface-manager.h \
-                                src/utils-branch.h \
-                                src/utils-chain.h \
-                                src/utils-debug.h \
-                                src/utils-list.h \
-                                src/utils-log.h \
-                                src/utils-pool.h \
-                                src/utils-store.h \
-                                src/wayland-cache.h \
-                                src/wayland-protocol-shell-surface.h \
-                                src/wayland-protocol-shell.c \
-                                src/wayland-protocol-shell.h \
-                                src/wayland-region.h \
-                                src/wayland-surface.h \
-                                src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-shell.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-shell.o -Isrc -Igen \
-	       -c src/wayland-protocol-shell.c
-
-build/wayland-protocol-shell-surface.o: Makefile \
-                                        src/global-constants.h \
-                                        src/global-enums.h \
-                                        src/global-macros.h \
-                                        src/global-types.h \
-                                        src/utils-debug.h \
-                                        src/utils-log.h \
-                                        src/wayland-protocol-shell-surface.c \
-                                        src/wayland-protocol-shell-surface.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-shell-surface.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-shell-surface.o -Isrc -Igen \
-	       -c src/wayland-protocol-shell-surface.c
-
-build/wayland-protocol-xdg-shell.o: Makefile \
+inter/wayland-protocol-xdg-shell.o: Makefile \
                                     gen/xdg-shell-server-protocol.h \
                                     src/exhibitor-compositor.h \
                                     src/exhibitor-frame.h \
@@ -1320,12 +1596,12 @@ build/wayland-protocol-xdg-shell.o: Makefile \
                                     src/wayland-region.h \
                                     src/wayland-surface.h \
                                     src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-xdg-shell.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-xdg-shell.o -Isrc -Igen \
-	       -c src/wayland-protocol-xdg-shell.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-xdg-shell.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-xdg-shell.o \
+	    src/wayland-protocol-xdg-shell.c
 
-build/wayland-protocol-xdg-surface.o: Makefile \
+inter/wayland-protocol-xdg-surface.o: Makefile \
                                       gen/xdg-shell-server-protocol.h \
                                       src/exhibitor-compositor.h \
                                       src/exhibitor-frame.h \
@@ -1344,122 +1620,12 @@ build/wayland-protocol-xdg-surface.o: Makefile \
                                       src/utils-store.h \
                                       src/wayland-protocol-xdg-surface.c \
                                       src/wayland-protocol-xdg-surface.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-xdg-surface.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-xdg-surface.o -Isrc -Igen \
-	       -c src/wayland-protocol-xdg-surface.c
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-xdg-surface.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-xdg-surface.o \
+	    src/wayland-protocol-xdg-surface.c
 
-build/xdg-shell-protocol.o: Makefile \
-                            gen/xdg-shell-protocol.c
-	@mkdir -p build
-	@echo "  CC   xdg-shell-protocol.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/xdg-shell-protocol.o -Isrc -Igen \
-	       -c gen/xdg-shell-protocol.c
-
-build/wayland-protocol-output.o: Makefile \
-                                 src/global-constants.h \
-                                 src/global-enums.h \
-                                 src/global-macros.h \
-                                 src/global-types.h \
-                                 src/output.h \
-                                 src/renderer.h \
-                                 src/utils-debug.h \
-                                 src/utils-log.h \
-                                 src/utils-object.h \
-                                 src/utils-pool.h \
-                                 src/wayland-protocol-output.c \
-                                 src/wayland-protocol-output.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-output.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-output.o -Isrc -Igen \
-	       -c src/wayland-protocol-output.c
-
-build/wayland-protocol-seat.o: Makefile \
-                               src/config.h \
-                               src/global-constants.h \
-                               src/global-enums.h \
-                               src/global-macros.h \
-                               src/global-types.h \
-                               src/output.h \
-                               src/renderer.h \
-                               src/utils-chain.h \
-                               src/utils-debug.h \
-                               src/utils-keymap.h \
-                               src/utils-list.h \
-                               src/utils-log.h \
-                               src/utils-object.h \
-                               src/utils-pool.h \
-                               src/utils-store.h \
-                               src/wayland-cache.h \
-                               src/wayland-protocol-keyboard.h \
-                               src/wayland-protocol-pointer.h \
-                               src/wayland-protocol-seat.c \
-                               src/wayland-protocol-seat.h \
-                               src/wayland-region.h \
-                               src/wayland-state.h \
-                               src/wayland-surface.h \
-                               src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-seat.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-seat.o -Isrc -Igen \
-	       -c src/wayland-protocol-seat.c
-
-build/wayland-protocol-pointer.o: Makefile \
-                                  src/global-constants.h \
-                                  src/global-enums.h \
-                                  src/global-macros.h \
-                                  src/global-types.h \
-                                  src/output.h \
-                                  src/renderer.h \
-                                  src/utils-debug.h \
-                                  src/utils-log.h \
-                                  src/utils-object.h \
-                                  src/utils-pool.h \
-                                  src/utils-store.h \
-                                  src/wayland-protocol-keyboard.h \
-                                  src/wayland-protocol-pointer.c \
-                                  src/wayland-state.h \
-                                  src/wayland-surface.h \
-                                  src/wayland-types.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-pointer.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-pointer.o -Isrc -Igen \
-	       -c src/wayland-protocol-pointer.c
-
-build/wayland-protocol-keyboard.o: Makefile \
-                                   src/global-constants.h \
-                                   src/global-enums.h \
-                                   src/global-macros.h \
-                                   src/global-types.h \
-                                   src/utils-debug.h \
-                                   src/utils-log.h \
-                                   src/wayland-protocol-keyboard.c \
-                                   src/wayland-protocol-keyboard.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-keyboard.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-keyboard.o -Isrc -Igen \
-	       -c src/wayland-protocol-keyboard.c
-
-build/wayland-protocol-screenshooter.o: Makefile \
-                                        gen/screenshooter-server-protocol.h \
-                                        src/global-constants.h \
-                                        src/global-enums.h \
-                                        src/global-macros.h \
-                                        src/global-types.h \
-                                        src/output.h \
-                                        src/renderer.h \
-                                        src/utils-debug.h \
-                                        src/utils-log.h \
-                                        src/utils-object.h \
-                                        src/utils-pool.h \
-                                        src/wayland-protocol-screenshooter.c \
-                                        src/wayland-protocol-screenshooter.h
-	@mkdir -p build
-	@echo "  CC   wayland-protocol-screenshooter.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/wayland-protocol-screenshooter.o -Isrc -Igen \
-	       -c src/wayland-protocol-screenshooter.c
-
-build/backend-offscreen.o: Makefile \
+inter/backend-offscreen.o: Makefile \
                            src/backend-offscreen.c \
                            src/backend-offscreen.h \
                            src/event-loop.h \
@@ -1480,12 +1646,12 @@ build/backend-offscreen.o: Makefile \
                            src/utils-log.h \
                            src/utils-object.h \
                            src/utils-pool.h
-	@mkdir -p build
-	@echo "  CC   backend-offscreen.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/backend-offscreen.o -Isrc -Igen \
-	       -c src/backend-offscreen.c
+	@mkdir -p inter
+	@echo "  CC   inter/backend-offscreen.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/backend-offscreen.o \
+	    src/backend-offscreen.c
 
-build/metanoia.o: Makefile \
+inter/metanoia.o: Makefile \
                   src/config.h \
                   src/event-dispatcher.h \
                   src/event-factory.h \
@@ -1512,39 +1678,36 @@ build/metanoia.o: Makefile \
                   src/utils-object.h \
                   src/utils-pool.h \
                   src/utils-store.h
-	@mkdir -p build
-	@echo "  CC   metanoia.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/metanoia.o -Isrc -Igen \
-	       -c src/metanoia.c
+	@mkdir -p inter
+	@echo "  CC   inter/metanoia.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/metanoia.o \
+	    src/metanoia.c
 
-build/controller-defs.o: Makefile \
+inter/controller-defs.o: Makefile \
                          src/controller-defs.c \
                          src/controller-defs.h
-	@mkdir -p build
-	@echo "  CC   controller-defs.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/controller-defs.o -Isrc -Igen \
-	       -c src/controller-defs.c \
-	       -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+	@mkdir -p inter
+	@echo "  CC   inter/controller-defs.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -o inter/controller-defs.o \
+	    src/controller-defs.c
 
-build/controller-output.o: Makefile \
+inter/controller-output.o: Makefile \
                            src/controller-defs.h \
                            src/controller-output.c \
                            src/controller-output.h
-	@mkdir -p build
-	@echo "  CC   controller-output.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/controller-output.o -Isrc -Igen \
-	       -c src/controller-output.c \
-	       -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+	@mkdir -p inter
+	@echo "  CC   inter/controller-output.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -o inter/controller-output.o \
+	    src/controller-output.c
 
-build/controller-gtk-res.o: Makefile \
+inter/controller-gtk-res.o: Makefile \
                             gen/controller-gtk-res.c
-	@mkdir -p build
-	@echo "  CC   controller-gtk-res.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/controller-gtk-res.o -Isrc -Igen \
-	       -c gen/controller-gtk-res.c \
-	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+	@mkdir -p inter
+	@echo "  CC   inter/controller-gtk-res.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -o inter/controller-gtk-res.o \
+	    gen/controller-gtk-res.c
 
-build/controller-gtk-display.o: Makefile \
+inter/controller-gtk-display.o: Makefile \
                                 src/controller-defs.h \
                                 src/controller-gtk-display.c \
                                 src/controller-gtk-display.h \
@@ -1553,39 +1716,36 @@ build/controller-gtk-display.o: Makefile \
                                 src/global-enums.h \
                                 src/global-types.h \
                                 src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   controller-gtk-display.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/controller-gtk-display.o -Isrc -Igen \
-	       -c src/controller-gtk-display.c \
-	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+	@mkdir -p inter
+	@echo "  CC   inter/controller-gtk-display.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/at-spi-2.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/dbus-1.0 -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/lib/dbus-1.0/include -I/usr/lib/glib-2.0/include -pthread -o inter/controller-gtk-display.o \
+	    src/controller-gtk-display.c
 
-build/controller-gtk-win.o: Makefile \
+inter/controller-gtk-win.o: Makefile \
                             gen/version.h \
                             src/controller-gtk-app.h \
                             src/controller-gtk-display.h \
                             src/controller-gtk-win.c \
                             src/controller-gtk-win.h \
                             src/controller-output.h
-	@mkdir -p build
-	@echo "  CC   controller-gtk-win.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/controller-gtk-win.o -Isrc -Igen \
-	       -c src/controller-gtk-win.c \
-	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+	@mkdir -p inter
+	@echo "  CC   inter/controller-gtk-win.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/at-spi-2.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/dbus-1.0 -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/lib/dbus-1.0/include -I/usr/lib/glib-2.0/include -pthread -o inter/controller-gtk-win.o \
+	    src/controller-gtk-win.c
 
-build/controller-gtk-app.o: Makefile \
+inter/controller-gtk-app.o: Makefile \
                             src/controller-bind.h \
                             src/controller-defs.h \
                             src/controller-gtk-app.c \
                             src/controller-gtk-app.h \
                             src/controller-gtk-win.h \
                             src/controller-output.h
-	@mkdir -p build
-	@echo "  CC   controller-gtk-app.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/controller-gtk-app.o -Isrc -Igen \
-	       -c src/controller-gtk-app.c \
-	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+	@mkdir -p inter
+	@echo "  CC   inter/controller-gtk-app.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/at-spi-2.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/dbus-1.0 -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/lib/dbus-1.0/include -I/usr/lib/glib-2.0/include -pthread -o inter/controller-gtk-app.o \
+	    src/controller-gtk-app.c
 
-build/controller-wayland.o: Makefile \
+inter/controller-wayland.o: Makefile \
                             gen/screenshooter-client-protocol.h \
                             src/controller-bind.h \
                             src/controller-defs.h \
@@ -1597,148 +1757,125 @@ build/controller-wayland.o: Makefile \
                             src/global-types.h \
                             src/utils-environment.h \
                             src/utils-log.h
-	@mkdir -p build
-	@echo "  CC   controller-wayland.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/controller-wayland.o -Isrc -Igen \
-	       -c src/controller-wayland.c \
-	       -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+	@mkdir -p inter
+	@echo "  CC   inter/controller-wayland.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -o inter/controller-wayland.o \
+	    src/controller-wayland.c
 
-build/metanoiactl-gtk.o: Makefile \
+inter/metanoiactl-gtk.o: Makefile \
                          src/controller-gtk-app.h \
                          src/global-constants.h \
                          src/global-enums.h \
                          src/global-types.h \
                          src/metanoiactl-gtk.c \
                          src/utils-environment.h
-	@mkdir -p build
-	@echo "  CC   metanoiactl-gtk.o"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -DDEBUG -g -O0 -o build/metanoiactl-gtk.o -Isrc -Igen \
-	       -c src/metanoiactl-gtk.c \
-	       -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+	@mkdir -p inter
+	@echo "  CC   inter/metanoiactl-gtk.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/at-spi-2.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/dbus-1.0 -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/lib/dbus-1.0/include -I/usr/lib/glib-2.0/include -pthread -o inter/metanoiactl-gtk.o \
+	    src/metanoiactl-gtk.c
 
-checks/check-globals: Makefile \
+inter/test-globals.o: Makefile \
                       src/global-enums.h \
-                      src/global-macros.h \
-                      src/global-types.c \
                       src/global-types.h \
-                      src/utils-debug.h \
                       tests/test-globals.c \
                       tests/tests-suit.h
-	@mkdir -p checks
-	@echo "  CC   check-globals"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-globals -Isrc -Igen \
-	      tests/test-globals.c src/global-types.c
+	@mkdir -p inter
+	@echo "  CC   inter/test-globals.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/test-globals.o \
+	    tests/test-globals.c
 
-checks/check-pool: Makefile \
-                   src/global-enums.h \
-                   src/global-macros.h \
-                   src/global-types.h \
-                   src/utils-debug.c \
-                   src/utils-debug.h \
-                   src/utils-pool.c \
+inter/test-pool.o: Makefile \
                    src/utils-pool.h \
                    tests/test-pool.c \
                    tests/tests-suit.h
-	@mkdir -p checks
-	@echo "  CC   check-pool"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-pool -Isrc -Igen \
-	      tests/test-pool.c src/utils-debug.c src/utils-pool.c
+	@mkdir -p inter
+	@echo "  CC   inter/test-pool.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/test-pool.o \
+	    tests/test-pool.c
 
-checks/check-chain: Makefile \
+inter/test-store.o: Makefile \
                     src/global-constants.h \
                     src/global-enums.h \
                     src/global-types.h \
-                    src/utils-chain.c \
+                    src/utils-store.h \
+                    tests/test-store.c \
+                    tests/tests-suit.h
+	@mkdir -p inter
+	@echo "  CC   inter/test-store.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/test-store.o \
+	    tests/test-store.c
+
+inter/test-chain.o: Makefile \
+                    src/global-constants.h \
+                    src/global-enums.h \
+                    src/global-types.h \
                     src/utils-chain.h \
                     tests/test-chain.c \
                     tests/tests-suit.h
-	@mkdir -p checks
-	@echo "  CC   check-chain"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-chain -Isrc -Igen \
-	      tests/test-chain.c src/utils-chain.c
+	@mkdir -p inter
+	@echo "  CC   inter/test-chain.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/test-chain.o \
+	    tests/test-chain.c
 
-checks/check-list: Makefile \
+inter/test-list.o: Makefile \
                    src/global-constants.h \
                    src/global-enums.h \
                    src/global-macros.h \
                    src/global-types.h \
-                   src/utils-chain.c \
                    src/utils-chain.h \
-                   src/utils-debug.c \
                    src/utils-debug.h \
-                   src/utils-list.c \
                    src/utils-list.h \
                    tests/test-list.c \
                    tests/tests-suit.h
-	@mkdir -p checks
-	@echo "  CC   check-list"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-list -Isrc -Igen \
-	      tests/test-list.c src/utils-debug.c src/utils-chain.c src/utils-list.c
+	@mkdir -p inter
+	@echo "  CC   inter/test-list.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/test-list.o \
+	    tests/test-list.c
 
-checks/check-branch: Makefile \
+inter/test-branch.o: Makefile \
                      src/global-constants.h \
                      src/global-enums.h \
                      src/global-types.h \
-                     src/utils-branch.c \
                      src/utils-branch.h \
-                     src/utils-chain.c \
                      src/utils-chain.h \
-                     src/utils-log.h \
                      tests/test-branch.c \
                      tests/tests-suit.h
-	@mkdir -p checks
-	@echo "  CC   check-branch"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-branch -Isrc -Igen \
-	      tests/test-branch.c src/utils-chain.c src/utils-branch.c
+	@mkdir -p inter
+	@echo "  CC   inter/test-branch.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/test-branch.o \
+	    tests/test-branch.c
 
-checks/check-store: Makefile \
-                    src/global-constants.h \
-                    src/global-enums.h \
-                    src/global-macros.h \
-                    src/global-types.h \
-                    src/utils-chain.c \
-                    src/utils-chain.h \
-                    src/utils-debug.h \
-                    src/utils-log.h \
-                    src/utils-store.c \
-                    src/utils-store.h \
-                    tests/test-store.c \
-                    tests/tests-suit.h
-	@mkdir -p checks
-	@echo "  CC   check-store"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-store -Isrc -Igen \
-	      tests/test-store.c src/utils-chain.c src/utils-store.c
-
-checks/check-frame: Makefile \
+inter/test-frame.o: Makefile \
                     src/exhibitor-compositor.h \
-                    src/exhibitor-frame.c \
                     src/exhibitor-frame.h \
                     src/global-constants.h \
-                    src/global-enums.c \
                     src/global-enums.h \
                     src/global-macros.h \
-                    src/global-types.c \
                     src/global-types.h \
                     src/surface-data.h \
                     src/surface-manager.h \
-                    src/utils-branch.c \
                     src/utils-branch.h \
-                    src/utils-chain.c \
                     src/utils-chain.h \
-                    src/utils-debug.c \
                     src/utils-debug.h \
                     src/utils-list.h \
-                    src/utils-log.h \
-                    src/utils-pool.c \
                     src/utils-pool.h \
-                    src/utils-store.c \
                     src/utils-store.h \
-                    tests/mock-surface-manager.c \
                     tests/mock-surface-manager.h \
                     tests/test-frame.c \
                     tests/tests-suit.h
-	@mkdir -p checks
-	@echo "  CC   check-frame"
-	@gcc -std=gnu11 -Wall -W -Wextra -Wpedantic -Werror -rdynamic -ldl -lrt -lpthread -lm -DDEBUG -g -O0 -o checks/check-frame -Isrc -Igen \
-	      tests/test-frame.c tests/mock-surface-manager.c src/utils-chain.c src/utils-branch.c src/utils-store.c src/utils-pool.c src/utils-debug.c src/global-enums.c src/global-types.c src/exhibitor-frame.c
+	@mkdir -p inter
+	@echo "  CC   inter/test-frame.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/test-frame.o \
+	    tests/test-frame.c
+
+inter/mock-surface-manager.o: Makefile \
+                              src/global-constants.h \
+                              src/global-enums.h \
+                              src/global-types.h \
+                              src/utils-store.h \
+                              tests/mock-surface-manager.c
+	@mkdir -p inter
+	@echo "  CC   inter/mock-surface-manager.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/mock-surface-manager.o \
+	    tests/mock-surface-manager.c
 

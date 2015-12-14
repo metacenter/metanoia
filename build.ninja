@@ -1,0 +1,446 @@
+build all: phony build/metanoia build/metanoiactl-gtk checks/check-globals checks/check-pool checks/check-store checks/check-chain checks/check-list checks/check-branch checks/check-frame
+
+build force: phony
+
+build checks: phony checks/check-globals checks/check-pool checks/check-store checks/check-chain checks/check-list checks/check-branch checks/check-frame
+
+rule check
+    description = run unit tests
+    command = ./checks/check-globals; ./checks/check-pool; ./checks/check-store; ./checks/check-chain; ./checks/check-list; ./checks/check-branch; ./checks/check-frame
+
+build check: check force checks
+
+rule clean
+    description = clean
+    command = rm -rf build checks doc gen inter callgrind* *plist* .ninja*
+
+build clean: clean
+
+rule cc
+    deps = gcc
+    depfile = $out.d
+    description = CC   $out
+    command = clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 $cflags -MMD -MF $out.d -o $out -c $inputs
+
+rule ld
+    description = LD   $out
+    command = clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm $lflags -o $out $in
+
+rule vgen
+    description = GEN  $out
+    command = python -B ./share/build/make.py version
+
+rule wsshg
+    description = GEN  $out
+    command = wayland-scanner server-header $inputs $out
+
+rule wschg
+    description = GEN  $out
+    command = wayland-scanner client-header $inputs $out
+
+rule wscg
+    description = GEN  $out
+    command = wayland-scanner code $inputs $out
+
+rule glcr
+    description = GEN  $out
+    command = glib-compile-resources $inputs --target=$out --generate-source
+
+rule cppcheck
+    description =  $out
+    command = python -B ./share/build/make.py cppcheck
+
+build cppcheck: cppcheck checks
+
+rule make
+    description =  $out
+    command = python -B ./share/build/make.py make
+
+build make: make force
+
+rule memcheck
+    description =  $out
+    command = python -B ./share/build/make.py memcheck
+
+build memcheck: memcheck checks
+
+rule ninja
+    description =  $out
+    command = python -B ./share/build/make.py ninja
+
+build ninja: ninja force
+
+build build/metanoia: ld inter/config.o inter/global-enums.o inter/global-types.o inter/global-objects.o inter/global-functions.o inter/utils-debug.o inter/utils-object.o inter/utils-pool.o inter/utils-store.o inter/utils-chain.o inter/utils-list.o inter/utils-branch.o inter/utils-log.o inter/utils-environment.o inter/utils-dbus.o inter/utils-gl.o inter/utils-keymap.o inter/event-dispatcher.o inter/event-factory.o inter/event-loop.o inter/event-signals.o inter/event-task.o inter/event-timer.o inter/renderer.o inter/renderer-mmap.o inter/renderer-gl.o inter/device-common.o inter/device-fb.o inter/device-drm.o inter/device-evdev.o inter/device-udev.o inter/output.o inter/output-collector.o inter/surface-data.o inter/surface-manager.o inter/keyboard-binding.o inter/keyboard-bindings.o inter/keyboard-functions.o inter/keyboard-mode.o inter/exhibitor-frame.o inter/exhibitor-strategist.o inter/exhibitor-compositor.o inter/exhibitor-display.o inter/exhibitor-pointer.o inter/exhibitor.o inter/wayland-region.o inter/wayland-surface.o inter/wayland-output.o inter/wayland-cache.o inter/wayland-state.o inter/wayland.o inter/xdg-shell-protocol.o inter/screenshooter-protocol.o inter/wayland-protocol-compositor.o inter/wayland-protocol-keyboard.o inter/wayland-protocol-output.o inter/wayland-protocol-pointer.o inter/wayland-protocol-region.o inter/wayland-protocol-screenshooter.o inter/wayland-protocol-seat.o inter/wayland-protocol-shell-surface.o inter/wayland-protocol-shell.o inter/wayland-protocol-surface.o inter/wayland-protocol-xdg-shell.o inter/wayland-protocol-xdg-surface.o inter/backend-offscreen.o inter/metanoia.o
+    lflags = -lEGL -lGL -ldbus-1 -ldrm -lgbm -ludev -lwayland-server -lxkbcommon
+
+build build/metanoiactl-gtk: ld inter/utils-debug.o inter/utils-log.o inter/utils-environment.o gen/screenshooter-protocol.c inter/controller-defs.o inter/controller-output.o inter/controller-gtk-res.o inter/controller-gtk-display.o inter/controller-gtk-win.o inter/controller-gtk-app.o inter/controller-wayland.o inter/metanoiactl-gtk.o
+    lflags = -latk-1.0 -lcairo -lcairo-gobject -lgdk-3 -lgdk_pixbuf-2.0 -lgio-2.0 -lglib-2.0 -lgobject-2.0 -lgtk-3 -lpango-1.0 -lpangocairo-1.0 -lwayland-client
+
+build checks/check-globals: ld inter/test-globals.o inter/global-types.o
+
+build checks/check-pool: ld inter/test-pool.o inter/utils-debug.o inter/utils-pool.o
+
+build checks/check-store: ld inter/test-store.o inter/utils-store.o
+
+build checks/check-chain: ld inter/test-chain.o inter/utils-chain.o
+
+build checks/check-list: ld inter/test-list.o inter/utils-debug.o inter/utils-chain.o inter/utils-list.o
+
+build checks/check-branch: ld inter/test-branch.o inter/utils-chain.o inter/utils-branch.o
+
+build checks/check-frame: ld inter/test-frame.o inter/mock-surface-manager.o inter/utils-pool.o inter/utils-debug.o inter/utils-store.o inter/utils-chain.o inter/utils-branch.o inter/global-enums.o inter/global-types.o inter/exhibitor-frame.o
+
+build gen/version.h: vgen force
+
+build gen/xdg-shell-server-protocol.h: wsshg res/xdg-shell.xml
+    inputs = res/xdg-shell.xml
+
+build gen/screenshooter-server-protocol.h: wsshg res/screenshooter.xml
+    inputs = res/screenshooter.xml
+
+build gen/screenshooter-client-protocol.h: wschg res/screenshooter.xml
+    inputs = res/screenshooter.xml
+
+build gen/xdg-shell-protocol.c: wscg res/xdg-shell.xml
+    inputs = res/xdg-shell.xml
+
+build gen/screenshooter-protocol.c: wscg res/screenshooter.xml
+    inputs = res/screenshooter.xml
+
+build gen/controller-gtk-res.c: glcr res/metanoiactl-gtk-main.ui res/metanoiactl.gresource.xml
+    inputs = res/metanoiactl.gresource.xml
+
+build inter/global-types.o: cc src/global-types.c
+    inputs = src/global-types.c
+    cflags = -Isrc -Igen
+
+build inter/utils-debug.o: cc src/utils-debug.c
+    inputs = src/utils-debug.c
+    cflags = -Isrc -Igen
+
+build inter/utils-pool.o: cc src/utils-pool.c
+    inputs = src/utils-pool.c
+    cflags = -Isrc -Igen
+
+build inter/utils-store.o: cc src/utils-store.c
+    inputs = src/utils-store.c
+    cflags = -Isrc -Igen
+
+build inter/utils-chain.o: cc src/utils-chain.c
+    inputs = src/utils-chain.c
+    cflags = -Isrc -Igen
+
+build inter/utils-list.o: cc src/utils-list.c
+    inputs = src/utils-list.c
+    cflags = -Isrc -Igen
+
+build inter/utils-branch.o: cc src/utils-branch.c
+    inputs = src/utils-branch.c
+    cflags = -Isrc -Igen
+
+build inter/global-enums.o: cc src/global-enums.c
+    inputs = src/global-enums.c
+    cflags = -Isrc -Igen
+
+build inter/exhibitor-frame.o: cc src/exhibitor-frame.c
+    inputs = src/exhibitor-frame.c
+    cflags = -Isrc -Igen
+
+build inter/config.o: cc src/config.c
+    inputs = src/config.c
+    cflags = -Isrc -Igen
+
+build inter/global-objects.o: cc src/global-objects.c
+    inputs = src/global-objects.c
+    cflags = -Isrc -Igen
+
+build inter/global-functions.o: cc src/global-functions.c
+    inputs = src/global-functions.c
+    cflags = -Isrc -Igen
+
+build inter/utils-object.o: cc src/utils-object.c
+    inputs = src/utils-object.c
+    cflags = -Isrc -Igen
+
+build inter/utils-log.o: cc gen/version.h src/utils-log.c
+    inputs = src/utils-log.c
+    cflags = -Isrc -Igen
+
+build inter/utils-environment.o: cc src/utils-environment.c
+    inputs = src/utils-environment.c
+    cflags = -Isrc -Igen
+
+build inter/utils-dbus.o: cc src/utils-dbus.c
+    inputs = src/utils-dbus.c
+    cflags = -Isrc -Igen -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
+
+build inter/utils-gl.o: cc src/utils-gl.c
+    inputs = src/utils-gl.c
+    cflags = -Isrc -Igen -I/usr/include/libdrm
+
+build inter/utils-keymap.o: cc src/utils-keymap.c
+    inputs = src/utils-keymap.c
+    cflags = -Isrc -Igen
+
+build inter/event-dispatcher.o: cc src/event-dispatcher.c
+    inputs = src/event-dispatcher.c
+    cflags = -Isrc -Igen
+
+build inter/event-factory.o: cc src/event-factory.c
+    inputs = src/event-factory.c
+    cflags = -Isrc -Igen
+
+build inter/event-loop.o: cc src/event-loop.c
+    inputs = src/event-loop.c
+    cflags = -Isrc -Igen
+
+build inter/event-signals.o: cc src/event-signals.c
+    inputs = src/event-signals.c
+    cflags = -Isrc -Igen
+
+build inter/event-task.o: cc src/event-task.c
+    inputs = src/event-task.c
+    cflags = -Isrc -Igen
+
+build inter/event-timer.o: cc src/event-timer.c
+    inputs = src/event-timer.c
+    cflags = -Isrc -Igen
+
+build inter/renderer.o: cc src/renderer.c
+    inputs = src/renderer.c
+    cflags = -Isrc -Igen
+
+build inter/renderer-mmap.o: cc src/renderer-mmap.c
+    inputs = src/renderer-mmap.c
+    cflags = -Isrc -Igen
+
+build inter/renderer-gl.o: cc src/renderer-gl.c
+    inputs = src/renderer-gl.c
+    cflags = -Isrc -Igen -I/usr/include/libdrm
+
+build inter/device-common.o: cc src/device-common.c
+    inputs = src/device-common.c
+    cflags = -Isrc -Igen
+
+build inter/device-fb.o: cc src/device-fb.c
+    inputs = src/device-fb.c
+    cflags = -Isrc -Igen
+
+build inter/device-drm.o: cc src/device-drm.c
+    inputs = src/device-drm.c
+    cflags = -Isrc -Igen -I/usr/include/libdrm
+
+build inter/device-evdev.o: cc src/device-evdev.c
+    inputs = src/device-evdev.c
+    cflags = -Isrc -Igen
+
+build inter/device-udev.o: cc src/device-udev.c
+    inputs = src/device-udev.c
+    cflags = -Isrc -Igen
+
+build inter/output.o: cc src/output.c
+    inputs = src/output.c
+    cflags = -Isrc -Igen
+
+build inter/output-collector.o: cc src/output-collector.c
+    inputs = src/output-collector.c
+    cflags = -Isrc -Igen
+
+build inter/surface-data.o: cc src/surface-data.c
+    inputs = src/surface-data.c
+    cflags = -Isrc -Igen
+
+build inter/surface-manager.o: cc src/surface-manager.c
+    inputs = src/surface-manager.c
+    cflags = -Isrc -Igen
+
+build inter/keyboard-binding.o: cc src/keyboard-binding.c
+    inputs = src/keyboard-binding.c
+    cflags = -Isrc -Igen
+
+build inter/keyboard-bindings.o: cc src/keyboard-bindings.c
+    inputs = src/keyboard-bindings.c
+    cflags = -Isrc -Igen
+
+build inter/keyboard-functions.o: cc src/keyboard-functions.c
+    inputs = src/keyboard-functions.c
+    cflags = -Isrc -Igen
+
+build inter/keyboard-mode.o: cc src/keyboard-mode.c
+    inputs = src/keyboard-mode.c
+    cflags = -Isrc -Igen
+
+build inter/exhibitor-strategist.o: cc src/exhibitor-strategist.c
+    inputs = src/exhibitor-strategist.c
+    cflags = -Isrc -Igen
+
+build inter/exhibitor-compositor.o: cc src/exhibitor-compositor.c
+    inputs = src/exhibitor-compositor.c
+    cflags = -Isrc -Igen
+
+build inter/exhibitor-display.o: cc src/exhibitor-display.c
+    inputs = src/exhibitor-display.c
+    cflags = -Isrc -Igen
+
+build inter/exhibitor-pointer.o: cc src/exhibitor-pointer.c
+    inputs = src/exhibitor-pointer.c
+    cflags = -Isrc -Igen
+
+build inter/exhibitor.o: cc src/exhibitor.c
+    inputs = src/exhibitor.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-region.o: cc src/wayland-region.c
+    inputs = src/wayland-region.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-surface.o: cc src/wayland-surface.c
+    inputs = src/wayland-surface.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-output.o: cc src/wayland-output.c
+    inputs = src/wayland-output.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-cache.o: cc src/wayland-cache.c
+    inputs = src/wayland-cache.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-state.o: cc gen/xdg-shell-server-protocol.h src/wayland-state.c
+    inputs = src/wayland-state.c
+    cflags = -Isrc -Igen
+
+build inter/wayland.o: cc gen/screenshooter-server-protocol.h src/wayland.c
+    inputs = src/wayland.c
+    cflags = -Isrc -Igen
+
+build inter/xdg-shell-protocol.o: cc gen/xdg-shell-protocol.c
+    inputs = gen/xdg-shell-protocol.c
+    cflags = -Isrc -Igen
+
+build inter/screenshooter-protocol.o: cc gen/screenshooter-protocol.c
+    inputs = gen/screenshooter-protocol.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-compositor.o: cc src/wayland-protocol-compositor.c
+    inputs = src/wayland-protocol-compositor.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-keyboard.o: cc src/wayland-protocol-keyboard.c
+    inputs = src/wayland-protocol-keyboard.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-output.o: cc src/wayland-protocol-output.c
+    inputs = src/wayland-protocol-output.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-pointer.o: cc src/wayland-protocol-pointer.c
+    inputs = src/wayland-protocol-pointer.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-region.o: cc src/wayland-protocol-region.c
+    inputs = src/wayland-protocol-region.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-screenshooter.o: cc src/wayland-protocol-screenshooter.c
+    inputs = src/wayland-protocol-screenshooter.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-seat.o: cc src/wayland-protocol-seat.c
+    inputs = src/wayland-protocol-seat.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-shell-surface.o: cc src/wayland-protocol-shell-surface.c
+    inputs = src/wayland-protocol-shell-surface.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-shell.o: cc src/wayland-protocol-shell.c
+    inputs = src/wayland-protocol-shell.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-surface.o: cc src/wayland-protocol-surface.c
+    inputs = src/wayland-protocol-surface.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-xdg-shell.o: cc src/wayland-protocol-xdg-shell.c
+    inputs = src/wayland-protocol-xdg-shell.c
+    cflags = -Isrc -Igen
+
+build inter/wayland-protocol-xdg-surface.o: cc src/wayland-protocol-xdg-surface.c
+    inputs = src/wayland-protocol-xdg-surface.c
+    cflags = -Isrc -Igen
+
+build inter/backend-offscreen.o: cc src/backend-offscreen.c
+    inputs = src/backend-offscreen.c
+    cflags = -Isrc -Igen
+
+build inter/metanoia.o: cc src/metanoia.c
+    inputs = src/metanoia.c
+    cflags = -Isrc -Igen
+
+build inter/controller-defs.o: cc src/controller-defs.c
+    inputs = src/controller-defs.c
+    cflags = -Isrc -Igen -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+
+build inter/controller-output.o: cc src/controller-output.c
+    inputs = src/controller-output.c
+    cflags = -Isrc -Igen -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+
+build inter/controller-gtk-res.o: cc gen/controller-gtk-res.c
+    inputs = gen/controller-gtk-res.c
+    cflags = -Isrc -Igen -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+
+build inter/controller-gtk-display.o: cc src/controller-gtk-display.c
+    inputs = src/controller-gtk-display.c
+    cflags = -Isrc -Igen -I/usr/include/at-spi-2.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/dbus-1.0 -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/lib/dbus-1.0/include -I/usr/lib/glib-2.0/include -pthread
+
+build inter/controller-gtk-win.o: cc src/controller-gtk-win.c
+    inputs = src/controller-gtk-win.c
+    cflags = -Isrc -Igen -I/usr/include/at-spi-2.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/dbus-1.0 -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/lib/dbus-1.0/include -I/usr/lib/glib-2.0/include -pthread
+
+build inter/controller-gtk-app.o: cc src/controller-gtk-app.c
+    inputs = src/controller-gtk-app.c
+    cflags = -Isrc -Igen -I/usr/include/at-spi-2.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/dbus-1.0 -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/lib/dbus-1.0/include -I/usr/lib/glib-2.0/include -pthread
+
+build inter/controller-wayland.o: cc gen/screenshooter-client-protocol.h src/controller-wayland.c
+    inputs = src/controller-wayland.c
+    cflags = -Isrc -Igen -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+
+build inter/metanoiactl-gtk.o: cc src/metanoiactl-gtk.c
+    inputs = src/metanoiactl-gtk.c
+    cflags = -Isrc -Igen -I/usr/include/at-spi-2.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/dbus-1.0 -I/usr/include/freetype2 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/lib/dbus-1.0/include -I/usr/lib/glib-2.0/include -pthread
+
+build inter/test-globals.o: cc tests/test-globals.c
+    inputs = tests/test-globals.c
+    cflags = -Isrc -Itests
+
+build inter/test-pool.o: cc tests/test-pool.c
+    inputs = tests/test-pool.c
+    cflags = -Isrc -Itests
+
+build inter/test-store.o: cc tests/test-store.c
+    inputs = tests/test-store.c
+    cflags = -Isrc -Itests
+
+build inter/test-chain.o: cc tests/test-chain.c
+    inputs = tests/test-chain.c
+    cflags = -Isrc -Itests
+
+build inter/test-list.o: cc tests/test-list.c
+    inputs = tests/test-list.c
+    cflags = -Isrc -Itests
+
+build inter/test-branch.o: cc tests/test-branch.c
+    inputs = tests/test-branch.c
+    cflags = -Isrc -Itests
+
+build inter/test-frame.o: cc tests/test-frame.c
+    inputs = tests/test-frame.c
+    cflags = -Isrc -Itests
+
+build inter/mock-surface-manager.o: cc tests/mock-surface-manager.c
+    inputs = tests/mock-surface-manager.c
+    cflags = -Isrc -Itests
+
+default build/metanoia build/metanoiactl-gtk
+
