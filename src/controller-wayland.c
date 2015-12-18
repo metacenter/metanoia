@@ -174,7 +174,7 @@ void noia_controller_handle_global(void* data NOIA_UNUSED,
         output_list = g_list_append(output_list, ctl_output);
 
         struct wl_output* output = wl_registry_bind(registry, name,
-                                              &wl_output_interface, 1);
+                                                    &wl_output_interface, 2);
         g_hash_table_insert(sOutputsTable, (gpointer) ctl_output->id, output);
         wl_output_add_listener(output,
                                &output_listener,
@@ -272,8 +272,9 @@ void* noia_controller_connect()
             }
 
             noia_controller_update_output(ctl_output);
+
+            usleep(DRAW_INTERVAL / g_list_length(output_list));
         }
-        usleep(DRAW_INTERVAL);
     }
 
     return NULL;

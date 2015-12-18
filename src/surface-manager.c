@@ -84,7 +84,6 @@ void noia_surface_attach_egl(NoiaSurfaceId sid,
 
 //------------------------------------------------------------------------------
 
-/// Buffer data is copied.
 void noia_surface_attach(NoiaSurfaceId sid,
                          int width,
                          int height,
@@ -96,37 +95,55 @@ void noia_surface_attach(NoiaSurfaceId sid,
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
     noia_surface_lock();
 
-    int is_first_time_attached = (not surface->buffer.data)
+    surface->pending_buffer.width    = width;
+    surface->pending_buffer.height   = height;
+    surface->pending_buffer.stride   = stride;
+    surface->pending_buffer.data     = data;
+    surface->pending_buffer.resource = resource;
+
+    noia_surface_unlock();
+}
+
+//------------------------------------------------------------------------------
+
+void noia_surface_commit(NoiaSurfaceId sid)
+{
+    NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+    noia_surface_lock();
+
+    int is_first_time_commited = (not surface->buffer.data)
                              and (not surface->buffer.resource);
 
     // Copy buffer
-    if (data) {
-        size_t size = stride * height;
+    if (surface->pending_buffer.data) {
+        size_t size = surface->pending_buffer.stride
+                    * surface->pending_buffer.height;
         size_t old_size = surface->buffer.stride * surface->buffer.height;
+
         if (size != old_size) {
             if (surface->buffer.data) {
                 free(surface->buffer.data);
             }
             surface->buffer.data = malloc(size);
         }
-        memcpy(surface->buffer.data, data, size);
+        memcpy(surface->buffer.data, surface->pending_buffer.data, size);
         surface->buffer.resource = NULL;
-    } else if (resource) {
+    } else if (surface->pending_buffer.resource) {
         surface->buffer.data = NULL;
-        surface->buffer.resource = resource;
+        surface->buffer.resource = surface->pending_buffer.resource;
     }
 
-    surface->buffer.width  = width;
-    surface->buffer.height = height;
-    surface->buffer.stride = stride;
+    surface->buffer.width  = surface->pending_buffer.width;
+    surface->buffer.height = surface->pending_buffer.height;
+    surface->buffer.stride = surface->pending_buffer.stride;
 
     // If surface was just created - inform others
-    if (is_first_time_attached) {
+    if (is_first_time_commited) {
         /// @todo Size should not be set here.
         if ((surface->requested_size.width  == 0)
         or  (surface->requested_size.height == 0)) {
-            surface->requested_size.width  = width;
-            surface->requested_size.height = height;
+            surface->requested_size.width  = surface->buffer.width;
+            surface->requested_size.height = surface->buffer.height;
         }
         noia_event_signal_emit_int(SIGNAL_SURFACE_READY, sid);
     }

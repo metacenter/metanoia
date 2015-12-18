@@ -40,6 +40,9 @@ typedef struct {
     /// Data required for draw.
     NoiaDrawBuffer buffer;
 
+    /// Data to be used after commit.
+    NoiaDrawBuffer pending_buffer;
+
     bool is_toplevel;
 } NoiaSurfaceData;
 

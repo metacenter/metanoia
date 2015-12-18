@@ -22,6 +22,8 @@ void noia_surface_attach(NoiaSurfaceId sid,
                          uint8_t* buffer,
                          void* resource);
 
+void noia_surface_commit(NoiaSurfaceId sid);
+
 void noia_surface_show(NoiaSurfaceId sid);
 
 void noia_surface_set_offset(NoiaSurfaceId sid, NoiaPosition offset);

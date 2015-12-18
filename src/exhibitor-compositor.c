@@ -59,14 +59,22 @@ void noia_compositor_free(NoiaCompositor* self)
 
 void noia_compositor_set_selection(NoiaCompositor* self, NoiaFrame* frame)
 {
-    NOIA_ENSURE(frame, return);
+    NOIA_ENSURE(self, return);
 
-    self->selection = frame;
+    NoiaSurfaceId sid = scInvalidSurfaceId;
 
-    if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
-        NoiaSurfaceId sid = noia_frame_get_sid(frame);
-        noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
+    if (not frame) {
+        if (self->selection) {
+            self->selection = self->selection->trunk;
+        }
+    } else if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
+        sid = noia_frame_get_sid(frame);
+        self->selection = frame;
+    } else {
+        self->selection = frame;
     }
+
+    noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
 }
 
 //------------------------------------------------------------------------------
@@ -138,6 +146,10 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 {
     NOIA_ENSURE(self, return);
+
+    /// @todo This should be configurable
+    noia_compositor_set_selection(self, NULL);
+
     NoiaFrame* frame = noia_frame_find_with_sid(self->root, sid);
     noia_frame_remove_self(frame);
     noia_frame_free(frame);

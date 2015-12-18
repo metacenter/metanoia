@@ -54,8 +54,13 @@ void noia_wayland_output_bind(struct wl_client* client,
     wl_output_send_mode(rc, 0, output->area.size.width,
                                output->area.size.height, 60);
 
-    wl_output_send_scale(rc, 1);
-    wl_output_send_done(rc);
+    if (version >= WL_OUTPUT_SCALE_SINCE_VERSION) {
+        wl_output_send_scale(rc, 1);
+    }
+
+    if (version >= WL_OUTPUT_DONE_SINCE_VERSION) {
+        wl_output_send_done(rc);
+    }
 }
 
 //------------------------------------------------------------------------------

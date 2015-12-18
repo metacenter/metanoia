@@ -122,7 +122,12 @@ void noia_wayland_surface_set_input_region(struct wl_client* client NOIA_UNUSED,
                                            struct wl_resource* region_resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
-    NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
+    NoiaItemId rid = scInvalidItemId;
+    if (region_resource) {
+        rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
+    } else {
+        /// @todo Clear input region.
+    }
 
     LOG_WAYL2("Wayland: set input region (sid: %d, rid: %d)", sid, rid);
 
@@ -135,7 +140,6 @@ void noia_wayland_surface_set_input_region(struct wl_client* client NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: commit surface.
 /// Client tells compositor that all request were sent and the surface is now
 /// ready to draw.
 void noia_wayland_surface_commit(struct wl_client* client NOIA_UNUSED,
@@ -145,7 +149,7 @@ void noia_wayland_surface_commit(struct wl_client* client NOIA_UNUSED,
 
     LOG_WAYL3("Wayland: commit (sid: %d)", sid);
 
-    //noia_surface_commit(sid);
+    noia_surface_commit(sid);
 }
 
 //------------------------------------------------------------------------------
