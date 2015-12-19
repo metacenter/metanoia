@@ -6,7 +6,10 @@
 
 #include <wayland-server.h>
 
-const struct wl_surface_interface surface_implementation;
+void noia_wayland_surface_bind(struct wl_client* client,
+                               void* data,
+                               uint32_t version,
+                               uint32_t id);
 
 #endif // NOIA_WAYLAND_PROTOCOL_SURFACE_H
 

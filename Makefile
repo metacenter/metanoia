@@ -87,6 +87,9 @@ build/metanoia: Makefile \
                 inter/xdg-shell-protocol.o \
                 inter/screenshooter-protocol.o \
                 inter/wayland-protocol-compositor.o \
+                inter/wayland-protocol-data-device.o \
+                inter/wayland-protocol-data-source.o \
+                inter/wayland-protocol-device-manager.o \
                 inter/wayland-protocol-keyboard.o \
                 inter/wayland-protocol-output.o \
                 inter/wayland-protocol-pointer.o \
@@ -95,6 +98,8 @@ build/metanoia: Makefile \
                 inter/wayland-protocol-seat.o \
                 inter/wayland-protocol-shell-surface.o \
                 inter/wayland-protocol-shell.o \
+                inter/wayland-protocol-subcompositor.o \
+                inter/wayland-protocol-subsurface.o \
                 inter/wayland-protocol-surface.o \
                 inter/wayland-protocol-xdg-shell.o \
                 inter/wayland-protocol-xdg-surface.o \
@@ -157,6 +162,9 @@ build/metanoia: Makefile \
 	    inter/xdg-shell-protocol.o \
 	    inter/screenshooter-protocol.o \
 	    inter/wayland-protocol-compositor.o \
+	    inter/wayland-protocol-data-device.o \
+	    inter/wayland-protocol-data-source.o \
+	    inter/wayland-protocol-device-manager.o \
 	    inter/wayland-protocol-keyboard.o \
 	    inter/wayland-protocol-output.o \
 	    inter/wayland-protocol-pointer.o \
@@ -165,6 +173,8 @@ build/metanoia: Makefile \
 	    inter/wayland-protocol-seat.o \
 	    inter/wayland-protocol-shell-surface.o \
 	    inter/wayland-protocol-shell.o \
+	    inter/wayland-protocol-subcompositor.o \
+	    inter/wayland-protocol-subsurface.o \
 	    inter/wayland-protocol-surface.o \
 	    inter/wayland-protocol-xdg-shell.o \
 	    inter/wayland-protocol-xdg-surface.o \
@@ -1313,10 +1323,12 @@ inter/wayland.o: Makefile \
                  src/utils-store.h \
                  src/wayland-cache.h \
                  src/wayland-protocol-compositor.h \
+                 src/wayland-protocol-device-manager.h \
                  src/wayland-protocol-output.h \
                  src/wayland-protocol-screenshooter.h \
                  src/wayland-protocol-seat.h \
                  src/wayland-protocol-shell.h \
+                 src/wayland-protocol-subcompositor.h \
                  src/wayland-protocol-xdg-shell.h \
                  src/wayland-region.h \
                  src/wayland-state.h \
@@ -1350,8 +1362,6 @@ inter/wayland-protocol-compositor.o: Makefile \
                                      src/global-enums.h \
                                      src/global-macros.h \
                                      src/global-types.h \
-                                     src/output.h \
-                                     src/renderer.h \
                                      src/surface-data.h \
                                      src/surface-manager.h \
                                      src/utils-branch.h \
@@ -1359,7 +1369,6 @@ inter/wayland-protocol-compositor.o: Makefile \
                                      src/utils-debug.h \
                                      src/utils-list.h \
                                      src/utils-log.h \
-                                     src/utils-object.h \
                                      src/utils-pool.h \
                                      src/utils-store.h \
                                      src/wayland-cache.h \
@@ -1368,7 +1377,6 @@ inter/wayland-protocol-compositor.o: Makefile \
                                      src/wayland-protocol-region.h \
                                      src/wayland-protocol-surface.h \
                                      src/wayland-region.h \
-                                     src/wayland-state.h \
                                      src/wayland-surface.h \
                                      src/wayland-types.h
 	@mkdir -p inter
@@ -1376,15 +1384,80 @@ inter/wayland-protocol-compositor.o: Makefile \
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-compositor.o \
 	    src/wayland-protocol-compositor.c
 
+inter/wayland-protocol-data-device.o: Makefile \
+                                      src/global-constants.h \
+                                      src/global-enums.h \
+                                      src/global-macros.h \
+                                      src/global-types.h \
+                                      src/utils-debug.h \
+                                      src/utils-log.h \
+                                      src/wayland-protocol-data-device.c \
+                                      src/wayland-protocol-data-device.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-data-device.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-data-device.o \
+	    src/wayland-protocol-data-device.c
+
+inter/wayland-protocol-data-source.o: Makefile \
+                                      src/global-constants.h \
+                                      src/global-enums.h \
+                                      src/global-macros.h \
+                                      src/global-types.h \
+                                      src/utils-debug.h \
+                                      src/utils-log.h \
+                                      src/wayland-protocol-data-source.c \
+                                      src/wayland-protocol-data-source.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-data-source.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-data-source.o \
+	    src/wayland-protocol-data-source.c
+
+inter/wayland-protocol-device-manager.o: Makefile \
+                                         src/global-constants.h \
+                                         src/global-enums.h \
+                                         src/global-macros.h \
+                                         src/global-types.h \
+                                         src/utils-chain.h \
+                                         src/utils-debug.h \
+                                         src/utils-list.h \
+                                         src/utils-log.h \
+                                         src/utils-store.h \
+                                         src/wayland-cache.h \
+                                         src/wayland-protocol-data-device.h \
+                                         src/wayland-protocol-data-source.h \
+                                         src/wayland-protocol-device-manager.c \
+                                         src/wayland-protocol-device-manager.h \
+                                         src/wayland-region.h \
+                                         src/wayland-surface.h \
+                                         src/wayland-types.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-device-manager.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-device-manager.o \
+	    src/wayland-protocol-device-manager.c
+
 inter/wayland-protocol-keyboard.o: Makefile \
+                                   src/config.h \
                                    src/global-constants.h \
                                    src/global-enums.h \
                                    src/global-macros.h \
                                    src/global-types.h \
+                                   src/output.h \
+                                   src/renderer.h \
+                                   src/utils-chain.h \
                                    src/utils-debug.h \
+                                   src/utils-keymap.h \
+                                   src/utils-list.h \
                                    src/utils-log.h \
+                                   src/utils-object.h \
+                                   src/utils-pool.h \
+                                   src/utils-store.h \
+                                   src/wayland-cache.h \
                                    src/wayland-protocol-keyboard.c \
-                                   src/wayland-protocol-keyboard.h
+                                   src/wayland-protocol-keyboard.h \
+                                   src/wayland-region.h \
+                                   src/wayland-state.h \
+                                   src/wayland-surface.h \
+                                   src/wayland-types.h
 	@mkdir -p inter
 	@echo "  CC   inter/wayland-protocol-keyboard.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-keyboard.o \
@@ -1415,13 +1488,17 @@ inter/wayland-protocol-pointer.o: Makefile \
                                   src/global-types.h \
                                   src/output.h \
                                   src/renderer.h \
+                                  src/utils-chain.h \
                                   src/utils-debug.h \
+                                  src/utils-list.h \
                                   src/utils-log.h \
                                   src/utils-object.h \
                                   src/utils-pool.h \
                                   src/utils-store.h \
+                                  src/wayland-cache.h \
                                   src/wayland-protocol-keyboard.h \
                                   src/wayland-protocol-pointer.c \
+                                  src/wayland-region.h \
                                   src/wayland-state.h \
                                   src/wayland-surface.h \
                                   src/wayland-types.h
@@ -1501,14 +1578,27 @@ inter/wayland-protocol-seat.o: Makefile \
 	    src/wayland-protocol-seat.c
 
 inter/wayland-protocol-shell-surface.o: Makefile \
+                                        src/exhibitor-compositor.h \
+                                        src/exhibitor-frame.h \
                                         src/global-constants.h \
                                         src/global-enums.h \
                                         src/global-macros.h \
                                         src/global-types.h \
+                                        src/surface-data.h \
+                                        src/surface-manager.h \
+                                        src/utils-branch.h \
+                                        src/utils-chain.h \
                                         src/utils-debug.h \
+                                        src/utils-list.h \
                                         src/utils-log.h \
+                                        src/utils-pool.h \
+                                        src/utils-store.h \
+                                        src/wayland-cache.h \
                                         src/wayland-protocol-shell-surface.c \
-                                        src/wayland-protocol-shell-surface.h
+                                        src/wayland-protocol-shell-surface.h \
+                                        src/wayland-region.h \
+                                        src/wayland-surface.h \
+                                        src/wayland-types.h
 	@mkdir -p inter
 	@echo "  CC   inter/wayland-protocol-shell-surface.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-shell-surface.o \
@@ -1530,17 +1620,49 @@ inter/wayland-protocol-shell.o: Makefile \
                                 src/utils-log.h \
                                 src/utils-pool.h \
                                 src/utils-store.h \
-                                src/wayland-cache.h \
                                 src/wayland-protocol-shell-surface.h \
                                 src/wayland-protocol-shell.c \
-                                src/wayland-protocol-shell.h \
-                                src/wayland-region.h \
-                                src/wayland-surface.h \
-                                src/wayland-types.h
+                                src/wayland-protocol-shell.h
 	@mkdir -p inter
 	@echo "  CC   inter/wayland-protocol-shell.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-shell.o \
 	    src/wayland-protocol-shell.c
+
+inter/wayland-protocol-subcompositor.o: Makefile \
+                                        src/global-constants.h \
+                                        src/global-enums.h \
+                                        src/global-macros.h \
+                                        src/global-types.h \
+                                        src/utils-chain.h \
+                                        src/utils-debug.h \
+                                        src/utils-list.h \
+                                        src/utils-log.h \
+                                        src/utils-store.h \
+                                        src/wayland-cache.h \
+                                        src/wayland-protocol-subcompositor.c \
+                                        src/wayland-protocol-subcompositor.h \
+                                        src/wayland-protocol-subsurface.h \
+                                        src/wayland-region.h \
+                                        src/wayland-surface.h \
+                                        src/wayland-types.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-subcompositor.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-subcompositor.o \
+	    src/wayland-protocol-subcompositor.c
+
+inter/wayland-protocol-subsurface.o: Makefile \
+                                     src/global-constants.h \
+                                     src/global-enums.h \
+                                     src/global-macros.h \
+                                     src/global-types.h \
+                                     src/utils-debug.h \
+                                     src/utils-log.h \
+                                     src/wayland-protocol-subsurface.c \
+                                     src/wayland-protocol-subsurface.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-subsurface.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-subsurface.o \
+	    src/wayland-protocol-subsurface.c
 
 inter/wayland-protocol-surface.o: Makefile \
                                   src/exhibitor-compositor.h \
@@ -1575,23 +1697,18 @@ inter/wayland-protocol-surface.o: Makefile \
 
 inter/wayland-protocol-xdg-shell.o: Makefile \
                                     gen/xdg-shell-server-protocol.h \
-                                    src/exhibitor-compositor.h \
-                                    src/exhibitor-frame.h \
                                     src/global-constants.h \
                                     src/global-enums.h \
                                     src/global-macros.h \
                                     src/global-types.h \
-                                    src/surface-data.h \
-                                    src/surface-manager.h \
-                                    src/utils-branch.h \
                                     src/utils-chain.h \
                                     src/utils-debug.h \
                                     src/utils-list.h \
                                     src/utils-log.h \
-                                    src/utils-pool.h \
                                     src/utils-store.h \
                                     src/wayland-cache.h \
                                     src/wayland-protocol-xdg-shell.c \
+                                    src/wayland-protocol-xdg-shell.h \
                                     src/wayland-protocol-xdg-surface.h \
                                     src/wayland-region.h \
                                     src/wayland-surface.h \
@@ -1618,8 +1735,12 @@ inter/wayland-protocol-xdg-surface.o: Makefile \
                                       src/utils-log.h \
                                       src/utils-pool.h \
                                       src/utils-store.h \
+                                      src/wayland-cache.h \
                                       src/wayland-protocol-xdg-surface.c \
-                                      src/wayland-protocol-xdg-surface.h
+                                      src/wayland-protocol-xdg-surface.h \
+                                      src/wayland-region.h \
+                                      src/wayland-surface.h \
+                                      src/wayland-types.h
 	@mkdir -p inter
 	@echo "  CC   inter/wayland-protocol-xdg-surface.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-xdg-surface.o \

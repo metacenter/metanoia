@@ -376,19 +376,19 @@ void noia_wayland_state_screen_refresh(NoiaSurfaceId sid)
 
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(sid);
 
-    // Release buffer resource
-    struct wl_resource* buffer_rc =
-               noia_wayland_surface_get_resource(surface, NOIA_RESOURCE_BUFFER);
-    if (buffer_rc) {
-        wl_resource_queue_event(buffer_rc, WL_BUFFER_RELEASE);
-    }
-
-    // Notify frame and release frame resource
+    // Release buffer resource and notify frame if needed
     struct wl_resource* frame_rc =
                 noia_wayland_surface_get_resource(surface, NOIA_RESOURCE_FRAME);
     if (frame_rc) {
-        LOG_WAYL4("Wayland: Sending frame (id: %u)", sid);
+        // Release buffer
+        struct wl_resource* buffer_rc =
+               noia_wayland_surface_get_resource(surface, NOIA_RESOURCE_BUFFER);
+        if (buffer_rc) {
+            wl_resource_queue_event(buffer_rc, WL_BUFFER_RELEASE);
+        }
 
+        // Notify frame
+        LOG_WAYL4("Wayland: Sending frame (id: %u)", sid);
         wl_callback_send_done(frame_rc, (uint32_t) noia_log_get_miliseconds());
         wl_resource_destroy(frame_rc);
         noia_wayland_surface_set_resource(surface, NOIA_RESOURCE_FRAME, NULL);

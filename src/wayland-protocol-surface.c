@@ -10,6 +10,17 @@
 
 //------------------------------------------------------------------------------
 
+/// Handle destruction of surface resource.
+void noia_wayland_surface_unbind(struct wl_resource* resource)
+{
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    LOG_NYIMP("Wayland: unbind surface (sid: %d)", sid);
+    noia_surface_destroy(sid);
+    noia_wayland_state_remove_surface(sid);
+}
+
+//------------------------------------------------------------------------------
+
 /// Handle destruction of frame resource.
 /// Currently nothing to do here.
 void noia_wayland_surface_frame_unbind(struct wl_resource* resource NOIA_UNUSED)
@@ -80,14 +91,9 @@ void noia_wayland_surface_frame(struct wl_client* client,
 
     LOG_WAYL3("Wayland: surface frame (cb: %d, sid: %d)", callback, sid);
 
-    struct wl_resource* rc = wl_resource_create(client,
-                                                &wl_callback_interface,
-                                                1, callback);
-    if (rc == NULL) {
-        LOG_ERROR("Could not create frame callback resource!");
-        wl_resource_post_no_memory(resource);
-        return;
-    }
+    struct wl_resource* rc;
+    rc = wl_resource_create(client, &wl_callback_interface, 1, callback);
+    NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
 
     wl_resource_set_implementation(rc, NULL, NULL,
                                    noia_wayland_surface_frame_unbind);
@@ -176,7 +182,7 @@ void noia_wayland_surface_set_buffer_scale
 
 //------------------------------------------------------------------------------
 
-const struct wl_surface_interface surface_implementation = {
+const struct wl_surface_interface scSurfaceImplementation = {
         noia_wayland_surface_destroy,
         noia_wayland_surface_attach,
         noia_wayland_surface_damage,
@@ -187,6 +193,26 @@ const struct wl_surface_interface surface_implementation = {
         noia_wayland_surface_set_buffer_transform,
         noia_wayland_surface_set_buffer_scale
     };
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_surface_bind(struct wl_client* client,
+                               void* data,
+                               uint32_t version,
+                               uint32_t id)
+{
+    LOG_WAYL2("Binding Wayland surface (version: %u, id: %u)", version, id);
+
+    struct wl_resource* rc;
+    rc = wl_resource_create(client, &wl_surface_interface, version, id);
+    NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
+
+    wl_resource_set_implementation(rc, &scSurfaceImplementation,
+                                   data, noia_wayland_surface_unbind);
+
+    NoiaSurfaceId sid = (NoiaSurfaceId) data;
+    noia_wayland_state_add_surface(sid, rc);
+}
 
 //------------------------------------------------------------------------------
 

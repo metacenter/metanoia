@@ -2,9 +2,17 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-protocol-shell-surface.h"
+#include "wayland-cache.h"
 
+#include "surface-manager.h"
 #include "utils-log.h"
-#include "global-macros.h"
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_shell_surface_unbind(struct wl_resource* resource NOIA_UNUSED)
+{
+    LOG_NYIMP("Wayland: unbind shell surface");
+}
 
 //------------------------------------------------------------------------------
 
@@ -121,7 +129,7 @@ void noia_wayland_shell_surface_set_class
 
 //------------------------------------------------------------------------------
 
-const struct wl_shell_surface_interface shell_surface_implementation = {
+const struct wl_shell_surface_interface scShellSurfaceImplementation = {
         noia_wayland_shell_surface_pong,
         noia_wayland_shell_surface_move,
         noia_wayland_shell_surface_resize,
@@ -133,6 +141,28 @@ const struct wl_shell_surface_interface shell_surface_implementation = {
         noia_wayland_shell_surface_set_title,
         noia_wayland_shell_surface_set_class
     };
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_shell_surface_bind(struct wl_client* client,
+                                     void* data,
+                                     uint32_t version,
+                                     uint32_t id)
+{
+    NoiaSurfaceId sid = (NoiaSurfaceId) data;
+    LOG_NYIMP("Binding Wayland shell surface (id: %32d, sid: %d)", id, sid);
+
+    struct wl_resource* rc;
+    rc = wl_resource_create(client, &wl_shell_surface_interface, version, id);
+    NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
+
+    noia_wayland_cache_add_surface_resource
+                                   (sid, NOIA_RESOURCE_SHELL_SURFACE, rc);
+    noia_surface_show(sid);
+
+    wl_resource_set_implementation(rc, &scShellSurfaceImplementation,
+                                   data, noia_wayland_shell_surface_unbind);
+}
 
 //------------------------------------------------------------------------------
 

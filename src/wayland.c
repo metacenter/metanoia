@@ -3,7 +3,9 @@
 
 #include "wayland.h"
 #include "wayland-protocol-compositor.h"
+#include "wayland-protocol-subcompositor.h"
 #include "wayland-protocol-shell.h"
+#include "wayland-protocol-device-manager.h"
 #include "wayland-protocol-seat.h"
 #include "wayland-protocol-xdg-shell.h"
 #include "wayland-protocol-output.h"
@@ -188,6 +190,16 @@ void noia_wayland_initialize(NoiaLoop* this_loop)
     if (!wl_global_create(wayland_display, &wl_compositor_interface, 3,
                           NULL, noia_wayland_compositor_bind)) {
         LOG_ERROR("Could not create global display!");
+    }
+
+    if (!wl_global_create(wayland_display, &wl_subcompositor_interface, 1,
+                          NULL, noia_wayland_subcompositor_bind)) {
+        LOG_ERROR("Could not create global display!");
+    }
+
+    if (!wl_global_create(wayland_display, &wl_data_device_manager_interface, 2,
+                          NULL, noia_wayland_device_manager_bind)) {
+        LOG_ERROR("Could not create global device manager!");
     }
 
     if (!wl_global_create(wayland_display, &wl_shell_interface, 1,

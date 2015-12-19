@@ -11,6 +11,13 @@
 
 //------------------------------------------------------------------------------
 
+void noia_wayland_screenshooter_unbind(struct wl_resource* resource NOIA_UNUSED)
+{
+    LOG_NYIMP("Wayland: unbind screenshooter");
+}
+
+//------------------------------------------------------------------------------
+
 /// Wayland protocol: Take a screenshot.
 void noia_wayland_screenshooter_shoot(struct wl_client* client NOIA_UNUSED,
                                       struct wl_resource* resource,
@@ -26,7 +33,7 @@ void noia_wayland_screenshooter_shoot(struct wl_client* client NOIA_UNUSED,
         int stride = wl_shm_buffer_get_stride(shm_buffer);
         uint8_t* data = wl_shm_buffer_get_data(shm_buffer);
 
-        NoiaArea area = {.pos={0,0},.size={width,height}};
+        NoiaArea area = {.pos={0, 0}, .size={width, height}};
         noia_output_take_screenshot(output, area, data, stride);
     } else {
         LOG_ERROR("Wrong shared memory buffer!");
@@ -38,7 +45,7 @@ void noia_wayland_screenshooter_shoot(struct wl_client* client NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-const struct screenshooter_interface screenshooter_implementation = {
+const struct screenshooter_interface scScreenshooterImplementation = {
         noia_wayland_screenshooter_shoot
     };
 
@@ -46,16 +53,19 @@ const struct screenshooter_interface screenshooter_implementation = {
 
 /// Wayland protocol: Handle request for interface to screenshooter object.
 void noia_wayland_screenshooter_bind(struct wl_client* client,
-                                     void* data       NOIA_UNUSED,
-                                     uint32_t version NOIA_UNUSED,
+                                     void* data,
+                                     uint32_t version,
                                      uint32_t id)
 {
-    struct wl_resource* resource =
-                    wl_resource_create(client, &screenshooter_interface, 1, id);
+    LOG_WAYL2("Binding Wayland screenshooter "
+              "(version: %d, id: %d)", version, id);
 
-    wl_resource_set_implementation(resource,
-                                   &screenshooter_implementation,
-                                   NULL, NULL);
+    struct wl_resource* rc;
+    rc = wl_resource_create(client, &screenshooter_interface, 1, id);
+    NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
+
+    wl_resource_set_implementation(rc, &scScreenshooterImplementation,
+                                   data, noia_wayland_screenshooter_unbind);
 }
 
 //------------------------------------------------------------------------------

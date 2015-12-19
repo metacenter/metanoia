@@ -2,12 +2,20 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-protocol-xdg-surface.h"
+#include "wayland-cache.h"
 
 #include "utils-log.h"
 #include "surface-manager.h"
 #include "global-macros.h"
 
 #include "xdg-shell-server-protocol.h"
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_xdg_surface_unbind(struct wl_resource* resource NOIA_UNUSED)
+{
+    LOG_NYIMP("Wayland: unbind XDG shell surface");
+}
 
 //------------------------------------------------------------------------------
 
@@ -177,7 +185,7 @@ void noia_wayland_xdg_surface_set_minimized
 
 //------------------------------------------------------------------------------
 
-const struct xdg_surface_interface xdg_surface_implementation = {
+const struct xdg_surface_interface scXdgSurfaceImplementation = {
         noia_wayland_xdg_surface_destroy,
         noia_wayland_xdg_surface_set_parent,
         noia_wayland_xdg_surface_set_title,
@@ -193,6 +201,30 @@ const struct xdg_surface_interface xdg_surface_implementation = {
         noia_wayland_xdg_surface_unset_fullscreen,
         noia_wayland_xdg_surface_set_minimized
     };
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_xdg_surface_bind(struct wl_client* client,
+                                   void* data,
+                                   uint32_t version,
+                                   uint32_t id)
+{
+    NoiaSurfaceId sid = (NoiaSurfaceId) data;
+    LOG_WAYL2("Binding XDG shell surface "
+              "(version: %u, id: %u, sid: %u)", version, id, sid);
+
+    struct wl_resource* rc;
+    rc = wl_resource_create(client, &xdg_surface_interface, version, id);
+    NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
+
+    noia_wayland_cache_add_surface_resource
+                                   (sid, NOIA_RESOURCE_XDG_SHELL_SURFACE, rc);
+    noia_surface_show(sid);
+
+    wl_resource_set_implementation(rc, &scXdgSurfaceImplementation, data,
+                                   noia_wayland_xdg_surface_unbind);
+
+}
 
 //------------------------------------------------------------------------------
 

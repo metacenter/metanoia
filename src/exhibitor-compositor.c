@@ -64,7 +64,8 @@ void noia_compositor_set_selection(NoiaCompositor* self, NoiaFrame* frame)
     NoiaSurfaceId sid = scInvalidSurfaceId;
 
     if (not frame) {
-        if (self->selection) {
+        if (self->selection
+        and noia_frame_has_type(self->selection, NOIA_FRAME_TYPE_LEAF)) {
             self->selection = self->selection->trunk;
         }
     } else if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
@@ -153,6 +154,8 @@ void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     NoiaFrame* frame = noia_frame_find_with_sid(self->root, sid);
     noia_frame_remove_self(frame);
     noia_frame_free(frame);
+
+    noia_compositor_log_frame(self);
 }
 
 //------------------------------------------------------------------------------
