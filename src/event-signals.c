@@ -40,7 +40,8 @@ int noia_event_signal_compare_task_subscription_data(void* data, NoiaTask* task)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_event_signal_subscribe(NoiaSignalNum sig_num, NoiaTask* task) {
+NoiaResult noia_event_signal_subscribe(NoiaSignalNum sig_num, NoiaTask* task)
+{
     if (sig_num >= SIGNAL_NUM) {
         LOG_WARN1("Unknown Signal Number: %d", sig_num);
         return NOIA_RESULT_INCORRECT_ARGUMENT;
@@ -97,7 +98,8 @@ NoiaResult noia_event_signal_unsubscribe(void* subscription_data)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_event_signal_emit(NoiaSignalNum sig_num, NoiaObject* object) {
+NoiaResult noia_event_signal_emit(NoiaSignalNum sig_num, NoiaObject* object)
+{
     if (sig_num >= SIGNAL_NUM) {
         LOG_WARN1("Unknown Signal Number: %d", sig_num);
         return NOIA_RESULT_INCORRECT_ARGUMENT;
@@ -119,6 +121,7 @@ NoiaResult noia_event_signal_emit(NoiaSignalNum sig_num, NoiaObject* object) {
             if (task) {
                 if (task->loop) {
                     LOG_EVNT4("Signal: emited (num: %d)", sig_num);
+                    /// @todo Do not allocate memory here.
                     NoiaTask* task_copy = noia_task_copy(task);
                     task_copy->emission_data = object;
                     noia_object_ref(object);

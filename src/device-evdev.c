@@ -65,9 +65,10 @@ void noia_evdev_handle_touch(struct input_event* ev)
     } else if (ev->code == ABS_MT_POSITION_Y) {
         noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y, ev->value);
     } else if (ev->code == BTN_LEFT || ev->code == BTN_RIGHT) {
-        noia_event_signal_emit(SIGNAL_POINTER_BUTTON,
-                    (NoiaObject*) noia_button_create(noia_log_get_miliseconds(),
-                                                     ev->code, ev->value));
+        unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
+        NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
+        noia_event_signal_emit(SIGNAL_POINTER_BUTTON, (NoiaObject*) btn);
+        noia_object_unref((NoiaObject*) btn);
     }
 }
 

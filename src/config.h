@@ -19,7 +19,7 @@ typedef struct {
     bool run_in_test_mode;
     bool use_gl;
     bool use_drm;
-    const char* wayland_display_name;
+    char* wayland_display_name;
 } NoiaSettings;
 
 /// Get configuration.

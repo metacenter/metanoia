@@ -95,7 +95,7 @@ void noia_config_apply(int argc, char** argv)
     if (env) {
         sSettings.wayland_display_name = strdup(env);
     } else {
-        sSettings.wayland_display_name = scDefaultWaylandDisplayName;
+        sSettings.wayland_display_name = strdup(scDefaultWaylandDisplayName);
     }
 
     // Parse program arguments
@@ -111,6 +111,11 @@ void noia_config_finalize(void)
 {
     noia_utils_keymap_finalize(keymap);
     noia_utils_keymap_free(keymap);
+
+    if (sSettings.wayland_display_name) {
+        free(sSettings.wayland_display_name);
+        sSettings.wayland_display_name = NULL;
+    }
 
     noia_keyboard_free_all();
 }

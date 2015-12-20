@@ -29,7 +29,8 @@
 //------------------------------------------------------------------------------
 
 static pthread_t wayland_thread;
-static struct wl_display* wayland_display;
+static struct wl_display* wayland_display = NULL;
+static struct wl_event_source* src = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -143,17 +144,8 @@ void wayland_surface_reconfigured_handler(void* data)
 
 int noia_wayland_event_loop_feeder(void* data NOIA_UNUSED)
 {
-    struct wl_event_loop* loop;
-    static struct wl_event_source* src = NULL;
-
     LOG_WAYL4("--- Wayland loop feeder ---");
-    loop = wl_display_get_event_loop(wayland_display);
-    if (!src) {
-        src = wl_event_loop_add_timer(loop,
-                noia_wayland_event_loop_feeder, NULL);
-    }
-    wl_event_source_timer_update(src, 100);
-
+    wl_event_source_timer_update(src, 60);
     return 0;
 }
 
@@ -168,6 +160,8 @@ void noia_wayland_finalize(void* data NOIA_UNUSED)
     LOG_INFO1("Wayland: waiting for thread to exit");
     pthread_join(wayland_thread, NULL);
     wl_display_destroy(wayland_display);
+
+    free(src);
 }
 
 //------------------------------------------------------------------------------
@@ -227,6 +221,8 @@ void noia_wayland_initialize(NoiaLoop* this_loop)
     /// @note WORKAROUND:
     /// Wayland main loop must be fed with some kind of epoll events,
     /// otherwise it blocks. Here Wayland timer is used.
+    src = wl_event_loop_add_timer(wl_display_get_event_loop(wayland_display),
+                                  noia_wayland_event_loop_feeder, NULL);
     noia_wayland_event_loop_feeder(NULL);
 
     // Add socket
