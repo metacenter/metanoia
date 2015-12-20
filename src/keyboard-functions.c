@@ -83,6 +83,7 @@ void noia_cicle_history_forward(NoiaBindingContext* context)
     NoiaAction* action = &context->action;
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_FORWARD;
+    action->magnitude = 1;
     noia_exhibitor_execute(action);
     noia_action_clean(action);
 }
@@ -94,8 +95,8 @@ void noia_cicle_history_back(NoiaBindingContext* context)
     NOIA_ENSURE(context, return);
     NoiaAction* action = &context->action;
     action->action = NOIA_ARGMAND_FOCUS;
-    action->direction = NOIA_ARGMAND_FORWARD;
-    action->magnitude = -1 * action->magnitude;
+    action->direction = NOIA_ARGMAND_BACK;
+    action->magnitude = 1;
     noia_exhibitor_execute(action);
     noia_action_clean(action);
 }

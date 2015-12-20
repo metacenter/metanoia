@@ -25,8 +25,6 @@ void noia_wayland_create_surface(struct wl_client* client,
                                  uint32_t id)
 {
     NoiaSurfaceId new_sid = noia_surface_create();
-    LOG_WAYL2("Wayland: create surface (id: %d, sid: %d)", id, new_sid);
-
     int32_t version = wl_resource_get_version(resource);
     noia_wayland_surface_bind(client, (void*) new_sid, version, id);
 }
@@ -40,8 +38,6 @@ void noia_wayland_create_region(struct wl_client* client,
                                 uint32_t id)
 {
     NoiaItemId new_rid = noia_wayland_cache_create_region();
-    LOG_WAYL2("Wayland: create region (id: %d, rid: %d)", id, new_rid);
-
     int32_t version = wl_resource_get_version(resource);
     noia_wayland_region_bind(client, (void*) new_rid, version, id);
 }

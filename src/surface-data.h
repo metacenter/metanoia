@@ -12,6 +12,14 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+typedef enum {
+    NOIA_SURFACE_SHOW_DRAWABLE = 0x1,
+    NOIA_SURFACE_SHOW_IN_SHELL = 0x2,
+
+    NOIA_SURFACE_SHOW_FULL = NOIA_SURFACE_SHOW_DRAWABLE
+                           | NOIA_SURFACE_SHOW_IN_SHELL,
+} NoiaSurfaceShowReason;
+
 /// Container for all data required to draw the surface.
 typedef struct {
     int width;
@@ -43,7 +51,8 @@ typedef struct {
     /// Data to be used after commit.
     NoiaDrawBuffer pending_buffer;
 
-    bool is_toplevel;
+    /// Flags indicating if surface is ready to be shown.
+    uint8_t show_flags;
 } NoiaSurfaceData;
 
 /// Allocate Surface Data.

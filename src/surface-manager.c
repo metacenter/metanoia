@@ -75,11 +75,6 @@ void noia_surface_attach_egl(NoiaSurfaceId sid,
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
     surface->buffer.resource = resource;
-    /// @todo Log at init if renderer supports egl
-    /// @todo Move 'attach' out from renderer
-    //if (renderer && renderer->attach) {
-    //    renderer->attach((renderer, sid, resource);
-    //}
 }
 
 //------------------------------------------------------------------------------
@@ -145,7 +140,10 @@ void noia_surface_commit(NoiaSurfaceId sid)
             surface->requested_size.width  = surface->buffer.width;
             surface->requested_size.height = surface->buffer.height;
         }
-        noia_event_signal_emit_int(SIGNAL_SURFACE_READY, sid);
+
+        if (surface->buffer.data or surface->buffer.resource) {
+            noia_surface_show(sid, NOIA_SURFACE_SHOW_DRAWABLE);
+        }
     }
 
     noia_surface_unlock();
@@ -153,10 +151,14 @@ void noia_surface_commit(NoiaSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-void noia_surface_show(NoiaSurfaceId sid NOIA_UNUSED)
+void noia_surface_show(NoiaSurfaceId sid, NoiaSurfaceShowReason reason)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
-    surface->is_toplevel = true;
+
+    surface->show_flags |= reason;
+    if (surface->show_flags == NOIA_SURFACE_SHOW_FULL) {
+        noia_event_signal_emit_int(SIGNAL_SURFACE_READY, sid);
+    }
 }
 
 //------------------------------------------------------------------------------

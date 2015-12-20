@@ -227,7 +227,7 @@ static inline void noia_frame_log_internal(NoiaFrame* self,
         print("    ");
     }
 
-    print("NoiaFrame(type='0x%x', sid='%d', len='%d'"
+    print("NoiaFrame(type='0x%x', sid='%d', len='%d', "
           "x='%d', y='%d', w='%d', h='%d', title='%s')%s\n",
           params->type, params->sid, noia_chain_len(self->twigs),
           params->area.pos.x, params->area.pos.y,

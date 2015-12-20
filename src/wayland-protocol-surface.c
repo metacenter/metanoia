@@ -51,7 +51,8 @@ void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
     uint8_t* data = NULL;
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
 
-    LOG_WAYL3("Wayland: surface attach (sx: %d, sy: %d, sid: %d)", sx, sy, sid);
+    LOG_WAYL3("Wayland > surface attach (sx: %d, sy: %d, sid: %d)",
+              sx, sy, sid);
 
     struct wl_shm_buffer* shm_buffer = wl_shm_buffer_get(buffer_resource);
     if (shm_buffer) {
@@ -70,13 +71,14 @@ void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
 //------------------------------------------------------------------------------
 
 /// @todo: Wayland protocol: damage surface.
-void noia_wayland_surface_damage(struct wl_client* client     NOIA_UNUSED,
-                                 struct wl_resource* resource NOIA_UNUSED,
+void noia_wayland_surface_damage(struct wl_client* client NOIA_UNUSED,
+                                 struct wl_resource* resource,
                                  int32_t x, int32_t y,
                                  int32_t width, int32_t height)
 {
-    LOG_WAYL3("Wayland: surface damage (x: %d, y: %d, w: %d, h: %d)",
-              x, y, width, height);
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    LOG_WAYL4("Wayland > surface damage (x: %d, y: %d, w: %d, h: %d, sid: %u)",
+              x, y, width, height, sid);
 }
 
 //------------------------------------------------------------------------------
@@ -89,7 +91,7 @@ void noia_wayland_surface_frame(struct wl_client* client,
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
 
-    LOG_WAYL3("Wayland: surface frame (cb: %d, sid: %d)", callback, sid);
+    LOG_WAYL3("Wayland > surface frame (cb: %d, sid: %d)", callback, sid);
 
     struct wl_resource* rc;
     rc = wl_resource_create(client, &wl_callback_interface, 1, callback);
@@ -117,7 +119,7 @@ void noia_wayland_surface_set_opaque_region
         /// @todo Clear opaque region.
     }
 
-    LOG_NYIMP("Wayland: set opaque region (sid: %d, rid: %d)", sid, rid);
+    LOG_NYIMP("Wayland > set opaque region (sid: %d, rid: %d)", sid, rid);
 }
 
 //------------------------------------------------------------------------------
@@ -135,7 +137,7 @@ void noia_wayland_surface_set_input_region(struct wl_client* client NOIA_UNUSED,
         /// @todo Clear input region.
     }
 
-    LOG_WAYL2("Wayland: set input region (sid: %d, rid: %d)", sid, rid);
+    LOG_WAYL2("Wayland > set input region (sid: %d, rid: %d)", sid, rid);
 
     NoiaWaylandRegion* region = noia_wayland_cache_find_region(rid);
     if (region) {
@@ -153,7 +155,7 @@ void noia_wayland_surface_commit(struct wl_client* client NOIA_UNUSED,
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
 
-    LOG_WAYL3("Wayland: commit (sid: %d)", sid);
+    LOG_WAYL3("Wayland > commit (sid: %d)", sid);
 
     noia_surface_commit(sid);
 }
@@ -166,7 +168,7 @@ void noia_wayland_surface_set_buffer_transform
                                        struct wl_resource* resource NOIA_UNUSED,
                                        int32_t transform)
 {
-    LOG_NYIMP("Wayland: set buffer transform (transform: %d)", transform);
+    LOG_NYIMP("Wayland > set buffer transform (transform: %d)", transform);
 }
 
 //------------------------------------------------------------------------------
@@ -177,7 +179,7 @@ void noia_wayland_surface_set_buffer_scale
                                        struct wl_resource* resource NOIA_UNUSED,
                                        int32_t scale)
 {
-    LOG_NYIMP("Wayland: set buffer scale (scale: %d)", scale);
+    LOG_NYIMP("Wayland > set buffer scale (scale: %d)", scale);
 }
 
 //------------------------------------------------------------------------------

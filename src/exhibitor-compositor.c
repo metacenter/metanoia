@@ -123,9 +123,7 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     NOIA_ENSURE(self, return false);
 
     NoiaSurfaceData* surface = noia_surface_get(sid);
-    if (!surface || !surface->is_toplevel) {
-        return false;
-    }
+    NOIA_ENSURE(surface, return false);
 
     /// @todo Frame type, size and position should be configurable.
     NoiaFrame* frame = noia_frame_new();

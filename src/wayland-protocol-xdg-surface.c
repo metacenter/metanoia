@@ -219,7 +219,7 @@ void noia_wayland_xdg_surface_bind(struct wl_client* client,
 
     noia_wayland_cache_add_surface_resource
                                    (sid, NOIA_RESOURCE_XDG_SHELL_SURFACE, rc);
-    noia_surface_show(sid);
+    noia_surface_show(sid, NOIA_SURFACE_SHOW_IN_SHELL);
 
     wl_resource_set_implementation(rc, &scXdgSurfaceImplementation, data,
                                    noia_wayland_xdg_surface_unbind);

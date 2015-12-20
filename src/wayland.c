@@ -61,7 +61,7 @@ void wayland_screen_refresh_handler(void* data)
 void wayland_keyboard_focus_change_handler(void* data)
 {
     NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
-    LOG_WAYL2("Wayland: handling keyboard focus change (%d)", sid);
+    LOG_WAYL2("Wayland: handling keyboard focus change (sid: %d)", sid);
     noia_wayland_state_keyboard_focus_update(sid);
 }
 

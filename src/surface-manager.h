@@ -24,7 +24,7 @@ void noia_surface_attach(NoiaSurfaceId sid,
 
 void noia_surface_commit(NoiaSurfaceId sid);
 
-void noia_surface_show(NoiaSurfaceId sid);
+void noia_surface_show(NoiaSurfaceId sid, NoiaSurfaceShowReason reason);
 
 void noia_surface_set_offset(NoiaSurfaceId sid, NoiaPosition offset);
 

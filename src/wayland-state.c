@@ -163,7 +163,7 @@ void noia_wayland_state_keyboard_focus_update(NoiaSurfaceId new_sid)
     pthread_mutex_lock(&sStateMutex);
 
     NoiaSurfaceId old_sid = sState.keyboard_focused_sid;
-    LOG_WAYL2("Wayland: keyboard focus update (oldsid: %u, newsid: %u)",
+    LOG_WAYL2("Wayland < keyboard focus update (oldsid: %u, newsid: %u)",
               old_sid, new_sid);
 
     new_resource = noia_wayland_state_get_rc_for_sid(new_sid);
@@ -218,7 +218,7 @@ void noia_wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
         return;
     }
 
-    LOG_WAYL4("Wayland: key (sid: %u, time: %u, key: %u, state: %u)",
+    LOG_WAYL4("Wayland < key (sid: %u, time: %u, key: %u, state: %u)",
               sState.keyboard_focused_sid, time, key, state);
 
     resource = noia_wayland_state_get_rc_for_sid(sState.keyboard_focused_sid);
@@ -388,7 +388,7 @@ void noia_wayland_state_screen_refresh(NoiaSurfaceId sid)
         }
 
         // Notify frame
-        LOG_WAYL4("Wayland: Sending frame (id: %u)", sid);
+        LOG_WAYL3("Wayland < frame (sid: %u)", sid);
         wl_callback_send_done(frame_rc, (uint32_t) noia_log_get_miliseconds());
         wl_resource_destroy(frame_rc);
         noia_wayland_surface_set_resource(surface, NOIA_RESOURCE_FRAME, NULL);
@@ -444,7 +444,7 @@ void noia_wayland_state_surface_reconfigured(NoiaSurfaceId sid)
     }
 
     if (surface && data) {
-        LOG_INFO2("Wayland: surface reconfiguration "
+        LOG_INFO2("Wayland < surface reconfiguration "
                   "(sid: %d, width: %d, height: %d)",
                    sid, data->desired_size.width, data->desired_size.height);
 
