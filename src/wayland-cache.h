@@ -44,7 +44,8 @@ void noia_wayland_cache_add_general_resource
                                    struct wl_resource* resource);
 
 void noia_wayland_cache_remove_surface_resource
-                                  (NoiaWaylandSurfaceResourceType resource_type,
+                                  (NoiaSurfaceId sid,
+                                   NoiaWaylandSurfaceResourceType resource_type,
                                    struct wl_resource* resource);
 
 void noia_wayland_cache_remove_general_resource

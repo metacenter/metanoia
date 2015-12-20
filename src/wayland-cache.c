@@ -13,7 +13,6 @@ pthread_mutex_t sCacheMutex = PTHREAD_MUTEX_INITIALIZER;
 static struct {
     NoiaStore* surfaces;
     NoiaStore* regions;
-    NoiaList* surface_resource[NOIA_NUM_SURFACE_RESOURCE_TYPES];
     NoiaList* general_resource[NOIA_NUM_GENERAL_RESOURCE_TYPES];
 } sCache;
 
@@ -22,12 +21,7 @@ static struct {
 int noia_wayland_cache_compare_resources(struct wl_resource* rc1,
                                          struct wl_resource* rc2)
 {
-    if (rc1 < rc2) {
-        return -1;
-    } else if (rc1 > rc2) {
-        return 1;
-    }
-    return 0;
+    return rc1 != rc2;
 }
 
 //------------------------------------------------------------------------------
@@ -42,13 +36,6 @@ NoiaResult noia_wayland_cache_initialize(void)
     sCache.surfaces = noia_store_new_for_id();
     if (!sCache.surfaces) {
         return NOIA_RESULT_ERROR;
-    }
-
-    for (int type = 0; type < NOIA_NUM_SURFACE_RESOURCE_TYPES; ++type) {
-        sCache.surface_resource[type] = noia_list_new(NULL);
-        if (!sCache.surface_resource[type]) {
-            return NOIA_RESULT_ERROR;
-        }
     }
 
     for (int type = 0; type < NOIA_NUM_GENERAL_RESOURCE_TYPES; ++type) {
@@ -66,11 +53,12 @@ NoiaResult noia_wayland_cache_initialize(void)
 void noia_wayland_cache_finalize(void)
 {
     for (int type = 0; type < NOIA_NUM_GENERAL_RESOURCE_TYPES; ++type) {
+        int len = noia_list_len(sCache.general_resource[type]);
+        if (len > 0) {
+            LOG_WARN1("Wayland: %d general resources of type '%d' "
+                      "were not released!", len, type);
+        }
         noia_list_free(sCache.general_resource[type]);
-    }
-
-    for (int type = 0; type < NOIA_NUM_SURFACE_RESOURCE_TYPES; ++type) {
-        noia_list_free(sCache.surface_resource[type]);
     }
 
     if (sCache.surfaces) {
@@ -149,14 +137,8 @@ void noia_wayland_cache_add_surface_resource
 {
     pthread_mutex_lock(&sCacheMutex);
 
-    noia_list_append(sCache.surface_resource[resource_type], resource);
-
     NoiaWaylandSurface* surface = noia_store_find(sCache.surfaces, sid);
-    if (surface) {
-        noia_wayland_surface_set_resource(surface, resource_type, resource);
-    } else {
-        LOG_INFO3("SID %d does not resolve to any surface", sid);
-    }
+    noia_wayland_surface_add_resource(surface, resource_type, resource);
 
     pthread_mutex_unlock(&sCacheMutex);
 }
@@ -167,13 +149,11 @@ void noia_wayland_cache_add_general_resource
                                    (NoiaWaylandGeneralResourceType resource_type,
                                     struct wl_resource* resource)
 {
+    NOIA_ENSURE(resource_type < NOIA_NUM_GENERAL_RESOURCE_TYPES, return);
+
     pthread_mutex_lock(&sCacheMutex);
 
-    if (resource_type < NOIA_NUM_GENERAL_RESOURCE_TYPES) {
-        noia_list_append(sCache.general_resource[resource_type], resource);
-    } else {
-        LOG_WARN1("Adding not existing resource type (%d)", resource_type);
-    }
+    noia_list_append(sCache.general_resource[resource_type], resource);
 
     pthread_mutex_unlock(&sCacheMutex);
 }
@@ -181,17 +161,16 @@ void noia_wayland_cache_add_general_resource
 //------------------------------------------------------------------------------
 
 void noia_wayland_cache_remove_surface_resource
-                                  (NoiaWaylandSurfaceResourceType resource_type,
+                                  (NoiaSurfaceId sid,
+                                   NoiaWaylandSurfaceResourceType resource_type,
                                    struct wl_resource* resource)
 {
+    NOIA_ENSURE(resource_type < NOIA_NUM_SURFACE_RESOURCE_TYPES, return);
+
     pthread_mutex_lock(&sCacheMutex);
 
-    if (resource_type < NOIA_NUM_SURFACE_RESOURCE_TYPES) {
-        noia_list_remove(sCache.surface_resource[resource_type], resource,
-                     (NoiaCompareFunc) noia_wayland_cache_compare_resources);
-    } else {
-        LOG_WARN1("Removing not existing resource type (%d)", resource_type);
-    }
+    NoiaWaylandSurface* surface = noia_store_find(sCache.surfaces, sid);
+    noia_wayland_surface_remove_resource(surface, resource_type, resource);
 
     pthread_mutex_unlock(&sCacheMutex);
 }
@@ -202,14 +181,12 @@ void noia_wayland_cache_remove_general_resource
                                   (NoiaWaylandGeneralResourceType resource_type,
                                    struct wl_resource* resource)
 {
+    NOIA_ENSURE(resource_type < NOIA_NUM_GENERAL_RESOURCE_TYPES, return);
+
     pthread_mutex_lock(&sCacheMutex);
 
-    if (resource_type < NOIA_NUM_GENERAL_RESOURCE_TYPES) {
-        noia_list_remove(sCache.general_resource[resource_type], resource,
-                     (NoiaCompareFunc) noia_wayland_cache_compare_resources);
-    } else {
-        LOG_WARN1("Removing not existing resource type (%d)", resource_type);
-    }
+    noia_list_remove(sCache.general_resource[resource_type], resource,
+                        (NoiaCompareFunc) noia_wayland_cache_compare_resources);
 
     pthread_mutex_unlock(&sCacheMutex);
 }
@@ -219,9 +196,7 @@ void noia_wayland_cache_remove_general_resource
 NoiaList* noia_wayland_cache_get_resources
                                   (NoiaWaylandGeneralResourceType resource_type)
 {
-    if (resource_type >= NOIA_NUM_GENERAL_RESOURCE_TYPES) {
-        return NULL;
-    }
+    NOIA_ENSURE(resource_type < NOIA_NUM_GENERAL_RESOURCE_TYPES, return NULL);
     return sCache.general_resource[resource_type];
 }
 

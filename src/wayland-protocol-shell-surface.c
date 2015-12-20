@@ -9,9 +9,12 @@
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_shell_surface_unbind(struct wl_resource* resource NOIA_UNUSED)
+void noia_wayland_shell_surface_unbind(struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: unbind shell surface");
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    LOG_WAYL2("Wayland: unbind shell surface (sid: %u)", sid);
+    noia_wayland_cache_remove_surface_resource
+                                   (sid, NOIA_RESOURCE_SHELL_SURFACE, resource);
 }
 
 //------------------------------------------------------------------------------

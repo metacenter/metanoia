@@ -9,22 +9,33 @@
 
 //------------------------------------------------------------------------------
 
+int noia_wayland_surfsace_compare_resources(struct wl_resource* rc1,
+                                            struct wl_resource* rc2)
+{
+    return rc1 != rc2;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaWaylandSurface* noia_wayland_surface_new(void)
 {
-    return calloc(1, sizeof(NoiaWaylandSurface));
+    NoiaWaylandSurface* self = calloc(1, sizeof(NoiaWaylandSurface));
+    self->frame_resources = noia_list_new(NULL);
+    return self;
 }
 
 //------------------------------------------------------------------------------
 
 void noia_wayland_surface_free(NoiaWaylandSurface* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
 
-    if (self->resources[NOIA_RESOURCE_FRAME]) {
-        wl_resource_destroy(self->resources[NOIA_RESOURCE_FRAME]);
+    int len = noia_list_len(self->frame_resources);
+    if (len > 2) {
+        LOG_WARN1("Wayland: %d surface frame resources not released!", len);
     }
+    noia_wayland_surface_remove_frame_resources(self);
+    noia_list_free(self->frame_resources);
 
     memset(self, 0, sizeof(NoiaWaylandSurface));
     free(self);
@@ -36,34 +47,67 @@ struct wl_resource* noia_wayland_surface_get_resource
                                   (NoiaWaylandSurface* self,
                                    NoiaWaylandSurfaceResourceType resource_type)
 {
-    struct wl_resource* result = NULL;
-    if (!self) {
-        return result;
-    }
+    NOIA_ENSURE(self, return NULL);
+    NOIA_ENSURE(resource_type < NOIA_NUM_SURFACE_RESOURCE_TYPES, return NULL);
 
-    if (resource_type < NOIA_NUM_SURFACE_RESOURCE_TYPES) {
-        result = self->resources[resource_type];
-    } else {
-        LOG_WARN1("Reading not existing resource type (%d)", resource_type);
-    }
-    return result;
+    return self->resources[resource_type];
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_surface_set_resource
+const NoiaList* noia_wayland_surface_get_frame_resources
+                                                      (NoiaWaylandSurface* self)
+{
+    NOIA_ENSURE(self, return NULL);
+    return self->frame_resources;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_surface_add_resource
                                   (NoiaWaylandSurface* self,
                                    NoiaWaylandSurfaceResourceType resource_type,
                                    struct wl_resource* resource)
 {
-    if (!self) {
-        return;
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(resource_type < NOIA_NUM_SURFACE_RESOURCE_TYPES, return);
+
+    if (resource_type == NOIA_RESOURCE_FRAME) {
+        noia_list_append(self->frame_resources, resource);
+    } else if (self->resources[resource_type]) {
+        LOG_WARN1("Wayland: surface resource of type '%d' "
+                  "already here!", resource_type);
     }
 
-    if (resource_type < NOIA_NUM_SURFACE_RESOURCE_TYPES) {
-        self->resources[resource_type] = resource;
-    } else {
-        LOG_WARN1("Adding not existing resource type (%d)", resource_type);
+    self->resources[resource_type] = resource;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_surface_remove_resource
+                                  (NoiaWaylandSurface* self,
+                                   NoiaWaylandSurfaceResourceType resource_type,
+                                   struct wl_resource* resource)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(resource_type < NOIA_NUM_SURFACE_RESOURCE_TYPES, return);
+
+    self->resources[resource_type] = NULL;
+
+    if (resource_type == NOIA_RESOURCE_FRAME) {
+        noia_list_remove(self->frame_resources, resource,
+                     (NoiaCompareFunc) noia_wayland_surfsace_compare_resources);
+        self->resources[resource_type] = noia_list_first(self->frame_resources);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_surface_remove_frame_resources(NoiaWaylandSurface* self)
+{
+    NOIA_ENSURE(self, return);
+    while (noia_list_len(self->frame_resources) > 0) {
+        wl_resource_destroy(noia_list_first(self->frame_resources));
     }
 }
 

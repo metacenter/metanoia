@@ -14,18 +14,20 @@
 void noia_wayland_surface_unbind(struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
-    LOG_NYIMP("Wayland: unbind surface (sid: %d)", sid);
+    LOG_WAYL2("Wayland: unbind surface (sid: %u)", sid);
     noia_surface_destroy(sid);
-    noia_wayland_state_remove_surface(sid);
+    noia_wayland_state_remove_surface(sid, resource);
 }
 
 //------------------------------------------------------------------------------
 
 /// Handle destruction of frame resource.
-/// Currently nothing to do here.
-void noia_wayland_surface_frame_unbind(struct wl_resource* resource NOIA_UNUSED)
+void noia_wayland_surface_frame_unbind(struct wl_resource* resource)
 {
-    LOG_WAYL5("Wayland: unbind surface frame");
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    LOG_WAYL3("Wayland: unbind surface frame (sid: %u)", sid);
+    noia_wayland_cache_remove_surface_resource
+                                           (sid, NOIA_RESOURCE_FRAME, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -97,7 +99,7 @@ void noia_wayland_surface_frame(struct wl_client* client,
     rc = wl_resource_create(client, &wl_callback_interface, 1, callback);
     NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
 
-    wl_resource_set_implementation(rc, NULL, NULL,
+    wl_resource_set_implementation(rc, NULL, (void*) sid,
                                    noia_wayland_surface_frame_unbind);
 
     noia_wayland_state_subscribe_frame(sid, rc);

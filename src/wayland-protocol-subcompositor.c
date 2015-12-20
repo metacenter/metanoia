@@ -9,10 +9,11 @@
 
 //------------------------------------------------------------------------------
 
-/// @todo: Handle destruction of subcompositor resource.
-void noia_wayland_subcompositor_unbind(struct wl_resource* resource NOIA_UNUSED)
+/// Handle destruction of subcompositor resource.
+void noia_wayland_subcompositor_unbind(struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: unbind subcompositor");
+    LOG_WAYL3("Wayland: unbind subcompositor");
+    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -31,7 +32,7 @@ void noia_wayland_subcompositor_destroy
 void noia_wayland_subcompositor_get_subsurface
                               (struct wl_client* client             NOIA_UNUSED,
                                struct wl_resource* resource,
-                               uint32_t id                          NOIA_UNUSED,
+                               uint32_t id,
                                struct wl_resource* surface_resource NOIA_UNUSED,
                                struct wl_resource* parent_resource  NOIA_UNUSED)
 {

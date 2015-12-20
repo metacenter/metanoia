@@ -11,10 +11,11 @@
 
 //------------------------------------------------------------------------------
 
-/// @todo: Handle destruction of compositor resource.
-void noia_wayland_compositor_unbind(struct wl_resource* resource NOIA_UNUSED)
+/// Handle destruction of compositor resource.
+void noia_wayland_compositor_unbind(struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: unbind compositor");
+    LOG_WAYL2("Wayland: unbind compositor");
+    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------

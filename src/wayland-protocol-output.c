@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-protocol-output.h"
+#include "wayland-cache.h"
 
 #include "utils-log.h"
 #include "output.h"
@@ -9,10 +10,11 @@
 
 //------------------------------------------------------------------------------
 
-/// @todo Handle destruction of output resource.
-void noia_wayland_output_unbind(struct wl_resource* resource NOIA_UNUSED)
+/// Handle destruction of output resource.
+void noia_wayland_output_unbind(struct wl_resource* resource)
 {
     LOG_WAYL2("Wayland: unbind output");
+    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -61,6 +63,8 @@ void noia_wayland_output_bind(struct wl_client* client,
     if (version >= WL_OUTPUT_DONE_SINCE_VERSION) {
         wl_output_send_done(rc);
     }
+
+    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 }
 
 //------------------------------------------------------------------------------

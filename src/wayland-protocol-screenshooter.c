@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "wayland-protocol-screenshooter.h"
+#include "wayland-cache.h"
 
 #include "utils-log.h"
 #include "output.h"
@@ -13,7 +14,8 @@
 
 void noia_wayland_screenshooter_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland: unbind screenshooter");
+    LOG_WAYL2("Wayland: unbind screenshooter");
+    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -66,6 +68,8 @@ void noia_wayland_screenshooter_bind(struct wl_client* client,
 
     wl_resource_set_implementation(rc, &scScreenshooterImplementation,
                                    data, noia_wayland_screenshooter_unbind);
+
+    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 }
 
 //------------------------------------------------------------------------------

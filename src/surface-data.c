@@ -12,13 +12,8 @@
 NoiaSurfaceData* noia_surface_data_new(void)
 {
     NoiaSurfaceData* self = malloc(sizeof(NoiaSurfaceData));
-    if (!self) {
-        LOG_ERROR("Could not create new surface!");
-        return NULL;
-    }
-
+    NOIA_ENSURE(self, abort());
     memset(self, 0, sizeof(NoiaSurfaceData));
-
     return self;
 }
 
@@ -26,8 +21,10 @@ NoiaSurfaceData* noia_surface_data_new(void)
 
 void noia_surface_data_free(NoiaSurfaceData* self)
 {
-    if (!self) {
-        return;
+    NOIA_ENSURE(self, return);
+
+    if (self->buffer.data) {
+        free(self->buffer.data);
     }
 
     memset(self, 0, sizeof(NoiaSurfaceData));

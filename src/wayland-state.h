@@ -16,7 +16,7 @@ void noia_wayland_state_finalize(void);
 
 void noia_wayland_state_add_surface(NoiaItemId sid, struct wl_resource* rc);
 
-void noia_wayland_state_remove_surface(NoiaItemId sid);
+void noia_wayland_state_remove_surface(NoiaItemId sid, struct wl_resource* rc);
 
 void noia_wayland_state_surface_attach(NoiaItemId sid, struct wl_resource* rc);
 

@@ -11,9 +11,10 @@
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_shell_unbind(struct wl_resource* resource NOIA_UNUSED)
+void noia_wayland_xdg_shell_unbind(struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: unbind XDG shell");
+    LOG_WAYL3("Wayland: unbind XDG shell");
+    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------

@@ -31,8 +31,13 @@ static struct {
 
 struct wl_resource* noia_wayland_state_get_rc_for_sid(NoiaSurfaceId sid)
 {
+    struct wl_resource* result = NULL;
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(sid);
-    return noia_wayland_surface_get_resource(surface, NOIA_RESOURCE_SURFACE);
+    if (surface) {
+        result = noia_wayland_surface_get_resource(surface,
+                                                   NOIA_RESOURCE_SURFACE);
+    }
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -74,7 +79,7 @@ void noia_wayland_state_add_surface(NoiaSurfaceId sid, struct wl_resource* rc)
 {
     pthread_mutex_lock(&sStateMutex);
 
-    LOG_INFO2("Wayland: adding surface (sid: %d)", sid);
+    LOG_WAYL1("Wayland: adding surface (sid: %d)", sid);
     NoiaWaylandSurface* surface = noia_wayland_surface_new();
     noia_wayland_cache_add_surface(sid, surface);
     noia_wayland_cache_add_surface_resource(sid, NOIA_RESOURCE_SURFACE, rc);
@@ -84,11 +89,13 @@ void noia_wayland_state_add_surface(NoiaSurfaceId sid, struct wl_resource* rc)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_state_remove_surface(NoiaSurfaceId sid)
+void noia_wayland_state_remove_surface(NoiaSurfaceId sid,
+                                       struct wl_resource* rc)
 {
     pthread_mutex_lock(&sStateMutex);
 
-    LOG_INFO2("Wayland: removing surface (sid: %d)", sid);
+    LOG_WAYL1("Wayland: removing surface (sid: %d)", sid);
+    noia_wayland_cache_remove_surface_resource(sid, NOIA_RESOURCE_SURFACE, rc);
     noia_wayland_cache_remove_surface(sid);
 
     pthread_mutex_unlock(&sStateMutex);
@@ -102,7 +109,7 @@ void noia_wayland_state_surface_attach(NoiaSurfaceId sid,
     pthread_mutex_lock(&sStateMutex);
 
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(sid);
-    noia_wayland_surface_set_resource(surface, NOIA_RESOURCE_BUFFER, rc);
+    noia_wayland_surface_add_resource(surface, NOIA_RESOURCE_BUFFER, rc);
 
     pthread_mutex_unlock(&sStateMutex);
 }
@@ -115,7 +122,7 @@ void noia_wayland_state_subscribe_frame(NoiaSurfaceId sid,
     pthread_mutex_lock(&sStateMutex);
 
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(sid);
-    noia_wayland_surface_set_resource(surface, NOIA_RESOURCE_FRAME, rc);
+    noia_wayland_surface_add_resource(surface, NOIA_RESOURCE_FRAME, rc);
 
     pthread_mutex_unlock(&sStateMutex);
 }
@@ -375,24 +382,24 @@ void noia_wayland_state_screen_refresh(NoiaSurfaceId sid)
     LOG_WAYL4("Wayland: screen refresh (sid: %u)", sid);
 
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(sid);
+    const NoiaList* frcs = noia_wayland_surface_get_frame_resources(surface);
 
-    // Release buffer resource and notify frame if needed
-    struct wl_resource* frame_rc =
-                noia_wayland_surface_get_resource(surface, NOIA_RESOURCE_FRAME);
-    if (frame_rc) {
-        // Release buffer
+    // Release buffer if needed
+    if (noia_list_len(frcs) > 0) {
         struct wl_resource* buffer_rc =
                noia_wayland_surface_get_resource(surface, NOIA_RESOURCE_BUFFER);
         if (buffer_rc) {
             wl_resource_queue_event(buffer_rc, WL_BUFFER_RELEASE);
         }
+    }
 
-        // Notify frame
+    // Notify frame
+    FOR_EACH(frcs, link) {
+        struct wl_resource* frame_rc = (struct wl_resource*) link->data;
         LOG_WAYL3("Wayland < frame (sid: %u)", sid);
         wl_callback_send_done(frame_rc, (uint32_t) noia_log_get_miliseconds());
-        wl_resource_destroy(frame_rc);
-        noia_wayland_surface_set_resource(surface, NOIA_RESOURCE_FRAME, NULL);
     }
+    noia_wayland_surface_remove_frame_resources(surface);
 
     pthread_mutex_unlock(&sStateMutex);
 }
