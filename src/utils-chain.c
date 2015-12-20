@@ -93,7 +93,7 @@ void noia_chain_initialize(NoiaChain* self, NoiaFreeFunc free_link)
 
 //------------------------------------------------------------------------------
 
-int noia_chain_len(NoiaChain* self)
+unsigned noia_chain_len(const NoiaChain* self)
 {
     if (!self) {
         return 0;
@@ -104,12 +104,13 @@ int noia_chain_len(NoiaChain* self)
 
 //------------------------------------------------------------------------------
 
-int noia_chain_recalculate_length(NoiaChain* self)
+unsigned noia_chain_recalculate_length(NoiaChain* self)
 {
-    int len = 0;
+    unsigned len = 0;
     for (NoiaLink* link = self->first; link; link = link->next) {
         len += 1;
     }
+    self->len = len;
     return len;
 }
 

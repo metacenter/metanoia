@@ -44,7 +44,7 @@ void noia_list_append(NoiaList* self, void* data);
 void* noia_list_pop(NoiaList* self);
 
 /// Get `n`-th element of the list.
-void* noia_list_get_nth(NoiaList* self, int n);
+void* noia_list_get_nth(const NoiaList* self, int n);
 
 /// Searches for first occurrence of given data using given compare function and
 /// removes it.
@@ -67,27 +67,27 @@ void noia_list_clean(NoiaList* self);
 /// in `subtrahent`.
 /// Uses `compare` function to compare elements and `duplicate` to copy them.
 /// `duplicate` can be NULL.
-NoiaList* noia_list_subtract(NoiaList* minuend,
-                             NoiaList* subtrahent,
+NoiaList* noia_list_subtract(const NoiaList* minuend,
+                             const NoiaList* subtrahent,
                              NoiaCompareFunc compare,
                              NoiaDuplicateFunc duplicate);
 
 /// Return the length of the list.
-static inline int noia_list_len(NoiaList* self)
+static inline unsigned noia_list_len(const NoiaList* self)
 {
     NOIA_ENSURE(self, return 0);
     return noia_chain_len(&self->base);
 }
 
 /// Recalculate and return the length of the list.
-static inline int noia_list_recalculate_length(NoiaList* self)
+static inline unsigned noia_list_recalculate_length(NoiaList* self)
 {
     NOIA_ENSURE(self, return 0);
     return noia_chain_recalculate_length(&self->base);
 }
 
 /// Return first element of the list.
-static inline void* noia_list_first(NoiaList* self)
+static inline void* noia_list_first(const NoiaList* self)
 {
     if (self->base.first) {
         return self->base.first->data;
@@ -97,7 +97,7 @@ static inline void* noia_list_first(NoiaList* self)
 }
 
 /// Return last element of the list.
-static inline void* noia_list_last(NoiaList* self)
+static inline void* noia_list_last(const NoiaList* self)
 {
     if (self->base.last) {
         return self->base.last->data;

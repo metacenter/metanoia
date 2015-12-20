@@ -79,7 +79,7 @@ void* noia_list_pop(NoiaList* self)
 
 //------------------------------------------------------------------------------
 
-void* noia_list_get_nth(NoiaList* self, int n)
+void* noia_list_get_nth(const NoiaList* self, int n)
 {
     NoiaLink* link = NULL;
     if (n < 0) {
@@ -161,8 +161,8 @@ void noia_list_clean(NoiaList* self)
 
 //------------------------------------------------------------------------------
 
-NoiaList* noia_list_subtract(NoiaList* minuend,
-                             NoiaList* subtrahent,
+NoiaList* noia_list_subtract(const NoiaList* minuend,
+                             const NoiaList* subtrahent,
                              NoiaCompareFunc compare,
                              NoiaDuplicateFunc duplicate)
 {

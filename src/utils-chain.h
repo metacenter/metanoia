@@ -34,7 +34,7 @@ void noia_link_initialize(NoiaLink* link, void* data);
 typedef struct {
     NoiaLink* first;
     NoiaLink* last;
-    int len;
+    unsigned len;
     NoiaFreeFunc free_link;
 } NoiaChain;
 
@@ -51,10 +51,10 @@ void noia_chain_free(NoiaChain* self);
 void noia_chain_initialize(NoiaChain* self, NoiaFreeFunc free_link);
 
 /// Get length of the chain.
-int noia_chain_len(NoiaChain* self);
+unsigned noia_chain_len(const NoiaChain* self);
 
 /// Recalculate length of the chain (for debugging purposes).
-int noia_chain_recalculate_length(NoiaChain* self);
+unsigned noia_chain_recalculate_length(NoiaChain* self);
 
 /// Add new link `link` at the begin of the chain `self`.
 NoiaResult noia_chain_prejoin(NoiaChain* self, NoiaLink* link);

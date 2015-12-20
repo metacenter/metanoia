@@ -442,10 +442,10 @@ NoiaTestResult should_append_and_prepend_values(void)
     NOIA_ASSERT_TRUNK(s4, s);
     NOIA_ASSERT_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5);
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
 
     noia_frame_free(r);
 
@@ -483,7 +483,7 @@ NoiaTestResult should_insert_values(void)
     NOIA_ASSERT_TRUNK(f3, r);
     NOIA_ASSERT_TRUNK(f4, r);
     NOIA_ASSERT_TRUNK(f5, r);
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 5);
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 5u);
 
     noia_frame_free(r);
 
@@ -626,10 +626,10 @@ NoiaTestResult should_remove_some_leaf_frames(void)
     NOIA_ASSERT_TRUNK(s4, NULL);
     NOIA_ASSERT_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 2);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 2);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 2);
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 2u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 2u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 2u);
 
     noia_frame_free(v1);
     noia_frame_free(v2);
@@ -677,10 +677,10 @@ NoiaTestResult should_remove_frame_with_subframes(void)
     NOIA_ASSERT_TRUNK(s4, s);
     NOIA_ASSERT_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 2);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5);
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 2u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
 
     noia_frame_free(h);
     noia_frame_free(r);
@@ -720,10 +720,10 @@ NoiaTestResult should_resettle_one_frame(void)
     NOIA_ASSERT_TRUNK(s4, s);
     NOIA_ASSERT_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 4);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 6);
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 4u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 6u);
 
     noia_frame_free(r);
 
@@ -762,10 +762,10 @@ NoiaTestResult should_resettle_frame_with_subframes(void)
     NOIA_ASSERT_TRUNK(s4, s);
     NOIA_ASSERT_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 2);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 6);
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 2u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 6u);
 
     noia_frame_free(r);
 

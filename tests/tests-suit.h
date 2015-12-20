@@ -55,14 +55,14 @@
 
 #define NOIA_ASSERT_CHAIN_LEN(CHAIN, LEN) \
     NOIA_ASSERT(LEN == noia_chain_recalculate_length(CHAIN), \
-                "Calculated chain length should be %d (is %d)", \
+                "Calculated chain length should be %u (is %u)", \
                 LEN, noia_chain_recalculate_length(CHAIN));
 
 #define NOIA_ASSERT_CHAIN(CHAIN, ARRAY) { \
-    int i = 0; int len = NOIA_SIZEOF_ARRAY(ARRAY); int j = len - 1; \
+    int i = 0; unsigned len = NOIA_SIZEOF_ARRAY(ARRAY); int j = len - 1; \
     char* chain_data = NULL; char* array_data = NULL; \
     NOIA_ASSERT(len == noia_chain_len(CHAIN), \
-                "Stored chain length should be %d (is %d)", \
+                "Stored chain length should be %u (is %u)", \
                 len, noia_chain_len(CHAIN)); \
     NOIA_ASSERT_CHAIN_LEN(CHAIN, len); \
     for (NoiaLink* link = CHAIN->first; link; link = link->next, ++i) { \
@@ -77,13 +77,13 @@
                     array_data, chain_data); }}
 
 #define NOIA_ASSERT_LIST(LIST, ARRAY) { \
-    int i = 0, len = NOIA_SIZEOF_ARRAY(ARRAY); \
+    int i = 0; unsigned len = NOIA_SIZEOF_ARRAY(ARRAY); \
     char* list_data = NULL; char* array_data = NULL; \
     NOIA_ASSERT(len == noia_list_len(LIST), \
-                "Stored list length should be %d (is %d)", \
+                "Stored list length should be %u (is %u)", \
                 len, noia_list_len(LIST)); \
     NOIA_ASSERT(len == noia_list_len(LIST), \
-                "Calculated list length should be %d (is %d)", \
+                "Calculated list length should be %u (is %u)", \
                 len, noia_list_recalculate_length(LIST)); \
     list_data = noia_list_first(LIST); array_data = ARRAY[0]; \
     NOIA_ASSERT(strcmp(list_data, array_data) == 0, \
