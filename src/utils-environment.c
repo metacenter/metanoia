@@ -19,8 +19,8 @@
 static const char scRuntimeDirTemplate[] = "/noia-XXXXXX";
 static const char scDataDirTemplate[] = "/noia";
 
-char* sNoiaDataPath = NULL;
-char* sNoiaRuntimePath = NULL;
+static char* sNoiaDataPath = NULL;
+static char* sNoiaRuntimePath = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -48,7 +48,7 @@ void noia_environment_unblock_system_signals(void)
 
 void noia_environment_set_thread_name(pthread_t thread, char* name)
 {
-    if (!thread) {
+    if (not thread) {
         thread = pthread_self();
     }
     /// @note Linux thread name is up to 15 characters.
@@ -108,102 +108,96 @@ void noia_environment_signal_handler_set_up(void)
 //------------------------------------------------------------------------------
 
 /// Make a directory if not exists.
-void noia_environment_mkdir(char* dir_name)
+NoiaResult noia_environment_mkdir(char* dir_name)
 {
     struct stat st;
+    NoiaResult result = NOIA_RESULT_SUCCESS;
     if (stat(dir_name, &st) == -1) {
         if (mkdir(dir_name, 0700) == -1) {
             LOG_ERROR("Failed to make directory '%s'! (%m)", dir_name);
+            result = NOIA_RESULT_ERROR;
         }
     }
+    return result;
 }
 
 //------------------------------------------------------------------------------
 
 /// Create data directory.
 /// '$XDG_DATA_HOME/noia' or '/tmp' if environment variable not provided.
-int noia_environment_data_path_setup(void)
+NoiaResult noia_environment_data_path_setup(void)
 {
     // Choose directory
     char* data_path = getenv("XDG_DATA_HOME");
-    if (!data_path) {
+    if (not data_path) {
         data_path = "/tmp";
     }
 
     sNoiaDataPath = malloc(strlen(data_path) + sizeof(scDataDirTemplate));
-    if (!sNoiaDataPath) {
-        return -1;
-    }
+    NOIA_ENSURE(sNoiaDataPath, abort());
 
     strcpy(sNoiaDataPath, data_path);
     strcat(sNoiaDataPath, scDataDirTemplate);
 
     // Create subdirectories
-    noia_environment_mkdir(sNoiaDataPath);
-
-    return 0;
+    return noia_environment_mkdir(sNoiaDataPath);
 }
 
 //------------------------------------------------------------------------------
 
 /// Create runtime directory.
 /// '$XDG_RUNTIME_DIR/noia' or '/tmp' if environment variable not provided.
-int noia_environment_runtime_path_setup(void)
+NoiaResult noia_environment_runtime_path_setup(void)
 {
-    int result = 0;
+    NoiaResult result = NOIA_RESULT_SUCCESS;
 
     const char* runtime_path = getenv("XDG_RUNTIME_DIR");
-    if (!runtime_path) {
+    if (not runtime_path) {
         runtime_path = "/tmp";
     }
 
     char* noia_runtime_path_template =
                     malloc(strlen(runtime_path) + sizeof(scRuntimeDirTemplate));
-    if (!noia_runtime_path_template) {
-        return -1;
-    }
+    NOIA_ENSURE(noia_runtime_path_template, abort());
 
     strcpy(noia_runtime_path_template, runtime_path);
     strcat(noia_runtime_path_template, scRuntimeDirTemplate);
 
     sNoiaRuntimePath = mkdtemp(noia_runtime_path_template);
-    if (sNoiaRuntimePath == NULL) {
-        LOG_WARN1("Failed to create runtime directory (template: %s)",
+    if (not sNoiaRuntimePath) {
+        LOG_WARN1("Failed to create runtime directory (template: '%s')",
                   noia_runtime_path_template);
-        result = -1;
-        goto cleanup;
+        free(noia_runtime_path_template);
+        result = NOIA_RESULT_ERROR;
     }
 
-    return 0;
-
-cleanup:
-    free(noia_runtime_path_template);
     return result;
 }
 
 //------------------------------------------------------------------------------
 
-int noia_environment_setup(const char* log_filename)
+NoiaResult noia_environment_setup(const char* log_filename)
 {
     // Set up async signal handler
     noia_environment_signal_handler_set_up();
 
     // Create $XDG_DATA_HOME/noia directory
-    int result1 = noia_environment_data_path_setup();
+    NoiaResult result1 = noia_environment_data_path_setup();
 
     // Open log file
     noia_log_initialize(log_filename);
 
     // Create temporary $XDG_RUNTIME_DIR/noia-XXXXXX directory
-    int result2 = noia_environment_runtime_path_setup();
-
-    if (result1 < 0 || result2 < 0) {
-        return -1;
-    }
+    NoiaResult result2 = noia_environment_runtime_path_setup();
 
     LOG_INFO1("Data path: '%s'", sNoiaDataPath);
     LOG_INFO1("Runtime path: '%s'", sNoiaRuntimePath);
-    return 0;
+
+    if ((result1 != NOIA_RESULT_SUCCESS)
+     or (result2 != NOIA_RESULT_SUCCESS)) {
+        return NOIA_RESULT_ERROR;
+    }
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -230,32 +224,36 @@ int noia_environment_open_file(const char *file_name,
                                NoiaPath path)
 {
     int fd = -1;
+    char* file_path = NULL;
 
-    char* base_path;
-    switch (path) {
-    case RUNTIME_PATH:       base_path = sNoiaRuntimePath; break;
-    case DATA_PATH: default: base_path = sNoiaDataPath;    break;
+    NOIA_BLOCK {
+        char* base_path;
+        switch (path) {
+        case RUNTIME_PATH:       base_path = sNoiaRuntimePath; break;
+        case DATA_PATH: default: base_path = sNoiaDataPath;    break;
+        }
+
+        file_path = malloc(strlen(base_path) + strlen(file_name) + 2);
+        NOIA_ENSURE(file_path, abort());
+
+        strcpy(file_path, base_path);
+        strcat(file_path, "/");
+        strcat(file_path, file_name);
+
+        fd = open(file_path, O_RDWR|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
+        if (fd < 0) {
+            LOG_ERROR("Creating file '%s' failed! (%m)", file_path);
+            break;
+        }
+
+        if (size > 0) {
+            posix_fallocate(fd, 0, size);
+        }
     }
 
-    char* file_path = malloc(strlen(base_path) + strlen(file_name) + 2);
-    NOIA_ENSURE(file_path, abort());
-
-    strcpy(file_path, base_path);
-    strcat(file_path, "/");
-    strcat(file_path, file_name);
-
-    fd = open(file_path, O_RDWR|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
-    if (fd < 0) {
-        LOG_ERROR("Creating file '%s' failed! (%m)", file_path);
-        goto cleanup;
+    if (file_path) {
+        free(file_path);
     }
-
-    if (size > 0) {
-        posix_fallocate(fd, 0, size);
-    }
-
-cleanup:
-    free(file_path);
     return fd;
 }
 

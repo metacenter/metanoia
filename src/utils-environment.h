@@ -39,7 +39,7 @@ void noia_environment_set_thread_name(pthread_t thread, char* name);
 void noia_environment_on_enter_new_thread(pthread_t thread, char* name);
 
 /// Set up signal handlers; create data and runtime directories; open log file.
-int noia_environment_setup(const char* log_filename);
+NoiaResult noia_environment_setup(const char* log_filename);
 
 /// Free memory and close log file.
 void noia_environment_cleanup(void);
