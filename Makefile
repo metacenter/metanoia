@@ -50,6 +50,7 @@ build/metanoia: Makefile \
                 inter/utils-dbus.o \
                 inter/utils-gl.o \
                 inter/utils-keymap.o \
+                inter/utils-image.o \
                 inter/event-dispatcher.o \
                 inter/event-factory.o \
                 inter/event-loop.o \
@@ -107,7 +108,7 @@ build/metanoia: Makefile \
                 inter/metanoia.o
 	@mkdir -p build
 	@echo "  LD   build/metanoia"
-	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -lEGL -lGL -ldbus-1 -ldrm -lgbm -ludev -lwayland-server -lxkbcommon -o build/metanoia \
+	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -lEGL -lGL -ldbus-1 -ldrm -lgbm -ljpeg -ludev -lwayland-server -lxkbcommon -o build/metanoia \
 	    inter/config.o \
 	    inter/global-enums.o \
 	    inter/global-types.o \
@@ -125,6 +126,7 @@ build/metanoia: Makefile \
 	    inter/utils-dbus.o \
 	    inter/utils-gl.o \
 	    inter/utils-keymap.o \
+	    inter/utils-image.o \
 	    inter/event-dispatcher.o \
 	    inter/event-factory.o \
 	    inter/event-loop.o \
@@ -559,9 +561,11 @@ inter/utils-environment.o: Makefile \
 inter/utils-dbus.o: Makefile \
                     src/global-constants.h \
                     src/global-enums.h \
+                    src/global-macros.h \
                     src/global-types.h \
                     src/utils-dbus.c \
                     src/utils-dbus.h \
+                    src/utils-debug.h \
                     src/utils-log.h
 	@mkdir -p inter
 	@echo "  CC   inter/utils-dbus.o"
@@ -592,6 +596,20 @@ inter/utils-keymap.o: Makefile \
 	@echo "  CC   inter/utils-keymap.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-keymap.o \
 	    src/utils-keymap.c
+
+inter/utils-image.o: Makefile \
+                     src/global-constants.h \
+                     src/global-enums.h \
+                     src/global-macros.h \
+                     src/global-types.h \
+                     src/utils-debug.h \
+                     src/utils-image.c \
+                     src/utils-image.h \
+                     src/utils-log.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-image.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-image.o \
+	    src/utils-image.c
 
 inter/event-dispatcher.o: Makefile \
                           src/event-dispatcher.c \
@@ -734,6 +752,7 @@ inter/renderer-mmap.o: Makefile \
                        src/utils-branch.h \
                        src/utils-chain.h \
                        src/utils-debug.h \
+                       src/utils-image.h \
                        src/utils-list.h \
                        src/utils-log.h \
                        src/utils-object.h \
@@ -1218,7 +1237,11 @@ inter/wayland-region.o: Makefile \
 inter/wayland-surface.o: Makefile \
                          src/global-constants.h \
                          src/global-enums.h \
+                         src/global-macros.h \
                          src/global-types.h \
+                         src/utils-chain.h \
+                         src/utils-debug.h \
+                         src/utils-list.h \
                          src/utils-log.h \
                          src/wayland-surface.c \
                          src/wayland-surface.h \
@@ -1470,12 +1493,19 @@ inter/wayland-protocol-output.o: Makefile \
                                  src/global-types.h \
                                  src/output.h \
                                  src/renderer.h \
+                                 src/utils-chain.h \
                                  src/utils-debug.h \
+                                 src/utils-list.h \
                                  src/utils-log.h \
                                  src/utils-object.h \
                                  src/utils-pool.h \
+                                 src/utils-store.h \
+                                 src/wayland-cache.h \
                                  src/wayland-protocol-output.c \
-                                 src/wayland-protocol-output.h
+                                 src/wayland-protocol-output.h \
+                                 src/wayland-region.h \
+                                 src/wayland-surface.h \
+                                 src/wayland-types.h
 	@mkdir -p inter
 	@echo "  CC   inter/wayland-protocol-output.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-output.o \
@@ -1536,12 +1566,19 @@ inter/wayland-protocol-screenshooter.o: Makefile \
                                         src/global-types.h \
                                         src/output.h \
                                         src/renderer.h \
+                                        src/utils-chain.h \
                                         src/utils-debug.h \
+                                        src/utils-list.h \
                                         src/utils-log.h \
                                         src/utils-object.h \
                                         src/utils-pool.h \
+                                        src/utils-store.h \
+                                        src/wayland-cache.h \
                                         src/wayland-protocol-screenshooter.c \
-                                        src/wayland-protocol-screenshooter.h
+                                        src/wayland-protocol-screenshooter.h \
+                                        src/wayland-region.h \
+                                        src/wayland-surface.h \
+                                        src/wayland-types.h
 	@mkdir -p inter
 	@echo "  CC   inter/wayland-protocol-screenshooter.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-screenshooter.o \

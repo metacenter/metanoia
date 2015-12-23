@@ -70,13 +70,29 @@ typedef struct {
     bool value;
 } NoiaButtonData;
 
+/// Container for color data.
+typedef struct {
+    uint8_t b;
+    uint8_t g;
+    uint8_t r;
+    uint8_t a;
+} NoiaColor;
+
+/// Container for all data required to draw an image.
+typedef struct {
+    int width;
+    int height;
+    int stride;
+    uint8_t* data;
+} NoiaBuffer;
+
 /// Data needed by Renderer to draw surface
 typedef struct {
     NoiaSurfaceId sid;
     NoiaPosition pos;
 } NoiaSurfaceContext;
 
-/// Data needed by Renderer to draw layover
+/// Data needed by Renderer to draw layout
 typedef struct {
     NoiaSurfaceContext pointer;
 } NoiaLayoverContext;
@@ -95,6 +111,9 @@ bool noia_position_is_inside(NoiaPosition position, NoiaArea area);
 /// If point `position` is outside area `area` return a point inside area `area`
 /// that is the closest to point `position`.
 NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area);
+
+/// Clear the buffer.
+void noia_buffer_clean(NoiaBuffer* buffer);
 
 /// Clear the action.
 void noia_action_clean(NoiaAction* action);

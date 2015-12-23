@@ -4,6 +4,8 @@
 #include "global-types.h"
 #include "global-macros.h"
 
+#include <memory.h>
+
 //------------------------------------------------------------------------------
 
 bool noia_position_is_inside(NoiaPosition position, NoiaArea area)
@@ -40,6 +42,13 @@ NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area)
         }
     }
     return position;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_buffer_clean(NoiaBuffer* buffer)
+{
+    memset(buffer, 0, sizeof(NoiaBuffer));
 }
 
 //------------------------------------------------------------------------------

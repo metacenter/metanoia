@@ -76,6 +76,14 @@ typedef enum {
                                | NOIA_FRAME_TYPE_STACKED,
 } NoiaFrameType;
 
+/// Type of transformation used for background image.
+typedef enum {
+    NOIA_BG_TRANS_REPEAT,
+    NOIA_BG_TRANS_CENTER,
+    NOIA_BG_TRANS_SCALE,
+    NOIA_BG_TRANS_STRETCH,
+} NoiaBGTransform;
+
 /// Function return values or error codes
 typedef enum {
     NOIA_RESULT_SUCCESS = 0,        ///< Everything worked fine

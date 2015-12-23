@@ -143,6 +143,7 @@ target_utils_environment = Com(['utils-environment.c'])
 target_utils_dbus        = Com(['utils-dbus.c'],   pkgs={'dbus-1'})
 target_utils_gl          = Com(['utils-gl.c'],     pkgs={'gl', 'egl'})
 target_utils_keymap      = Com(['utils-keymap.c'], pkgs={'xkbcommon'})
+target_utils_image       = Com(['utils-image.c'],  libs={'jpeg'})
 
 metanoia.add([target_utils_debug,
               target_utils_object,
@@ -155,7 +156,8 @@ metanoia.add([target_utils_debug,
               target_utils_environment,
               target_utils_dbus,
               target_utils_gl,
-              target_utils_keymap])
+              target_utils_keymap,
+              target_utils_image])
 
 #-------------------------------------------------------------------------------
 # EVENTS
