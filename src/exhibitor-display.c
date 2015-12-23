@@ -4,10 +4,12 @@
 #include "exhibitor-display.h"
 #include "exhibitor-pointer.h"
 #include "utils-log.h"
+#include "utils-image.h"
 #include "utils-environment.h"
 #include "event-timer.h"
 #include "event-signals.h"
 #include "surface-manager.h"
+#include "config.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -36,14 +38,42 @@ bool noia_display_is_valid(NoiaDisplay* self)
 
     return true;
 }
+//------------------------------------------------------------------------------
+
+/// Setup display loop.
+NoiaResult noia_display_setup(NoiaDisplay* self)
+{
+    // Setup the thread
+    char name[32];
+    snprintf(name, sizeof(name), "noia@%s", self->output->unique_name);
+    noia_environment_on_enter_new_thread(self->thread, name);
+    LOG_INFO1("Threads: starting display loop '%s'", name);
+
+    // Initialize output
+    /// @todo Squash this to one function call.
+    LOG_INFO1("Initializing output '%s'", self->output->unique_name);
+    self->output->renderer = self->output->initialize(self->output,
+                                                      self->output->area.size);
+    NoiaResult result = noia_output_initialize_rendering(self->output);
+
+    if (result == NOIA_RESULT_SUCCESS) {
+        // Read in background image
+        /// @todo Reimplement background as surface.
+        self->background =
+              noia_image_read(noia_config()->background_image_path);
+    }
+
+    return result;
+}
 
 //------------------------------------------------------------------------------
 
-/// Prepare rendering context for drawing layover (currently only pointer).
-void noia_display_setup_layover_context(NoiaDisplay* self,
-                                        NoiaLayoverContext* context)
+/// Prepare rendering context for drawing layout
+/// (currently only pointer and background).
+void noia_display_setup_layout_context(NoiaDisplay* self,
+                                       NoiaLayoutContext* context)
 {
-    memset(context, 0, sizeof(NoiaLayoverContext));
+    memset(context, 0, sizeof(NoiaLayoutContext));
 
     // Setup pointer position and surface id
     NoiaPosition position = noia_exhibitor_pointer_get_global_position();
@@ -56,6 +86,11 @@ void noia_display_setup_layover_context(NoiaDisplay* self,
         context->pointer.pos.y = INT_MIN;
         context->pointer.sid = scInvalidSurfaceId;
     }
+
+    // Setup background image
+    context->background_buffer = self->background;
+    context->background_transform = noia_config()->background_image_transform;
+    context->background_color = noia_config()->background_color;
 }
 
 //------------------------------------------------------------------------------
@@ -69,12 +104,12 @@ void noia_display_redraw_all(NoiaDisplay* self)
     noia_exhibitor_pointer_update_hover_state(self->output,
                                               self->visible_surfaces);
 
-    NoiaLayoverContext layover_context;
-    noia_display_setup_layover_context(self, &layover_context);
+    NoiaLayoutContext layout_context;
+    noia_display_setup_layout_context(self, &layout_context);
 
     self->output->renderer->draw(self->output->renderer,
                                  self->visible_surfaces,
-                                 &layover_context);
+                                 &layout_context);
 
     if (self->output->renderer->swap_buffers) {
         self->output->renderer->swap_buffers(self->output->renderer);
@@ -108,17 +143,7 @@ void* noia_display_thread_loop(void* data)
         return NULL;
     }
 
-    char name[32];
-    snprintf(name, sizeof(name), "noia@%s", self->output->unique_name);
-    noia_environment_on_enter_new_thread(self->thread, name);
-    LOG_INFO1("Threads: starting display loop '%s'", name);
-
-    LOG_INFO1("Initializing output '%s'", self->output->unique_name);
-    self->output->renderer = self->output->initialize(self->output,
-                                                      self->output->area.size);
-
-    NoiaResult result = noia_output_initialize_rendering(self->output);
-    if (result == NOIA_RESULT_SUCCESS) {
+    if (noia_display_setup(self) == NOIA_RESULT_SUCCESS) {
         LOG_INFO1("Initialized new renderer!");
         self->run = true;
         while (self->run) {
@@ -131,7 +156,7 @@ void* noia_display_thread_loop(void* data)
         LOG_ERROR("Initializing new renderer failed!");
     }
 
-    LOG_INFO1("Threads: stopped display loop '%s'", name);
+    LOG_INFO1("Threads: stopped display loop");
     return NULL;
 }
 
@@ -149,6 +174,7 @@ NoiaDisplay* noia_display_new(NoiaOutput* output, NoiaFrame* workspace)
     self->output = output;
     self->workspace = workspace;
     self->visible_surfaces = noia_pool_create(8, sizeof(NoiaSurfaceContext));
+    noia_buffer_clean(&self->background);
     return self;
 }
 

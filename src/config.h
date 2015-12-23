@@ -10,7 +10,9 @@
 /// Keeps information about internal application configuration.
 /// @see NoiaSettings
 typedef struct {
-    int dummy;
+    const char* background_image_path;
+    NoiaBGTransform background_image_transform;
+    NoiaColor background_color;
 } NoiaConfig;
 
 /// Keeps information about external environment configuration.

@@ -23,6 +23,9 @@ typedef struct {
     /// @see noia_display_redraw_all
     NoiaPool* visible_surfaces;
 
+    /// Background image buffer.
+    NoiaBuffer background;
+
     /// State of the thread.
     bool run;
 

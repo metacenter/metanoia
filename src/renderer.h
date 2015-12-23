@@ -18,7 +18,7 @@ typedef void (*NoiaRendererFinalizeFunc) (NoiaRenderer*);
 
 typedef void (*NoiaRendererDrawFunc) (NoiaRenderer*,
                                       NoiaPool*,
-                                      NoiaLayoverContext*);
+                                      NoiaLayoutContext*);
 
 typedef void (*NoiaRendererSwapBuffersFunc) (NoiaRenderer*);
 
@@ -38,7 +38,7 @@ struct NoiaRendererStruct {
     /// Finalize all tasks, free resources.
     NoiaRendererFinalizeFunc finalize;
 
-    /// Draw surfaces and layover using passed contexts.
+    /// Draw surfaces and layout using passed contexts.
     NoiaRendererDrawFunc draw;
 
     /// Swap buffers if renderer supports this.

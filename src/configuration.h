@@ -11,7 +11,16 @@
 #include <linux/input.h>
 
 static const NoiaConfig scConfig = {
-        .dummy = 0,
+        // Absolute path to background image. Only JPEG supported.
+        .background_image_path = "",
+
+        // Transformation type of background image.
+        // Available: NOIA_BG_TRANS_REPEAT, NOIA_BG_TRANS_CENTER,
+        // NOIA_BG_TRANS_SCALE, NOIA_BG_TRANS_STRETCH,
+        .background_image_transform = NOIA_BG_TRANS_REPEAT,
+
+        // Color of background not covered with background image.
+        .background_color = {.b=0x21, .g=0x21, .r=0x21, .a=0xFF}
     };
 
 static const NoiaBinding scBindingsCommon[] = {

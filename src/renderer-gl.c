@@ -295,7 +295,7 @@ void noia_renderer_gl_release_view(NoiaRendererGL* mine)
 ///      noia_renderer_gl_release_view
 void noia_renderer_gl_draw(NoiaRenderer* self,
                            NoiaPool* surfaces,
-                           NoiaLayoverContext* context)
+                           NoiaLayoutContext* context)
 {
     NOIA_ENSURE_RENDERER_GL(self, return);
     NOIA_ENSURE(surfaces, return);

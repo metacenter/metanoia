@@ -55,7 +55,10 @@ void noia_renderer_mmap_finalize(NoiaRenderer* self NOIA_UNUSED)
 /// Draw background image.
 /// This is subroutine of `noia_renderer_mmap_draw`.
 /// @see noia_renderer_mmap_draw
-void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine)
+void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine,
+                                      NoiaBuffer* buffer,
+                                      NoiaBGTransform transform NOIA_UNUSED,
+                                      NoiaColor color)
 {
     int current_buffer = mine->front ^ 1;
     uint8_t* D = mine->buffer[current_buffer].data;
@@ -63,25 +66,19 @@ void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine)
     int H = mine->size.height;
     int S = mine->buffer[current_buffer].stride;
 
-    int x, y;
-    for (y = 0; y < H; ++y) {
-        for (x = 0; x < W; ++x) {
-            if (x < W/3){
-                D[y*S + 4*x + 0] = 0x00;
-                D[y*S + 4*x + 1] = 0xFF;
-                D[y*S + 4*x + 2] = 0xFF;
-                D[y*S + 4*x + 3] = 0xFF;
-            } else if (x < W*2/3) {
-                D[y*S + 4*x + 0] = 0xFF;
-                D[y*S + 4*x + 1] = 0xFF;
-                D[y*S + 4*x + 2] = 0x00;
-                D[y*S + 4*x + 3] = 0xFF;
-            } else {
-                D[y*S + 4*x + 0] = 0xFF;
-                D[y*S + 4*x + 1] = 0x00;
-                D[y*S + 4*x + 2] = 0xFF;
-                D[y*S + 4*x + 3] = 0xFF;
-            }
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            *((NoiaColor*) &D[y*S + 4*x]) = color;
+        }
+    }
+
+    if (buffer->data) {
+        uint8_t* d = buffer->data;
+        int w = fmin(W, buffer->width);
+        int h = fmin(H, buffer->height);
+        int s = 4 * w;
+        for (int y = 0; y < h; ++y) {
+            memcpy(&D[y*S], &d[y*buffer->stride], s);
         }
     }
 }
@@ -195,14 +192,18 @@ void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
 
 void noia_renderer_mmap_draw(NoiaRenderer* self,
                              NoiaPool* surfaces,
-                             NoiaLayoverContext* context)
+                             NoiaLayoutContext* context)
 {
     NOIA_ASSERT_RENDERER_MMAP(self);
     NOIA_ENSURE(surfaces, return);
     NOIA_ENSURE(context, return);
 
-    noia_renderer_mmap_draw_bg_image(mine);
+    noia_renderer_mmap_draw_bg_image(mine, &context->background_buffer,
+                                     context->background_transform,
+                                     context->background_color);
+
     noia_renderer_mmap_draw_surfaces(mine, surfaces);
+
     noia_renderer_mmap_draw_pointer(mine, &context->pointer);
 }
 
