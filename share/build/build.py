@@ -333,7 +333,7 @@ class Project:
 class Target:
     """If `inputs` id None - force"""
 
-    def __init__(self, inputs, output, deps, pkgs):
+    def __init__(self, inputs, output, deps, pkgs, libs):
         self._input_dir = None
         self._output_dir = None
 
@@ -352,6 +352,7 @@ class Target:
         self._inputs = None if inputs is None else list(inputs)
         self._deps = None if deps is None else list(deps)
         self._pkgs = set() if pkgs is None else set(pkgs)
+        self._libs = set() if libs is None else set(libs)
 
     def __str__(self):
         return str(self._output)
@@ -389,6 +390,9 @@ class Target:
     def get_pkgs(self):
         return self._pkgs if self._pkgs is not None else set()
 
+    def get_libs(self):
+        return self._libs if self._libs is not None else set()
+
     def get_command_string(self, **kwargs):
         return ' '.join(self.get_command(**kwargs))
 
@@ -406,7 +410,7 @@ class PhonyTarget(Target):
     """ """
 
     def __init__(self, generator, deps=None):
-        Target.__init__(self, None, None, deps, None)
+        Target.__init__(self, None, None, deps, None, None)
 
         if isinstance(generator, Generator):
             self._gen = generator
@@ -431,7 +435,7 @@ class GeneratedTarget(Target):
     """ """
 
     def __init__(self, generator, output, inputs=None, deps=None):
-        Target.__init__(self, inputs, output, deps, None)
+        Target.__init__(self, inputs, output, deps, None, None)
 
         if isinstance(generator, Generator):
             self._gen = generator
@@ -476,8 +480,9 @@ class GeneratedTarget(Target):
 class CompileTarget(Target):
     """ """
 
-    def __init__(self, inputs=tuple(), output=None, deps=None, pkgs=None):
-        Target.__init__(self, inputs, output, deps, pkgs)
+    def __init__(self, inputs=tuple(), output=None,
+                 deps=None, pkgs=None, libs=None):
+        Target.__init__(self, inputs, output, deps, pkgs, libs)
 
     def set_config(self, config):
         self._input_dir = config.source_dir
@@ -565,8 +570,9 @@ class ExecutableTarget(Target):
     """ """
 
     def __init__(self, inputs=tuple(), output=None):
-        Target.__init__(self, inputs, output, None, None)
+        Target.__init__(self, inputs, output, None, None, None)
         self._targets = list()
+        self._libs = set()
 
     def set_config(self, config):
         self._input_dir = config.intermediate_dir
@@ -591,13 +597,17 @@ class ExecutableTarget(Target):
         return command
 
     def get_lflags(self):
-        return sorted(self._fetch_pflags('--libs'))
+        lflags = set()
+        lflags.update(self._fetch_pflags('--libs'))
+        lflags.update('-l{lib}'.format(lib=lib) for lib in self._libs)
+        return sorted(lflags)
 
     def add(self, targets):
         self._targets.extend(targets)
         self._inputs.extend(targets)
         for t in targets:
             self._pkgs.update(t.get_pkgs())
+            self._libs.update(t.get_libs())
 
     def _add_to_project(self, project):
         project._add_executable(self)
