@@ -5,7 +5,6 @@
 #define NOIA_SURFACE_DATA_H
 
 #include "utils-store.h"
-#include "exhibitor-compositor.h"
 
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
@@ -26,7 +25,6 @@ typedef struct {
     int height;
     int stride;
     uint8_t* data;
-    GLuint texture;
     void* resource;
     EGLImageKHR image;
 } NoiaDrawBuffer;

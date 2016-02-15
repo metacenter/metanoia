@@ -5,6 +5,7 @@
 #include "wayland-protocol-shell-surface.h"
 
 #include "surface-manager.h"
+#include "global-macros.h"
 #include "utils-log.h"
 
 //------------------------------------------------------------------------------

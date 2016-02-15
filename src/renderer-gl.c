@@ -41,7 +41,7 @@ struct NoiaRendererGLInternal {
     bool has_wayland_support;
     PFNEGLCREATEIMAGEKHRPROC            create_image_khr;
     PFNEGLDESTROYIMAGEKHRPROC           destroy_image_khr;
-    PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2does;
+    PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d_oes;
 };
 
 //------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
             mine->destroy_image_khr =
                               (PFNEGLDESTROYIMAGEKHRPROC)
                               eglGetProcAddress("eglDestroyImageKHR");
-            mine->image_target_texture_2does =
+            mine->image_target_texture_2d_oes =
                               (PFNGLEGLIMAGETARGETTEXTURE2DOESPROC)
                               eglGetProcAddress("glEGLImageTargetTexture2DOES");
             mine->has_wayland_support = true;
@@ -195,8 +195,8 @@ void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaRendererGL* mine,
                                                        attribs);
 
         if (surface->buffer.image != EGL_NO_IMAGE_KHR) {
-            mine->image_target_texture_2does(GL_TEXTURE_2D,
-                                             surface->buffer.image);
+            mine->image_target_texture_2d_oes(GL_TEXTURE_2D,
+                                              surface->buffer.image);
         } else {
             LOG_WARN1("Could not create KHR image! (%d)", eglGetError());
         }
@@ -403,10 +403,10 @@ NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
 
     mine->size = size;
 
-    mine->has_wayland_support        = false;
-    mine->create_image_khr           = NULL;
-    mine->destroy_image_khr          = NULL;
-    mine->image_target_texture_2does = NULL;
+    mine->has_wayland_support         = false;
+    mine->create_image_khr            = NULL;
+    mine->destroy_image_khr           = NULL;
+    mine->image_target_texture_2d_oes = NULL;
 
     return (NoiaRenderer*) mine;
 }

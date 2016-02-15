@@ -9,11 +9,20 @@
 
 //------------------------------------------------------------------------------
 
+void noia_surface_data_clean(NoiaSurfaceData* self)
+{
+    NOIA_ENSURE(self, return);
+    memset(self, 0, sizeof(NoiaSurfaceData));
+    self->buffer.image = EGL_NO_IMAGE_KHR;
+    self->pending_buffer.image = EGL_NO_IMAGE_KHR;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaSurfaceData* noia_surface_data_new(void)
 {
     NoiaSurfaceData* self = malloc(sizeof(NoiaSurfaceData));
-    NOIA_ENSURE(self, abort());
-    memset(self, 0, sizeof(NoiaSurfaceData));
+    noia_surface_data_clean(self);
     return self;
 }
 
@@ -27,7 +36,7 @@ void noia_surface_data_free(NoiaSurfaceData* self)
         free(self->buffer.data);
     }
 
-    memset(self, 0, sizeof(NoiaSurfaceData));
+    noia_surface_data_clean(self);
     free(self);
 }
 

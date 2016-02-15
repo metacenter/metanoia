@@ -18,7 +18,7 @@ static NoiaSurfaceId cursor_sid = 0;
 static NoiaPosition position = {100, 100};
 static NoiaPosition last_abs = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
 static NoiaPosition last_rel = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
-static NoiaSurfaceId focused_sid;
+static NoiaSurfaceId focused_sid = scInvalidSurfaceId;
 static NoiaOutput* active_output = NULL;
 
 pthread_mutex_t pointer_mutex = PTHREAD_MUTEX_INITIALIZER;
