@@ -127,7 +127,7 @@ NoiaResult noia_event_signal_emit(NoiaSignalNum sig_num, NoiaObject* object)
                     noia_object_ref(object);
                     noia_loop_schedule_task(task->loop, task_copy);
                 } else {
-                    LOG_WARN3("Invalid loop!");
+                    LOG_WARN1("Invalid loop!");
                 }
             } else {
                 LOG_WARN3("Invalid task!");

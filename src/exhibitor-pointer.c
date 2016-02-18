@@ -77,11 +77,11 @@ void noia_exhibitor_pointer_on_motion_reset()
 //------------------------------------------------------------------------------
 
 /// Handle motion in X-axis notification.
-void noia_exhibitor_pointer_on_motion_x(void* data)
+void noia_exhibitor_pointer_on_motion_x(void* edata, void* sdata NOIA_UNUSED)
 {
     pthread_mutex_lock(&pointer_mutex);
 
-    int abs_value = noia_int_unref_get((NoiaIntObject*) data);
+    int abs_value = noia_int_unref_get((NoiaIntObject*) edata);
     if (last_abs.x != INVALID_POINTER_VALUE) {
         position.x += abs_value - last_abs.x;
         position = noia_exhibitor_pointer_cast_into_output(position);
@@ -94,11 +94,11 @@ void noia_exhibitor_pointer_on_motion_x(void* data)
 //------------------------------------------------------------------------------
 
 /// Handle motion in Y-axis notification.
-void noia_exhibitor_pointer_on_motion_y(void* data)
+void noia_exhibitor_pointer_on_motion_y(void* edata, void* sdata NOIA_UNUSED)
 {
     pthread_mutex_lock(&pointer_mutex);
 
-    int abs_value = noia_int_unref_get((NoiaIntObject*) data);
+    int abs_value = noia_int_unref_get((NoiaIntObject*) edata);
     if (last_abs.y != INVALID_POINTER_VALUE) {
         position.y += abs_value - last_abs.y;
         position = noia_exhibitor_pointer_cast_into_output(position);
@@ -111,11 +111,12 @@ void noia_exhibitor_pointer_on_motion_y(void* data)
 //------------------------------------------------------------------------------
 
 /// Handle change surface notification.
-void noia_exhibitor_pointer_on_surface_change(void* data)
+void noia_exhibitor_pointer_on_surface_change(void* edata,
+                                              void* sdata NOIA_UNUSED)
 {
     pthread_mutex_lock(&pointer_mutex);
 
-    NoiaSurfaceId sid = noia_int_unref_get((NoiaIntObject*) data);
+    NoiaSurfaceId sid = noia_int_unref_get((NoiaIntObject*) edata);
     NoiaSurfaceData* surface_data = noia_surface_get(sid);
     if (surface_data) {
         cursor_sid = sid;
@@ -127,11 +128,12 @@ void noia_exhibitor_pointer_on_surface_change(void* data)
 //------------------------------------------------------------------------------
 
 /// Handle surface destruction notification.
-void noia_exhibitor_pointer_on_surface_destroyed(void* data)
+void noia_exhibitor_pointer_on_surface_destroyed(void* edata,
+                                                 void* sdata NOIA_UNUSED)
 {
     pthread_mutex_lock(&pointer_mutex);
 
-    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
+    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) edata);
     if (cursor_sid == sid) {
         cursor_sid = scInvalidSurfaceId;
     }

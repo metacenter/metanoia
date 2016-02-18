@@ -11,6 +11,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+//------------------------------------------------------------------------------
+// PRIVATE
+
 struct NoiaLoopPriv {
     char* name;
     pthread_t thread;
@@ -24,48 +27,12 @@ struct NoiaLoopPriv {
 
 //------------------------------------------------------------------------------
 
-NoiaLoop* noia_loop_new(const char* name)
-{
-    NoiaLoop* self = malloc(sizeof(NoiaLoop));
-    if (!self) {
-        return NULL;
-    }
-
-    self->name = strdup(name);
-    pthread_mutex_init(&self->schedule_mutex, NULL);
-    pthread_mutex_init(&self->process_mutex, NULL);
-    pthread_cond_init(&self->condition, NULL);
-    self->run = 0;
-    self->task_list = noia_list_new(NULL);
-    self->finalizers = noia_list_new(NULL);
-    return self;
-}
-
-//------------------------------------------------------------------------------
-
-void noia_loop_free(NoiaLoop* self)
-{
-    if (!self) {
-        return;
-    }
-
-    if (self->name) {
-        free(self->name);
-    }
-    noia_list_free(self->finalizers);
-    noia_list_free(self->task_list);
-    memset(self, 0, sizeof(NoiaLoop));
-    free(self);
-}
-
-//------------------------------------------------------------------------------
-
 void noia_loop_process_task(NoiaTask* task)
 {
     if (task) {
         if (task->process) {
             LOG_EVNT4("Loop: processing task");
-            task->process(task->emission_data);
+            task->process(task->emission_data, task->subscription_data);
         } else {
             LOG_ERROR("Invalid task processor!");
         }
@@ -80,14 +47,12 @@ void noia_loop_process_task(NoiaTask* task)
 void* noia_loop_thread_loop(void* data)
 {
     NoiaLoop* self = (NoiaLoop*) data;
-    if (!self) {
-        return NULL;
-    }
+    NOIA_ENSURE(self, return NULL);
 
     LOG_INFO1("Threads: starting loop '%s'", self->name);
     noia_environment_on_enter_new_thread(self->thread, self->name);
 
-    self->run = 1;
+    self->run = true;
     pthread_mutex_lock(&self->process_mutex);
     while (self->run) {
         while (noia_list_len(self->task_list) > 0) {
@@ -109,27 +74,64 @@ void* noia_loop_thread_loop(void* data)
 }
 
 //------------------------------------------------------------------------------
+// PUBLIC
 
-int noia_loop_run(NoiaLoop* self)
+NoiaLoop* noia_loop_new(const char* name)
 {
-    if (!self) {
-        return -ENOMEM;
+    NoiaLoop* self = malloc(sizeof(NoiaLoop));
+    NOIA_ENSURE(self, abort());
+
+    self->name = strdup(name);
+    pthread_mutex_init(&self->schedule_mutex, NULL);
+    pthread_mutex_init(&self->process_mutex, NULL);
+    pthread_cond_init(&self->condition, NULL);
+    self->run = false;
+    self->task_list = noia_list_new(NULL);
+    self->finalizers = noia_list_new(NULL);
+    return self;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_loop_free(NoiaLoop* self)
+{
+    NOIA_ENSURE(self, return);
+
+    if (self->name) {
+        free(self->name);
+    }
+    noia_list_free(self->finalizers);
+    noia_list_free(self->task_list);
+    memset(self, 0, sizeof(NoiaLoop));
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaResult noia_loop_run(NoiaLoop* self)
+{
+    NOIA_ENSURE(self, return NOIA_RESULT_ERROR);
+
+    NoiaResult result = NOIA_RESULT_ERROR;
+    int code = pthread_create(&self->thread, NULL, noia_loop_thread_loop, self);
+    if (code == 0) {
+        result = NOIA_RESULT_SUCCESS;
+    } else {
+        LOG_ERROR("Threads: error while creating thread: '%s'", strerror(code));
     }
 
-    return pthread_create(&self->thread, NULL, noia_loop_thread_loop, self);
+    return result;
 }
 
 //------------------------------------------------------------------------------
 
 void noia_loop_stop(NoiaLoop* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
 
     LOG_INFO1("Threads: stopping loop '%s'", self->name);
     pthread_mutex_lock(&self->process_mutex);
-    self->run = 0;
+    self->run = false;
     pthread_mutex_unlock(&self->process_mutex);
     pthread_cond_signal(&self->condition);
 }
@@ -138,34 +140,41 @@ void noia_loop_stop(NoiaLoop* self)
 
 void noia_loop_join(NoiaLoop* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
     pthread_join(self->thread, NULL);
 }
 
 //------------------------------------------------------------------------------
 
-int noia_loop_schedule_task(NoiaLoop* self, NoiaTask* task)
+NoiaResult noia_loop_schedule_task(NoiaLoop* self, NoiaTask* task)
 {
-    if (!self || !task) {
-        LOG_ERROR("Invalid Loop or Task!");
-        return -ENOMEM;
-    }
+    NOIA_ENSURE(self, return NOIA_RESULT_ERROR);
+    NOIA_ENSURE(task, return NOIA_RESULT_ERROR);
 
     pthread_mutex_lock(&self->schedule_mutex);
     noia_list_append(self->task_list, task);
     pthread_mutex_unlock(&self->schedule_mutex);
     pthread_cond_signal(&self->condition);
-    return 1;
+
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_loop_add_finalizer(NoiaLoop* self, NoiaTaskProcessor finalizer)
+NoiaResult noia_loop_add_finalizer(NoiaLoop* self,
+                                   NoiaTaskProcessor finalizer,
+                                   void* data)
 {
-    noia_list_append(self->finalizers, noia_task_new(finalizer,
-                    (NoiaFreeFunc) noia_task_free, NULL, NULL, NULL));
+    NOIA_ENSURE(self, return NOIA_RESULT_ERROR);
+    NOIA_ENSURE(finalizer, return NOIA_RESULT_ERROR);
+
+    NoiaTask* task = noia_task_new(finalizer,
+                                   (NoiaFreeFunc) noia_task_free,
+                                   NULL, data, NULL);
+
+    noia_list_append(self->finalizers, task);
+
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------

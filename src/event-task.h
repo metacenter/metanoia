@@ -8,7 +8,7 @@
 
 typedef struct NoiaLoopPriv NoiaLoop;
 
-typedef void (*NoiaTaskProcessor) (void*);
+typedef void (*NoiaTaskProcessor) (void*, void*);
 typedef void (*NoiaTaskFreeFunc) (void*);
 
 typedef struct {

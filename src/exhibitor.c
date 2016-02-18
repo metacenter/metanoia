@@ -43,9 +43,9 @@ void noia_exhibitor_create_new_display(NoiaOutput* output)
 //------------------------------------------------------------------------------
 
 /// Handle display found notification.
-void noia_exhibitor_on_display_found(void* data)
+void noia_exhibitor_on_display_found(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaOutput* output = (NoiaOutput*) data;
+    NoiaOutput* output = (NoiaOutput*) edata;
     if (!output) {
         LOG_ERROR("Invalid output!");
         return;
@@ -57,9 +57,9 @@ void noia_exhibitor_on_display_found(void* data)
 //------------------------------------------------------------------------------
 
 /// Handle display lost notification.
-void noia_exhibitor_on_display_lost(void* data)
+void noia_exhibitor_on_display_lost(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaOutput* output = (NoiaOutput*) data;
+    NoiaOutput* output = (NoiaOutput*) edata;
     if (!output) {
         LOG_ERROR("Invalid output");
         return;
@@ -84,9 +84,9 @@ void noia_exhibitor_on_display_lost(void* data)
 //------------------------------------------------------------------------------
 
 /// Handle creation of new surface notification.
-void noia_exhibitor_on_surface_ready(void* data)
+void noia_exhibitor_on_surface_ready(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
+    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) edata);
     if (sid == scInvalidSurfaceId) {
         return;
     }
@@ -98,9 +98,9 @@ void noia_exhibitor_on_surface_ready(void* data)
 //------------------------------------------------------------------------------
 
 /// Handle creation of surface destruction notification.
-void noia_exhibitor_on_surface_destroyed(void* data)
+void noia_exhibitor_on_surface_destroyed(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
+    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) edata);
     if (sid == scInvalidSurfaceId) {
         return;
     }
@@ -117,7 +117,7 @@ void noia_exhibitor_on_surface_destroyed(void* data)
 //------------------------------------------------------------------------------
 
 /// Finalize the loop - realise resources.
-void noia_exhibitor_finalize(void* data NOIA_UNUSED)
+void noia_exhibitor_finalize(void* edata NOIA_UNUSED, void* sdata NOIA_UNUSED)
 {
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
@@ -179,10 +179,7 @@ void noia_exhibitor_execute(NoiaAction* action)
 
 void noia_exhibitor_initialize(NoiaLoop* this_loop)
 {
-    if (this_loop == 0) {
-        LOG_ERROR("Invalid loop!");
-        return;
-    }
+    NOIA_ENSURE(this_loop, return);
 
     NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
 
@@ -202,7 +199,7 @@ void noia_exhibitor_initialize(NoiaLoop* this_loop)
                noia_task_create(noia_exhibitor_on_surface_destroyed,
                                 this_loop, exhibitor));
 
-    noia_loop_add_finalizer(this_loop, noia_exhibitor_finalize);
+    noia_loop_add_finalizer(this_loop, noia_exhibitor_finalize, NULL);
 
     noia_exhibitor_pointer_initialize(this_loop, exhibitor);
 }

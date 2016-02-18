@@ -50,29 +50,29 @@ void* display_run(void* data)
 
 //------------------------------------------------------------------------------
 
-void wayland_screen_refresh_handler(void* data)
+void wayland_screen_refresh_handler(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
+    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) edata);
     LOG_WAYL4("Wayland: handling screen refresh");
     noia_wayland_state_screen_refresh(sid);
 }
 
 //------------------------------------------------------------------------------
 
-void wayland_keyboard_focus_change_handler(void* data)
+void wayland_keyboard_focus_change_handler(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
+    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) edata);
     LOG_WAYL2("Wayland: handling keyboard focus change (sid: %d)", sid);
     noia_wayland_state_keyboard_focus_update(sid);
 }
 
 //------------------------------------------------------------------------------
 
-void wayland_keyboard_event_handler(void* data)
+void wayland_keyboard_event_handler(void* edata, void* sdata NOIA_UNUSED)
 {
     LOG_WAYL4("Wayland: handling keyboard event");
 
-    NoiaKeyObject* object = (NoiaKeyObject*) data;
+    NoiaKeyObject* object = (NoiaKeyObject*) edata;
     if (!object) {
         return;
     }
@@ -85,30 +85,30 @@ void wayland_keyboard_event_handler(void* data)
 
 //------------------------------------------------------------------------------
 
-void wayland_pointer_focus_change_handler(void* data)
+void wayland_pointer_focus_change_handler(void* edata, void* sdata NOIA_UNUSED)
 {
     LOG_WAYL4("Wayland: handling pointer focus change");
-    NoiaMotionObject* object = (NoiaMotionObject*) data;
+    NoiaMotionObject* object = (NoiaMotionObject*) edata;
     noia_wayland_state_pointer_focus_update(object->sid, object->pos);
     noia_object_unref((NoiaObject*) object);
 }
 
 //------------------------------------------------------------------------------
 
-void wayland_pointer_motion_handler(void* data)
+void wayland_pointer_motion_handler(void* edata, void* sdata NOIA_UNUSED)
 {
     LOG_WAYL4("Wayland: handling pointer motion");
-    NoiaMotionObject* object = (NoiaMotionObject*) data;
+    NoiaMotionObject* object = (NoiaMotionObject*) edata;
     noia_wayland_state_pointer_motion(object->sid, object->pos);
     noia_object_unref((NoiaObject*) object);
 }
 
 //------------------------------------------------------------------------------
 
-void wayland_pointer_button_handler(void* data)
+void wayland_pointer_button_handler(void* edata, void* sdata NOIA_UNUSED)
 {
     LOG_WAYL4("Wayland: handling pointer button");
-    NoiaButtonObject* object = (NoiaButtonObject*) data;
+    NoiaButtonObject* object = (NoiaButtonObject*) edata;
     noia_wayland_state_pointer_button(object->buttondata.time,
                                       object->buttondata.code,
                                       object->buttondata.value);
@@ -117,26 +117,26 @@ void wayland_pointer_button_handler(void* data)
 
 //------------------------------------------------------------------------------
 
-void wayland_output_found_handler(void* data)
+void wayland_output_found_handler(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaOutput* output = (NoiaOutput*) data;
+    NoiaOutput* output = (NoiaOutput*) edata;
     noia_wayland_state_advertise_output(output);
     noia_object_unref((NoiaObject*) output);
 }
 
 //------------------------------------------------------------------------------
 
-void wayland_output_lost_handler(void* data)
+void wayland_output_lost_handler(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaOutput* output = (NoiaOutput*) data;
+    NoiaOutput* output = (NoiaOutput*) edata;
     noia_wayland_state_destroy_output(output);
 }
 
 //------------------------------------------------------------------------------
 
-void wayland_surface_reconfigured_handler(void* data)
+void wayland_surface_reconfigured_handler(void* edata, void* sdata NOIA_UNUSED)
 {
-    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) data);
+    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) edata);
     noia_wayland_state_surface_reconfigured(sid);
 }
 
@@ -151,7 +151,7 @@ int noia_wayland_event_loop_feeder(void* data NOIA_UNUSED)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_finalize(void* data NOIA_UNUSED)
+void noia_wayland_finalize(void* edata NOIA_UNUSED, void* sdata NOIA_UNUSED)
 {
     noia_wayland_state_finalize();
     noia_wayland_cache_finalize();
@@ -169,6 +169,7 @@ void noia_wayland_finalize(void* data NOIA_UNUSED)
 void noia_wayland_initialize(NoiaLoop* this_loop)
 {
     LOG_INFO1("Initializing Wayland...");
+    NOIA_ENSURE(this_loop, return);
 
     // Init Wayland
     wayland_display = wl_display_create();
@@ -279,7 +280,7 @@ void noia_wayland_initialize(NoiaLoop* this_loop)
                noia_task_create(wayland_surface_reconfigured_handler,
                                 this_loop, NULL));
 
-    noia_loop_add_finalizer(this_loop, noia_wayland_finalize);
+    noia_loop_add_finalizer(this_loop, noia_wayland_finalize, NULL);
 
     LOG_INFO1("Initializing Wayland: SUCCESS");
 }

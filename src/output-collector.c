@@ -140,7 +140,7 @@ void noia_output_collector_update(void)
 //------------------------------------------------------------------------------
 
 /// Handle SIGNAL_OUTPUTS_CHANGED signal.
-void noia_output_on_change(void* data NOIA_UNUSED)
+void noia_output_on_change(void* edata NOIA_UNUSED, void* sdata NOIA_UNUSED)
 {
     noia_output_collector_update();
 }
@@ -148,7 +148,8 @@ void noia_output_on_change(void* data NOIA_UNUSED)
 //------------------------------------------------------------------------------
 
 /// Finalize loop.
-void noia_output_collector_finalize(void* data NOIA_UNUSED)
+void noia_output_collector_finalize(void* edata NOIA_UNUSED,
+                                    void* sdata NOIA_UNUSED)
 {
     noia_list_free(outputs);
 }
@@ -158,10 +159,7 @@ void noia_output_collector_finalize(void* data NOIA_UNUSED)
 /// Initialize Output Collector.
 void noia_output_collector_initialize(NoiaLoop* this_loop)
 {
-    if (!this_loop) {
-        LOG_ERROR("Invalid loop!");
-        return;
-    }
+    NOIA_ENSURE(this_loop, return);
 
     // initialize
     outputs = noia_list_new(NULL);
@@ -171,7 +169,7 @@ void noia_output_collector_initialize(NoiaLoop* this_loop)
     noia_event_signal_subscribe(SIGNAL_OUTPUTS_CHANGED,
          noia_task_create(noia_output_on_change, this_loop, NULL));
 
-    noia_loop_add_finalizer(this_loop, noia_output_collector_finalize);
+    noia_loop_add_finalizer(this_loop, noia_output_collector_finalize, NULL);
 }
 
 //------------------------------------------------------------------------------
