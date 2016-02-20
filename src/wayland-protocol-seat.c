@@ -19,9 +19,9 @@ void noia_wayland_seat_unbind(struct wl_resource* resource NOIA_UNUSED)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_get_pointer(struct wl_client* client,
-                              struct wl_resource* resource,
-                              uint32_t id)
+void noia_wayland_seat_get_pointer(struct wl_client* client,
+                                   struct wl_resource* resource,
+                                   uint32_t id)
 {
     uint32_t version = wl_resource_get_version(resource);
     noia_wayland_pointer_bind(client, NULL, version, id);
@@ -29,9 +29,9 @@ void noia_wayland_get_pointer(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_get_keyboard(struct wl_client* client,
-                               struct wl_resource* resource,
-                               uint32_t id)
+void noia_wayland_seat_get_keyboard(struct wl_client* client,
+                                    struct wl_resource* resource,
+                                    uint32_t id)
 {
     uint32_t version = wl_resource_get_version(resource);
     noia_wayland_keyboard_bind(client, NULL, version, id);
@@ -39,19 +39,30 @@ void noia_wayland_get_keyboard(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_get_touch(struct wl_client* client     NOIA_UNUSED,
-                            struct wl_resource* resource NOIA_UNUSED,
-                            uint32_t id)
+/// @todo: Wayland protocol: seat get touch.
+void noia_wayland_seat_get_touch(struct wl_client* client     NOIA_UNUSED,
+                                 struct wl_resource* resource NOIA_UNUSED,
+                                 uint32_t id)
 {
-    LOG_NYIMP("Wayland: get touch (id: %d)", id);
+    LOG_NYIMP("Wayland > get touch (id: %d)", id);
+}
+
+//------------------------------------------------------------------------------
+
+/// @todo: Wayland protocol: seat release.
+void noia_wayland_seat_release(struct wl_client* client     NOIA_UNUSED,
+                               struct wl_resource* resource NOIA_UNUSED)
+{
+    LOG_NYIMP("Wayland > seat release");
 }
 
 //------------------------------------------------------------------------------
 
 static const struct wl_seat_interface scSeatImplementation = {
-        noia_wayland_get_pointer,
-        noia_wayland_get_keyboard,
-        noia_wayland_get_touch
+        noia_wayland_seat_get_pointer,
+        noia_wayland_seat_get_keyboard,
+        noia_wayland_seat_get_touch,
+        noia_wayland_seat_release,
     };
 
 //------------------------------------------------------------------------------

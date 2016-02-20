@@ -186,6 +186,22 @@ void noia_wayland_surface_set_buffer_scale
 
 //------------------------------------------------------------------------------
 
+/// @todo: Wayland protocol: surface buffer damage.
+void noia_wayland_surface_damage_buffer
+                                      (struct wl_client* client     NOIA_UNUSED,
+                                       struct wl_resource* resource NOIA_UNUSED,
+                                       int32_t x,
+                                       int32_t y,
+                                       int32_t width,
+                                       int32_t height)
+{
+    LOG_NYIMP("Wayland > damage surface buffer "
+              "(x: '%d', y: '%d', width: '%d', height: '%d')",
+              x, y, width, height);
+}
+
+//------------------------------------------------------------------------------
+
 const struct wl_surface_interface scSurfaceImplementation = {
         noia_wayland_surface_destroy,
         noia_wayland_surface_attach,
@@ -195,7 +211,8 @@ const struct wl_surface_interface scSurfaceImplementation = {
         noia_wayland_surface_set_input_region,
         noia_wayland_surface_commit,
         noia_wayland_surface_set_buffer_transform,
-        noia_wayland_surface_set_buffer_scale
+        noia_wayland_surface_set_buffer_scale,
+        noia_wayland_surface_damage_buffer,
     };
 
 //------------------------------------------------------------------------------

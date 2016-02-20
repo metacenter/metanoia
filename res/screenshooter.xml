@@ -1,4 +1,4 @@
-<protocol name="screenshooter">
+<protocol name="weston_screenshooter">
 
   <interface name="screenshooter" version="1">
     <request name="shoot">
