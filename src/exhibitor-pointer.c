@@ -16,6 +16,7 @@ static const int scInvalidPointerValue = -1;
 //------------------------------------------------------------------------------
 // PRIVATE
 
+/// @see NoiaPointer
 struct NoiaPointerStruct {
     /// Position in global coordinates.
     NoiaPosition position;
@@ -30,10 +31,13 @@ struct NoiaPointerStruct {
     NoiaArea active_area;
 
     /// Surface ID of cursor surface.
-    NoiaSurfaceId cursor_sid;
+    NoiaSurfaceId csid;
 
-    /// Surface ID of focused surface.
-    NoiaSurfaceId focused_sid;
+    /// Surface ID of pointer-focused surface.
+    NoiaSurfaceId pfsid;
+
+    /// Surface ID of keyboard-focused surface.
+    NoiaSurfaceId kfsid;
 
     /// Pointer functions may be called from display threads.
     pthread_mutex_t mutex;
@@ -92,8 +96,9 @@ NoiaPointer* noia_exhibitor_pointer_new()
     self->last_rel.x = scInvalidPointerValue;
     self->last_rel.y = scInvalidPointerValue;
     noia_area_invalidate(&self->active_area);
-    self->cursor_sid = scInvalidSurfaceId;
-    self->focused_sid = scInvalidSurfaceId;
+    self->csid = scInvalidSurfaceId;
+    self->pfsid = scInvalidSurfaceId;
+    self->kfsid = scInvalidSurfaceId;
     pthread_mutex_init(&self->mutex, NULL);
 
     return self;
@@ -117,7 +122,7 @@ NoiaPosition noia_exhibitor_pointer_get_global_position(NoiaPointer* self)
 
 NoiaSurfaceId noia_exhibitor_pointer_get_sid(NoiaPointer* self)
 {
-    return self->cursor_sid;
+    return self->csid;
 }
 
 //------------------------------------------------------------------------------
@@ -157,15 +162,15 @@ void noia_exhibitor_pointer_update_hover_state(NoiaPointer* self,
         }
     }
 
-    if (sid != self->focused_sid) {
+    if (sid != self->pfsid) {
         LOG_INFO2("Pointer focus changed "
                   "(old sid: %d, new sid: %d, x: %d, y: %d)",
-                  self->focused_sid, sid, rel.x, rel.y);
-        self->focused_sid = sid;
-        self->cursor_sid = scInvalidSurfaceId;
+                  self->pfsid, sid, rel.x, rel.y);
+        self->pfsid = sid;
+        self->csid = scInvalidSurfaceId;
         noia_event_signal_emit(SIGNAL_POINTER_FOCUS_CHANGED,
                                (NoiaObject*) noia_motion_create(sid, rel));
-    } else if ((self->focused_sid != scInvalidSurfaceId)
+    } else if ((self->pfsid != scInvalidSurfaceId)
            and ((rel.x != self->last_rel.x) or (rel.y != self->last_rel.y))) {
         LOG_INFO3("Pointer surface relative position (x: %d, y: %d)",
                   rel.x, rel.y);
@@ -234,7 +239,7 @@ void noia_exhibitor_pointer_on_surface_change(NoiaPointer* self,
 
     NoiaSurfaceData* surface_data = noia_surface_get(sid);
     if (surface_data) {
-        self->cursor_sid = sid;
+        self->csid = sid;
     }
 
     pthread_mutex_unlock(&self->mutex);
@@ -247,11 +252,34 @@ void noia_exhibitor_pointer_on_surface_destroyed(NoiaPointer* self,
 {
     pthread_mutex_lock(&self->mutex);
 
-    if (self->cursor_sid == sid) {
-        self->cursor_sid = scInvalidSurfaceId;
+    if (self->csid == sid) {
+        self->csid = scInvalidSurfaceId;
     }
 
     pthread_mutex_unlock(&self->mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_pointer_on_button(NoiaPointer* self,
+                                      NoiaExhibitor* exhibitor)
+{
+    NOIA_ENSURE(self, return);
+
+    if (self->kfsid != self->pfsid) {
+        NoiaCompositor* compositor = noia_exhibitor_get_compositor(exhibitor);
+        noia_compositor_pop_surface(compositor, self->pfsid);
+        // Do not update `self->kfsid` - if pop succeeds we will be notified
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_pointer_on_keyboard_focus_changed(NoiaPointer* self,
+                                                      NoiaSurfaceId new_sid)
+{
+    NOIA_ENSURE(self, return);
+    self->kfsid = new_sid;
 }
 
 //------------------------------------------------------------------------------

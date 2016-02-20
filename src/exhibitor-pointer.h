@@ -46,5 +46,13 @@ void noia_exhibitor_pointer_on_surface_change(NoiaPointer* self,
 void noia_exhibitor_pointer_on_surface_destroyed(NoiaPointer* self,
                                                  NoiaSurfaceId sid);
 
+/// Handle button press or release.
+void noia_exhibitor_pointer_on_button(NoiaPointer* self,
+                                      NoiaExhibitor* exhibitor);
+
+/// Handle change of keyboard focus.
+void noia_exhibitor_pointer_on_keyboard_focus_changed(NoiaPointer* self,
+                                                      NoiaSurfaceId new_sid);
+
 #endif // NOIA_EXHIBITOR_POINTER_H
 

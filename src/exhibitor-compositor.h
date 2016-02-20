@@ -7,10 +7,6 @@
 #include "exhibitor-frame.h"
 #include "exhibitor.h"
 
-/// NoiaCompositor manages surfaces and decides which ones should be drawn on
-/// which output.
-typedef struct NoiaCompositorStruct NoiaCompositor;
-
 /// Compositor constructor.
 NoiaCompositor* noia_compositor_new(NoiaExhibitor* exhibitor);
 

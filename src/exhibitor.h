@@ -12,6 +12,11 @@
 /// surface history, pointer position, etc.
 typedef struct NoiaExhibitorStruct NoiaExhibitor;
 
+/// `NoiaCompositor` manages surfaces and decides which ones should be drawn on
+/// which output.
+typedef struct NoiaCompositorStruct NoiaCompositor;
+
+/// `NoiaPointer` manages motion of pointer and appearance of cursor.
 typedef struct NoiaPointerStruct NoiaPointer;
 
 
@@ -27,6 +32,9 @@ NoiaList* noia_exhibitor_get_displays(NoiaExhibitor* self);
 
 /// Get list of surface IDs ordered by time of access.
 NoiaList* noia_exhibitor_get_surface_history(NoiaExhibitor* self);
+
+/// Get compositor.
+NoiaCompositor* noia_exhibitor_get_compositor(NoiaExhibitor* self);
 
 /// Get pointer manager.
 NoiaPointer* noia_exhibitor_get_pointer(NoiaExhibitor* self);
@@ -59,6 +67,16 @@ void noia_exhibitor_on_motion_x(NoiaExhibitor* self, int abs_value);
 
 /// Handle motion in Y-axis notification.
 void noia_exhibitor_on_motion_y(NoiaExhibitor* self, int abs_value);
+
+/// Handle button press or release.
+void noia_exhibitor_on_button(NoiaExhibitor* self,
+                              uint32_t time,
+                              uint32_t button,
+                              uint32_t state);
+
+/// Handle change of keyboard focus.
+void noia_exhibitor_on_keyboard_focus_changed(NoiaExhibitor* self,
+                                              NoiaSurfaceId new_sid);
 
 #endif // NOIA_EXHIBITOR_H
 

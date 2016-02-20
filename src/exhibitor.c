@@ -69,6 +69,13 @@ NoiaList* noia_exhibitor_get_surface_history(NoiaExhibitor* self)
 
 //------------------------------------------------------------------------------
 
+NoiaCompositor* noia_exhibitor_get_compositor(NoiaExhibitor* self)
+{
+    return self->compositor;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaPointer* noia_exhibitor_get_pointer(NoiaExhibitor* self)
 {
     return self->pointer;
@@ -182,6 +189,26 @@ void noia_exhibitor_on_motion_y(NoiaExhibitor* self, int abs_value)
 {
     NOIA_ENSURE(self, return);
     noia_exhibitor_pointer_on_motion_y(self->pointer, self, abs_value);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_on_button(NoiaExhibitor* self,
+                              uint32_t time   NOIA_UNUSED,
+                              uint32_t button NOIA_UNUSED,
+                              uint32_t state  NOIA_UNUSED)
+{
+    NOIA_ENSURE(self, return);
+    noia_exhibitor_pointer_on_button(self->pointer, self);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_on_keyboard_focus_changed(NoiaExhibitor* self,
+                                              NoiaSurfaceId new_sid)
+{
+    NOIA_ENSURE(self, return);
+    noia_exhibitor_pointer_on_keyboard_focus_changed(self->pointer, new_sid);
 }
 
 //------------------------------------------------------------------------------
