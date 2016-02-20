@@ -28,7 +28,7 @@ struct NoiaPointerStruct {
     NoiaPosition last_rel;
 
     /// Area of display on which the pointer is placed.
-    NoiaArea active_area;
+    NoiaArea display_area;
 
     /// Surface ID of cursor surface.
     NoiaSurfaceId csid;
@@ -45,7 +45,7 @@ struct NoiaPointerStruct {
 
 //------------------------------------------------------------------------------
 
-/// Find the output inside which is pointer.
+/// Find the output inside which output pointer is places.
 /// If found - nothing to do.
 /// If no output found - update cursor position with closest on inside
 /// previously active output.
@@ -55,7 +55,7 @@ NoiaPosition noia_exhibitor_pointer_cast(NoiaPointer* self,
                                          NoiaPosition position)
 {
     NOIA_BLOCK {
-        if (noia_position_is_inside(position, self->active_area)) {
+        if (noia_position_is_inside(position, self->display_area)) {
             // Nothing to do - pointer inside active output
             break;
         }
@@ -67,7 +67,7 @@ NoiaPosition noia_exhibitor_pointer_cast(NoiaPointer* self,
             NoiaArea area = noia_display_get_area(display);
             if (noia_position_is_inside(position, area)) {
                 // Set new active output and exit
-                self->active_area = area;
+                self->display_area = area;
                 found = true;
                 break;
             }
@@ -75,7 +75,7 @@ NoiaPosition noia_exhibitor_pointer_cast(NoiaPointer* self,
 
         if (not found) {
             // Pointer outside any known output - cast it to the previous active
-            position = noia_position_cast(position, self->active_area);
+            position = noia_position_cast(position, self->display_area);
         }
     }
 
@@ -95,7 +95,7 @@ NoiaPointer* noia_exhibitor_pointer_new()
     self->last_abs.y = scInvalidPointerValue;
     self->last_rel.x = scInvalidPointerValue;
     self->last_rel.y = scInvalidPointerValue;
-    noia_area_invalidate(&self->active_area);
+    noia_area_invalidate(&self->display_area);
     self->csid = scInvalidSurfaceId;
     self->pfsid = scInvalidSurfaceId;
     self->kfsid = scInvalidSurfaceId;
@@ -127,41 +127,49 @@ NoiaSurfaceId noia_exhibitor_pointer_get_sid(NoiaPointer* self)
 
 //------------------------------------------------------------------------------
 
-/// @todo Find better moment to update hover state.
+/// @note Applications ignore excess motion events and react only to last before
+///       frame to avoid constant redrawing therefore motion event is emitted
+///       here (just before display redraw) instead of in reaction to every
+///       input event (where we only ensure pointer is inside display).
 void noia_exhibitor_pointer_update_hover_state(NoiaPointer* self,
-                                               NoiaArea area,
+                                               NoiaArea display_area,
                                                NoiaPool* visible_surfaces)
 {
     // Check if this update is for display on which this pointer is placed
-    if (not noia_area_is_equal(self->active_area, area)) {
+    if (not noia_area_is_equal(self->display_area, display_area)) {
         return;
     }
 
     pthread_mutex_lock(&self->mutex);
 
-    NoiaPosition relative_position = {self->position.x - area.pos.x,
-                                      self->position.y - area.pos.y};
+    NoiaPosition relative_position = {self->position.x - display_area.pos.x,
+                                      self->position.y - display_area.pos.y};
 
-    NoiaPosition rel = {-1, -1};
+    NoiaPosition rel = {scInvalidPointerValue, scInvalidPointerValue};
     NoiaSurfaceId sid = scInvalidSurfaceId;
+    NoiaArea surface_area;
+    noia_area_invalidate(&surface_area);
 
+    // Find surface pointer hovers
     int i;
     NoiaSurfaceContext* context;
     NOIA_ITERATE_POOL_REVERSE(visible_surfaces, i, context) {
         NoiaSurfaceData* data = noia_surface_get(context->sid);
-        /// @todo Use noia_position_is_inside function
-        if (data
-        &&  relative_position.x >= context->pos.x
-        &&  relative_position.y >= context->pos.y
-        &&  relative_position.x <= context->pos.x + data->desired_size.width
-        &&  relative_position.y <= context->pos.y + data->desired_size.height) {
-            sid = context->sid;
-            rel.x = relative_position.x - context->pos.x + data->offset.x;
-            rel.y = relative_position.y - context->pos.y + data->offset.y;
-            break;
+        if (data) {
+            surface_area.pos.x = context->pos.x;
+            surface_area.pos.y = context->pos.y;
+            surface_area.size = data->desired_size;
+            if (noia_position_is_inside(relative_position, surface_area)) {
+                sid = context->sid;
+                rel.x = relative_position.x - context->pos.x + data->offset.x;
+                rel.y = relative_position.y - context->pos.y + data->offset.y;
+                break;
+            }
         }
     }
 
+    // Handle focus change if hovered surface is different than current one
+    // or handle motion otherwise
     if (sid != self->pfsid) {
         LOG_INFO2("Pointer focus changed "
                   "(old sid: %d, new sid: %d, x: %d, y: %d)",
@@ -266,11 +274,15 @@ void noia_exhibitor_pointer_on_button(NoiaPointer* self,
 {
     NOIA_ENSURE(self, return);
 
+    pthread_mutex_lock(&self->mutex);
+
     if (self->kfsid != self->pfsid) {
         NoiaCompositor* compositor = noia_exhibitor_get_compositor(exhibitor);
         noia_compositor_pop_surface(compositor, self->pfsid);
         // Do not update `self->kfsid` - if pop succeeds we will be notified
     }
+
+    pthread_mutex_unlock(&self->mutex);
 }
 
 //------------------------------------------------------------------------------
@@ -279,7 +291,9 @@ void noia_exhibitor_pointer_on_keyboard_focus_changed(NoiaPointer* self,
                                                       NoiaSurfaceId new_sid)
 {
     NOIA_ENSURE(self, return);
+    pthread_mutex_lock(&self->mutex);
     self->kfsid = new_sid;
+    pthread_mutex_unlock(&self->mutex);
 }
 
 //------------------------------------------------------------------------------
