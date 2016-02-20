@@ -5,9 +5,10 @@
 #define NOIA_EXHIBITOR_STRATEGIST_H
 
 #include "exhibitor.h"
+#include "exhibitor-compositor.h"
 
 typedef void (*NoiaStrategistOnSurfaceReadyFunc)
-             (NoiaExhibitor*, NoiaSurfaceId);
+             (NoiaExhibitor*, NoiaCompositor*, NoiaSurfaceId);
 typedef void (*NoiaStrategistOnSurfaceDestroyedFunc)
              (NoiaExhibitor*, NoiaSurfaceId);
 
@@ -23,7 +24,6 @@ void noia_strategist_setup
                     (NoiaStrategist* self,
                      NoiaStrategistOnSurfaceReadyFunc     on_surface_ready,
                      NoiaStrategistOnSurfaceDestroyedFunc on_surface_destroyed);
-
 
 #endif // NOIA_EXHIBITOR_STRATEGIST_H
 

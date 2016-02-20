@@ -4,7 +4,7 @@
 #include "global-functions.h"
 #include "utils-log.h"
 #include "event-signals.h"
-#include "exhibitor.h"
+#include "exhibitor-module.h"
 
 #include <stdlib.h>
 #include <unistd.h>

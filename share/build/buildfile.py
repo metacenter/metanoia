@@ -206,7 +206,8 @@ metanoia.add([target_exhibitor_frame,
               Com(['exhibitor-compositor.c']),
               Com(['exhibitor-display.c']),
               Com(['exhibitor-pointer.c']),
-              Com(['exhibitor.c'])])
+              Com(['exhibitor.c']),
+              Com(['exhibitor-module.c'])])
 
 #-------------------------------------------------------------------------------
 # WAYLAND FRONTEND

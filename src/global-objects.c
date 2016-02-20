@@ -146,3 +146,17 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos)
 
 //------------------------------------------------------------------------------
 
+/// Clean an action.
+void noia_action_clean(NoiaAction* action)
+{
+    action->action     = NOIA_ARGMAND_NONE;
+    action->direction  = NOIA_ARGMAND_NONE;
+    action->magnitude  = 0;
+    if (action->str) {
+        free(action->str);
+        action->str = NULL;
+    }
+}
+
+//------------------------------------------------------------------------------
+

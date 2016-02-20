@@ -4,8 +4,10 @@
 #include "keyboard-functions.h"
 #include "keyboard-mode.h"
 #include "utils-log.h"
-#include "exhibitor.h"
+#include "utils-system.h"
+#include "exhibitor-module.h"
 #include "global-macros.h"
+#include "event-signals.h"
 
 #include <string.h>
 #include <linux/input.h>
@@ -33,8 +35,17 @@ int noia_get_number_from_key(int code)
 
 //------------------------------------------------------------------------------
 
-static inline void noia_action(NoiaAction* action,
-                               NoiaArgmand argmand)
+void noia_execute(NoiaAction* action)
+{
+    noia_object_ref(&action->base);
+    noia_event_signal_emit(SIGNAL_ACTION, &action->base);
+    // FIXME
+    //noia_action_clean(action);
+}
+
+//------------------------------------------------------------------------------
+
+static inline void noia_action(NoiaAction* action, NoiaArgmand argmand)
 {
     NOIA_ENSURE(action, return);
     NOIA_ENSURE(noia_argmand_is_actionable(argmand), return);
@@ -44,8 +55,7 @@ static inline void noia_action(NoiaAction* action,
         if (action->magnitude == 0) {
             action->magnitude = 1;
         }
-        noia_exhibitor_execute(action);
-        noia_action_clean(action);
+        noia_execute(action);
     }
 }
 
@@ -62,8 +72,7 @@ static inline void noia_direction(NoiaAction* action,
         if (action->magnitude == 0) {
             action->magnitude = 1;
         }
-        noia_exhibitor_execute(action);
-        noia_action_clean(action);
+        noia_execute(action);
     }
 }
 
@@ -84,8 +93,7 @@ void noia_cicle_history_forward(NoiaBindingContext* context)
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_FORWARD;
     action->magnitude = 1;
-    noia_exhibitor_execute(action);
-    noia_action_clean(action);
+    noia_execute(action);
 }
 
 //------------------------------------------------------------------------------
@@ -97,8 +105,7 @@ void noia_cicle_history_back(NoiaBindingContext* context)
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_BACK;
     action->magnitude = 1;
-    noia_exhibitor_execute(action);
-    noia_action_clean(action);
+    noia_execute(action);
 }
 
 //------------------------------------------------------------------------------
@@ -164,8 +171,7 @@ void noia_focus_workspace(NoiaBindingContext* context)
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_WORKSPACE;
     action->str = strdup(str);
-    noia_exhibitor_execute(action);
-    noia_action_clean(action);
+    noia_execute(action);
 }
 
 //------------------------------------------------------------------------------
@@ -176,8 +182,7 @@ void noia_anchorize(NoiaBindingContext* context)
     NoiaAction* action = &context->action;
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_ANCHOR;
-    noia_exhibitor_execute(action);
-    noia_action_clean(action);
+    noia_execute(action);
 }
 
 //------------------------------------------------------------------------------
@@ -189,8 +194,7 @@ void noia_stackedize(NoiaBindingContext* context)
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_END;
-    noia_exhibitor_execute(action);
-    noia_action_clean(action);
+    noia_execute(action);
 }
 
 //------------------------------------------------------------------------------
@@ -202,8 +206,7 @@ void noia_verticalize(NoiaBindingContext* context)
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_N;
-    noia_exhibitor_execute(action);
-    noia_action_clean(action);
+    noia_execute(action);
 }
 
 //------------------------------------------------------------------------------
@@ -215,8 +218,7 @@ void noia_horizontalize(NoiaBindingContext* context)
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_W;
-    noia_exhibitor_execute(action);
-    noia_action_clean(action);
+    noia_execute(action);
 }
 
 //------------------------------------------------------------------------------
@@ -227,8 +229,7 @@ void noia_select_trunk(NoiaBindingContext* context)
     NoiaAction* action = &context->action;
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_TRUNK;
-    noia_exhibitor_execute(action);
-    noia_action_clean(action);
+    noia_execute(action);
 }
 
 //------------------------------------------------------------------------------

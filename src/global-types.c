@@ -15,8 +15,8 @@ bool noia_position_is_inside(NoiaPosition position, NoiaArea area)
     int margin_left   = area.pos.x;
     int margin_right  = area.size.width + margin_left;
 
-    return margin_top  <= position.y && position.y < margin_bottom
-        && margin_left <= position.x && position.x < margin_right;
+    return (margin_top  <= position.y) and (position.y < margin_bottom)
+       and (margin_left <= position.x) and (position.x < margin_right);
 }
 
 //------------------------------------------------------------------------------
@@ -46,22 +46,34 @@ NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area)
 
 //------------------------------------------------------------------------------
 
-void noia_buffer_clean(NoiaBuffer* buffer)
+void noia_area_invalidate(NoiaArea* area)
 {
-    memset(buffer, 0, sizeof(NoiaBuffer));
+    area->pos.x = 0;
+    area->pos.y = 0;
+    area->size.width = -1;
+    area->size.height = -1;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_action_clean(NoiaAction* action)
+bool noia_area_is_equal(NoiaArea area1, NoiaArea area2)
 {
-    action->action     = NOIA_ARGMAND_NONE;
-    action->direction  = NOIA_ARGMAND_NONE;
-    action->magnitude  = 0;
-    if (action->str) {
-        free(action->str);
-        action->str = NULL;
+    if ((area1.size.width < 0) or (area1.size.height < 0)
+     or (area2.size.width < 0) or (area2.size.height < 0)) {
+        return false;
     }
+
+    return (area1.size.width  == area2.size.width)
+       and (area1.size.height == area2.size.height)
+       and (area1.pos.x       == area2.pos.x)
+       and (area1.pos.y       == area2.pos.y);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_buffer_clean(NoiaBuffer* buffer)
+{
+    memset(buffer, 0, sizeof(NoiaBuffer));
 }
 
 //------------------------------------------------------------------------------

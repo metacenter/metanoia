@@ -4,7 +4,6 @@
 #include "surface-manager.h"
 
 #include "utils-log.h"
-#include "event-timer.h"
 #include "event-signals.h"
 #include "global-macros.h"
 

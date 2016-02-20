@@ -2,7 +2,6 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "exhibitor-compositor.h"
-#include "exhibitor.h"
 
 #include "surface-manager.h"
 #include "event-signals.h"
@@ -12,7 +11,15 @@
 #include <memory.h>
 
 //------------------------------------------------------------------------------
-// INTERNAL
+// PRIVATE
+
+struct NoiaCompositorStruct {
+    NoiaFrame* root;
+    NoiaFrame* selection;
+    NoiaExhibitor* exhibitor;
+};
+
+//------------------------------------------------------------------------------
 
 NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
                                           const char* title)
@@ -30,13 +37,14 @@ NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
 //------------------------------------------------------------------------------
 // PUBLIC
 
-NoiaCompositor* noia_compositor_new(void)
+NoiaCompositor* noia_compositor_new(NoiaExhibitor* exhibitor)
 {
     NoiaCompositor* self = malloc(sizeof(NoiaCompositor));
     NOIA_ENSURE(self, abort());
 
     NoiaPosition pos = {0, 0};
     NoiaSize size = {-1, -1};
+    self->exhibitor = exhibitor;
     self->root = noia_frame_new();
     noia_frame_configure(self->root, NOIA_FRAME_TYPE_STACKED,
                          scInvalidSurfaceId, pos, size, "METANOIA");
@@ -173,10 +181,10 @@ void noia_compositor_pop_surface(NoiaCompositor* self,
     noia_frame_pop_recursively(self->root, frame);
 
     // Pop in history.
-    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-    noia_list_remove(exhibitor->surface_history,
-                    (void*) sid, (NoiaCompareFunc) noia_surface_compare);
-    noia_list_prepend(exhibitor->surface_history, (void*) sid);
+    NoiaList* history = noia_exhibitor_get_surface_history(self->exhibitor);
+    noia_list_remove(history, (void*) sid,
+                     (NoiaCompareFunc) noia_surface_compare);
+    noia_list_prepend(history, (void*) sid);
 
     // Update selection.
     noia_compositor_set_selection(self, frame);
@@ -202,14 +210,13 @@ void noia_compositor_focus(NoiaCompositor* self,
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
 
-    if (argmand == NOIA_ARGMAND_BACK || argmand == NOIA_ARGMAND_FORWARD) {
-        NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
+    if ((argmand == NOIA_ARGMAND_BACK) or (argmand == NOIA_ARGMAND_FORWARD)) {
         if (argmand == NOIA_ARGMAND_BACK) {
             position = -1 * position;
         }
 
-        NoiaSurfaceId sid = (NoiaSurfaceId) noia_list_get_nth
-                                         (exhibitor->surface_history, position);
+        NoiaList* history = noia_exhibitor_get_surface_history(self->exhibitor);
+        NoiaSurfaceId sid = (NoiaSurfaceId)noia_list_get_nth(history, position);
         if (sid != scInvalidSurfaceId) {
             noia_compositor_pop_surface(self, sid);
         }
@@ -272,8 +279,8 @@ void noia_compositor_focus_workspace(NoiaCompositor* self, char* title)
     /// Not the most efficient...
     /// Any ideas for improvement?
     NoiaFrame* frame = NULL;
-    NoiaExhibitor* exhibitor = noia_exhibitor_get_instance();
-    FOR_EACH(exhibitor->surface_history, link) {
+    NoiaList* history = noia_exhibitor_get_surface_history(self->exhibitor);
+    FOR_EACH(history, link) {
         NoiaSurfaceId sid = (NoiaSurfaceId) link->data;
         frame = noia_frame_find_with_sid(workspace, sid);
         if (frame) {

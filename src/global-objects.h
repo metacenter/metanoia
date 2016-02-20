@@ -59,5 +59,19 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos);
 
 //------------------------------------------------------------------------------
 
+/// Compositor action context
+typedef struct {
+    NoiaObject base;
+    NoiaArgmand action;
+    NoiaArgmand direction;
+    char* str;
+    int magnitude;
+} NoiaAction;
+
+/// Clear the action.
+void noia_action_clean(NoiaAction* action);
+
+//------------------------------------------------------------------------------
+
 #endif // NOIA_GLOBAL_OBJECTS_H
 

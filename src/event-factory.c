@@ -7,7 +7,7 @@
 #include "device-udev.h"
 #include "backend-offscreen.h"
 #include "output-collector.h"
-#include "exhibitor.h"
+#include "exhibitor-module.h"
 #include "wayland.h"
 #include "utils-environment.h"
 

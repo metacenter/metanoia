@@ -4,22 +4,47 @@
 #ifndef NOIA_EXHIBITOR_POINTER_H
 #define NOIA_EXHIBITOR_POINTER_H
 
-#include "event-loop.h"
+#include "exhibitor.h"
 
-#include "output.h"
+#include "global-types.h"
+
+/// Pointer constructor.
+NoiaPointer* noia_exhibitor_pointer_new(void);
+
+/// Pointer destructor.
+void noia_exhibitor_pointer_free(NoiaPointer* self);
 
 /// Return cursor position in global coordinates.
-NoiaPosition noia_exhibitor_pointer_get_global_position(void);
+NoiaPosition noia_exhibitor_pointer_get_global_position(NoiaPointer* self);
 
-/// Return the surface ID of the current surface.
-NoiaSurfaceId noia_exhibitor_pointer_get_sid(void);
+/// Return the surface ID of the current cursor surface.
+NoiaSurfaceId noia_exhibitor_pointer_get_sid(NoiaPointer* self);
 
 /// Find surface the pointer is over given an array of visible surfaces.
-void noia_exhibitor_pointer_update_hover_state(NoiaOutput* output,
+void noia_exhibitor_pointer_update_hover_state(NoiaPointer* self,
+                                               NoiaArea area,
                                                NoiaPool* visible_surfaces);
 
-/// Subscribe for events.
-void noia_exhibitor_pointer_initialize(NoiaLoop* this_loop, void* data);
+/// Handle motion reset notification.
+void noia_exhibitor_pointer_on_motion_reset(NoiaPointer* self);
+
+/// Handle motion in X-axis notification.
+void noia_exhibitor_pointer_on_motion_x(NoiaPointer* self,
+                                        NoiaExhibitor* exhibitor,
+                                        int abs_value);
+
+/// Handle motion in Y-axis notification.
+void noia_exhibitor_pointer_on_motion_y(NoiaPointer* self,
+                                        NoiaExhibitor* exhibitor,
+                                        int abs_value);
+
+/// Handle change surface notification.
+void noia_exhibitor_pointer_on_surface_change(NoiaPointer* self,
+                                              NoiaSurfaceId sid);
+
+/// Handle surface destruction notification.
+void noia_exhibitor_pointer_on_surface_destroyed(NoiaPointer* self,
+                                                 NoiaSurfaceId sid);
 
 #endif // NOIA_EXHIBITOR_POINTER_H
 

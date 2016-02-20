@@ -2,59 +2,76 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "exhibitor-pointer.h"
+#include "exhibitor-display.h"
 #include "exhibitor.h"
-#include "surface-manager.h"
 
 #include "utils-log.h"
-#include "global-macros.h"
-#include "global-objects.h"
-#include "global-macros.h"
+#include "surface-manager.h"
 #include "event-signals.h"
 
-#define INVALID_POINTER_VALUE -1
+#include <pthread.h>
 
-/// @todo Do not store these variables as globals.
-static NoiaSurfaceId cursor_sid = 0;
-static NoiaPosition position = {100, 100};
-static NoiaPosition last_abs = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
-static NoiaPosition last_rel = {INVALID_POINTER_VALUE, INVALID_POINTER_VALUE};
-static NoiaSurfaceId focused_sid = scInvalidSurfaceId;
-static NoiaOutput* active_output = NULL;
-
-pthread_mutex_t pointer_mutex = PTHREAD_MUTEX_INITIALIZER;
+static const int scInvalidPointerValue = -1;
 
 //------------------------------------------------------------------------------
 // PRIVATE
+
+struct NoiaPointerStruct {
+    /// Position in global coordinates.
+    NoiaPosition position;
+
+    /// Last absolute position received from input device.
+    NoiaPosition last_abs;
+
+    /// Last relative position inside focused surface.
+    NoiaPosition last_rel;
+
+    /// Area of display on which the pointer is placed.
+    NoiaArea active_area;
+
+    /// Surface ID of cursor surface.
+    NoiaSurfaceId cursor_sid;
+
+    /// Surface ID of focused surface.
+    NoiaSurfaceId focused_sid;
+
+    /// Pointer functions may be called from display threads.
+    pthread_mutex_t mutex;
+};
+
+//------------------------------------------------------------------------------
 
 /// Find the output inside which is pointer.
 /// If found - nothing to do.
 /// If no output found - update cursor position with closest on inside
 /// previously active output.
 /// @see noia_exhibitor_pointer_on_motion_x, noia_exhibitor_pointer_on_motion_y
-NoiaPosition noia_exhibitor_pointer_cast_into_output(NoiaPosition position)
+NoiaPosition noia_exhibitor_pointer_cast(NoiaPointer* self,
+                                         NoiaExhibitor* exhibitor,
+                                         NoiaPosition position)
 {
     NOIA_BLOCK {
-        if (active_output
-        &&  noia_position_is_inside(position, active_output->area)) {
+        if (noia_position_is_inside(position, self->active_area)) {
             // Nothing to do - pointer inside active output
             break;
         }
 
         bool found = false;
-        NoiaList* displays = noia_exhibitor_get_displays();
+        NoiaList* displays = noia_exhibitor_get_displays(exhibitor);
         FOR_EACH (displays, link) {
             NoiaDisplay* display = (NoiaDisplay*) link->data;
-            if (noia_position_is_inside(position, display->output->area)) {
+            NoiaArea area = noia_display_get_area(display);
+            if (noia_position_is_inside(position, area)) {
                 // Set new active output and exit
-                active_output = display->output;
+                self->active_area = area;
                 found = true;
                 break;
             }
         }
 
-        if (!found && active_output) {
-            // Pointer outside any known output - cast it to the last active
-            position = noia_position_cast(position, active_output->area);
+        if (not found) {
+            // Pointer outside any known output - cast it to the previous active
+            position = noia_position_cast(position, self->active_area);
         }
     }
 
@@ -62,115 +79,65 @@ NoiaPosition noia_exhibitor_pointer_cast_into_output(NoiaPosition position)
 }
 
 //------------------------------------------------------------------------------
-
-/// Handle motion reset notification.
-void noia_exhibitor_pointer_on_motion_reset()
-{
-    pthread_mutex_lock(&pointer_mutex);
-
-    last_abs.x = INVALID_POINTER_VALUE;
-    last_abs.y = INVALID_POINTER_VALUE;
-
-    pthread_mutex_unlock(&pointer_mutex);
-}
-
-//------------------------------------------------------------------------------
-
-/// Handle motion in X-axis notification.
-void noia_exhibitor_pointer_on_motion_x(void* edata, void* sdata NOIA_UNUSED)
-{
-    pthread_mutex_lock(&pointer_mutex);
-
-    int abs_value = noia_int_unref_get((NoiaIntObject*) edata);
-    if (last_abs.x != INVALID_POINTER_VALUE) {
-        position.x += abs_value - last_abs.x;
-        position = noia_exhibitor_pointer_cast_into_output(position);
-    }
-    last_abs.x = abs_value;
-
-    pthread_mutex_unlock(&pointer_mutex);
-}
-
-//------------------------------------------------------------------------------
-
-/// Handle motion in Y-axis notification.
-void noia_exhibitor_pointer_on_motion_y(void* edata, void* sdata NOIA_UNUSED)
-{
-    pthread_mutex_lock(&pointer_mutex);
-
-    int abs_value = noia_int_unref_get((NoiaIntObject*) edata);
-    if (last_abs.y != INVALID_POINTER_VALUE) {
-        position.y += abs_value - last_abs.y;
-        position = noia_exhibitor_pointer_cast_into_output(position);
-    }
-    last_abs.y = abs_value;
-
-    pthread_mutex_unlock(&pointer_mutex);
-}
-
-//------------------------------------------------------------------------------
-
-/// Handle change surface notification.
-void noia_exhibitor_pointer_on_surface_change(void* edata,
-                                              void* sdata NOIA_UNUSED)
-{
-    pthread_mutex_lock(&pointer_mutex);
-
-    NoiaSurfaceId sid = noia_int_unref_get((NoiaIntObject*) edata);
-    NoiaSurfaceData* surface_data = noia_surface_get(sid);
-    if (surface_data) {
-        cursor_sid = sid;
-    }
-
-    pthread_mutex_unlock(&pointer_mutex);
-}
-
-//------------------------------------------------------------------------------
-
-/// Handle surface destruction notification.
-void noia_exhibitor_pointer_on_surface_destroyed(void* edata,
-                                                 void* sdata NOIA_UNUSED)
-{
-    pthread_mutex_lock(&pointer_mutex);
-
-    NoiaSurfaceId sid = noia_uint_unref_get((NoiaIntObject*) edata);
-    if (cursor_sid == sid) {
-        cursor_sid = scInvalidSurfaceId;
-    }
-
-    pthread_mutex_unlock(&pointer_mutex);
-}
-
-//------------------------------------------------------------------------------
 // PUBLIC
 
-NoiaPosition noia_exhibitor_pointer_get_global_position(void)
+NoiaPointer* noia_exhibitor_pointer_new()
 {
-    return position;
+    NoiaPointer* self = malloc(sizeof(NoiaPointer));
+
+    self->position.x = 100;
+    self->position.y = 100;
+    self->last_abs.x = scInvalidPointerValue;
+    self->last_abs.y = scInvalidPointerValue;
+    self->last_rel.x = scInvalidPointerValue;
+    self->last_rel.y = scInvalidPointerValue;
+    noia_area_invalidate(&self->active_area);
+    self->cursor_sid = scInvalidSurfaceId;
+    self->focused_sid = scInvalidSurfaceId;
+    pthread_mutex_init(&self->mutex, NULL);
+
+    return self;
 }
 
 //------------------------------------------------------------------------------
 
-NoiaSurfaceId noia_exhibitor_pointer_get_sid(void)
+void noia_exhibitor_pointer_free(NoiaPointer* self NOIA_UNUSED)
 {
-    return cursor_sid;
+    // Nothing to do
 }
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_pointer_update_hover_state(NoiaOutput* output,
+NoiaPosition noia_exhibitor_pointer_get_global_position(NoiaPointer* self)
+{
+    return self->position;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaSurfaceId noia_exhibitor_pointer_get_sid(NoiaPointer* self)
+{
+    return self->cursor_sid;
+}
+
+//------------------------------------------------------------------------------
+
+/// @todo Find better moment to update hover state.
+void noia_exhibitor_pointer_update_hover_state(NoiaPointer* self,
+                                               NoiaArea area,
                                                NoiaPool* visible_surfaces)
 {
-    if (output != active_output) {
+    // Check if this update is for display on which this pointer is placed
+    if (not noia_area_is_equal(self->active_area, area)) {
         return;
     }
 
-    pthread_mutex_lock(&pointer_mutex);
+    pthread_mutex_lock(&self->mutex);
 
-    NoiaPosition relative_position = {position.x - output->area.pos.x,
-                                      position.y - output->area.pos.y};
+    NoiaPosition relative_position = {self->position.x - area.pos.x,
+                                      self->position.y - area.pos.y};
 
-    NoiaPosition relative = {-1, -1};
+    NoiaPosition rel = {-1, -1};
     NoiaSurfaceId sid = scInvalidSurfaceId;
 
     int i;
@@ -184,62 +151,107 @@ void noia_exhibitor_pointer_update_hover_state(NoiaOutput* output,
         &&  relative_position.x <= context->pos.x + data->desired_size.width
         &&  relative_position.y <= context->pos.y + data->desired_size.height) {
             sid = context->sid;
-            relative.x = relative_position.x - context->pos.x + data->offset.x;
-            relative.y = relative_position.y - context->pos.y + data->offset.y;
+            rel.x = relative_position.x - context->pos.x + data->offset.x;
+            rel.y = relative_position.y - context->pos.y + data->offset.y;
             break;
         }
     }
 
-    if (sid != focused_sid) {
+    if (sid != self->focused_sid) {
         LOG_INFO2("Pointer focus changed "
                   "(old sid: %d, new sid: %d, x: %d, y: %d)",
-                  focused_sid, sid, relative.x, relative.y);
-        focused_sid = sid;
-        cursor_sid = scInvalidSurfaceId;
+                  self->focused_sid, sid, rel.x, rel.y);
+        self->focused_sid = sid;
+        self->cursor_sid = scInvalidSurfaceId;
         noia_event_signal_emit(SIGNAL_POINTER_FOCUS_CHANGED,
-                               (NoiaObject*) noia_motion_create(sid, relative));
-    } else if (focused_sid != scInvalidSurfaceId
-           && (relative.x != last_rel.x || relative.y != last_rel.y)) {
+                               (NoiaObject*) noia_motion_create(sid, rel));
+    } else if ((self->focused_sid != scInvalidSurfaceId)
+           and ((rel.x != self->last_rel.x) or (rel.y != self->last_rel.y))) {
         LOG_INFO3("Pointer surface relative position (x: %d, y: %d)",
-                  relative.x, relative.y);
+                  rel.x, rel.y);
         noia_event_signal_emit(SIGNAL_POINTER_RELATIVE_MOTION,
-                               (NoiaObject*) noia_motion_create(sid, relative));
-        last_rel = relative;
+                               (NoiaObject*) noia_motion_create(sid, rel));
+        self->last_rel = rel;
     }
 
-    pthread_mutex_unlock(&pointer_mutex);
+    pthread_mutex_unlock(&self->mutex);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_pointer_initialize(NoiaLoop* this_loop, void* data)
+void noia_exhibitor_pointer_on_motion_reset(NoiaPointer* self)
 {
-    if (this_loop == 0) {
-        LOG_ERROR("Invalid loop!");
-        return;
+    pthread_mutex_lock(&self->mutex);
+
+    self->last_abs.x = scInvalidPointerValue;
+    self->last_abs.y = scInvalidPointerValue;
+
+    pthread_mutex_unlock(&self->mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_pointer_on_motion_x(NoiaPointer* self,
+                                        NoiaExhibitor* exhibitor,
+                                        int abs_value)
+{
+    pthread_mutex_lock(&self->mutex);
+
+    if (self->last_abs.x != scInvalidPointerValue) {
+        self->position.x += abs_value - self->last_abs.x;
+        self->position =
+                   noia_exhibitor_pointer_cast(self, exhibitor, self->position);
+    }
+    self->last_abs.x = abs_value;
+
+    pthread_mutex_unlock(&self->mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_pointer_on_motion_y(NoiaPointer* self,
+                                        NoiaExhibitor* exhibitor,
+                                        int abs_value)
+{
+    pthread_mutex_lock(&self->mutex);
+
+    if (self->last_abs.y != scInvalidPointerValue) {
+        self->position.y += abs_value - self->last_abs.y;
+        self->position =
+                   noia_exhibitor_pointer_cast(self, exhibitor, self->position);
+    }
+    self->last_abs.y = abs_value;
+
+    pthread_mutex_unlock(&self->mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_pointer_on_surface_change(NoiaPointer* self,
+                                              NoiaSurfaceId sid)
+{
+    pthread_mutex_lock(&self->mutex);
+
+    NoiaSurfaceData* surface_data = noia_surface_get(sid);
+    if (surface_data) {
+        self->cursor_sid = sid;
     }
 
-    focused_sid = scInvalidSurfaceId;
+    pthread_mutex_unlock(&self->mutex);
+}
 
-    noia_event_signal_subscribe(SIGNAL_POINTER_MOTION_RESET,
-               noia_task_create(noia_exhibitor_pointer_on_motion_reset,
-                                this_loop, data));
+//------------------------------------------------------------------------------
 
-    noia_event_signal_subscribe(SIGNAL_POINTER_MOTION_X,
-               noia_task_create(noia_exhibitor_pointer_on_motion_x,
-                                this_loop, data));
+void noia_exhibitor_pointer_on_surface_destroyed(NoiaPointer* self,
+                                                 NoiaSurfaceId sid)
+{
+    pthread_mutex_lock(&self->mutex);
 
-    noia_event_signal_subscribe(SIGNAL_POINTER_MOTION_Y,
-               noia_task_create(noia_exhibitor_pointer_on_motion_y,
-                                this_loop, data));
+    if (self->cursor_sid == sid) {
+        self->cursor_sid = scInvalidSurfaceId;
+    }
 
-    noia_event_signal_subscribe(SIGNAL_CURSOR_SURFACE_CHANGE,
-               noia_task_create(noia_exhibitor_pointer_on_surface_change,
-                                this_loop, data));
-
-    noia_event_signal_subscribe(SIGNAL_SURFACE_DESTROYED,
-               noia_task_create(noia_exhibitor_pointer_on_surface_destroyed,
-                                this_loop, data));
+    pthread_mutex_unlock(&self->mutex);
 }
 
 //------------------------------------------------------------------------------

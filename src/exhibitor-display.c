@@ -3,6 +3,7 @@
 
 #include "exhibitor-display.h"
 #include "exhibitor-pointer.h"
+
 #include "utils-log.h"
 #include "utils-image.h"
 #include "utils-environment.h"
@@ -13,29 +14,43 @@
 
 #include <malloc.h>
 #include <memory.h>
-#include <string.h>
 
 //------------------------------------------------------------------------------
 // PRIVATE
 
+/// @see NoiaDisplay
+struct NoiaDisplayStruct {
+    /// An output to draw on.
+    NoiaOutput* output;
+
+    /// Pointer to frame which represents active workspace.
+    NoiaFrame* workspace;
+
+    /// Memory pool for storing visible surfaces.
+    /// @see noia_display_redraw_all
+    NoiaPool* visible_surfaces;
+
+    /// Background image buffer.
+    NoiaBuffer background;
+
+    /// State of the thread.
+    bool run;
+
+    /// Reference to exhibitor.
+    NoiaExhibitor* exhibitor;
+
+    /// Thread object.
+    pthread_t thread;
+};
+
+//------------------------------------------------------------------------------
+
 /// Check validity of the display.
 bool noia_display_is_valid(NoiaDisplay* self)
 {
-    if (!self) {
-        LOG_ERROR("Invalid display!");
-        return false;
-    }
-
-    if (!self->output) {
-        LOG_ERROR("Invalid output!");
-        return false;
-    }
-
-    if (!self->workspace) {
-        LOG_ERROR("Invalid workspace!");
-        return false;
-    }
-
+    NOIA_ENSURE(self, return false);
+    NOIA_ENSURE(self->output, return false);
+    NOIA_ENSURE(self->workspace, return false);
     return true;
 }
 //------------------------------------------------------------------------------
@@ -71,16 +86,17 @@ NoiaResult noia_display_setup(NoiaDisplay* self)
 /// Prepare rendering context for drawing layout
 /// (currently only pointer and background).
 void noia_display_setup_layout_context(NoiaDisplay* self,
+                                       NoiaPointer* pointer,
                                        NoiaLayoutContext* context)
 {
     memset(context, 0, sizeof(NoiaLayoutContext));
 
     // Setup pointer position and surface id
-    NoiaPosition position = noia_exhibitor_pointer_get_global_position();
+    NoiaPosition position = noia_exhibitor_pointer_get_global_position(pointer);
     if (noia_position_is_inside(position, self->output->area)) {
         context->pointer.pos.x = position.x - self->output->area.pos.x;
         context->pointer.pos.y = position.y - self->output->area.pos.y;
-        context->pointer.sid = noia_exhibitor_pointer_get_sid();
+        context->pointer.sid = noia_exhibitor_pointer_get_sid(pointer);
     } else {
         context->pointer.pos.x = INT_MIN;
         context->pointer.pos.y = INT_MIN;
@@ -101,11 +117,13 @@ void noia_display_redraw_all(NoiaDisplay* self)
 {
     noia_frame_to_array(self->workspace, self->visible_surfaces);
 
-    noia_exhibitor_pointer_update_hover_state(self->output,
+    NoiaPointer* pointer = noia_exhibitor_get_pointer(self->exhibitor);
+    noia_exhibitor_pointer_update_hover_state(pointer,
+                                              self->output->area,
                                               self->visible_surfaces);
 
     NoiaLayoutContext layout_context;
-    noia_display_setup_layout_context(self, &layout_context);
+    noia_display_setup_layout_context(self, pointer, &layout_context);
 
     self->output->renderer->draw(self->output->renderer,
                                  self->visible_surfaces,
@@ -139,7 +157,7 @@ void noia_display_redraw_all(NoiaDisplay* self)
 void* noia_display_thread_loop(void* data)
 {
     NoiaDisplay* self = (NoiaDisplay*) data;
-    if (!noia_display_is_valid(self)) {
+    if (not noia_display_is_valid(self)) {
         return NULL;
     }
 
@@ -163,18 +181,19 @@ void* noia_display_thread_loop(void* data)
 //------------------------------------------------------------------------------
 // PUBLIC
 
-NoiaDisplay* noia_display_new(NoiaOutput* output, NoiaFrame* workspace)
+NoiaDisplay* noia_display_new(NoiaOutput* output,
+                              NoiaFrame* workspace,
+                              NoiaExhibitor* exhibitor)
 {
     NoiaDisplay* self = malloc(sizeof(NoiaDisplay));
-    if (!self) {
-        LOG_ERROR("Could not create new display!");
-        return self;
-    }
 
+    self->run = false;
     self->output = output;
     self->workspace = workspace;
+    self->exhibitor = exhibitor;
     self->visible_surfaces = noia_pool_create(8, sizeof(NoiaSurfaceContext));
     noia_buffer_clean(&self->background);
+
     return self;
 }
 
@@ -182,14 +201,8 @@ NoiaDisplay* noia_display_new(NoiaOutput* output, NoiaFrame* workspace)
 
 void noia_display_free(NoiaDisplay* self)
 {
-    if (!self) {
-        return;
-    }
-
-    if (self->run) {
-        LOG_ERROR("Trying to free running display!");
-        return;
-    }
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(not self->run, return);
 
     noia_pool_destroy(self->visible_surfaces);
     noia_object_unref((NoiaObject*) self->output);
@@ -200,35 +213,48 @@ void noia_display_free(NoiaDisplay* self)
 
 //------------------------------------------------------------------------------
 
-int noia_display_start(NoiaDisplay* self)
+NoiaResult noia_display_start(NoiaDisplay* self)
 {
-    if (!self) {
-        return -1;
+    NOIA_ENSURE(self, return NOIA_RESULT_ERROR);
+
+    NoiaResult result = NOIA_RESULT_ERROR;
+    int code = pthread_create(&self->thread, NULL,
+                              noia_display_thread_loop, self);
+    if (code == 0) {
+        result = NOIA_RESULT_SUCCESS;
+    } else {
+        LOG_ERROR("Threads: error while creating thread: '%s'", strerror(code));
     }
 
-    return pthread_create(&self->thread, NULL, noia_display_thread_loop, self);
+    return result;
 }
 
 //------------------------------------------------------------------------------
 
 void noia_display_stop(NoiaDisplay* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
     self->run = false;
     pthread_join(self->thread, NULL);
 }
 
 //------------------------------------------------------------------------------
 
-int noia_display_compare_unique_name(NoiaDisplay* self,
-                                     char* unique_name)
+NoiaArea noia_display_get_area(NoiaDisplay* self)
 {
-    if (!self || !self->output || !self->output->unique_name) {
-        return -1;
-    }
-    return strcmp(self->output->unique_name, unique_name);
+    return self->output->area;
+}
+
+//------------------------------------------------------------------------------
+
+int noia_display_compare_name(NoiaDisplay* self,
+                              const char* name)
+{
+    NOIA_ENSURE(name, return -1);
+    NOIA_ENSURE(self, return -1);
+    NOIA_ENSURE(self->output, return -1);
+    NOIA_ENSURE(self->output->unique_name, return -1);
+    return strcmp(self->output->unique_name, name);
 }
 
 //------------------------------------------------------------------------------

@@ -100,14 +100,6 @@ typedef struct {
     NoiaColor background_color;
 } NoiaLayoutContext;
 
-/// Compositor action context
-typedef struct {
-    NoiaArgmand action;
-    NoiaArgmand direction;
-    char* str;
-    int magnitude;
-} NoiaAction;
-
 /// Check if point `position` is inside area `area`.
 bool noia_position_is_inside(NoiaPosition position, NoiaArea area);
 
@@ -115,11 +107,16 @@ bool noia_position_is_inside(NoiaPosition position, NoiaArea area);
 /// that is the closest to point `position`.
 NoiaPosition noia_position_cast(NoiaPosition position, NoiaArea area);
 
+/// Invalidate area by seting negative dimensions.
+void noia_area_invalidate(NoiaArea* area);
+
+/// Check if two areas are equal.
+/// @return `true` if areas are equal or
+///         `false` if not or at least one area is invalid.
+bool noia_area_is_equal(NoiaArea area1, NoiaArea area2);
+
 /// Clear the buffer.
 void noia_buffer_clean(NoiaBuffer* buffer);
-
-/// Clear the action.
-void noia_action_clean(NoiaAction* action);
 
 #endif // NOIA_GLOBAL_TYPES_H
 
