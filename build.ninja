@@ -26,10 +26,6 @@ rule ld
     description = LD   $out
     command = clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm $lflags -o $out $in
 
-rule vgen
-    description = GEN  $out
-    command = python -B ./share/build/make.py version
-
 rule wsshg
     description = GEN  $out
     command = wayland-scanner server-header $inputs $out
@@ -37,6 +33,10 @@ rule wsshg
 rule wschg
     description = GEN  $out
     command = wayland-scanner client-header $inputs $out
+
+rule vgen
+    description = GEN  $out
+    command = python -B ./share/build/make.py version
 
 rule wscg
     description = GEN  $out
@@ -90,8 +90,6 @@ build checks/check-branch: ld inter/test-branch.o inter/utils-chain.o inter/util
 
 build checks/check-frame: ld inter/test-frame.o inter/mock-surface-manager.o inter/utils-pool.o inter/utils-debug.o inter/utils-store.o inter/utils-chain.o inter/utils-branch.o inter/global-enums.o inter/global-types.o inter/exhibitor-frame.o
 
-build gen/version.h: vgen force
-
 build gen/xdg-shell-server-protocol.h: wsshg res/xdg-shell.xml
     inputs = res/xdg-shell.xml
 
@@ -100,6 +98,8 @@ build gen/screenshooter-server-protocol.h: wsshg res/screenshooter.xml
 
 build gen/screenshooter-client-protocol.h: wschg res/screenshooter.xml
     inputs = res/screenshooter.xml
+
+build version_info_file: vgen force
 
 build gen/xdg-shell-protocol.c: wscg res/xdg-shell.xml
     inputs = res/xdg-shell.xml
@@ -162,7 +162,7 @@ build inter/utils-object.o: cc src/utils-object.c
     inputs = src/utils-object.c
     cflags = -Isrc -Igen
 
-build inter/utils-log.o: cc gen/version.h src/utils-log.c
+build inter/utils-log.o: cc src/utils-log.c
     inputs = src/utils-log.c
     cflags = -Isrc -Igen
 
@@ -470,5 +470,5 @@ build inter/mock-surface-manager.o: cc tests/mock-surface-manager.c
     inputs = tests/mock-surface-manager.c
     cflags = -Isrc -Itests
 
-default build/metanoia build/metanoiactl-gtk
+default version_info_file build/metanoia build/metanoiactl-gtk
 

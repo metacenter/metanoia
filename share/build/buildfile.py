@@ -66,7 +66,7 @@ p.add(Pny(build.Generator('ninja',
 #-------------------------------------------------------------------------------
 # GENERATED FILES
 
-target_version = Gen(vgen, output='version.h')
+target_version_info = Gen(vgen, output=None, alias='version_info_file')
 
 target_xdg_shell_server = Gen(
         generator=wsshg,
@@ -105,8 +105,7 @@ target_gtk_resources = Gen(
         deps=['metanoiactl-gtk-main.ui'],
     )
 
-p.add([target_version,
-       target_xdg_shell_server,
+p.add([target_xdg_shell_server,
        target_screenshooter_server,
        target_screenshooter_client])
 
@@ -138,7 +137,7 @@ target_utils_store       = Com(['utils-store.c'])
 target_utils_chain       = Com(['utils-chain.c'])
 target_utils_list        = Com(['utils-list.c'])
 target_utils_branch      = Com(['utils-branch.c'])
-target_utils_log         = Com(['utils-log.c'],    deps={target_version})
+target_utils_log         = Com(['utils-log.c'])
 target_utils_environment = Com(['utils-environment.c'])
 target_utils_dbus        = Com(['utils-dbus.c'],   pkgs={'dbus-1'})
 target_utils_gl          = Com(['utils-gl.c'],     pkgs={'gl', 'egl'})
@@ -293,8 +292,9 @@ p.add(Chk(output='check-frame',
 
 #-------------------------------------------------------------------------------
 
-p.add(metanoia,        include_in_default=True)
-p.add(metanoiactl_gtk, include_in_default=True)
+p.add(target_version_info, include_in_default=True)
+p.add(metanoia,            include_in_default=True)
+p.add(metanoiactl_gtk,     include_in_default=True)
 
 #-------------------------------------------------------------------------------
 

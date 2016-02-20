@@ -1,4 +1,4 @@
-default: build/metanoia build/metanoiactl-gtk
+default: version_info_file build/metanoia build/metanoiactl-gtk
 
 all: build/metanoia build/metanoiactl-gtk checks/check-globals checks/check-pool checks/check-store checks/check-chain checks/check-list checks/check-branch checks/check-frame
 
@@ -301,11 +301,6 @@ checks/check-frame: Makefile \
 	    inter/global-types.o \
 	    inter/exhibitor-frame.o
 
-gen/version.h: force
-	@mkdir -p gen
-	@echo "  GEN  gen/version.h"
-	@python -B ./share/build/make.py version
-
 gen/xdg-shell-server-protocol.h: Makefile \
                                  res/xdg-shell.xml
 	@mkdir -p gen
@@ -323,6 +318,11 @@ gen/screenshooter-client-protocol.h: Makefile \
 	@mkdir -p gen
 	@echo "  GEN  gen/screenshooter-client-protocol.h"
 	@wayland-scanner client-header res/screenshooter.xml gen/screenshooter-client-protocol.h
+
+version_info_file: force
+	@mkdir -p gen
+	@echo "  GEN  version_info_file"
+	@python -B ./share/build/make.py version
 
 gen/xdg-shell-protocol.c: Makefile \
                           res/xdg-shell.xml

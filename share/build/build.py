@@ -333,7 +333,7 @@ class Project:
 class Target:
     """If `inputs` id None - force"""
 
-    def __init__(self, inputs, output, deps, pkgs, libs):
+    def __init__(self, inputs, output, deps, pkgs, libs, alias):
         self._input_dir = None
         self._output_dir = None
 
@@ -353,17 +353,22 @@ class Target:
         self._deps = None if deps is None else list(deps)
         self._pkgs = set() if pkgs is None else set(pkgs)
         self._libs = set() if libs is None else set(libs)
+        self._alias = alias
 
     def __str__(self):
         return str(self._output)
 
     def get_output(self):
-        if self._output_dir is None:
+        if self._alias is not None:
+            result = self._alias
+        elif self._output_dir is None:
             _warn('Target "{output}" has not output specified! '
                   'Did you add it to project?'.format(output=self._output))
-            return self._output
+            result = self._output
+        else:
+            result = os.path.join(self._output_dir, str(self._output))
 
-        return os.path.join(self._output_dir, str(self._output))
+        return result
 
     def get_output_dir(self):
         return self._output_dir
@@ -410,7 +415,7 @@ class PhonyTarget(Target):
     """ """
 
     def __init__(self, generator, deps=None):
-        Target.__init__(self, None, None, deps, None, None)
+        Target.__init__(self, None, None, deps, None, None, None)
 
         if isinstance(generator, Generator):
             self._gen = generator
@@ -434,8 +439,8 @@ class PhonyTarget(Target):
 class GeneratedTarget(Target):
     """ """
 
-    def __init__(self, generator, output, inputs=None, deps=None):
-        Target.__init__(self, inputs, output, deps, None, None)
+    def __init__(self, generator, output, inputs=None, deps=None, alias=None):
+        Target.__init__(self, inputs, output, deps, None, None, alias)
 
         if isinstance(generator, Generator):
             self._gen = generator
@@ -482,7 +487,7 @@ class CompileTarget(Target):
 
     def __init__(self, inputs=tuple(), output=None,
                  deps=None, pkgs=None, libs=None):
-        Target.__init__(self, inputs, output, deps, pkgs, libs)
+        Target.__init__(self, inputs, output, deps, pkgs, libs, None)
 
     def set_config(self, config):
         self._input_dir = config.source_dir
@@ -570,7 +575,7 @@ class ExecutableTarget(Target):
     """ """
 
     def __init__(self, inputs=tuple(), output=None):
-        Target.__init__(self, inputs, output, None, None, None)
+        Target.__init__(self, inputs, output, None, None, None, None)
         self._targets = list()
         self._libs = set()
 
