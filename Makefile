@@ -79,6 +79,7 @@ build/metanoia: Makefile \
                 inter/exhibitor-display.o \
                 inter/exhibitor-pointer.o \
                 inter/exhibitor.o \
+                inter/exhibitor-module.o \
                 inter/wayland-region.o \
                 inter/wayland-surface.o \
                 inter/wayland-output.o \
@@ -155,6 +156,7 @@ build/metanoia: Makefile \
 	    inter/exhibitor-display.o \
 	    inter/exhibitor-pointer.o \
 	    inter/exhibitor.o \
+	    inter/exhibitor-module.o \
 	    inter/wayland-region.o \
 	    inter/wayland-surface.o \
 	    inter/wayland-output.o \
@@ -435,7 +437,6 @@ inter/global-enums.o: Makefile \
 	    src/global-enums.c
 
 inter/exhibitor-frame.o: Makefile \
-                         src/exhibitor-compositor.h \
                          src/exhibitor-frame.c \
                          src/exhibitor-frame.h \
                          src/global-constants.h \
@@ -463,6 +464,7 @@ inter/config.o: Makefile \
                 src/global-enums.h \
                 src/global-functions.h \
                 src/global-macros.h \
+                src/global-objects.h \
                 src/global-types.h \
                 src/keyboard-binding.h \
                 src/keyboard-bindings.h \
@@ -472,7 +474,8 @@ inter/config.o: Makefile \
                 src/utils-debug.h \
                 src/utils-keymap.h \
                 src/utils-list.h \
-                src/utils-log.h
+                src/utils-log.h \
+                src/utils-object.h
 	@mkdir -p inter
 	@echo "  CC   inter/config.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/config.o \
@@ -495,25 +498,14 @@ inter/global-functions.o: Makefile \
                           src/event-loop.h \
                           src/event-signals.h \
                           src/event-task.h \
-                          src/exhibitor-compositor.h \
-                          src/exhibitor-display.h \
-                          src/exhibitor-frame.h \
-                          src/exhibitor.h \
+                          src/exhibitor-module.h \
                           src/global-constants.h \
                           src/global-enums.h \
                           src/global-functions.c \
                           src/global-functions.h \
-                          src/global-macros.h \
                           src/global-types.h \
-                          src/output.h \
-                          src/renderer.h \
-                          src/utils-branch.h \
-                          src/utils-chain.h \
-                          src/utils-debug.h \
-                          src/utils-list.h \
                           src/utils-log.h \
-                          src/utils-object.h \
-                          src/utils-pool.h
+                          src/utils-object.h
 	@mkdir -p inter
 	@echo "  CC   inter/global-functions.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/global-functions.o \
@@ -636,10 +628,7 @@ inter/event-factory.o: Makefile \
                        src/event-factory.h \
                        src/event-loop.h \
                        src/event-task.h \
-                       src/exhibitor-compositor.h \
-                       src/exhibitor-display.h \
-                       src/exhibitor-frame.h \
-                       src/exhibitor.h \
+                       src/exhibitor-module.h \
                        src/global-constants.h \
                        src/global-enums.h \
                        src/global-macros.h \
@@ -647,7 +636,6 @@ inter/event-factory.o: Makefile \
                        src/output-collector.h \
                        src/output.h \
                        src/renderer.h \
-                       src/utils-branch.h \
                        src/utils-chain.h \
                        src/utils-debug.h \
                        src/utils-environment.h \
@@ -737,8 +725,6 @@ inter/renderer.o: Makefile \
 	    src/renderer.c
 
 inter/renderer-mmap.o: Makefile \
-                       src/exhibitor-compositor.h \
-                       src/exhibitor-frame.h \
                        src/global-constants.h \
                        src/global-enums.h \
                        src/global-macros.h \
@@ -749,11 +735,7 @@ inter/renderer-mmap.o: Makefile \
                        src/renderer.h \
                        src/surface-data.h \
                        src/surface-manager.h \
-                       src/utils-branch.h \
-                       src/utils-chain.h \
                        src/utils-debug.h \
-                       src/utils-image.h \
-                       src/utils-list.h \
                        src/utils-log.h \
                        src/utils-object.h \
                        src/utils-pool.h \
@@ -764,8 +746,6 @@ inter/renderer-mmap.o: Makefile \
 	    src/renderer-mmap.c
 
 inter/renderer-gl.o: Makefile \
-                     src/exhibitor-compositor.h \
-                     src/exhibitor-frame.h \
                      src/global-constants.h \
                      src/global-enums.h \
                      src/global-macros.h \
@@ -775,11 +755,8 @@ inter/renderer-gl.o: Makefile \
                      src/renderer.h \
                      src/surface-data.h \
                      src/surface-manager.h \
-                     src/utils-branch.h \
-                     src/utils-chain.h \
                      src/utils-debug.h \
                      src/utils-gl.h \
-                     src/utils-list.h \
                      src/utils-log.h \
                      src/utils-pool.h \
                      src/utils-store.h
@@ -936,20 +913,12 @@ inter/output-collector.o: Makefile \
 	    src/output-collector.c
 
 inter/surface-data.o: Makefile \
-                      src/exhibitor-compositor.h \
-                      src/exhibitor-frame.h \
                       src/global-constants.h \
                       src/global-enums.h \
-                      src/global-macros.h \
                       src/global-types.h \
                       src/surface-data.c \
                       src/surface-data.h \
-                      src/utils-branch.h \
-                      src/utils-chain.h \
-                      src/utils-debug.h \
-                      src/utils-list.h \
                       src/utils-log.h \
-                      src/utils-pool.h \
                       src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/surface-data.o"
@@ -959,9 +928,6 @@ inter/surface-data.o: Makefile \
 inter/surface-manager.o: Makefile \
                          src/event-signals.h \
                          src/event-task.h \
-                         src/event-timer.h \
-                         src/exhibitor-compositor.h \
-                         src/exhibitor-frame.h \
                          src/global-constants.h \
                          src/global-enums.h \
                          src/global-macros.h \
@@ -969,13 +935,9 @@ inter/surface-manager.o: Makefile \
                          src/surface-data.h \
                          src/surface-manager.c \
                          src/surface-manager.h \
-                         src/utils-branch.h \
-                         src/utils-chain.h \
                          src/utils-debug.h \
-                         src/utils-list.h \
                          src/utils-log.h \
                          src/utils-object.h \
-                         src/utils-pool.h \
                          src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/surface-manager.o"
@@ -986,6 +948,7 @@ inter/keyboard-binding.o: Makefile \
                           src/global-constants.h \
                           src/global-enums.h \
                           src/global-macros.h \
+                          src/global-objects.h \
                           src/global-types.h \
                           src/keyboard-binding.c \
                           src/keyboard-binding.h \
@@ -993,7 +956,8 @@ inter/keyboard-binding.o: Makefile \
                           src/utils-chain.h \
                           src/utils-debug.h \
                           src/utils-list.h \
-                          src/utils-log.h
+                          src/utils-log.h \
+                          src/utils-object.h
 	@mkdir -p inter
 	@echo "  CC   inter/keyboard-binding.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-binding.o \
@@ -1003,6 +967,7 @@ inter/keyboard-bindings.o: Makefile \
                            src/global-constants.h \
                            src/global-enums.h \
                            src/global-macros.h \
+                           src/global-objects.h \
                            src/global-types.h \
                            src/keyboard-binding.h \
                            src/keyboard-bindings.c \
@@ -1012,7 +977,8 @@ inter/keyboard-bindings.o: Makefile \
                            src/utils-chain.h \
                            src/utils-debug.h \
                            src/utils-list.h \
-                           src/utils-log.h
+                           src/utils-log.h \
+                           src/utils-object.h
 	@mkdir -p inter
 	@echo "  CC   inter/keyboard-bindings.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-bindings.o \
@@ -1020,29 +986,24 @@ inter/keyboard-bindings.o: Makefile \
 
 inter/keyboard-functions.o: Makefile \
                             src/event-loop.h \
+                            src/event-signals.h \
                             src/event-task.h \
-                            src/exhibitor-compositor.h \
-                            src/exhibitor-display.h \
-                            src/exhibitor-frame.h \
-                            src/exhibitor.h \
+                            src/exhibitor-module.h \
                             src/global-constants.h \
                             src/global-enums.h \
                             src/global-macros.h \
+                            src/global-objects.h \
                             src/global-types.h \
                             src/keyboard-binding.h \
                             src/keyboard-context.h \
                             src/keyboard-functions.c \
                             src/keyboard-functions.h \
                             src/keyboard-mode.h \
-                            src/output.h \
-                            src/renderer.h \
-                            src/utils-branch.h \
                             src/utils-chain.h \
                             src/utils-debug.h \
                             src/utils-list.h \
                             src/utils-log.h \
-                            src/utils-object.h \
-                            src/utils-pool.h
+                            src/utils-object.h
 	@mkdir -p inter
 	@echo "  CC   inter/keyboard-functions.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-functions.o \
@@ -1052,6 +1013,7 @@ inter/keyboard-mode.o: Makefile \
                        src/global-constants.h \
                        src/global-enums.h \
                        src/global-macros.h \
+                       src/global-objects.h \
                        src/global-types.h \
                        src/keyboard-binding.h \
                        src/keyboard-context.h \
@@ -1060,18 +1022,17 @@ inter/keyboard-mode.o: Makefile \
                        src/utils-chain.h \
                        src/utils-debug.h \
                        src/utils-list.h \
-                       src/utils-log.h
+                       src/utils-log.h \
+                       src/utils-object.h
 	@mkdir -p inter
 	@echo "  CC   inter/keyboard-mode.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-mode.o \
 	    src/keyboard-mode.c
 
 inter/exhibitor-strategist.o: Makefile \
-                              src/event-loop.h \
                               src/event-signals.h \
                               src/event-task.h \
                               src/exhibitor-compositor.h \
-                              src/exhibitor-display.h \
                               src/exhibitor-frame.h \
                               src/exhibitor-strategist.c \
                               src/exhibitor-strategist.h \
@@ -1079,6 +1040,7 @@ inter/exhibitor-strategist.o: Makefile \
                               src/global-constants.h \
                               src/global-enums.h \
                               src/global-macros.h \
+                              src/global-objects.h \
                               src/global-types.h \
                               src/output.h \
                               src/renderer.h \
@@ -1086,7 +1048,6 @@ inter/exhibitor-strategist.o: Makefile \
                               src/utils-chain.h \
                               src/utils-debug.h \
                               src/utils-list.h \
-                              src/utils-log.h \
                               src/utils-object.h \
                               src/utils-pool.h
 	@mkdir -p inter
@@ -1095,17 +1056,16 @@ inter/exhibitor-strategist.o: Makefile \
 	    src/exhibitor-strategist.c
 
 inter/exhibitor-compositor.o: Makefile \
-                              src/event-loop.h \
                               src/event-signals.h \
                               src/event-task.h \
                               src/exhibitor-compositor.c \
                               src/exhibitor-compositor.h \
-                              src/exhibitor-display.h \
                               src/exhibitor-frame.h \
                               src/exhibitor.h \
                               src/global-constants.h \
                               src/global-enums.h \
                               src/global-macros.h \
+                              src/global-objects.h \
                               src/global-types.h \
                               src/output.h \
                               src/renderer.h \
@@ -1125,7 +1085,7 @@ inter/exhibitor-compositor.o: Makefile \
 	    src/exhibitor-compositor.c
 
 inter/exhibitor-display.o: Makefile \
-                           src/event-loop.h \
+                           src/config.h \
                            src/event-signals.h \
                            src/event-task.h \
                            src/event-timer.h \
@@ -1134,9 +1094,11 @@ inter/exhibitor-display.o: Makefile \
                            src/exhibitor-display.h \
                            src/exhibitor-frame.h \
                            src/exhibitor-pointer.h \
+                           src/exhibitor.h \
                            src/global-constants.h \
                            src/global-enums.h \
                            src/global-macros.h \
+                           src/global-objects.h \
                            src/global-types.h \
                            src/output.h \
                            src/renderer.h \
@@ -1146,6 +1108,8 @@ inter/exhibitor-display.o: Makefile \
                            src/utils-chain.h \
                            src/utils-debug.h \
                            src/utils-environment.h \
+                           src/utils-image.h \
+                           src/utils-keymap.h \
                            src/utils-list.h \
                            src/utils-log.h \
                            src/utils-object.h \
@@ -1157,7 +1121,6 @@ inter/exhibitor-display.o: Makefile \
 	    src/exhibitor-display.c
 
 inter/exhibitor-pointer.o: Makefile \
-                           src/event-loop.h \
                            src/event-signals.h \
                            src/event-task.h \
                            src/exhibitor-compositor.h \
@@ -1189,9 +1152,6 @@ inter/exhibitor-pointer.o: Makefile \
 	    src/exhibitor-pointer.c
 
 inter/exhibitor.o: Makefile \
-                   src/event-loop.h \
-                   src/event-signals.h \
-                   src/event-task.h \
                    src/exhibitor-compositor.h \
                    src/exhibitor-display.h \
                    src/exhibitor-frame.h \
@@ -1201,7 +1161,6 @@ inter/exhibitor.o: Makefile \
                    src/exhibitor.h \
                    src/global-constants.h \
                    src/global-enums.h \
-                   src/global-functions.h \
                    src/global-macros.h \
                    src/global-objects.h \
                    src/global-types.h \
@@ -1221,6 +1180,31 @@ inter/exhibitor.o: Makefile \
 	@echo "  CC   inter/exhibitor.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor.o \
 	    src/exhibitor.c
+
+inter/exhibitor-module.o: Makefile \
+                          src/event-loop.h \
+                          src/event-signals.h \
+                          src/event-task.h \
+                          src/exhibitor-module.c \
+                          src/exhibitor-module.h \
+                          src/exhibitor.h \
+                          src/global-constants.h \
+                          src/global-enums.h \
+                          src/global-macros.h \
+                          src/global-objects.h \
+                          src/global-types.h \
+                          src/output.h \
+                          src/renderer.h \
+                          src/utils-chain.h \
+                          src/utils-debug.h \
+                          src/utils-list.h \
+                          src/utils-log.h \
+                          src/utils-object.h \
+                          src/utils-pool.h
+	@mkdir -p inter
+	@echo "  CC   inter/exhibitor-module.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-module.o \
+	    src/exhibitor-module.c
 
 inter/wayland-region.o: Makefile \
                         src/global-constants.h \
@@ -1290,8 +1274,6 @@ inter/wayland-cache.o: Makefile \
 
 inter/wayland-state.o: Makefile \
                        gen/xdg-shell-server-protocol.h \
-                       src/exhibitor-compositor.h \
-                       src/exhibitor-frame.h \
                        src/global-constants.h \
                        src/global-enums.h \
                        src/global-macros.h \
@@ -1300,7 +1282,6 @@ inter/wayland-state.o: Makefile \
                        src/renderer.h \
                        src/surface-data.h \
                        src/surface-manager.h \
-                       src/utils-branch.h \
                        src/utils-chain.h \
                        src/utils-debug.h \
                        src/utils-list.h \
@@ -1379,20 +1360,16 @@ inter/screenshooter-protocol.o: Makefile \
 	    gen/screenshooter-protocol.c
 
 inter/wayland-protocol-compositor.o: Makefile \
-                                     src/exhibitor-compositor.h \
-                                     src/exhibitor-frame.h \
                                      src/global-constants.h \
                                      src/global-enums.h \
                                      src/global-macros.h \
                                      src/global-types.h \
                                      src/surface-data.h \
                                      src/surface-manager.h \
-                                     src/utils-branch.h \
                                      src/utils-chain.h \
                                      src/utils-debug.h \
                                      src/utils-list.h \
                                      src/utils-log.h \
-                                     src/utils-pool.h \
                                      src/utils-store.h \
                                      src/wayland-cache.h \
                                      src/wayland-protocol-compositor.c \
@@ -1615,20 +1592,16 @@ inter/wayland-protocol-seat.o: Makefile \
 	    src/wayland-protocol-seat.c
 
 inter/wayland-protocol-shell-surface.o: Makefile \
-                                        src/exhibitor-compositor.h \
-                                        src/exhibitor-frame.h \
                                         src/global-constants.h \
                                         src/global-enums.h \
                                         src/global-macros.h \
                                         src/global-types.h \
                                         src/surface-data.h \
                                         src/surface-manager.h \
-                                        src/utils-branch.h \
                                         src/utils-chain.h \
                                         src/utils-debug.h \
                                         src/utils-list.h \
                                         src/utils-log.h \
-                                        src/utils-pool.h \
                                         src/utils-store.h \
                                         src/wayland-cache.h \
                                         src/wayland-protocol-shell-surface.c \
@@ -1642,20 +1615,14 @@ inter/wayland-protocol-shell-surface.o: Makefile \
 	    src/wayland-protocol-shell-surface.c
 
 inter/wayland-protocol-shell.o: Makefile \
-                                src/exhibitor-compositor.h \
-                                src/exhibitor-frame.h \
                                 src/global-constants.h \
                                 src/global-enums.h \
                                 src/global-macros.h \
                                 src/global-types.h \
                                 src/surface-data.h \
                                 src/surface-manager.h \
-                                src/utils-branch.h \
-                                src/utils-chain.h \
                                 src/utils-debug.h \
-                                src/utils-list.h \
                                 src/utils-log.h \
-                                src/utils-pool.h \
                                 src/utils-store.h \
                                 src/wayland-protocol-shell-surface.h \
                                 src/wayland-protocol-shell.c \
@@ -1702,8 +1669,6 @@ inter/wayland-protocol-subsurface.o: Makefile \
 	    src/wayland-protocol-subsurface.c
 
 inter/wayland-protocol-surface.o: Makefile \
-                                  src/exhibitor-compositor.h \
-                                  src/exhibitor-frame.h \
                                   src/global-constants.h \
                                   src/global-enums.h \
                                   src/global-macros.h \
@@ -1712,7 +1677,6 @@ inter/wayland-protocol-surface.o: Makefile \
                                   src/renderer.h \
                                   src/surface-data.h \
                                   src/surface-manager.h \
-                                  src/utils-branch.h \
                                   src/utils-chain.h \
                                   src/utils-debug.h \
                                   src/utils-list.h \
@@ -1757,20 +1721,16 @@ inter/wayland-protocol-xdg-shell.o: Makefile \
 
 inter/wayland-protocol-xdg-surface.o: Makefile \
                                       gen/xdg-shell-server-protocol.h \
-                                      src/exhibitor-compositor.h \
-                                      src/exhibitor-frame.h \
                                       src/global-constants.h \
                                       src/global-enums.h \
                                       src/global-macros.h \
                                       src/global-types.h \
                                       src/surface-data.h \
                                       src/surface-manager.h \
-                                      src/utils-branch.h \
                                       src/utils-chain.h \
                                       src/utils-debug.h \
                                       src/utils-list.h \
                                       src/utils-log.h \
-                                      src/utils-pool.h \
                                       src/utils-store.h \
                                       src/wayland-cache.h \
                                       src/wayland-protocol-xdg-surface.c \
@@ -1816,25 +1776,17 @@ inter/metanoia.o: Makefile \
                   src/event-loop.h \
                   src/event-signals.h \
                   src/event-task.h \
-                  src/exhibitor-compositor.h \
-                  src/exhibitor-frame.h \
                   src/global-constants.h \
                   src/global-enums.h \
-                  src/global-macros.h \
                   src/global-types.h \
                   src/metanoia.c \
                   src/surface-data.h \
                   src/surface-manager.h \
-                  src/utils-branch.h \
-                  src/utils-chain.h \
                   src/utils-dbus.h \
-                  src/utils-debug.h \
                   src/utils-environment.h \
                   src/utils-keymap.h \
-                  src/utils-list.h \
                   src/utils-log.h \
                   src/utils-object.h \
-                  src/utils-pool.h \
                   src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/metanoia.o"
@@ -2004,7 +1956,6 @@ inter/test-branch.o: Makefile \
 	    tests/test-branch.c
 
 inter/test-frame.o: Makefile \
-                    src/exhibitor-compositor.h \
                     src/exhibitor-frame.h \
                     src/global-constants.h \
                     src/global-enums.h \

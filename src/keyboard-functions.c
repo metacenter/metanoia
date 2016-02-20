@@ -4,7 +4,6 @@
 #include "keyboard-functions.h"
 #include "keyboard-mode.h"
 #include "utils-log.h"
-#include "utils-system.h"
 #include "exhibitor-module.h"
 #include "global-macros.h"
 #include "event-signals.h"
