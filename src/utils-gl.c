@@ -4,8 +4,10 @@
 #include "utils-gl.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include <gbm.h>
+#include <string.h>
 #include <malloc.h>
 #include <stdio.h>
 
@@ -97,52 +99,59 @@ char* noia_gl_read_shader_source(const char* filename)
 
 //------------------------------------------------------------------------------
 
-/// Create and compile shader
-GLuint noia_gl_create_shader(const char* filename, GLenum type)
+/// Get latests supported version of GL ES shading language
+NoiaGLSLVersion noia_gl_get_shading_land_version(void)
 {
-    GLchar* source = noia_gl_read_shader_source(filename);
-    if (source == NULL) {
-        LOG_ERROR("Error reading file '%s'", filename);
-        return 0;
+    NoiaGLSLVersion result = NOIA_GLSL_UNKNOWN;
+    const char* version_string =
+                         (const char*) glGetString(GL_SHADING_LANGUAGE_VERSION);
+    if (strstr(version_string, "ES 3.")) {
+        result = NOIA_GLSL_300;
+    } else if (strstr(version_string, "ES 1.")) {
+        result = NOIA_GLSL_100;
     }
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+/// Create and compile shader
+GLuint noia_gl_create_shader(const char* source, GLenum type)
+{
+    NOIA_ENSURE(source, return 0);
 
     const GLchar* sources[] = {source};
-    GLuint res = glCreateShader(type);
-    glShaderSource(res, 1, sources, NULL);
-    glCompileShader(res);
-    free(source);
+    GLuint shader = glCreateShader(type);
+    glShaderSource(shader, 1, sources, NULL);
+    glCompileShader(shader);
 
     GLint compile_ok = GL_FALSE;
-    glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compile_ok);
     if (compile_ok == GL_FALSE) {
-        noia_gl_print_log(res);
-        glDeleteShader(res);
+        noia_gl_print_log(shader);
+        glDeleteShader(shader);
         return 0;
     }
 
-    return res;
+    return shader;
 }
 
 //------------------------------------------------------------------------------
 
 /// Create program and link with shaders
-GLuint noia_gl_prepare_shaders_and_program(void)
+GLuint noia_gl_prepare_shaders_and_program(const char* vertex_source,
+                                           const char* fragment_source)
 {
     // Create shaders
-    /// @todo use different paths
     LOG_INFO2("Compiling vertex shader");
-    GLuint vertex_shader = noia_gl_create_shader("src/shader-vertex.glsl",
+    GLuint vertex_shader = noia_gl_create_shader(vertex_source,
                                                  GL_VERTEX_SHADER);
-    if (vertex_shader == scInvalidGLObject) {
-        return scInvalidGLObject;
-    }
+    NOIA_ENSURE(vertex_shader != scInvalidGLObject, return scInvalidGLObject);
 
     LOG_INFO2("Compiling fragment shader");
-    GLuint fragment_shader = noia_gl_create_shader("src/shader-fragment.glsl",
+    GLuint fragment_shader = noia_gl_create_shader(fragment_source,
                                                    GL_FRAGMENT_SHADER);
-    if (fragment_shader == scInvalidGLObject) {
-        return scInvalidGLObject;
-    }
+    NOIA_ENSURE(fragment_shader != scInvalidGLObject, return scInvalidGLObject);
 
     // Create and link program
     LOG_INFO2("Linking shader program");
@@ -154,7 +163,7 @@ GLuint noia_gl_prepare_shaders_and_program(void)
 
     glLinkProgram(shader_program);
     glGetProgramiv(shader_program, GL_LINK_STATUS, &link_ok);
-    if (!link_ok || shader_program == scInvalidGLObject) {
+    if ((not link_ok) or (shader_program == scInvalidGLObject)) {
         noia_gl_print_log(shader_program);
         glDeleteProgram(shader_program);
         return scInvalidGLObject;
@@ -208,7 +217,7 @@ NoiaResult noia_gl_initialize(NoiaEGLBundle* egl,
     }
 
     // Initialize EGL
-    if (!eglInitialize(egl->display, &major, &minor)) {
+    if (not eglInitialize(egl->display, &major, &minor)) {
         LOG_ERROR("EGL: Failed to initialize EGL display!");
         return NOIA_RESULT_ERROR;
     }
@@ -220,14 +229,14 @@ NoiaResult noia_gl_initialize(NoiaEGLBundle* egl,
               GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
 
     // Bind API
-    if (!eglBindAPI(EGL_OPENGL_ES_API)) {
+    if (not eglBindAPI(EGL_OPENGL_ES_API)) {
         LOG_ERROR("EGL: Failed to bind api EGL_OPENGL_ES_API!");
         return NOIA_RESULT_ERROR;
     }
 
     // Choose config
     r = eglChooseConfig(egl->display, config_attribs, &egl->config, 1, &n);
-    if (!r || n != 1) {
+    if ((r == EGL_FALSE) or (n != 1)) {
         LOG_ERROR("EGL: Failed to choose config! (r: %d, n: %d)", r, n);
         return NOIA_RESULT_ERROR;
     }

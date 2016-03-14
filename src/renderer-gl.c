@@ -21,6 +21,70 @@
 
 //------------------------------------------------------------------------------
 
+/// Vertex shader source code for OpenGL ES 2.0 (GLSL ES 100)
+static const char* scShaderVertex100 =
+"#version 100\n"
+"attribute vec2 vertices;"
+"attribute vec2 texcoords;"
+"uniform ivec2 screen_size;"
+"varying vec2 v_texcoords;"
+"void main(void)"
+"{"
+"    mat2 view_matrix = mat2(2.0/float(screen_size.x),          0.0,"
+"                                    0.0,           -2.0/float(screen_size.y));"
+"    vec2 translation_vector = vec2(-1.0, 1.0);"
+"    gl_Position = vec4(view_matrix * vertices + translation_vector, 0.0, 1.0);"
+"    v_texcoords = vec2(vertices.x != 0.0, vertices.y != 0.0);"
+"}";
+
+//------------------------------------------------------------------------------
+
+/// Fragment shader source code for OpenGL ES 2.0 (GLSL ES 100)
+static const char* scShaderFragment100 =
+"#version 100\n"
+"varying highp vec2 v_texcoords;"
+"uniform sampler2D texture;"
+"mediump vec4 color;"
+"void main(void)"
+"{"
+"    color = texture2D(texture, v_texcoords);"
+"    gl_FragColor = vec4(color.z, color.y, color.x, color.t);"
+"}";
+
+//------------------------------------------------------------------------------
+
+/// Vertex shader source code for OpenGL ES 3.0 (GLSL ES 300)
+static const char* scShaderVertex300 =
+"#version 300 es\n"
+"in vec2 vertices;"
+"in vec2 texcoords;"
+"uniform ivec2 screen_size;"
+"out vec2 v_texcoords;"
+"void main(void)"
+"{"
+"    mat2 view_matrix = mat2(2.0/float(screen_size.x),          0.0,"
+"                                 0.0,              -2.0/float(screen_size.y));"
+"    vec2 translation_vector = vec2(-1.0, 1.0);"
+"    gl_Position = vec4(view_matrix * vertices + translation_vector, 0.0, 1.0);"
+"    v_texcoords = vec2(vertices.x != 0.0, vertices.y != 0.0);"
+"}";
+
+//------------------------------------------------------------------------------
+
+/// Fragment shader source code for OpenGL ES 3.0 (GLSL ES 300)
+static const char* scShaderFragment300 =
+"#version 300 es\n"
+"in highp vec2 v_texcoords;"
+"uniform sampler2D texture;"
+"out highp vec4 color;"
+"void main(void)"
+"{"
+"    color = texture2D(texture, v_texcoords);"
+"    color = vec4(color.z, color.y, color.x, color.t);"
+"}";
+
+//------------------------------------------------------------------------------
+
 pthread_mutex_t mutexRendererGL = PTHREAD_MUTEX_INITIALIZER;
 
 struct NoiaRendererGLInternal {
@@ -81,8 +145,27 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
         // Make context current
         NOIA_ASSERT_RESULT(noia_gl_make_current(&mine->egl));
 
+        LOG_INFO2("GL version: %s", glGetString(GL_VERSION));
+        LOG_INFO2("GLSL version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
         // Compile shaders and link program
-        mine->program = noia_gl_prepare_shaders_and_program();
+        const char* vertex_shader_source = "";
+        const char* fragment_shader_source = "";
+        NoiaGLSLVersion version = noia_gl_get_shading_land_version();
+        if (version == NOIA_GLSL_300) {
+            vertex_shader_source = scShaderVertex300;
+            fragment_shader_source = scShaderFragment300;
+        } else if (version == NOIA_GLSL_100) {
+            vertex_shader_source = scShaderVertex100;
+            fragment_shader_source = scShaderFragment100;
+        } else {
+            LOG_ERROR("Unknown GLSL version!");
+            break;
+        }
+
+        mine->program =
+                     noia_gl_prepare_shaders_and_program
+                                 (vertex_shader_source, fragment_shader_source);
         mine->loc_vertices =
                      noia_gl_get_attrib_location(mine->program, "vertices");
         mine->loc_texture =

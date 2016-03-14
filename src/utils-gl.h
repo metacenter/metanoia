@@ -14,6 +14,12 @@
 #define NOIA_GL_ATTRIB_POINTER_POSITION(stride, offset) \
                     stride * sizeof(GLfloat), (void*) (offset * sizeof(GLfloat))
 
+typedef enum {
+    NOIA_GLSL_UNKNOWN,
+    NOIA_GLSL_100,
+    NOIA_GLSL_300,
+} NoiaGLSLVersion;
+
 static const GLuint scInvalidGLObject = 0;
 static const GLint scInvalidGLLocation = -1;
 
@@ -59,9 +65,12 @@ void noia_gl_print_log(GLuint object);
 
 char* noia_gl_read_shader_source(const char* filename);
 
-GLuint noia_gl_create_shader(const char* filename, GLenum type);
+NoiaGLSLVersion noia_gl_get_shading_land_version(void);
 
-GLuint noia_gl_prepare_shaders_and_program(void);
+GLuint noia_gl_create_shader(const char* source, GLenum type);
+
+GLuint noia_gl_prepare_shaders_and_program(const char* vertex_source,
+                                           const char* fragment_source);
 
 GLint noia_gl_get_attrib_location(GLuint program, const char* name);
 
