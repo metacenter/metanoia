@@ -2,7 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "surface-data.h"
-#include "utils-log.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>

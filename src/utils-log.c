@@ -1,8 +1,8 @@
 // file: utils-log.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
+#include "global-macros.h"
 #include "utils-log.h"
-#include "utils-debug.h"
 #include "utils-environment.h"
 #include "version.h"
 
@@ -42,7 +42,7 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void noia_log_initialize(const char* filename)
 {
-    if (filename && strlen(filename) > 0) {
+    if (filename and (strlen(filename) > 0)) {
         setbuf(stdout, NULL);
         sLogFD = noia_environment_open_file(filename, 0, DATA_PATH);
         if (sLogFD == -1) {
@@ -50,6 +50,10 @@ void noia_log_initialize(const char* filename)
             LOG_ERROR("Log file could not be opened!");
         }
     }
+
+    noia_debug_config()->print = noia_log_print;
+    noia_debug_config()->print_backtrace = noia_log_backtrace;
+    noia_debug_config()->print_failure = noia_log_failure;
 
     write(sLogFD, scLogWelcomeText, sizeof(scLogWelcomeText) - 1);
     LOG_INFO1("Build: " __TIME__ " " __DATE__ "; Version: " NOIA_VERSION);
@@ -72,11 +76,11 @@ void noia_log_finalize(void)
 
 //------------------------------------------------------------------------------
 
-void noia_log(const char* log_level,
-              const int   line,
-              const char* file,
-              const char* format,
-              ...)
+int noia_log(const char* log_level,
+             const int   line,
+             const char* file,
+             const char* format,
+             ...)
 {
     size_t n;
     char buff[128];
@@ -115,12 +119,13 @@ void noia_log(const char* log_level,
 
     // Unlock Mutex
     pthread_mutex_unlock(&mutex);
+    return n;
 }
 
 //------------------------------------------------------------------------------
 
 /// Prints log delimiter.
-void noia_log_print_delimiter(char* string)
+int noia_log_print_delimiter(char* string)
 {
     int string_len = strlen(string);
     int delimiter_len = strlen(scLogDelimiter);
@@ -130,22 +135,25 @@ void noia_log_print_delimiter(char* string)
     write(sLogFD, scLogDelimiter, begining_len);
     write(sLogFD, string, string_len);
     write(sLogFD, scLogDelimiter + end_pos, delimiter_len - end_pos);
+
+    return delimiter_len;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_log_begin(char* string)
+int noia_log_begin(char* string)
 {
     pthread_mutex_lock(&mutex);
-    noia_log_print_delimiter(string);
+    return noia_log_print_delimiter(string);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_log_end(void)
+int noia_log_end(void)
 {
-    noia_log_print_delimiter("");
+    int n = noia_log_print_delimiter("");
     pthread_mutex_unlock(&mutex);
+    return n;
 }
 
 //------------------------------------------------------------------------------
@@ -165,11 +173,19 @@ int noia_log_print(const char* format, ...)
 
 //------------------------------------------------------------------------------
 
-void noia_log_backtrace(void)
+int noia_log_failure(int line, const char* filename, const char* condition)
 {
-    noia_log_begin("BACKTRACE");
-    noia_print_backtrace(noia_log_print);
-    noia_log_end();
+    return noia_log(LEVEL_ERROR, line, filename,
+                   "Ensurence failed: >> %s <<", condition);
+}
+
+//------------------------------------------------------------------------------
+
+int noia_log_backtrace(void)
+{
+    return noia_log_begin("BACKTRACE")
+         + noia_print_backtrace()
+         + noia_log_end();
 }
 
 //------------------------------------------------------------------------------

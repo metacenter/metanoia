@@ -59,27 +59,6 @@
 #define LOG_EVNT4(...) NOIA_LOG(EVNT4, __VA_ARGS__)
 #define LOG_WAYL5(...) NOIA_LOG(WAYL5, __VA_ARGS__)
 
-/// If condition `COND` is not fulfilled print an error and execute expression
-/// `EXPR`.
-///
-/// Switched of when `NDEBUG` macro is defined so if `EXPR` is `abort()`,
-/// it is equivalent to `assert()`.
-///
-/// @note File `utils-macros.h` also defines this macro but without support for
-///       writing to log file.
-#undef NOIA_ENSURE
-#ifndef NDEBUG
-    #define NOIA_ENSURE(COND,EXPR) \
-        if (!(COND)) { \
-            fprintf(stderr, "Noia: %s: %d: Ensurence '%s' failed!\n", \
-                    __FILE__, __LINE__, #COND); \
-            LOG_ERROR("Ensurence failed: >> %s <<", #COND); \
-            noia_log_backtrace(); \
-            EXPR; }
-#else
-    #define NOIA_ENSURE(COND,EXPR) ((void) 0)
-#endif
-
 /// Inialize logging - open the file and write welcome message.
 void noia_log_initialize(const char* filename);
 
@@ -89,25 +68,28 @@ void noia_log_finalize(void);
 /// Print log.
 /// This is helper functions for macros from LOG* family.
 /// @see LOG
-void noia_log(const char* log_level,
-              const int   line_number,
-              const char* file_name,
-              const char* format,
-              ...);
+int noia_log(const char* log_level,
+             const int   line_number,
+             const char* file_name,
+             const char* format,
+             ...);
 
 /// Lock mutex and print the log header.
-void noia_log_begin(char* string);
+int noia_log_begin(char* string);
 
 /// Unlock mutex and print the log footer.
-void noia_log_end(void);
+int noia_log_end(void);
 
 /// Prints single simple line without additional info.
 /// @note This function must be used between `noia_log_begin` and
 ///       `noia_log_end` to avoid printing in the same time from many threads.
 int noia_log_print(const char* format, ...);
 
+/// Equivalent to LOG_ERROR
+int noia_log_failure(int line, const char* filename, const char* condition);
+
 /// Print backtrace.
-void noia_log_backtrace(void);
+int noia_log_backtrace(void);
 
 /// Return number of miliseconds since Epoch.
 /// @todo Move elsewhere.

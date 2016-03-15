@@ -42,16 +42,11 @@
 ///
 /// Switched of when `NDEBUG` macro is defined so if `EXPR` is `abort()`,
 /// it is equivalent to `assert()`.
-///
-/// @note File `utils-log.h` redefines this macro to add support for writing
-///       log file.
 #ifndef NOIA_ENSURE
     #ifndef NDEBUG
         #define NOIA_ENSURE(COND,EXPR) \
-            if (!(COND)) { \
-                fprintf(stderr, "Noia: %s: %d: Ensurence '%s' failed!\n", \
-                        __FILE__, __LINE__, #COND); \
-                noia_print_backtrace(printf); \
+            if (not (COND)) { \
+                noia_print_ensurence_failed(__LINE__, __FILE__, #COND); \
                 EXPR; }
     #else
         #define NOIA_ENSURE(COND,EXPR) ((void) 0)
