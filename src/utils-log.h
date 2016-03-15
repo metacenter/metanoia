@@ -28,7 +28,7 @@
 #define LEVEL_EVNT2 0
 #define LEVEL_WARN3 "WARN3"
 #define LEVEL_INFO3 0
-#define LEVEL_WAYL3 "WAYL3"
+#define LEVEL_WAYL3 0
 #define LEVEL_EVNT3 0
 #define LEVEL_WARN4 0
 #define LEVEL_INFO4 0

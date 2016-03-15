@@ -19,6 +19,8 @@
     NoiaRendererGL* mine = (NoiaRendererGL*) RENDERER; \
     NOIA_ENSURE(mine, EXPR);
 
+#define NOIA_MAX_TEXTURES 32
+
 //------------------------------------------------------------------------------
 
 /// Vertex shader source code for OpenGL ES 2.0 (GLSL ES 100)
@@ -34,7 +36,7 @@ static const char* scShaderVertex100 =
 "                                    0.0,           -2.0/float(screen_size.y));"
 "    vec2 translation_vector = vec2(-1.0, 1.0);"
 "    gl_Position = vec4(view_matrix * vertices + translation_vector, 0.0, 1.0);"
-"    v_texcoords = vec2(vertices.x != 0.0, vertices.y != 0.0);"
+"    v_texcoords = texcoords;"
 "}";
 
 //------------------------------------------------------------------------------
@@ -48,7 +50,7 @@ static const char* scShaderFragment100 =
 "void main(void)"
 "{"
 "    color = texture2D(texture, v_texcoords);"
-"    gl_FragColor = vec4(color.z, color.y, color.x, color.t);"
+"    gl_FragColor = vec4(color.b, color.g, color.r, color.a);"
 "}";
 
 //------------------------------------------------------------------------------
@@ -66,7 +68,7 @@ static const char* scShaderVertex300 =
 "                                 0.0,              -2.0/float(screen_size.y));"
 "    vec2 translation_vector = vec2(-1.0, 1.0);"
 "    gl_Position = vec4(view_matrix * vertices + translation_vector, 0.0, 1.0);"
-"    v_texcoords = vec2(vertices.x != 0.0, vertices.y != 0.0);"
+"    v_texcoords = texcoords;"
 "}";
 
 //------------------------------------------------------------------------------
@@ -80,7 +82,7 @@ static const char* scShaderFragment300 =
 "void main(void)"
 "{"
 "    color = texture2D(texture, v_texcoords);"
-"    color = vec4(color.z, color.y, color.x, color.t);"
+"    gl_FragColor = vec4(color.b, color.g, color.r, color.a);"
 "}";
 
 //------------------------------------------------------------------------------
@@ -96,10 +98,12 @@ struct NoiaRendererGLInternal {
     // GL rendering
     GLuint program;
     GLint loc_vertices;
+    GLint loc_texcoords;
     GLint loc_texture;
     GLint loc_screen_size;
     GLuint vbo_vertices;
-    GLuint vbo_texture[2];
+    GLuint vbo_texcoords;
+    GLuint vbo_texture[NOIA_MAX_TEXTURES];
 
     // Wayland support
     bool has_wayland_support;
@@ -168,12 +172,15 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
                                  (vertex_shader_source, fragment_shader_source);
         mine->loc_vertices =
                      noia_gl_get_attrib_location(mine->program, "vertices");
+        mine->loc_texcoords =
+                     noia_gl_get_attrib_location(mine->program, "texcoords");
         mine->loc_texture =
                      noia_gl_get_uniform_location(mine->program, "texture");
         mine->loc_screen_size =
                      noia_gl_get_uniform_location(mine->program, "screen_size");
         if (mine->program == scInvalidGLObject
         or  mine->loc_vertices == scInvalidGLLocation
+        or  mine->loc_texcoords == scInvalidGLLocation
         or  mine->loc_texture == scInvalidGLLocation
         or  mine->loc_screen_size == scInvalidGLLocation) {
             break;
@@ -181,18 +188,17 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
 
         // Generate vertex buffer object
         glGenBuffers(1, &mine->vbo_vertices);
+        glGenBuffers(1, &mine->vbo_texcoords);
 
         /// @todo Implement support for more textures.
         // Create texture buffer
-        glGenTextures(2, mine->vbo_texture);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mine->vbo_texture[0]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, mine->vbo_texture[1]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glGenTextures(NOIA_MAX_TEXTURES, mine->vbo_texture);
+        for (int i = 0; i < NOIA_MAX_TEXTURES; ++i) {
+            glActiveTexture(GL_TEXTURE0 + 1);
+            glBindTexture(GL_TEXTURE_2D, mine->vbo_texture[i]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        }
 
         // Clean up and return
         result = NOIA_RESULT_SUCCESS;
@@ -209,8 +215,18 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
 
 /// Finalize GL renderer.
 /// @todo Finnish `noia_renderer_gl_finalize`.
-void noia_renderer_gl_finalize(NoiaRenderer* self NOIA_UNUSED)
+void noia_renderer_gl_finalize(NoiaRenderer* self)
 {
+    NOIA_ENSURE_RENDERER_GL(self, return);
+    mine->program = scInvalidGLObject;
+    mine->loc_vertices = scInvalidGLLocation;
+    mine->loc_texcoords = scInvalidGLLocation;
+    mine->loc_texture = scInvalidGLLocation;
+    mine->loc_screen_size = scInvalidGLLocation;
+    mine->has_wayland_support = false;
+    mine->create_image_khr = NULL;
+    mine->destroy_image_khr = NULL;
+    mine->image_target_texture_2d_oes = NULL;
     return;
 }
 
@@ -223,6 +239,9 @@ void noia_renderer_gl_prepare_view(NoiaRendererGL* mine)
 {
     glClearColor(0.00, 0.25, 0.50, 1.00);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glUseProgram(mine->program);
     glUniform2i(mine->loc_screen_size, mine->size.width, mine->size.height);
@@ -242,12 +261,14 @@ void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine NOIA_UNUSED)
 /// Load textures to memory and save vertices coordinates for given surface.
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
-void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaRendererGL* mine,
-                                                        NoiaSurfaceId sid,
-                                                        int i,
-                                                        GLfloat* vertices)
+void noia_renderer_gl_load_texture_and_prepare_vertices
+                                                   (NoiaRendererGL* mine,
+                                                    NoiaSurfaceContext* context,
+                                                    int i,
+                                                    GLfloat* vertices,
+                                                    GLfloat* texcoords)
 {
-    NoiaSurfaceData* surface = noia_surface_get(sid);
+    NoiaSurfaceData* surface = noia_surface_get(context->sid);
     NOIA_ENSURE(surface, return);
 
     int width = surface->buffer.width;
@@ -288,12 +309,24 @@ void noia_renderer_gl_load_texture_and_prepare_vertices(NoiaRendererGL* mine,
         return;
     }
 
-    vertices[ 0] = 0;      vertices[ 1] = 0;
-    vertices[ 2] = width;  vertices[ 3] = 0;
-    vertices[ 4] = 0;      vertices[ 5] = height;
-    vertices[ 6] = width;  vertices[ 7] = height;
-    vertices[ 8] = width;  vertices[ 9] = 0;
-    vertices[10] = 0;      vertices[11] = height;
+    int left   = context->pos.x - surface->offset.x;
+    int top    = context->pos.y - surface->offset.y;
+    int right  = left + surface->buffer.width;
+    int bottom = top + surface->buffer.height;
+
+    vertices[ 0] = left;  vertices[ 1] = top;
+    vertices[ 2] = right; vertices[ 3] = top;
+    vertices[ 4] = left;  vertices[ 5] = bottom;
+    vertices[ 6] = right; vertices[ 7] = top;
+    vertices[ 8] = right; vertices[ 9] = bottom;
+    vertices[10] = left;  vertices[11] = bottom;
+
+    texcoords[ 0] = 0;     texcoords[ 1] = 0;
+    texcoords[ 2] = 1;     texcoords[ 3] = 0;
+    texcoords[ 4] = 0;     texcoords[ 5] = 1;
+    texcoords[ 6] = 1;     texcoords[ 7] = 0;
+    texcoords[ 8] = 1;     texcoords[ 9] = 1;
+    texcoords[10] = 0;     texcoords[11] = 1;
 }
 
 //------------------------------------------------------------------------------
@@ -314,20 +347,29 @@ void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine,
     size_t vertices_size = 12 * noia_pool_get_size(surfaces) * sizeof(GLfloat);
     /// @todo Do not malloc here.
     GLfloat* vertices = malloc(vertices_size);
+    GLfloat* texcoords = malloc(vertices_size);
 
     /// @todo Upload textures only if really needed
     unsigned i = 0;
     NoiaSurfaceContext* context;
     NOIA_ITERATE_POOL(surfaces, i, context) {
         noia_renderer_gl_load_texture_and_prepare_vertices
-                                       (mine, context->sid, i, &vertices[12*i]);
+                          (mine, context, i, &vertices[12*i], &texcoords[12*i]);
     }
 
     // Upload positions to vertex buffer object
     glBindBuffer(GL_ARRAY_BUFFER, mine->vbo_vertices);
     glEnableVertexAttribArray(mine->loc_vertices);
-    glVertexAttribPointer(mine->loc_vertices, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(mine->loc_vertices, 2, GL_FLOAT, GL_FALSE,
+                          2*sizeof(GLfloat), NULL);
     glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_DYNAMIC_DRAW);
+
+    // Upload positions to vertex buffer object
+    glBindBuffer(GL_ARRAY_BUFFER, mine->vbo_texcoords);
+    glEnableVertexAttribArray(mine->loc_texcoords);
+    glVertexAttribPointer(mine->loc_texcoords, 2, GL_FLOAT, GL_FALSE,
+                          2*sizeof(GLfloat), NULL);
+    glBufferData(GL_ARRAY_BUFFER, vertices_size, texcoords, GL_DYNAMIC_DRAW);
 
     // Redraw everything
     for (i = 0; i < noia_pool_get_size(surfaces); ++i) {
@@ -336,6 +378,7 @@ void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine,
     }
 
     // Release resources
+    glDisableVertexAttribArray(mine->loc_texcoords);
     glDisableVertexAttribArray(mine->loc_vertices);
     free(vertices);
 }
@@ -456,7 +499,6 @@ void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
 /// GL renderer destructor.
 void noia_renderer_gl_free(NoiaRenderer* self)
 {
-    /// @todo  Finnish destructor
     if (self) {
         free(self);
     }
