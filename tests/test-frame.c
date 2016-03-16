@@ -1,9 +1,11 @@
 // file: tests-frame.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "exhibitor-frame.h"
+#include "exhibitor-frame-internal.h"
 #include "tests-suit.h"
 #include "mock-surface-manager.h"
+
+#include "global-macros.h"
 
 #include <malloc.h>
 

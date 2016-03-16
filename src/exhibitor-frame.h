@@ -5,29 +5,10 @@
 #define NOIA_EXHIBITOR_FRAME_H
 
 #include "utils-branch.h"
-#include "utils-list.h"
 #include "utils-pool.h"
-
-/// @file
-/// @todo Unit tests for NoiaFrame.
 
 /// Structure representing frame containing surfaces and other frames.
 typedef NoiaBranch NoiaFrame;
-
-/// Parameters describing state of surface hold by frame.
-typedef struct {
-    /// Type of the frame.
-    NoiaFrameType type;
-
-    /// Surface ID.
-    NoiaSurfaceId sid;
-
-    /// Position in workspace coordinates and size of the frame.
-    NoiaArea area;
-
-    /// Title if frame; ID of workspace.
-    char* title;
-} NoiaFrameParams;
 
 /// Enum type defining relative position to a frame.
 typedef enum {
@@ -44,18 +25,8 @@ typedef struct {
     NoiaFramePosition position;
 } NoiaFrameIterator;
 
-/// Compare frame parameters.
-/// @return True if parameters are equivalent, else false.
-bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
-                                          NoiaFrameParams* p2);
-
 /// Create new frame.
 NoiaFrame* noia_frame_new(void);
-
-/// Create new frame with the same position and size as `self`, attach to `self`
-/// and set new type.
-/// @note This function only takes effect if frames type is STACKED.
-NoiaFrame* noia_frame_create_child(NoiaFrame* self, NoiaFrameType type);
 
 /// Frame destructor.
 void noia_frame_free(NoiaFrame* self);
@@ -89,22 +60,9 @@ NoiaSurfaceId noia_frame_get_sid(NoiaFrame* self);
 /// Get frame area.
 NoiaArea noia_frame_get_area(NoiaFrame* self);
 
-/// Add child frame to ending.
-/// If `self` has twigs add `other` to them.
-/// If not, add to subframes of its trunk.
-void noia_frame_append(NoiaFrame* self, NoiaFrame* other);
-
-/// Add child frame to beginning.
-/// If `self` has twigs add `other` to them.
-/// If not, add to subframes of its trunk.
-void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other);
-
 /// Swap surface ID of given frames.
 /// This does not rearrange frames.
 NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame);
-
-/// Remove frame `self` from its current trunk and prepend to frame `target`.
-NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target);
 
 /// Resize the frame.
 void noia_frame_resize(NoiaFrame* self,
@@ -113,18 +71,29 @@ void noia_frame_resize(NoiaFrame* self,
 
 /// Move the frame.
 /// This takes effect only on surfaces which are FLOATING but not FIXED.
+/// @todo Add unit tests.
 void noia_frame_move(NoiaFrame* self,
                      NoiaArgmand direction,
                      int magnitude);
 
 /// Change directed type of frame.
+/// @todo Add unit tests.
 NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type);
 
 /// Pop the surface `pop` and its parents recursively ending on `self`.
+/// @todo Add unit tests.
 void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
 
 /// Detach frame `self` from its trunk.
 NoiaResult noia_frame_remove_self(NoiaFrame* self);
+
+/// Remove frame `self` from its current trunk and insert to frame `target`.
+/// @todo Add unit tests.
+NoiaResult noia_frame_jump(NoiaFrame* self, NoiaFrame* target);
+
+/// Insert frame `self` in frame `target`.
+/// @todo Add unit tests.
+NoiaResult noia_frame_jumpin(NoiaFrame* self, NoiaFrame* target);
 
 /// Find a frame holding surface with given ID.
 NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid);
@@ -145,12 +114,8 @@ NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
 
 /// Find first trunk which type has NOIA_FRAME_TYPE_SPECIAL.
 /// For normal frame this should be workspace.
+/// @todo Add unit tests.
 NoiaFrame* noia_frame_find_top(NoiaFrame* self);
-
-/// Find first ancestor which trunk has type `type`, `FLOATING` or `SPECIAL`.
-/// @see noia_frame_resize
-NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame,
-                                           NoiaFrameType type);
 
 /// Initialize iterator.
 void noia_frame_start_iteration(NoiaFrameIterator* iter,
@@ -162,18 +127,6 @@ void noia_frame_iterate(NoiaFrameIterator* iter);
 
 /// Print frame tree to log file.
 void noia_frame_log(NoiaFrame* self, NoiaPrintFunc print, NoiaFrame* selection);
-
-/// Insert `other` to twigs of `self`'s trunk just before `self`.
-static inline void noia_frame_insert_before(NoiaFrame* self, NoiaFrame* other)
-{
-    noia_branch_insert_before(self, other);
-}
-
-/// Insert `other` to twigs of `self`'s trunk just after `self`.
-static inline void noia_frame_insert_after(NoiaFrame* self, NoiaFrame* other)
-{
-    noia_branch_insert_after(self, other);
-}
 
 #endif // NOIA_EXHIBITOR_FRAME_H
 

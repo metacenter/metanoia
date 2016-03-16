@@ -198,9 +198,11 @@ metanoia.add(Com.from_mathing('keyboard-*.c', c))
 #-------------------------------------------------------------------------------
 # EXHIBITOR
 
-target_exhibitor_frame = Com(['exhibitor-frame.c'])
+target_exhibitor_frame          = Com(['exhibitor-frame.c'])
+target_exhibitor_frame_internal = Com(['exhibitor-frame-internal.c'])
 
 metanoia.add([target_exhibitor_frame,
+              target_exhibitor_frame_internal,
               Com(['exhibitor-strategist.c']),
               Com(['exhibitor-compositor.c']),
               Com(['exhibitor-display.c']),
@@ -288,7 +290,7 @@ p.add(Chk(output='check-frame',
                   target_utils_pool, target_utils_debug,
                   target_utils_store, target_utils_chain, target_utils_branch,
                   target_global_enums, target_global_types,
-                  target_exhibitor_frame]))
+                  target_exhibitor_frame, target_exhibitor_frame_internal]))
 
 #-------------------------------------------------------------------------------
 

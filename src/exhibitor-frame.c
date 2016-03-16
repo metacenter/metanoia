@@ -1,261 +1,11 @@
 // file: exhibitor-frame.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "exhibitor-frame.h"
-#include "surface-manager.h"
+#include "exhibitor-frame-internal.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>
-
-//------------------------------------------------------------------------------
-// PRIVATE
-
-/// Get the parameters - convenience function.
-static inline NoiaFrameParams* noia_frame_get_params(NoiaFrame* self)
-{
-    return self->base.data;
-}
-
-//------------------------------------------------------------------------------
-
-/// Compare function - check if given params have give surface ID.
-int noia_frame_params_compare_sid(NoiaFrameParams* params, NoiaSurfaceId sid)
-{
-    NoiaSurfaceId frame_sid = scInvalidSurfaceId;
-    if (params) {
-        frame_sid = params->sid;
-    }
-
-    if (frame_sid < sid) {
-        return -1;
-    } else if (frame_sid > sid) {
-        return 1;
-    }
-    return 0;
-}
-
-//------------------------------------------------------------------------------
-
-/// Parameters destructor.
-void noia_frame_params_free(NoiaFrameParams* params)
-{
-    if (!params) {
-        return;
-    }
-
-    if (params->title) {
-        free(params->title);
-    }
-
-    memset(params, 0, sizeof(NoiaFrameParams));
-    free(params);
-}
-
-//------------------------------------------------------------------------------
-
-/// Set surface ID.
-void noia_frame_set_surface(NoiaFrame* self, NoiaSurfaceId sid)
-{
-    noia_frame_get_params(self)->sid = sid;
-
-    // Resize to requested size
-    if (sid != scInvalidSurfaceId) {
-        NoiaSize size = {INT_MIN, INT_MIN};
-        noia_surface_set_desired_size(sid, size);
-    }
-}
-
-//------------------------------------------------------------------------------
-
-/// Set frame size.
-void noia_frame_set_size(NoiaFrame* self, NoiaSize size)
-{
-    NoiaFrameParams* params = noia_frame_get_params(self);
-    params->area.size = size;
-    noia_surface_set_desired_size(params->sid, size);
-}
-
-//------------------------------------------------------------------------------
-
-/// Move the frame with all twigs.
-void noia_frame_move_with_contents(NoiaFrame* self, NoiaPosition vector)
-{
-    NoiaFrameParams* params = noia_frame_get_params(self);
-
-    // Update surfaces position
-    params->area.pos.x += vector.x;
-    params->area.pos.y += vector.y;
-
-    // Move all subframes
-    FOR_EACH_TWIG(self, branch) {
-        noia_frame_move_with_contents(branch, vector);
-    }
-}
-
-//------------------------------------------------------------------------------
-
-/// Set frame position.
-void noia_frame_set_position(NoiaFrame* self, NoiaPosition position)
-{
-    NoiaFrameParams* params = noia_frame_get_params(self);
-
-    NoiaPosition vector;
-    vector.x = position.x - params->area.pos.x;
-    vector.y = position.y - params->area.pos.y;
-
-    noia_frame_move_with_contents(self, vector);
-}
-
-//------------------------------------------------------------------------------
-
-/// Resize the surface frame is holding.
-void noia_frame_reconfigure(NoiaFrame* self, NoiaArea areal)
-{
-    NoiaFrameParams* params = noia_frame_get_params(self);
-
-    params->area.pos.x       += areal.pos.x;
-    params->area.pos.y       += areal.pos.y;
-    params->area.size.width  += areal.size.width;
-    params->area.size.height += areal.size.height;
-
-    if (params->sid != scInvalidSurfaceId) {
-        noia_surface_set_desired_size(params->sid, params->area.size);
-    } else if (self->twigs and (noia_chain_len(self->twigs) != 0)) {
-        int num_twigs = noia_chain_len(self->twigs);
-        NoiaSize increment = {0, 0};
-        NoiaArea twig_areal = areal;
-
-        if (params->type & NOIA_FRAME_TYPE_VERTICAL) {
-            twig_areal.size.height = areal.size.height / num_twigs;
-            increment.height       = areal.size.height / num_twigs;
-        }
-        if (params->type & NOIA_FRAME_TYPE_HORIZONTAL) {
-            twig_areal.size.width = areal.size.width / num_twigs;
-            increment.width       = areal.size.width / num_twigs;
-        }
-
-        FOR_EACH_TWIG (self, twig) {
-            noia_frame_reconfigure(twig, twig_areal);
-            twig_areal.pos.x += increment.width;
-            twig_areal.pos.y += increment.height;
-        }
-    }
-}
-
-//------------------------------------------------------------------------------
-
-/// Resize floating frame.
-void noia_frame_resize_floating(NoiaFrame* self,
-                                NoiaArgmand border,
-                                int magnitude)
-{
-    NOIA_ENSURE(self, return);
-
-    NoiaArea areal = {{0, 0}, {0, 0}};
-
-    switch (border) {
-    case NOIA_ARGMAND_N:
-        areal.pos.y -= magnitude;
-    case NOIA_ARGMAND_S:
-        areal.size.height += magnitude;
-        break;
-    case NOIA_ARGMAND_W:
-        areal.pos.x -= magnitude;
-    case NOIA_ARGMAND_E:
-        areal.size.width += magnitude;
-        break;
-    default:
-        break;
-    }
-
-    noia_frame_reconfigure(self, areal);
-}
-
-//------------------------------------------------------------------------------
-
-/// Resize anchored frame.
-void noia_frame_resize_anchored(NoiaFrame* self,
-                                NoiaArgmand border,
-                                int magnitude)
-{
-    NOIA_ENSURE(self, return);
-
-    NoiaArea areal = {{0, 0}, {0, 0}};
-    NoiaArea areal_other = {{0, 0}, {0, 0}};
-    NoiaFrame* other = NULL;
-
-    if (border == NOIA_ARGMAND_N) {
-        other                   = (NoiaFrame*) self->base.prev;
-        areal.pos.y             -= magnitude;
-        areal.size.height       += magnitude;
-        areal_other.size.height -= magnitude;
-    } else if (border == NOIA_ARGMAND_S) {
-        other                   = (NoiaFrame*) self->base.next;
-        areal.size.height       += magnitude;
-        areal_other.pos.y       += magnitude;
-        areal_other.size.height -= magnitude;
-    } else if (border == NOIA_ARGMAND_W) {
-        other                  = (NoiaFrame*) self->base.prev;
-        areal.pos.x            -= magnitude;
-        areal.size.width       += magnitude;
-        areal_other.size.width -= magnitude;
-    } else if (border == NOIA_ARGMAND_E) {
-        other                  = (NoiaFrame*) self->base.next;
-        areal.size.width       += magnitude;
-        areal_other.pos.x      += magnitude;
-        areal_other.size.width -= magnitude;
-    }
-
-    if (other) {
-        noia_frame_reconfigure(self, areal);
-        noia_frame_reconfigure(other, areal_other);
-    }
-}
-
-//------------------------------------------------------------------------------
-
-/// Helper function for log printing.
-/// @see noia_frame_log
-static inline void noia_frame_log_internal(NoiaFrame* self,
-                                           NoiaPrintFunc print,
-                                           NoiaFrame* selection,
-                                           unsigned level)
-{
-    NoiaFrameParams* params = noia_frame_get_params(self);
-
-    for (unsigned i = 0; i < level; ++i) {
-        print("    ");
-    }
-
-    print("NoiaFrame(type='0x%x', sid='%d', len='%d', "
-          "x='%d', y='%d', w='%d', h='%d', title='%s')%s\n",
-          params->type, params->sid, noia_chain_len(self->twigs),
-          params->area.pos.x, params->area.pos.y,
-          params->area.size.width, params->area.size.height, params->title,
-          (self == selection) ? " <== FOCUS" : "");
-
-    FOR_EACH_TWIG(self, twig) {
-        noia_frame_log_internal(twig, print, selection, level+1);
-    }
-}
-
-//------------------------------------------------------------------------------
-// PUBLIC
-
-bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
-                                          NoiaFrameParams* p2)
-{
-    if (!p1 || !p2) {
-        return false;
-    }
-
-    return p1->type             == p2->type
-        && p1->sid              == p2->sid
-        && p1->area.pos.x       == p2->area.pos.x
-        && p1->area.pos.y       == p2->area.pos.y
-        && p1->area.size.width  == p2->area.size.width
-        && p1->area.size.height == p2->area.size.height;
-}
 
 //------------------------------------------------------------------------------
 
@@ -275,23 +25,6 @@ NoiaFrame* noia_frame_new(void)
     params->area.size.width = 0;
     params->area.size.height = 0;
     return self;
-}
-
-//------------------------------------------------------------------------------
-
-NoiaFrame* noia_frame_create_child(NoiaFrame* self, NoiaFrameType type)
-{
-    NoiaFrameParams* params = noia_frame_get_params(self);
-    if (!(params->type & NOIA_FRAME_TYPE_STACKED)) {
-        return NULL;
-    }
-
-    NoiaFrame* frame = noia_frame_new();
-    noia_frame_configure(frame, type, scInvalidSurfaceId,
-                         params->area.pos, params->area.size, NULL);
-    noia_frame_append(self, frame);
-
-    return frame;
 }
 
 //------------------------------------------------------------------------------
@@ -383,31 +116,6 @@ NoiaArea noia_frame_get_area(NoiaFrame* self)
 
 //------------------------------------------------------------------------------
 
-void noia_frame_append(NoiaFrame* self, NoiaFrame* other)
-{
-    NOIA_ENSURE(self, return);
-    NOIA_ENSURE(other, return);
-
-    if (noia_frame_get_params(self)->sid == scInvalidSurfaceId) {
-        noia_branch_append(self, other);
-    } else {
-        noia_branch_append(self->trunk, other);
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other)
-{
-    if (noia_frame_get_params(self)->sid == scInvalidSurfaceId) {
-        noia_branch_prepend(self, other);
-    } else {
-        noia_branch_prepend(self->trunk, other);
-    }
-}
-
-//------------------------------------------------------------------------------
-
 NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
@@ -428,21 +136,6 @@ NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame)
     }
 
     return NOIA_RESULT_SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
-NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target)
-{
-    NoiaResult result = NOIA_RESULT_SUCCESS;
-    NOIA_BLOCK {
-        result = noia_frame_remove_self(self);
-        NOIA_ASSERT_RESULT(result);
-
-        noia_frame_prepend(target, self);
-        noia_frame_set_size(self, noia_frame_get_params(target)->area.size);
-    }
-    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -480,7 +173,37 @@ void noia_frame_resize(NoiaFrame* self,
 
 //------------------------------------------------------------------------------
 
-/// @todo Add unit tests.
+void noia_frame_move(NoiaFrame* self,
+                     NoiaArgmand direction,
+                     int magnitude)
+{
+    NOIA_ENSURE(self, return);
+
+    NoiaFrameParams* params = noia_frame_get_params(self);
+    if (!(params->type & NOIA_FRAME_TYPE_FLOATING)
+      || (params->type & NOIA_FRAME_TYPE_FIXED)) {
+        return;
+    }
+
+    NoiaPosition vector = {0, 0};
+    if (direction == NOIA_ARGMAND_S) {
+        vector.y += magnitude;
+    }
+    if (direction == NOIA_ARGMAND_N) {
+        vector.y -= magnitude;
+    }
+    if (direction == NOIA_ARGMAND_E) {
+        vector.x += magnitude;
+    }
+    if (direction == NOIA_ARGMAND_W) {
+        vector.x -= magnitude;
+    }
+
+    noia_frame_move_with_contents(self, vector);
+}
+
+//------------------------------------------------------------------------------
+
 NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
@@ -522,42 +245,12 @@ NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type)
 
 //------------------------------------------------------------------------------
 
-void noia_frame_move(NoiaFrame* self,
-                     NoiaArgmand direction,
-                     int magnitude)
-{
-    NOIA_ENSURE(self, return);
-
-    NoiaFrameParams* params = noia_frame_get_params(self);
-    if (!(params->type & NOIA_FRAME_TYPE_FLOATING)
-      || (params->type & NOIA_FRAME_TYPE_FIXED)) {
-        return;
-    }
-
-    NoiaPosition vector = {0, 0};
-    if (direction == NOIA_ARGMAND_S) {
-        vector.y += magnitude;
-    }
-    if (direction == NOIA_ARGMAND_N) {
-        vector.y -= magnitude;
-    }
-    if (direction == NOIA_ARGMAND_E) {
-        vector.x += magnitude;
-    }
-    if (direction == NOIA_ARGMAND_W) {
-        vector.x -= magnitude;
-    }
-
-    noia_frame_move_with_contents(self, vector);
-}
-
-//------------------------------------------------------------------------------
-
 void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop)
 {
-    if (!self || !pop || !pop->trunk || self == pop) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(pop, return);
+    NOIA_ENSURE(pop->trunk, return);
+    NOIA_ENSURE(self != pop, return);
 
     if (noia_frame_get_params(pop->trunk)->type & NOIA_FRAME_TYPE_STACKED) {
         NoiaBranch* trunk = pop->trunk;
@@ -572,11 +265,27 @@ void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop)
 
 NoiaResult noia_frame_remove_self(NoiaFrame* self)
 {
-    if (!self || !self->trunk) {
-        return NOIA_RESULT_INCORRECT_ARGUMENT;
-    }
+    NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
+    NOIA_ENSURE(self->trunk, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
     return noia_branch_remove(self->trunk, self);
+}
+
+//------------------------------------------------------------------------------
+
+/// @todo Fix setting size and position.
+NoiaResult noia_frame_jump(NoiaFrame* self, NoiaFrame* target)
+{
+    return noia_frame_resettle(self, target);
+}
+
+//------------------------------------------------------------------------------
+
+/// @todo
+NoiaResult noia_frame_jumpin(NoiaFrame* self, NoiaFrame* target)
+{
+    noia_frame_append(self, target);
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -710,21 +419,6 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self)
         frame = frame->trunk;
     }
     return frame;
-}
-
-//------------------------------------------------------------------------------
-
-NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame, NoiaFrameType type)
-{
-    NOIA_ENSURE(frame, return NULL);
-    NOIA_ENSURE(frame->trunk, return NULL);
-
-    if ((noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_FLOATING)
-    or  (noia_frame_get_params(frame->trunk)->type & NOIA_FRAME_TYPE_SPECIAL)
-    or  (noia_frame_get_params(frame->trunk)->type & type)) {
-        return frame;
-    }
-    return noia_frame_find_trunk_with_type(frame->trunk, type);
 }
 
 //------------------------------------------------------------------------------

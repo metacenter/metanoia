@@ -74,6 +74,7 @@ build/metanoia: Makefile \
                 inter/keyboard-functions.o \
                 inter/keyboard-mode.o \
                 inter/exhibitor-frame.o \
+                inter/exhibitor-frame-internal.o \
                 inter/exhibitor-strategist.o \
                 inter/exhibitor-compositor.o \
                 inter/exhibitor-display.o \
@@ -151,6 +152,7 @@ build/metanoia: Makefile \
 	    inter/keyboard-functions.o \
 	    inter/keyboard-mode.o \
 	    inter/exhibitor-frame.o \
+	    inter/exhibitor-frame-internal.o \
 	    inter/exhibitor-strategist.o \
 	    inter/exhibitor-compositor.o \
 	    inter/exhibitor-display.o \
@@ -286,7 +288,8 @@ checks/check-frame: Makefile \
                     inter/utils-branch.o \
                     inter/global-enums.o \
                     inter/global-types.o \
-                    inter/exhibitor-frame.o
+                    inter/exhibitor-frame.o \
+                    inter/exhibitor-frame-internal.o
 	@mkdir -p checks
 	@echo "  LD   checks/check-frame"
 	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-frame \
@@ -299,7 +302,8 @@ checks/check-frame: Makefile \
 	    inter/utils-branch.o \
 	    inter/global-enums.o \
 	    inter/global-types.o \
-	    inter/exhibitor-frame.o
+	    inter/exhibitor-frame.o \
+	    inter/exhibitor-frame-internal.o
 
 gen/xdg-shell-server-protocol.h: Makefile \
                                  res/xdg-shell.xml
@@ -437,24 +441,41 @@ inter/global-enums.o: Makefile \
 	    src/global-enums.c
 
 inter/exhibitor-frame.o: Makefile \
+                         src/exhibitor-frame-internal.h \
                          src/exhibitor-frame.c \
                          src/exhibitor-frame.h \
                          src/global-constants.h \
                          src/global-enums.h \
                          src/global-macros.h \
                          src/global-types.h \
-                         src/surface-data.h \
-                         src/surface-manager.h \
                          src/utils-branch.h \
                          src/utils-chain.h \
                          src/utils-debug.h \
-                         src/utils-list.h \
-                         src/utils-pool.h \
-                         src/utils-store.h
+                         src/utils-pool.h
 	@mkdir -p inter
 	@echo "  CC   inter/exhibitor-frame.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-frame.o \
 	    src/exhibitor-frame.c
+
+inter/exhibitor-frame-internal.o: Makefile \
+                                  src/exhibitor-frame-internal.c \
+                                  src/exhibitor-frame-internal.h \
+                                  src/exhibitor-frame.h \
+                                  src/global-constants.h \
+                                  src/global-enums.h \
+                                  src/global-macros.h \
+                                  src/global-types.h \
+                                  src/surface-data.h \
+                                  src/surface-manager.h \
+                                  src/utils-branch.h \
+                                  src/utils-chain.h \
+                                  src/utils-debug.h \
+                                  src/utils-pool.h \
+                                  src/utils-store.h
+	@mkdir -p inter
+	@echo "  CC   inter/exhibitor-frame-internal.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-frame-internal.o \
+	    src/exhibitor-frame-internal.c
 
 inter/config.o: Makefile \
                 src/config.c \
@@ -526,6 +547,7 @@ inter/utils-log.o: Makefile \
                    gen/version.h \
                    src/global-constants.h \
                    src/global-enums.h \
+                   src/global-macros.h \
                    src/global-types.h \
                    src/utils-debug.h \
                    src/utils-environment.h \
@@ -567,7 +589,9 @@ inter/utils-dbus.o: Makefile \
 inter/utils-gl.o: Makefile \
                   src/global-constants.h \
                   src/global-enums.h \
+                  src/global-macros.h \
                   src/global-types.h \
+                  src/utils-debug.h \
                   src/utils-gl.c \
                   src/utils-gl.h \
                   src/utils-log.h
@@ -915,10 +939,11 @@ inter/output-collector.o: Makefile \
 inter/surface-data.o: Makefile \
                       src/global-constants.h \
                       src/global-enums.h \
+                      src/global-macros.h \
                       src/global-types.h \
                       src/surface-data.c \
                       src/surface-data.h \
-                      src/utils-log.h \
+                      src/utils-debug.h \
                       src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/surface-data.o"
@@ -1956,6 +1981,7 @@ inter/test-branch.o: Makefile \
 	    tests/test-branch.c
 
 inter/test-frame.o: Makefile \
+                    src/exhibitor-frame-internal.h \
                     src/exhibitor-frame.h \
                     src/global-constants.h \
                     src/global-enums.h \
@@ -1966,7 +1992,6 @@ inter/test-frame.o: Makefile \
                     src/utils-branch.h \
                     src/utils-chain.h \
                     src/utils-debug.h \
-                    src/utils-list.h \
                     src/utils-pool.h \
                     src/utils-store.h \
                     tests/mock-surface-manager.h \

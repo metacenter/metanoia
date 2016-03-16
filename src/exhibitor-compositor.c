@@ -108,7 +108,7 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
     // Create and configure workspace
     NoiaFrame* workspace = noia_frame_new();
     noia_frame_configure_as_workspace(workspace, size, title);
-    noia_frame_append(self->root, workspace);
+    noia_frame_jumpin(self->root, workspace);
 
     /// @todo This should be configurable
     noia_compositor_set_selection(self, workspace);
@@ -139,7 +139,7 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
                          sid, (NoiaPosition) {0,0}, surface->requested_size,
                          NULL);
 
-    noia_frame_append(self->selection, frame);
+    noia_frame_jumpin(self->selection, frame);
     /// @todo This should be configurable
     noia_compositor_set_selection(self, frame);
 
@@ -351,7 +351,7 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
             break;
         }
 
-        noia_frame_resettle(frame, workspace);
+        noia_frame_jump(frame, workspace);
     }
     noia_compositor_log_frame(self);
 }
