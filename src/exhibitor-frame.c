@@ -180,8 +180,8 @@ void noia_frame_move(NoiaFrame* self,
     NOIA_ENSURE(self, return);
 
     NoiaFrameParams* params = noia_frame_get_params(self);
-    if (!(params->type & NOIA_FRAME_TYPE_FLOATING)
-      || (params->type & NOIA_FRAME_TYPE_FIXED)) {
+    if ((not (params->type & NOIA_FRAME_TYPE_FLOATING))
+     or (params->type & NOIA_FRAME_TYPE_FIXED)) {
         return;
     }
 
@@ -249,10 +249,12 @@ void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop)
 {
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(pop, return);
-    NOIA_ENSURE(pop->trunk, return);
-    NOIA_ENSURE(self != pop, return);
 
-    if (noia_frame_get_params(pop->trunk)->type & NOIA_FRAME_TYPE_STACKED) {
+    if((not pop->trunk) or (self == pop)) {
+        return;
+    }
+
+    if (noia_frame_has_type(pop->trunk, NOIA_FRAME_TYPE_STACKED)) {
         NoiaBranch* trunk = pop->trunk;
         noia_branch_remove(trunk, pop);
         noia_branch_append(trunk, pop);
@@ -415,7 +417,7 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self)
     NOIA_ENSURE(self, return NULL);
 
     NoiaFrame* frame = self;
-    while (frame && !noia_frame_has_type(frame, NOIA_FRAME_TYPE_SPECIAL)) {
+    while (frame and (not noia_frame_has_type(frame, NOIA_FRAME_TYPE_SPECIAL))){
         frame = frame->trunk;
     }
     return frame;

@@ -127,7 +127,8 @@ void noia_test_frame_config(NoiaFrame* frame,
                          (NoiaPosition) {40,  0}, (NoiaSize) { 30,  60}, ""); \
     noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
                          (NoiaPosition) { 0, 60}, (NoiaSize) { 70,  60}, ""); \
-    noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
+    noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL | NOIA_FRAME_TYPE_SPECIAL,\
+                         scInvalidSurfaceId, \
                          (NoiaPosition) { 0,  0}, (NoiaSize) {100, 120}, ""); \
     noia_frame_configure(abc, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId, \
                          (NoiaPosition) { 0,  0}, (NoiaSize) { 40,  60}, ""); \
@@ -834,6 +835,75 @@ NoiaTestResult should_swap_frames(void)
 
 //------------------------------------------------------------------------------
 
+/// Check if frame covered with other frames correctly pops up.
+NoiaTestResult should_pop_frame_recursively(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NoiaFrame* r  = noia_frame_new();
+    NoiaFrame* u  = noia_frame_new();
+    NoiaFrame* s  = noia_frame_new();
+    NoiaFrame* z  = noia_frame_new();
+    NoiaFrame* u1 = noia_frame_new();
+    NoiaFrame* u3 = noia_frame_new();
+    NoiaFrame* s1 = noia_frame_new();
+    NoiaFrame* s2 = noia_frame_new();
+    NoiaFrame* s3 = noia_frame_new();
+    NoiaFrame* z1 = noia_frame_new();
+    NoiaFrame* z2 = noia_frame_new();
+    NoiaFrame* z3 = noia_frame_new();
+    noia_test_frame_config(r, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
+    noia_test_frame_config(u, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId);
+    noia_test_frame_config(s, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
+    noia_test_frame_config(z, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
+    noia_test_frame_config(s1, NOIA_FRAME_TYPE_LEAF, 11);
+    noia_test_frame_config(s2, NOIA_FRAME_TYPE_LEAF, 12);
+    noia_test_frame_config(s3, NOIA_FRAME_TYPE_LEAF, 13);
+    noia_test_frame_config(u1, NOIA_FRAME_TYPE_LEAF, 21);
+    noia_test_frame_config(u3, NOIA_FRAME_TYPE_LEAF, 23);
+    noia_test_frame_config(z1, NOIA_FRAME_TYPE_LEAF, 31);
+    noia_test_frame_config(z2, NOIA_FRAME_TYPE_LEAF, 32);
+    noia_test_frame_config(z3, NOIA_FRAME_TYPE_LEAF, 33);
+    noia_frame_prepend(r, s);
+    noia_frame_prepend(r, u);
+    noia_frame_prepend(u, u1);
+    noia_frame_prepend(u, z);
+    noia_frame_prepend(u, u3);
+    noia_frame_prepend(s, s1);
+    noia_frame_prepend(s, s2);
+    noia_frame_prepend(s, s3);
+    noia_frame_prepend(z, z1);
+    noia_frame_prepend(z, z2);
+    noia_frame_prepend(z, z3);
+
+    NoiaSurfaceContext a[] = {
+            {13, {0, 0}},
+            {12, {0, 0}},
+            {11, {0, 0}},
+            {23, {0, 0}},
+            {33, {0, 0}},
+            {31, {0, 0}},
+            {32, {0, 0}},
+            {21, {0, 0}},
+        };
+
+    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
+                                      sizeof(NoiaSurfaceContext));
+
+    noia_frame_pop_recursively(r, z2);
+    noia_frame_to_array(r, pool);
+    noia_frame_free(r);
+
+    NOIA_ASSERT_FRAME_ARRAY(a, pool);
+
+    noia_pool_destroy(pool);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 /// Check if `noia_frame_find_with_sid` returns correct frames.
 NoiaTestResult should_find_with_sid(void)
 {
@@ -867,6 +937,30 @@ NoiaTestResult should_find_with_sid(void)
 
     noia_mock_surface_manager_finalize();
     return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Find first frame above given with type Special
+NoiaTestResult should_find_top(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_POSITIONED;
+
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(a), r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(b), r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(c), r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(d), r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(e), r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(f), r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(r), r);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+
 }
 
 //------------------------------------------------------------------------------
@@ -2040,6 +2134,138 @@ NoiaTestResult should_horizontal_expand_to_west(void)
 
 //------------------------------------------------------------------------------
 
+/// Check position of frame moved to north-west.
+NoiaTestResult should_move_to_north_west(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
+
+    noia_frame_move(r, NOIA_ARGMAND_N, 20);
+    noia_frame_move(r, NOIA_ARGMAND_W, 30);
+
+    NOIA_ASSERT_FRAME_AREA(r,      -30, -20, 300, 120);
+    NOIA_ASSERT_FRAME_AREA(abcdef, -30, -20, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(g,       90, -20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(hi,     150, -20, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(a,      -30, -20, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(bcd,    -30,  20, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(ef,     -30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(h,      150, -20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(i,      210, -20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(b,      -30,  20, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(c,      -30,  20, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(d,      -30,  20, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(e,      -30,  60,  60,  40);
+    NOIA_ASSERT_FRAME_AREA(f,       30,  60,  60,  40);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Check position of frame moved to south-east.
+NoiaTestResult should_move_to_south_east(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
+
+    noia_frame_move(r, NOIA_ARGMAND_S, 20);
+    noia_frame_move(r, NOIA_ARGMAND_E, 30);
+
+    NOIA_ASSERT_FRAME_AREA(r,       30,  20, 300, 120);
+    NOIA_ASSERT_FRAME_AREA(abcdef,  30,  20, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(g,      150,  20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(hi,     210,  20, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(a,       30,  20, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(bcd,     30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(ef,      30, 100, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(h,      210,  20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(i,      270,  20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(b,       30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(c,       30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(d,       30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(e,       30, 100,  60,  40);
+    NOIA_ASSERT_FRAME_AREA(f,       90, 100,  60,  40);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Check position of frame moved to north-east.
+NoiaTestResult should_move_from_north_east(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
+
+    noia_frame_move(r, NOIA_ARGMAND_N, -20);
+    noia_frame_move(r, NOIA_ARGMAND_E, -30);
+
+    NOIA_ASSERT_FRAME_AREA(r,      -30,  20, 300, 120);
+    NOIA_ASSERT_FRAME_AREA(abcdef, -30,  20, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(g,       90,  20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(hi,     150,  20, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(a,      -30,  20, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(bcd,    -30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(ef,     -30, 100, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(h,      150,  20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(i,      210,  20,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(b,      -30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(c,      -30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(d,      -30,  60, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(e,      -30, 100,  60,  40);
+    NOIA_ASSERT_FRAME_AREA(f,       30, 100,  60,  40);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Check if frame is not moved when trying to move not-floating frame.
+NoiaTestResult should_not_move_when_frame_is_not_floating(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
+
+    noia_frame_move(f, NOIA_ARGMAND_N, -20);
+    noia_frame_move(f, NOIA_ARGMAND_E, -30);
+
+    NOIA_ASSERT_FRAME_AREA(r,        0,  0, 300, 120);
+    NOIA_ASSERT_FRAME_AREA(abcdef,   0,  0, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(g,      120,  0,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(hi,     180,  0, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(a,        0,  0, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(bcd,      0, 40, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(ef,       0, 80, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(h,      180,  0,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(i,      240,  0,  60, 120);
+    NOIA_ASSERT_FRAME_AREA(b,        0, 40, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(c,        0, 40, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(d,        0, 40, 120,  40);
+    NOIA_ASSERT_FRAME_AREA(e,        0, 80,  60,  40);
+    NOIA_ASSERT_FRAME_AREA(f,       60, 80,  60,  40);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 /// Empty test
 NoiaTestResult should(void)
 {
@@ -2063,6 +2289,8 @@ int main(int argc, char** argv)
 
     NoiaTest test[] = {
             NOIA_TEST(should),
+
+            // general operations
             NOIA_TEST(should_append_and_prepend_values),
             NOIA_TEST(should_insert_values),
             NOIA_TEST(should_translate_frame_to_array),
@@ -2072,13 +2300,19 @@ int main(int argc, char** argv)
             NOIA_TEST(should_resettle_one_frame),
             NOIA_TEST(should_resettle_frame_with_subframes),
             NOIA_TEST(should_swap_frames),
+            NOIA_TEST(should_pop_frame_recursively),
 
+            // finding
             NOIA_TEST(should_find_with_sid),
+            NOIA_TEST(should_find_top),
+
+            // finding contiguous
             NOIA_TEST(should_find_contiguous_on_the_same_level_one_further),
             NOIA_TEST(should_find_contiguous_on_the_same_level_many_further),
             NOIA_TEST(should_find_contiguous_on_the_second_level),
             NOIA_TEST(should_find_contiguous_on_the_third_level),
 
+            // finding pointed
             NOIA_TEST(should_find_stacked_pointed_inside),
             NOIA_TEST(should_find_flat_pointed_inside),
             NOIA_TEST(should_find_stacked_pointed_outside),
@@ -2086,12 +2320,14 @@ int main(int argc, char** argv)
             NOIA_TEST(should_find_frame_over_another),
             NOIA_TEST(should_find_frame_in_empty_space),
 
+            // iterating
             NOIA_TEST(should_find_adjacent_frames),
             NOIA_TEST(should_correctly_iterate_east),
             NOIA_TEST(should_correctly_iterate_west),
             NOIA_TEST(should_correctly_iterate_south),
             NOIA_TEST(should_correctly_iterate_north),
 
+            // resizing
             NOIA_TEST(check_setup_for_resizing_with_horizontal_floating),
             NOIA_TEST(check_setup_for_resizing_with_vertical_floating),
             NOIA_TEST(should_shrink_from_south),
@@ -2106,6 +2342,12 @@ int main(int argc, char** argv)
             NOIA_TEST(should_vertical_expand_to_north),
             NOIA_TEST(should_horizontal_shrink_from_west),
             NOIA_TEST(should_horizontal_expand_to_west),
+
+            // moving
+            NOIA_TEST(should_move_to_north_west),
+            NOIA_TEST(should_move_to_south_east),
+            NOIA_TEST(should_move_from_north_east),
+            NOIA_TEST(should_not_move_when_frame_is_not_floating),
         };
 
     return noia_test_run("Frame", test, NOIA_NUM_TESTS(test));

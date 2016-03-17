@@ -71,7 +71,6 @@ void noia_frame_resize(NoiaFrame* self,
 
 /// Move the frame.
 /// This takes effect only on surfaces which are FLOATING but not FIXED.
-/// @todo Add unit tests.
 void noia_frame_move(NoiaFrame* self,
                      NoiaArgmand direction,
                      int magnitude);
@@ -81,7 +80,6 @@ void noia_frame_move(NoiaFrame* self,
 NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type);
 
 /// Pop the surface `pop` and its parents recursively ending on `self`.
-/// @todo Add unit tests.
 void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
 
 /// Detach frame `self` from its trunk.
@@ -114,7 +112,6 @@ NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
 
 /// Find first trunk which type has NOIA_FRAME_TYPE_SPECIAL.
 /// For normal frame this should be workspace.
-/// @todo Add unit tests.
 NoiaFrame* noia_frame_find_top(NoiaFrame* self);
 
 /// Initialize iterator.
