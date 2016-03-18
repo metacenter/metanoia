@@ -72,8 +72,35 @@ void noia_frame_set_surface(NoiaFrame* self, NoiaSurfaceId sid)
 void noia_frame_set_size(NoiaFrame* self, NoiaSize size)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
+    NoiaSize old_size = params->area.size;
     params->area.size = size;
     noia_surface_set_desired_size(params->sid, size);
+
+    if (noia_frame_has_type(self, NOIA_FRAME_TYPE_VERTICAL)) {
+        if (old_size.height == size.height) {
+            FOR_EACH_TWIG (self, twig) {
+                NoiaSize twig_size = noia_frame_get_area(twig).size;
+                twig_size.width = size.width;
+                noia_frame_set_size(twig, twig_size);
+            }
+        } else {
+            noia_frame_relax(self);
+        }
+    } else if (noia_frame_has_type(self, NOIA_FRAME_TYPE_HORIZONTAL)) {
+        if (old_size.width == size.width) {
+            FOR_EACH_TWIG (self, twig) {
+                NoiaSize twig_size = noia_frame_get_area(twig).size;
+                twig_size.height = size.height;
+                noia_frame_set_size(twig, twig_size);
+            }
+        } else {
+            noia_frame_relax(self);
+        }
+    } else {
+        FOR_EACH_TWIG (self, twig) {
+            noia_frame_set_size(twig, size);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -248,6 +275,42 @@ void noia_frame_resize_floating(NoiaFrame* self,
     }
 
     noia_frame_reconfigure(self, area);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_frame_relax(NoiaFrame* self)
+{
+    int len = noia_chain_len(self->twigs);
+    if (len < 1) {
+        return;
+    }
+
+    // Decide how to resize and move twigs
+    NoiaFrameParams* params = noia_frame_get_params(self);
+    NoiaSize size = {0, 0};
+    NoiaSize increment = {0, 0};
+    if (noia_frame_has_type(self, NOIA_FRAME_TYPE_STACKED)) {
+        size = params->area.size;
+    } else if (noia_frame_has_type(self, NOIA_FRAME_TYPE_VERTICAL)) {
+        size.width = params->area.size.width;
+        size.height = increment.height = params->area.size.height / len;
+    } else if (noia_frame_has_type(self, NOIA_FRAME_TYPE_HORIZONTAL)) {
+        size.height = params->area.size.height;
+        size.width = increment.width = params->area.size.width / len;
+    } else {
+        // Nothig to do for not-directed frames
+        return;
+    }
+
+    // Resize and reposition all subframes recursively
+    NoiaPosition pos = params->area.pos;
+    FOR_EACH_TWIG (self, twig) {
+        noia_frame_set_size(twig, size);
+        noia_frame_set_position(twig, pos);
+        pos.x += increment.width;
+        pos.y += increment.height;
+    }
 }
 
 //------------------------------------------------------------------------------

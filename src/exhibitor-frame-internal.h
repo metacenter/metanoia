@@ -89,6 +89,9 @@ void noia_frame_resize_floating(NoiaFrame* self,
                                 NoiaArgmand border,
                                 int magnitude);
 
+/// Make all subsurfaces have the same size and proper layout.
+void noia_frame_relax(NoiaFrame* self);
+
 /// Move the frame with all twigs.
 void noia_frame_move_with_contents(NoiaFrame* self, NoiaPosition vector);
 

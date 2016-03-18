@@ -208,37 +208,11 @@ NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
-    int len = noia_chain_len(self->twigs);
-    NOIA_ENSURE(len > 0, return NOIA_RESULT_INCORRECT_ARGUMENT);
-
-    // Decide how to resize and move twigs
     NoiaFrameParams* params = noia_frame_get_params(self);
-    NoiaSize size = {0, 0};
-    NoiaSize increment = {0, 0};
-    if (type == NOIA_FRAME_TYPE_STACKED) {
-        size = params->area.size;
-    } else if (type == NOIA_FRAME_TYPE_VERTICAL) {
-        size.width = params->area.size.width;
-        size.height = increment.height = params->area.size.height / len;
-    } else if (type == NOIA_FRAME_TYPE_HORIZONTAL) {
-        size.height = params->area.size.height;
-        size.width = increment.width = params->area.size.width / len;
-    } else {
-        return NOIA_RESULT_INCORRECT_ARGUMENT;
-    }
-
-    // Resize and reposition all twigs
-    NoiaPosition pos = params->area.pos;
-    FOR_EACH_TWIG (self, twig) {
-        noia_frame_set_size(twig, size);
-        noia_frame_set_position(twig, pos);
-        pos.x += increment.width;
-        pos.y += increment.height;
-    }
-
-    // Change type
     params->type &= (~NOIA_FRAME_TYPE_DIRECTED);
     params->type |= type;
+
+    noia_frame_relax(self);
 
     return NOIA_RESULT_SUCCESS;
 }
@@ -275,18 +249,28 @@ NoiaResult noia_frame_remove_self(NoiaFrame* self)
 
 //------------------------------------------------------------------------------
 
-/// @todo Fix setting size and position.
 NoiaResult noia_frame_jump(NoiaFrame* self, NoiaFrame* target)
 {
-    return noia_frame_resettle(self, target);
+    NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
+    NOIA_ENSURE(self->trunk, return NOIA_RESULT_INCORRECT_ARGUMENT);
+    NOIA_ENSURE(target, return NOIA_RESULT_INCORRECT_ARGUMENT);
+
+    NoiaFrame* source = self->trunk;
+    NoiaResult result = noia_frame_resettle(self, target);
+    if (result == NOIA_RESULT_SUCCESS) {
+        noia_frame_relax(source);
+        noia_frame_relax(target);
+    }
+
+    return result;
 }
 
 //------------------------------------------------------------------------------
 
-/// @todo
 NoiaResult noia_frame_jumpin(NoiaFrame* self, NoiaFrame* target)
 {
     noia_frame_append(self, target);
+    noia_frame_relax(target);
     return NOIA_RESULT_SUCCESS;
 }
 

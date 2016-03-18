@@ -367,6 +367,68 @@ void noia_test_frame_config(NoiaFrame* frame,
                          | NOIA_FRAME_TYPE_FLOATING, scInvalidSurfaceId, \
                          (NoiaPosition) {  0,   0}, (NoiaSize) {120, 300}, "");
 
+/// Frame set for testing relaxig.
+/// Ihah the same layout as frame set for testing resizing with horizontal
+/// floating but with different frame sizes.
+#define NOIA_MAKE_FRAMES_FOR_RELAXING \
+    NoiaFrame* r      = noia_frame_new(); \
+    NoiaFrame* a      = noia_frame_new(); \
+    NoiaFrame* b      = noia_frame_new(); \
+    NoiaFrame* c      = noia_frame_new(); \
+    NoiaFrame* d      = noia_frame_new(); \
+    NoiaFrame* e      = noia_frame_new(); \
+    NoiaFrame* f      = noia_frame_new(); \
+    NoiaFrame* g      = noia_frame_new(); \
+    NoiaFrame* h      = noia_frame_new(); \
+    NoiaFrame* i      = noia_frame_new(); \
+    NoiaFrame* bcd    = noia_frame_new(); \
+    NoiaFrame* ef     = noia_frame_new(); \
+    NoiaFrame* abcdef = noia_frame_new(); \
+    NoiaFrame* hi     = noia_frame_new(); \
+    noia_frame_append(bcd,    b); \
+    noia_frame_append(bcd,    c); \
+    noia_frame_append(bcd,    d); \
+    noia_frame_append(ef,     e); \
+    noia_frame_append(ef,     f); \
+    noia_frame_append(abcdef, a); \
+    noia_frame_append(abcdef, bcd); \
+    noia_frame_append(abcdef, ef); \
+    noia_frame_append(hi,     h); \
+    noia_frame_append(hi,     i); \
+    noia_frame_append(r,      abcdef); \
+    noia_frame_append(r,      g); \
+    noia_frame_append(r,      hi); \
+    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
+                         (NoiaPosition) {  0,   0}, (NoiaSize) {180, 120}, "");\
+    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
+                         (NoiaPosition) {  0, 120}, (NoiaSize) {180, 180}, "");\
+    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
+                         (NoiaPosition) {  0, 120}, (NoiaSize) {180, 180}, "");\
+    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
+                         (NoiaPosition) {  0, 120}, (NoiaSize) {180, 180}, "");\
+    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
+                         (NoiaPosition) {  0, 300}, (NoiaSize) { 60,  60}, "");\
+    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
+                         (NoiaPosition) { 60, 300}, (NoiaSize) {120,  60}, "");\
+    noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 7, \
+                         (NoiaPosition) {180,   0}, (NoiaSize) { 60, 360}, "");\
+    noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 8, \
+                         (NoiaPosition) {240,   0}, (NoiaSize) { 80, 360}, "");\
+    noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 9, \
+                         (NoiaPosition) {320,   0}, (NoiaSize) { 40, 360}, "");\
+    noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId, \
+                         (NoiaPosition) {  0, 120}, (NoiaSize) {180, 180}, "");\
+    noia_frame_configure(ef, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId, \
+                         (NoiaPosition) {  0, 300}, (NoiaSize) {180,  60}, "");\
+    noia_frame_configure(abcdef, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId, \
+                         (NoiaPosition) {  0,   0}, (NoiaSize) {180, 360}, "");\
+    noia_frame_configure(hi, NOIA_FRAME_TYPE_HORIZONTAL, scInvalidSurfaceId, \
+                         (NoiaPosition) {240,   0}, (NoiaSize) {120, 360}, "");\
+    noia_frame_configure(r, NOIA_FRAME_TYPE_HORIZONTAL \
+                         | NOIA_FRAME_TYPE_FLOATING, scInvalidSurfaceId, \
+                         (NoiaPosition) {  0,   0}, (NoiaSize) {360, 360}, "");\
+
+
 #define NOIA_ASSERT_FRAME_ARRAY(ARRAY, POOL) \
     NOIA_ASSERT(NOIA_SIZEOF_ARRAY(ARRAY) == noia_pool_get_size(POOL), \
                 "Number of elements should be '%lu' (is '%u')", \
@@ -2266,6 +2328,116 @@ NoiaTestResult should_not_move_when_frame_is_not_floating(void)
 
 //------------------------------------------------------------------------------
 
+/// When relaxing horizontal frame check if:
+///
+/// - main frame is relaxed
+/// - subframes have proper sizes
+/// - non-horizontal subframes are not relaxed
+/// - horizontal subframes are relaxed if and only if the changed size
+///
+NoiaTestResult should_relax_horizontal(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_RELAXING;
+
+    noia_frame_relax(r);
+
+    NOIA_ASSERT_FRAME_AREA(r,        0,   0, 360, 360);
+    NOIA_ASSERT_FRAME_AREA(abcdef,   0,   0, 120, 360);
+    NOIA_ASSERT_FRAME_AREA(g,      120,   0, 120, 360);
+    NOIA_ASSERT_FRAME_AREA(hi,     240,   0, 120, 360);
+    NOIA_ASSERT_FRAME_AREA(a,        0,   0, 120, 120);
+    NOIA_ASSERT_FRAME_AREA(bcd,      0, 120, 120, 180);
+    NOIA_ASSERT_FRAME_AREA(ef,       0, 300, 120,  60);
+    NOIA_ASSERT_FRAME_AREA(h,      240,   0,  80, 360);
+    NOIA_ASSERT_FRAME_AREA(i,      320,   0,  40, 360);
+    NOIA_ASSERT_FRAME_AREA(b,        0, 120, 120, 180);
+    NOIA_ASSERT_FRAME_AREA(c,        0, 120, 120, 180);
+    NOIA_ASSERT_FRAME_AREA(d,        0, 120, 120, 180);
+    NOIA_ASSERT_FRAME_AREA(e,        0, 300,  60,  60);
+    NOIA_ASSERT_FRAME_AREA(f,       60, 300,  60,  60);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// When changing type of horizontal frame to stacked check if:
+///
+/// - main frame is relaxed and have correct type
+/// - subframes have proper sizes
+///
+NoiaTestResult should_change_type_to_stacked(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_RELAXING;
+
+    noia_frame_change_type(r, NOIA_FRAME_TYPE_STACKED);
+
+    NOIA_ASSERT_FRAME_AREA(r,      0,   0, 360, 360);
+    NOIA_ASSERT_FRAME_AREA(abcdef, 0,   0, 360, 360);
+    NOIA_ASSERT_FRAME_AREA(g,      0,   0, 360, 360);
+    NOIA_ASSERT_FRAME_AREA(hi,     0,   0, 360, 360);
+    NOIA_ASSERT_FRAME_AREA(a,      0,   0, 360, 120);
+    NOIA_ASSERT_FRAME_AREA(bcd,    0, 120, 360, 180);
+    NOIA_ASSERT_FRAME_AREA(ef,     0, 300, 360,  60);
+    NOIA_ASSERT_FRAME_AREA(h,      0,   0, 180, 360);
+    NOIA_ASSERT_FRAME_AREA(i,    180,   0, 180, 360);
+    NOIA_ASSERT_FRAME_AREA(b,      0, 120, 360, 180);
+    NOIA_ASSERT_FRAME_AREA(c,      0, 120, 360, 180);
+    NOIA_ASSERT_FRAME_AREA(d,      0, 120, 360, 180);
+    NOIA_ASSERT_FRAME_AREA(e,      0, 300, 180,  60);
+    NOIA_ASSERT_FRAME_AREA(f,    180, 300, 180,  60);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// When changing type of horizontal frame to vertical check if:
+///
+/// - main frame is relaxed and have correct type
+/// - subframes have proper sizes
+///
+NoiaTestResult should_change_type_to_vertical(void)
+{
+    noia_mock_surface_manager_initialize();
+
+    NOIA_MAKE_FRAMES_FOR_RELAXING;
+
+    noia_frame_change_type(r, NOIA_FRAME_TYPE_VERTICAL);
+
+    NOIA_ASSERT_FRAME_AREA(r,      0,   0, 360, 360);
+    NOIA_ASSERT_FRAME_AREA(abcdef, 0,   0, 360, 120);
+    NOIA_ASSERT_FRAME_AREA(g,      0, 120, 360, 120);
+    NOIA_ASSERT_FRAME_AREA(hi,     0, 240, 360, 120);
+    NOIA_ASSERT_FRAME_AREA(a,      0,   0, 360,  40);
+    NOIA_ASSERT_FRAME_AREA(bcd,    0,  40, 360,  40);
+    NOIA_ASSERT_FRAME_AREA(ef,     0,  80, 360,  40);
+    NOIA_ASSERT_FRAME_AREA(h,      0, 240, 180, 120);
+    NOIA_ASSERT_FRAME_AREA(i,    180, 240, 180, 120);
+    NOIA_ASSERT_FRAME_AREA(b,      0,  40, 360,  40);
+    NOIA_ASSERT_FRAME_AREA(c,      0,  40, 360,  40);
+    NOIA_ASSERT_FRAME_AREA(d,      0,  40, 360,  40);
+    NOIA_ASSERT_FRAME_AREA(e,      0,  80, 180,  40);
+    NOIA_ASSERT_FRAME_AREA(f,    180,  80, 180,  40);
+
+    noia_frame_free(r);
+
+    noia_mock_surface_manager_finalize();
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 /// Empty test
 NoiaTestResult should(void)
 {
@@ -2348,6 +2520,11 @@ int main(int argc, char** argv)
             NOIA_TEST(should_move_to_south_east),
             NOIA_TEST(should_move_from_north_east),
             NOIA_TEST(should_not_move_when_frame_is_not_floating),
+
+            // relaxing
+            NOIA_TEST(should_relax_horizontal),
+            NOIA_TEST(should_change_type_to_stacked),
+            NOIA_TEST(should_change_type_to_vertical),
         };
 
     return noia_test_run("Frame", test, NOIA_NUM_TESTS(test));
