@@ -2,6 +2,7 @@
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
 #include "global-objects.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -11,10 +12,9 @@
 #include "utils-log.h"
 
 /// Free Int Object.
-void noia_int_free(NoiaIntObject* self) {
-    if (!self) {
-        return;
-    }
+void noia_int_destroy(NoiaIntObject* self)
+{
+    NOIA_ENSURE(self, return);
     memset(self, 0, sizeof(NoiaIntObject));
     free(self);
 }
@@ -25,7 +25,7 @@ void noia_int_free(NoiaIntObject* self) {
 NoiaIntObject* noia_uint_create(uintptr_t value)
 {
     NoiaIntObject* self = malloc(sizeof(NoiaIntObject));
-    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_int_free);
+    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_int_destroy);
     noia_object_ref(&self->base);
     self->uint = value;
     return self;
@@ -37,7 +37,7 @@ NoiaIntObject* noia_uint_create(uintptr_t value)
 NoiaIntObject* noia_int_create(intptr_t value)
 {
     NoiaIntObject* self = malloc(sizeof(NoiaIntObject));
-    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_int_free);
+    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_int_destroy);
     noia_object_ref(&self->base);
     self->sint = value;
     return self;
@@ -49,9 +49,7 @@ NoiaIntObject* noia_int_create(intptr_t value)
 uintptr_t noia_uint_unref_get(NoiaIntObject* self)
 {
     uintptr_t result = 0;
-    if (!self) {
-        return result;
-    }
+    NOIA_ENSURE(self, return result);
     result = self->uint;
     noia_object_unref((NoiaObject*) self);
     return result;
@@ -62,10 +60,8 @@ uintptr_t noia_uint_unref_get(NoiaIntObject* self)
 /// Convenience for getting signed value and unrefing at once.
 intptr_t noia_int_unref_get(NoiaIntObject* self)
 {
-    intptr_t result = 0;
-    if (!self) {
-        return result;
-    }
+    uintptr_t result = 0;
+    NOIA_ENSURE(self, return result);
     result = self->sint;
     noia_object_unref((NoiaObject*) self);
     return result;
@@ -74,10 +70,9 @@ intptr_t noia_int_unref_get(NoiaIntObject* self)
 //------------------------------------------------------------------------------
 
 /// Free Key Object.
-void noia_key_free(NoiaKeyObject* self) {
-    if (!self) {
-        return;
-    }
+void noia_key_destroy(NoiaKeyObject* self)
+{
+    NOIA_ENSURE(self, return);
     memset(self, 0, sizeof(NoiaKeyObject));
     free(self);
 }
@@ -88,7 +83,7 @@ void noia_key_free(NoiaKeyObject* self) {
 NoiaKeyObject* noia_key_create(unsigned time, int code, bool value)
 {
     NoiaKeyObject* self = malloc(sizeof(NoiaKeyObject));
-    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_key_free);
+    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_key_destroy);
     noia_object_ref(&self->base);
     self->keydata.time = time;
     self->keydata.code = code;
@@ -99,10 +94,9 @@ NoiaKeyObject* noia_key_create(unsigned time, int code, bool value)
 //------------------------------------------------------------------------------
 
 /// Free Button Object.
-void noia_button_free(NoiaButtonObject* self) {
-    if (!self) {
-        return;
-    }
+void noia_button_destroy(NoiaButtonObject* self)
+{
+    NOIA_ENSURE(self, return);
     memset(self, 0, sizeof(NoiaButtonObject));
     free(self);
 }
@@ -113,7 +107,7 @@ void noia_button_free(NoiaButtonObject* self) {
 NoiaButtonObject* noia_button_create(unsigned time, int code, bool value)
 {
     NoiaButtonObject* self = malloc(sizeof(NoiaButtonObject));
-    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_button_free);
+    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_button_destroy);
     noia_object_ref(&self->base);
     self->buttondata.time = time;
     self->buttondata.code = code;
@@ -124,10 +118,9 @@ NoiaButtonObject* noia_button_create(unsigned time, int code, bool value)
 //------------------------------------------------------------------------------
 
 /// Free Motion Object.
-void noia_motion_free(NoiaMotionObject* self) {
-    if (!self) {
-        return;
-    }
+void noia_motion_destroy(NoiaMotionObject* self)
+{
+    NOIA_ENSURE(self, return);
     memset(self, 0, sizeof(NoiaMotionObject));
     free(self);
 }
@@ -138,7 +131,7 @@ void noia_motion_free(NoiaMotionObject* self) {
 NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos)
 {
     NoiaMotionObject* self = malloc(sizeof(NoiaMotionObject));
-    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_motion_free);
+    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_motion_destroy);
     self->sid = sid;
     self->pos = pos;
     return self;
@@ -146,16 +139,55 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos)
 
 //------------------------------------------------------------------------------
 
-/// Clean an action.
-void noia_action_clean(NoiaAction* action)
+/// Create an action.
+NoiaAction* noia_action_create(void)
 {
-    action->action     = NOIA_ARGMAND_NONE;
-    action->direction  = NOIA_ARGMAND_NONE;
-    action->magnitude  = 0;
-    if (action->str) {
-        free(action->str);
-        action->str = NULL;
+    NoiaAction* self = malloc(sizeof(NoiaAction));
+    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_action_destroy);
+    self->str = NULL;
+    noia_action_clean(self);
+    return self;
+}
+
+//------------------------------------------------------------------------------
+
+/// Free an action.
+void noia_action_destroy(NoiaAction* self)
+{
+    NOIA_ENSURE(self, return);
+    noia_action_clean(self);
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+/// Clean an action.
+void noia_action_clean(NoiaAction* self)
+{
+    self->action    = NOIA_ARGMAND_NONE;
+    self->direction = NOIA_ARGMAND_NONE;
+    self->magnitude = 0;
+    if (self->str) {
+        free(self->str);
+        self->str = NULL;
     }
+}
+
+//------------------------------------------------------------------------------
+
+/// Copy an action.
+NoiaAction* noia_action_copy(NoiaAction* self)
+{
+    NoiaAction* copy = noia_action_create();
+    copy->action    = self->action;
+    copy->direction = self->direction;
+    copy->magnitude = self->magnitude;
+    if (self->str) {
+        copy->str = strdup(self->str);
+    } else {
+        copy->str = NULL;
+    }
+    return copy;
 }
 
 //------------------------------------------------------------------------------

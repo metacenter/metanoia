@@ -193,7 +193,7 @@ metanoia.add(Com.from_mathing('surface-*.c', c))
 #-------------------------------------------------------------------------------
 # KEYBOARD
 
-metanoia.add(Com.from_mathing('keyboard-*.c', c))
+metanoia.add(Com.from_mathing('input-*.c', c))
 
 #-------------------------------------------------------------------------------
 # EXHIBITOR

@@ -1,7 +1,7 @@
-// file: keyboard-binding.c
+// file: input-binding.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "keyboard-binding.h"
+#include "input-binding.h"
 #include "utils-log.h"
 
 #include <malloc.h>
@@ -11,10 +11,7 @@
 NoiaBinding* noia_binding_new(void)
 {
     NoiaBinding* self = malloc(sizeof(NoiaBinding));
-    if (!self) {
-        LOG_ERROR("Memory allocation failed!");
-        return self;
-    }
+    NOIA_ENSURE(self, abort());
 
     self->code = 0;
     self->modifiers = 0;
@@ -26,9 +23,7 @@ NoiaBinding* noia_binding_new(void)
 
 void noia_binding_free(NoiaBinding* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
     free(self);
 }
 

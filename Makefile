@@ -69,10 +69,11 @@ build/metanoia: Makefile \
                 inter/output-collector.o \
                 inter/surface-data.o \
                 inter/surface-manager.o \
-                inter/keyboard-binding.o \
-                inter/keyboard-bindings.o \
-                inter/keyboard-functions.o \
-                inter/keyboard-mode.o \
+                inter/input-binding.o \
+                inter/input-bindings.o \
+                inter/input-context.o \
+                inter/input-functions.o \
+                inter/input-mode.o \
                 inter/exhibitor-frame.o \
                 inter/exhibitor-frame-internal.o \
                 inter/exhibitor-strategist.o \
@@ -147,10 +148,11 @@ build/metanoia: Makefile \
 	    inter/output-collector.o \
 	    inter/surface-data.o \
 	    inter/surface-manager.o \
-	    inter/keyboard-binding.o \
-	    inter/keyboard-bindings.o \
-	    inter/keyboard-functions.o \
-	    inter/keyboard-mode.o \
+	    inter/input-binding.o \
+	    inter/input-bindings.o \
+	    inter/input-context.o \
+	    inter/input-functions.o \
+	    inter/input-mode.o \
 	    inter/exhibitor-frame.o \
 	    inter/exhibitor-frame-internal.o \
 	    inter/exhibitor-strategist.o \
@@ -487,10 +489,10 @@ inter/config.o: Makefile \
                 src/global-macros.h \
                 src/global-objects.h \
                 src/global-types.h \
-                src/keyboard-binding.h \
-                src/keyboard-bindings.h \
-                src/keyboard-context.h \
-                src/keyboard-functions.h \
+                src/input-binding.h \
+                src/input-bindings.h \
+                src/input-context.h \
+                src/input-functions.h \
                 src/utils-chain.h \
                 src/utils-debug.h \
                 src/utils-keymap.h \
@@ -505,9 +507,11 @@ inter/config.o: Makefile \
 inter/global-objects.o: Makefile \
                         src/global-constants.h \
                         src/global-enums.h \
+                        src/global-macros.h \
                         src/global-objects.c \
                         src/global-objects.h \
                         src/global-types.h \
+                        src/utils-debug.h \
                         src/utils-log.h \
                         src/utils-object.h
 	@mkdir -p inter
@@ -851,6 +855,7 @@ inter/device-drm.o: Makefile \
 	    src/device-drm.c
 
 inter/device-evdev.o: Makefile \
+                      src/config.h \
                       src/device-common.h \
                       src/device-evdev.c \
                       src/device-evdev.h \
@@ -862,12 +867,13 @@ inter/device-evdev.o: Makefile \
                       src/global-macros.h \
                       src/global-objects.h \
                       src/global-types.h \
-                      src/keyboard-binding.h \
-                      src/keyboard-bindings.h \
-                      src/keyboard-context.h \
+                      src/input-binding.h \
+                      src/input-bindings.h \
+                      src/input-context.h \
                       src/utils-chain.h \
                       src/utils-dbus.h \
                       src/utils-debug.h \
+                      src/utils-keymap.h \
                       src/utils-list.h \
                       src/utils-log.h \
                       src/utils-object.h
@@ -969,90 +975,110 @@ inter/surface-manager.o: Makefile \
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/surface-manager.o \
 	    src/surface-manager.c
 
-inter/keyboard-binding.o: Makefile \
-                          src/global-constants.h \
-                          src/global-enums.h \
-                          src/global-macros.h \
-                          src/global-objects.h \
-                          src/global-types.h \
-                          src/keyboard-binding.c \
-                          src/keyboard-binding.h \
-                          src/keyboard-context.h \
-                          src/utils-chain.h \
-                          src/utils-debug.h \
-                          src/utils-list.h \
-                          src/utils-log.h \
-                          src/utils-object.h
-	@mkdir -p inter
-	@echo "  CC   inter/keyboard-binding.o"
-	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-binding.o \
-	    src/keyboard-binding.c
-
-inter/keyboard-bindings.o: Makefile \
-                           src/global-constants.h \
-                           src/global-enums.h \
-                           src/global-macros.h \
-                           src/global-objects.h \
-                           src/global-types.h \
-                           src/keyboard-binding.h \
-                           src/keyboard-bindings.c \
-                           src/keyboard-bindings.h \
-                           src/keyboard-context.h \
-                           src/keyboard-mode.h \
-                           src/utils-chain.h \
-                           src/utils-debug.h \
-                           src/utils-list.h \
-                           src/utils-log.h \
-                           src/utils-object.h
-	@mkdir -p inter
-	@echo "  CC   inter/keyboard-bindings.o"
-	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-bindings.o \
-	    src/keyboard-bindings.c
-
-inter/keyboard-functions.o: Makefile \
-                            src/event-loop.h \
-                            src/event-signals.h \
-                            src/event-task.h \
-                            src/exhibitor-module.h \
-                            src/global-constants.h \
-                            src/global-enums.h \
-                            src/global-macros.h \
-                            src/global-objects.h \
-                            src/global-types.h \
-                            src/keyboard-binding.h \
-                            src/keyboard-context.h \
-                            src/keyboard-functions.c \
-                            src/keyboard-functions.h \
-                            src/keyboard-mode.h \
-                            src/utils-chain.h \
-                            src/utils-debug.h \
-                            src/utils-list.h \
-                            src/utils-log.h \
-                            src/utils-object.h
-	@mkdir -p inter
-	@echo "  CC   inter/keyboard-functions.o"
-	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-functions.o \
-	    src/keyboard-functions.c
-
-inter/keyboard-mode.o: Makefile \
+inter/input-binding.o: Makefile \
                        src/global-constants.h \
                        src/global-enums.h \
                        src/global-macros.h \
                        src/global-objects.h \
                        src/global-types.h \
-                       src/keyboard-binding.h \
-                       src/keyboard-context.h \
-                       src/keyboard-mode.c \
-                       src/keyboard-mode.h \
+                       src/input-binding.c \
+                       src/input-binding.h \
+                       src/input-context.h \
                        src/utils-chain.h \
                        src/utils-debug.h \
                        src/utils-list.h \
                        src/utils-log.h \
                        src/utils-object.h
 	@mkdir -p inter
-	@echo "  CC   inter/keyboard-mode.o"
-	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/keyboard-mode.o \
-	    src/keyboard-mode.c
+	@echo "  CC   inter/input-binding.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/input-binding.o \
+	    src/input-binding.c
+
+inter/input-bindings.o: Makefile \
+                        src/global-constants.h \
+                        src/global-enums.h \
+                        src/global-macros.h \
+                        src/global-objects.h \
+                        src/global-types.h \
+                        src/input-binding.h \
+                        src/input-bindings.c \
+                        src/input-bindings.h \
+                        src/input-context.h \
+                        src/input-mode.h \
+                        src/utils-chain.h \
+                        src/utils-debug.h \
+                        src/utils-list.h \
+                        src/utils-log.h \
+                        src/utils-object.h
+	@mkdir -p inter
+	@echo "  CC   inter/input-bindings.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/input-bindings.o \
+	    src/input-bindings.c
+
+inter/input-context.o: Makefile \
+                       src/global-constants.h \
+                       src/global-enums.h \
+                       src/global-macros.h \
+                       src/global-objects.h \
+                       src/global-types.h \
+                       src/input-context.c \
+                       src/input-context.h \
+                       src/utils-chain.h \
+                       src/utils-debug.h \
+                       src/utils-list.h \
+                       src/utils-object.h
+	@mkdir -p inter
+	@echo "  CC   inter/input-context.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/input-context.o \
+	    src/input-context.c
+
+inter/input-functions.o: Makefile \
+                         src/config.h \
+                         src/event-loop.h \
+                         src/event-signals.h \
+                         src/event-task.h \
+                         src/exhibitor-module.h \
+                         src/global-constants.h \
+                         src/global-enums.h \
+                         src/global-macros.h \
+                         src/global-objects.h \
+                         src/global-types.h \
+                         src/input-binding.h \
+                         src/input-bindings.h \
+                         src/input-context.h \
+                         src/input-functions.c \
+                         src/input-functions.h \
+                         src/input-mode.h \
+                         src/utils-chain.h \
+                         src/utils-debug.h \
+                         src/utils-keymap.h \
+                         src/utils-list.h \
+                         src/utils-log.h \
+                         src/utils-object.h
+	@mkdir -p inter
+	@echo "  CC   inter/input-functions.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/input-functions.o \
+	    src/input-functions.c
+
+inter/input-mode.o: Makefile \
+                    src/global-constants.h \
+                    src/global-enums.h \
+                    src/global-macros.h \
+                    src/global-objects.h \
+                    src/global-types.h \
+                    src/input-binding.h \
+                    src/input-context.h \
+                    src/input-mode.c \
+                    src/input-mode.h \
+                    src/utils-chain.h \
+                    src/utils-debug.h \
+                    src/utils-list.h \
+                    src/utils-log.h \
+                    src/utils-object.h
+	@mkdir -p inter
+	@echo "  CC   inter/input-mode.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/input-mode.o \
+	    src/input-mode.c
 
 inter/exhibitor-strategist.o: Makefile \
                               src/event-signals.h \
@@ -1803,13 +1829,17 @@ inter/metanoia.o: Makefile \
                   src/event-task.h \
                   src/global-constants.h \
                   src/global-enums.h \
+                  src/global-macros.h \
                   src/global-types.h \
                   src/metanoia.c \
                   src/surface-data.h \
                   src/surface-manager.h \
+                  src/utils-chain.h \
                   src/utils-dbus.h \
+                  src/utils-debug.h \
                   src/utils-environment.h \
                   src/utils-keymap.h \
+                  src/utils-list.h \
                   src/utils-log.h \
                   src/utils-object.h \
                   src/utils-store.h

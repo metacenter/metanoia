@@ -59,7 +59,7 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos);
 
 //------------------------------------------------------------------------------
 
-/// Compositor action context
+/// Compositor action context.
 typedef struct {
     NoiaObject base;
     NoiaArgmand action;
@@ -68,8 +68,17 @@ typedef struct {
     int magnitude;
 } NoiaAction;
 
+/// Create the action.
+NoiaAction* noia_action_create(void);
+
+/// Destroy the action.
+void noia_action_destroy(NoiaAction* action);
+
 /// Clear the action.
 void noia_action_clean(NoiaAction* action);
+
+/// Copy the action.
+NoiaAction* noia_action_copy(NoiaAction* action);
 
 //------------------------------------------------------------------------------
 

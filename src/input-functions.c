@@ -1,8 +1,10 @@
-// file: global-functions.c
+// file: input-functions.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "keyboard-functions.h"
-#include "keyboard-mode.h"
+#include "input-functions.h"
+#include "input-bindings.h"
+#include "input-mode.h"
+#include "config.h"
 #include "utils-log.h"
 #include "exhibitor-module.h"
 #include "global-macros.h"
@@ -36,10 +38,11 @@ int noia_get_number_from_key(int code)
 
 void noia_execute(NoiaAction* action)
 {
-    noia_object_ref(&action->base);
-    noia_event_signal_emit(SIGNAL_ACTION, &action->base);
-    // FIXME
-    //noia_action_clean(action);
+    NoiaObject* copy = (NoiaObject*) noia_action_copy(action);
+    noia_object_ref(copy);
+    noia_event_signal_emit(SIGNAL_ACTION, copy);
+    noia_object_unref(copy);
+    noia_action_clean(action);
 }
 
 //------------------------------------------------------------------------------
@@ -77,18 +80,18 @@ static inline void noia_direction(NoiaAction* action,
 
 //------------------------------------------------------------------------------
 
-void noia_clean_action(NoiaBindingContext* context)
+void noia_clean_action(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_action_clean(&context->action);
+    noia_action_clean(context->action);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_cicle_history_forward(NoiaBindingContext* context)
+void noia_cicle_history_forward(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    NoiaAction* action = &context->action;
+    NoiaAction* action = context->action;
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_FORWARD;
     action->magnitude = 1;
@@ -97,10 +100,10 @@ void noia_cicle_history_forward(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
-void noia_cicle_history_back(NoiaBindingContext* context)
+void noia_cicle_history_back(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    NoiaAction* action = &context->action;
+    NoiaAction* action = context->action;
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_BACK;
     action->magnitude = 1;
@@ -109,55 +112,55 @@ void noia_cicle_history_back(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
-void noia_put_focus(NoiaBindingContext* context)
+void noia_put_focus(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_action(&context->action, NOIA_ARGMAND_FOCUS);
+    noia_action(context->action, NOIA_ARGMAND_FOCUS);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_put_swap(NoiaBindingContext* context)
+void noia_put_swap(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_action(&context->action, NOIA_ARGMAND_SWAP);
+    noia_action(context->action, NOIA_ARGMAND_SWAP);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_put_move(NoiaBindingContext* context)
+void noia_put_move(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_action(&context->action, NOIA_ARGMAND_MOVE);
+    noia_action(context->action, NOIA_ARGMAND_MOVE);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_put_resize(NoiaBindingContext* context)
+void noia_put_resize(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_action(&context->action, NOIA_ARGMAND_RESIZE);
+    noia_action(context->action, NOIA_ARGMAND_RESIZE);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_put_number(NoiaBindingContext* context)
+void noia_put_number(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
 
     int number = noia_get_number_from_key(context->code);
-    if (context->action.magnitude == 0) {
-        context->action.magnitude = number;
+    if (context->action->magnitude == 0) {
+        context->action->magnitude = number;
     } else if (number < 0) {
-        context->action.magnitude = context->action.magnitude * number;
+        context->action->magnitude = context->action->magnitude * number;
     } else {
-        context->action.magnitude = 10 * context->action.magnitude + number;
+        context->action->magnitude = 10 * context->action->magnitude + number;
     }
 }
 
 //------------------------------------------------------------------------------
 
-void noia_focus_workspace(NoiaBindingContext* context)
+void noia_focus_workspace(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
 
@@ -165,7 +168,7 @@ void noia_focus_workspace(NoiaBindingContext* context)
     int number = noia_get_number_from_key(context->code);
     snprintf(str, sizeof(str), "%d", number);
 
-    NoiaAction* action = &context->action;
+    NoiaAction* action = context->action;
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_WORKSPACE;
@@ -175,10 +178,10 @@ void noia_focus_workspace(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
-void noia_anchorize(NoiaBindingContext* context)
+void noia_anchorize(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    NoiaAction* action = &context->action;
+    NoiaAction* action = context->action;
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_ANCHOR;
     noia_execute(action);
@@ -186,10 +189,10 @@ void noia_anchorize(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
-void noia_stackedize(NoiaBindingContext* context)
+void noia_stackedize(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    NoiaAction* action = &context->action;
+    NoiaAction* action = context->action;
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_END;
@@ -198,10 +201,10 @@ void noia_stackedize(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
-void noia_verticalize(NoiaBindingContext* context)
+void noia_verticalize(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    NoiaAction* action = &context->action;
+    NoiaAction* action = context->action;
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_N;
@@ -210,10 +213,10 @@ void noia_verticalize(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
-void noia_horizontalize(NoiaBindingContext* context)
+void noia_horizontalize(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    NoiaAction* action = &context->action;
+    NoiaAction* action = context->action;
     noia_action_clean(action);
     action->action = NOIA_ARGMAND_CONF;
     action->direction = NOIA_ARGMAND_W;
@@ -222,10 +225,10 @@ void noia_horizontalize(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
-void noia_select_trunk(NoiaBindingContext* context)
+void noia_select_trunk(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    NoiaAction* action = &context->action;
+    NoiaAction* action = context->action;
     action->action = NOIA_ARGMAND_FOCUS;
     action->direction = NOIA_ARGMAND_TRUNK;
     noia_execute(action);
@@ -233,84 +236,74 @@ void noia_select_trunk(NoiaBindingContext* context)
 
 //------------------------------------------------------------------------------
 
-void noia_right(NoiaBindingContext* context)
+void noia_right(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_direction(&context->action, NOIA_ARGMAND_E);
+    noia_direction(context->action, NOIA_ARGMAND_E);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_left(NoiaBindingContext* context)
+void noia_left(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_direction(&context->action, NOIA_ARGMAND_W);
+    noia_direction(context->action, NOIA_ARGMAND_W);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_up(NoiaBindingContext* context)
+void noia_up(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_direction(&context->action, NOIA_ARGMAND_N);
+    noia_direction(context->action, NOIA_ARGMAND_N);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_down(NoiaBindingContext* context)
+void noia_down(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_direction(&context->action, NOIA_ARGMAND_S);
+    noia_direction(context->action, NOIA_ARGMAND_S);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_back(NoiaBindingContext* context)
+void noia_back(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_direction(&context->action, NOIA_ARGMAND_BACK);
+    noia_direction(context->action, NOIA_ARGMAND_BACK);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_forward(NoiaBindingContext* context)
+void noia_forward(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
-    noia_direction(&context->action, NOIA_ARGMAND_FORWARD);
+    noia_direction(context->action, NOIA_ARGMAND_FORWARD);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_swap_mode_normal_to_insert(NoiaBindingContext* context)
+void noia_swap_mode_normal_to_insert(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
     LOG_INFO2("Swap mode from normal to insert");
-    FOR_EACH (context->modes, link) {
-        NoiaMode* mode = (NoiaMode*) link->data;
-        if (mode->modeid == NOIA_MODE_NORMAL) {
-            mode->active = false;
-        }
-        if (mode->modeid == NOIA_MODE_INSERT) {
-            mode->active = true;
-        }
-    }
+
+    NoiaList* modes = noia_gears()->modes;
+    noia_input_mode_make_active(modes, NOIA_MODE_NORMAL, false);
+    noia_input_mode_make_active(modes, NOIA_MODE_INSERT, true);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_swap_mode_insert_to_normal(NoiaBindingContext* context)
+void noia_swap_mode_insert_to_normal(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
     LOG_INFO2("Swap mode from insert to normal");
-    FOR_EACH (context->modes, link) {
-        NoiaMode* mode = (NoiaMode*) link->data;
-        if (mode->modeid == NOIA_MODE_INSERT) {
-            mode->active = false;
-        }
-        if (mode->modeid == NOIA_MODE_NORMAL) {
-            mode->active = true;
-        }
-    }
+
+    NoiaList* modes = noia_gears()->modes;
+    noia_input_mode_make_active(modes, NOIA_MODE_INSERT, false);
+    noia_input_mode_make_active(modes, NOIA_MODE_NORMAL, true);
 }
 
 //------------------------------------------------------------------------------

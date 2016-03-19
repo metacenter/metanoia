@@ -5,8 +5,8 @@
 #define NOIA_CONFIGURATION_H
 
 #include "global-functions.h"
-#include "keyboard-functions.h"
-#include "keyboard-binding.h"
+#include "input-functions.h"
+#include "input-binding.h"
 
 #include <linux/input.h>
 

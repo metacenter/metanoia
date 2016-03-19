@@ -7,7 +7,8 @@
 #include "utils-log.h"
 #include "global-objects.h"
 #include "event-signals.h"
-#include "keyboard-bindings.h"
+#include "config.h"
+#include "input-bindings.h"
 
 #include <malloc.h>
 #include <libudev.h>
@@ -39,12 +40,14 @@ static const uint32_t scIdInputKeyboardFlag    = 0x0040;
 //------------------------------------------------------------------------------
 
 /// Handle epoll events from EventDispatcher comming from keyboard devices.
-void noia_evdev_handle_key(struct input_event* ev)
+void noia_evdev_handle_key(struct input_event* ev, NoiaInputContext* context)
 {
     if (ev->type == EV_KEY) {
-        bool catched = noia_keyboard_catch_key(ev->code,
-                              ev->value ? NOIA_KEY_PRESSED : NOIA_KEY_RELEASED);
-        if (!catched) {
+        bool catched =
+                    noia_input_catch_key(noia_gears()->modes, context, ev->code,
+                            (ev->value ? NOIA_KEY_PRESSED : NOIA_KEY_RELEASED));
+
+        if (not catched) {
             unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
             NoiaKeyObject* key = noia_key_create(time, ev->code, ev->value);
             noia_event_signal_emit(SIGNAL_KEYBOARD_EVENT, (NoiaObject*) key);
@@ -64,7 +67,7 @@ void noia_evdev_handle_touch(struct input_event* ev)
         noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_X, ev->value);
     } else if (ev->code == ABS_MT_POSITION_Y) {
         noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y, ev->value);
-    } else if (ev->code == BTN_LEFT || ev->code == BTN_RIGHT) {
+    } else if ((ev->code == BTN_LEFT) or (ev->code == BTN_RIGHT)) {
         unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
         NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
         noia_event_signal_emit(SIGNAL_POINTER_BUTTON, (NoiaObject*) btn);
@@ -77,13 +80,13 @@ void noia_evdev_handle_touch(struct input_event* ev)
 /// Handle epoll events from EventDispatcher.
 void noia_evdev_handle_event(NoiaEventData* data, struct epoll_event* epev)
 {
-    if (!epev || !data) {
-        return;
-    }
+    NOIA_ENSURE(epev, return);
+    NOIA_ENSURE(data, return);
 
     struct input_event ev;
     int fd = data->fd;
     uint32_t flags = data->flags;
+    NoiaInputContext* context = (NoiaInputContext*) data->data;
 
     int size = read(fd, &ev, sizeof(struct input_event));
 
@@ -100,10 +103,22 @@ void noia_evdev_handle_event(NoiaEventData* data, struct epoll_event* epev)
               ev.type, ev.code, ev.value, flags);
 
     if (flags & scIdInputKeyboardFlag) {
-        noia_evdev_handle_key(&ev);
+        noia_evdev_handle_key(&ev, context);
     } else if (flags & scIdInputTouchpadFlag) {
         noia_evdev_handle_touch(&ev);
     }
+}
+
+//------------------------------------------------------------------------------
+
+void noia_evdev_handle_exit(NoiaEventData* data)
+{
+    if ((not data) or (not data->data)) {
+        return;
+    }
+
+    NoiaInputContext* context = (NoiaInputContext*) data->data;
+    noia_input_context_destroy(context);
 }
 
 //------------------------------------------------------------------------------
@@ -197,9 +212,11 @@ void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
         ioctl(fd, EVIOCGNAME(sizeof(name)), name);
         LOG_INFO1("Found input device: '%s' (%s)", name, devnode);
 
+        NoiaInputContext* context = noia_input_context_create();
         NoiaEventData* data = noia_event_data_create(fd,
                                                      noia_evdev_handle_event,
-                                                     NULL, flags, NULL);
+                                                     noia_evdev_handle_exit,
+                                                     flags, context);
         noia_event_dispatcher_add_event_source(ed, data);
         udev_device_unref(dev);
     }

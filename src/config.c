@@ -3,7 +3,8 @@
 
 #include "config.h"
 #include "configuration.h"
-#include "keyboard-bindings.h"
+#include "input-mode.h"
+#include "input-bindings.h"
 #include "global-macros.h"
 #include "utils-log.h"
 
@@ -14,14 +15,13 @@
 static const char* scDefaultWaylandDisplayName = "wayland-0";
 
 /// @todo Don't use global variables
-NoiaKeymap* keymap;
-
+static NoiaGears sGears;
 static NoiaSettings sSettings;
 
 //------------------------------------------------------------------------------
 
 int noia_config_parse_option(int key,
-                             char *arg NOIA_UNUSED,
+                             char* arg NOIA_UNUSED,
                              struct argp_state* state)
 {
     NoiaSettings* settings = state->input;
@@ -68,25 +68,33 @@ void noia_config_log_settings(void)
 
 void noia_config_apply(int argc, char** argv)
 {
+    // Set up settings
     memset(&sSettings, 0, sizeof(NoiaSettings));
     sSettings.use_gl = true;
     sSettings.use_drm = true;
 
-    // Apply keybinding config
-    keymap = noia_utils_keymap_new();
-    noia_utils_keymap_initialize(keymap);
+    // Setup gears
+    sGears.keymap = noia_utils_keymap_new();
+    noia_utils_keymap_initialize(sGears.keymap);
 
+    sGears.modes = noia_list_new((NoiaFreeFunc) noia_mode_destroy);
+
+    // Apply binding config
     for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsCommon); ++i) {
-        noia_keyboard_add_binding(NOIA_MODE_COMMON, &scBindingsCommon[i]);
+        noia_input_add_binding(sGears.modes, NOIA_MODE_COMMON,
+                               &scBindingsCommon[i]);
     }
     for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsNormal); ++i) {
-        noia_keyboard_add_binding(NOIA_MODE_NORMAL, &scBindingsNormal[i]);
+        noia_input_add_binding(sGears.modes, NOIA_MODE_NORMAL,
+                               &scBindingsNormal[i]);
     }
     for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsInsert); ++i) {
-        noia_keyboard_add_binding(NOIA_MODE_INSERT, &scBindingsInsert[i]);
+        noia_input_add_binding(sGears.modes, NOIA_MODE_INSERT,
+                               &scBindingsInsert[i]);
     }
-    noia_keyboard_mode_make_active(NOIA_MODE_COMMON, true);
-    noia_keyboard_mode_make_active(NOIA_MODE_NORMAL, true);
+    noia_input_mode_make_active(sGears.modes, NOIA_MODE_COMMON, true);
+    noia_input_mode_make_active(sGears.modes, NOIA_MODE_NORMAL, true);
+    noia_input_mode_make_active(sGears.modes, NOIA_MODE_INSERT, false);
 
     // Apply evironment variables
     sSettings.run_in_test_mode = (getenv("DISPLAY") != NULL);
@@ -109,22 +117,15 @@ void noia_config_apply(int argc, char** argv)
 
 void noia_config_finalize(void)
 {
-    noia_utils_keymap_finalize(keymap);
-    noia_utils_keymap_free(keymap);
+    noia_list_free(sGears.modes);
+
+    noia_utils_keymap_finalize(sGears.keymap);
+    noia_utils_keymap_free(sGears.keymap);
 
     if (sSettings.wayland_display_name) {
         free(sSettings.wayland_display_name);
         sSettings.wayland_display_name = NULL;
     }
-
-    noia_keyboard_free_all();
-}
-
-//------------------------------------------------------------------------------
-
-NoiaKeymap* noia_config_get_keymap(void)
-{
-    return keymap;
 }
 
 //------------------------------------------------------------------------------
@@ -139,6 +140,13 @@ const NoiaConfig* noia_config(void)
 const NoiaSettings* noia_settings(void)
 {
     return &sSettings;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaGears* noia_gears(void)
+{
+    return &sGears;
 }
 
 //------------------------------------------------------------------------------

@@ -52,8 +52,9 @@ void noia_wayland_keyboard_bind(struct wl_client* client,
     noia_wayland_state_add_keyboard_resource(rc);
 
     // Send keymap to client
-    NoiaKeymap* keymap = noia_config_get_keymap();
+    NoiaKeymap* keymap = noia_gears()->keymap;
     NOIA_ENSURE(keymap, return);
+
     LOG_WAYL2("Wayland: keyboard map send (format: %d, fd: %d, size: %d)",
               keymap->format, keymap->keymap_fd, keymap->keymap_size);
     wl_keyboard_send_keymap(rc, (uint32_t) keymap->format,

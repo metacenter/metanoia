@@ -1,12 +1,12 @@
-// file: keyboard-binding.h
+// file: input-binding.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef NOIA_KEYBOARD_BINDING_H
-#define NOIA_KEYBOARD_BINDING_H
+#ifndef NOIA_INPUT_BINDING_H
+#define NOIA_INPUT_BINDING_H
 
-#include "keyboard-context.h"
+#include "input-context.h"
 
-typedef void (*NoiaBindingExecuteFunc) (NoiaBindingContext*);
+typedef void (*NoiaBindingExecuteFunc) (NoiaInputContext*);
 
 /// Data type representing key binding.
 typedef struct {
@@ -26,5 +26,5 @@ NoiaBinding* noia_binding_copy(const NoiaBinding* self);
 int noia_binding_compare(const NoiaBinding* binding1,
                          const NoiaBinding* binding2);
 
-#endif // NOIA_KEYBOARD_BINDING_H
+#endif // NOIA_INPUT_BINDING_H
 

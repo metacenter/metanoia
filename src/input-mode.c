@@ -1,8 +1,8 @@
-// file: keyboard-mode.c
+// file: input-mode.c
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#include "keyboard-mode.h"
-#include "keyboard-binding.h"
+#include "input-mode.h"
+#include "input-binding.h"
 
 #include "utils-log.h"
 
@@ -15,13 +15,10 @@
 
 //------------------------------------------------------------------------------
 
-NoiaMode* noia_mode_new(NoiaModeEnum modeid)
+NoiaMode* noia_mode_create(NoiaModeEnum modeid)
 {
     NoiaMode* self = malloc(sizeof(NoiaMode));
-    if (!self) {
-        LOG_ERROR("Memory allocation failure!");
-        return self;
-    }
+    NOIA_ENSURE(self, abort());
 
     self->modeid = modeid;
     self->bindings = NULL;
@@ -31,11 +28,9 @@ NoiaMode* noia_mode_new(NoiaModeEnum modeid)
 
 //------------------------------------------------------------------------------
 
-void noia_mode_free(NoiaMode* self)
+void noia_mode_destroy(NoiaMode* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
 
     tdestroy(self->bindings, (NoiaFreeFunc) noia_binding_free);
     memset(self, 0, sizeof(NoiaMode));
@@ -60,7 +55,7 @@ void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding)
 
     found = tsearch((void*) copy, &self->bindings,
                     (NoiaCompareFunc) noia_binding_compare);
-    if (!found) {
+    if (not found) {
         LOG_ERROR("Could not store binding!");
         noia_binding_free(copy);
         return;
@@ -76,6 +71,7 @@ NoiaBinding* noia_mode_find_binding(NoiaMode* self,
                                     int code,
                                     uint32_t modifiers)
 {
+    NoiaBinding* result = NULL;
     NoiaBinding searched;
     searched.code = code;
     searched.modifiers = modifiers;
@@ -83,9 +79,9 @@ NoiaBinding* noia_mode_find_binding(NoiaMode* self,
     NoiaBinding** found = tfind((void*) &searched, &self->bindings,
                                 (NoiaCompareFunc) noia_binding_compare);
     if (found) {
-        return *found;
+        result = *found;
     }
-    return NULL;
+    return result;
 }
 
 //------------------------------------------------------------------------------

@@ -4,19 +4,27 @@
 #ifndef NOIA_CONFIG_H
 #define NOIA_CONFIG_H
 
+#include "utils-list.h"
 #include "utils-keymap.h"
 #include "global-constants.h"
 
-/// Keeps information about internal application configuration.
-/// @see NoiaSettings
+/// Keeps information about constant internal application configuration.
+/// @see NoiaSettings NoiaGears
 typedef struct {
     const char* background_image_path;
     NoiaBGTransform background_image_transform;
     NoiaColor background_color;
 } NoiaConfig;
 
+/// Keeps information about variable internal application configuration.
+/// @see NoiaConfig NoiaSettings
+typedef struct {
+    NoiaKeymap* keymap;
+    NoiaList* modes;
+} NoiaGears;
+
 /// Keeps information about external environment configuration.
-/// @see NoiaConfig
+/// @see NoiaConfig NoiaGears
 typedef struct {
     bool run_in_test_mode;
     bool use_gl;
@@ -26,6 +34,9 @@ typedef struct {
 
 /// Get configuration.
 const NoiaConfig* noia_config(void);
+
+/// Get gears.
+NoiaGears* noia_gears(void);
 
 /// Get settings.
 const NoiaSettings* noia_settings(void);
@@ -40,9 +51,6 @@ void noia_config_apply(int argc, char** argv);
 
 /// Free memory allocated for storing configuration.
 void noia_config_finalize(void);
-
-/// Get key map.
-NoiaKeymap* noia_config_get_keymap(void);
 
 #endif // NOIA_CONFIG_H
 

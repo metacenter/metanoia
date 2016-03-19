@@ -1,13 +1,13 @@
-// file: keyboard-mode.h
+// file: input-mode.h
 // vim: tabstop=4 expandtab colorcolumn=81 list
 
-#ifndef NOIA_KEYBOARD_MODE_H
-#define NOIA_KEYBOARD_MODE_H
+#ifndef NOIA_INPUT_MODE_H
+#define NOIA_INPUT_MODE_H
 
-#include "keyboard-binding.h"
+#include "input-binding.h"
 #include "global-constants.h"
 
-/// Data type representing keyboard mode.
+/// Data type representing input mode.
 typedef struct {
     NoiaModeEnum modeid;
     void* bindings;
@@ -15,12 +15,12 @@ typedef struct {
 } NoiaMode;
 
 /// Construct NoiaMode.
-NoiaMode* noia_mode_new(NoiaModeEnum modeid);
+NoiaMode* noia_mode_create(NoiaModeEnum modeid);
 
 /// Destruct NoiaMode.
-void noia_mode_free(NoiaMode* self);
+void noia_mode_destroy(NoiaMode* self);
 
-/// Add new keyboard binding to given mode.
+/// Add new input binding to given mode.
 void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding);
 
 /// Find binding specified by `code` and `modifiers` in given mode.
@@ -29,5 +29,5 @@ NoiaBinding* noia_mode_find_binding(NoiaMode* self,
                                     int code,
                                     uint32_t Noiamodifiers);
 
-#endif // NOIA_KEYBOARD_MODE_H
+#endif // NOIA_INPUT_MODE_H
 

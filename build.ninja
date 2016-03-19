@@ -70,7 +70,7 @@ rule ninja
 
 build ninja: ninja force
 
-build build/metanoia: ld inter/config.o inter/global-enums.o inter/global-types.o inter/global-objects.o inter/global-functions.o inter/utils-debug.o inter/utils-object.o inter/utils-pool.o inter/utils-store.o inter/utils-chain.o inter/utils-list.o inter/utils-branch.o inter/utils-log.o inter/utils-environment.o inter/utils-dbus.o inter/utils-gl.o inter/utils-keymap.o inter/utils-image.o inter/event-dispatcher.o inter/event-factory.o inter/event-loop.o inter/event-signals.o inter/event-task.o inter/event-timer.o inter/renderer.o inter/renderer-mmap.o inter/renderer-gl.o inter/device-common.o inter/device-fb.o inter/device-drm.o inter/device-evdev.o inter/device-udev.o inter/output.o inter/output-collector.o inter/surface-data.o inter/surface-manager.o inter/keyboard-binding.o inter/keyboard-bindings.o inter/keyboard-functions.o inter/keyboard-mode.o inter/exhibitor-frame.o inter/exhibitor-frame-internal.o inter/exhibitor-strategist.o inter/exhibitor-compositor.o inter/exhibitor-display.o inter/exhibitor-pointer.o inter/exhibitor.o inter/exhibitor-module.o inter/wayland-region.o inter/wayland-surface.o inter/wayland-output.o inter/wayland-cache.o inter/wayland-state.o inter/wayland.o inter/xdg-shell-protocol.o inter/screenshooter-protocol.o inter/wayland-protocol-compositor.o inter/wayland-protocol-data-device.o inter/wayland-protocol-data-source.o inter/wayland-protocol-device-manager.o inter/wayland-protocol-keyboard.o inter/wayland-protocol-output.o inter/wayland-protocol-pointer.o inter/wayland-protocol-region.o inter/wayland-protocol-screenshooter.o inter/wayland-protocol-seat.o inter/wayland-protocol-shell-surface.o inter/wayland-protocol-shell.o inter/wayland-protocol-subcompositor.o inter/wayland-protocol-subsurface.o inter/wayland-protocol-surface.o inter/wayland-protocol-xdg-shell.o inter/wayland-protocol-xdg-surface.o inter/backend-offscreen.o inter/metanoia.o
+build build/metanoia: ld inter/config.o inter/global-enums.o inter/global-types.o inter/global-objects.o inter/global-functions.o inter/utils-debug.o inter/utils-object.o inter/utils-pool.o inter/utils-store.o inter/utils-chain.o inter/utils-list.o inter/utils-branch.o inter/utils-log.o inter/utils-environment.o inter/utils-dbus.o inter/utils-gl.o inter/utils-keymap.o inter/utils-image.o inter/event-dispatcher.o inter/event-factory.o inter/event-loop.o inter/event-signals.o inter/event-task.o inter/event-timer.o inter/renderer.o inter/renderer-mmap.o inter/renderer-gl.o inter/device-common.o inter/device-fb.o inter/device-drm.o inter/device-evdev.o inter/device-udev.o inter/output.o inter/output-collector.o inter/surface-data.o inter/surface-manager.o inter/input-binding.o inter/input-bindings.o inter/input-context.o inter/input-functions.o inter/input-mode.o inter/exhibitor-frame.o inter/exhibitor-frame-internal.o inter/exhibitor-strategist.o inter/exhibitor-compositor.o inter/exhibitor-display.o inter/exhibitor-pointer.o inter/exhibitor.o inter/exhibitor-module.o inter/wayland-region.o inter/wayland-surface.o inter/wayland-output.o inter/wayland-cache.o inter/wayland-state.o inter/wayland.o inter/xdg-shell-protocol.o inter/screenshooter-protocol.o inter/wayland-protocol-compositor.o inter/wayland-protocol-data-device.o inter/wayland-protocol-data-source.o inter/wayland-protocol-device-manager.o inter/wayland-protocol-keyboard.o inter/wayland-protocol-output.o inter/wayland-protocol-pointer.o inter/wayland-protocol-region.o inter/wayland-protocol-screenshooter.o inter/wayland-protocol-seat.o inter/wayland-protocol-shell-surface.o inter/wayland-protocol-shell.o inter/wayland-protocol-subcompositor.o inter/wayland-protocol-subsurface.o inter/wayland-protocol-surface.o inter/wayland-protocol-xdg-shell.o inter/wayland-protocol-xdg-surface.o inter/backend-offscreen.o inter/metanoia.o
     lflags = -lEGL -lGL -ldbus-1 -ldrm -lgbm -ljpeg -ludev -lwayland-server -lxkbcommon
 
 build build/metanoiactl-gtk: ld inter/utils-debug.o inter/utils-log.o inter/utils-environment.o gen/screenshooter-protocol.c inter/controller-defs.o inter/controller-output.o inter/controller-gtk-res.o inter/controller-gtk-display.o inter/controller-gtk-win.o inter/controller-gtk-app.o inter/controller-wayland.o inter/metanoiactl-gtk.o
@@ -262,20 +262,24 @@ build inter/surface-manager.o: cc src/surface-manager.c
     inputs = src/surface-manager.c
     cflags = -Isrc -Igen
 
-build inter/keyboard-binding.o: cc src/keyboard-binding.c
-    inputs = src/keyboard-binding.c
+build inter/input-binding.o: cc src/input-binding.c
+    inputs = src/input-binding.c
     cflags = -Isrc -Igen
 
-build inter/keyboard-bindings.o: cc src/keyboard-bindings.c
-    inputs = src/keyboard-bindings.c
+build inter/input-bindings.o: cc src/input-bindings.c
+    inputs = src/input-bindings.c
     cflags = -Isrc -Igen
 
-build inter/keyboard-functions.o: cc src/keyboard-functions.c
-    inputs = src/keyboard-functions.c
+build inter/input-context.o: cc src/input-context.c
+    inputs = src/input-context.c
     cflags = -Isrc -Igen
 
-build inter/keyboard-mode.o: cc src/keyboard-mode.c
-    inputs = src/keyboard-mode.c
+build inter/input-functions.o: cc src/input-functions.c
+    inputs = src/input-functions.c
+    cflags = -Isrc -Igen
+
+build inter/input-mode.o: cc src/input-mode.c
+    inputs = src/input-mode.c
     cflags = -Isrc -Igen
 
 build inter/exhibitor-strategist.o: cc src/exhibitor-strategist.c
