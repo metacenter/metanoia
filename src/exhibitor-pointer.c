@@ -106,9 +106,10 @@ NoiaPointer* noia_exhibitor_pointer_new()
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_pointer_free(NoiaPointer* self NOIA_UNUSED)
+void noia_exhibitor_pointer_free(NoiaPointer* self)
 {
-    // Nothing to do
+    NOIA_ENSURE(self, return);
+    free(self);
 }
 
 //------------------------------------------------------------------------------

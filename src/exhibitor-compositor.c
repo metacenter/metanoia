@@ -342,12 +342,12 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
     NOIA_ENSURE(frame, return);
 
     NOIA_BLOCK {
-        if (!noia_frame_has_type(self->selection, NOIA_FRAME_TYPE_FLOATING)) {
+        if (not noia_frame_has_type(self->selection, NOIA_FRAME_TYPE_FLOATING)){
             break;
         }
 
         NoiaFrame* workspace = noia_frame_find_top(self->selection);
-        if (!workspace) {
+        if (not workspace) {
             break;
         }
 
@@ -363,7 +363,7 @@ void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
     NOIA_ENSURE(a, return);
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(noia_argmand_is_actionable(a->action), return);
-    if (!self->selection) {
+    if (not self->selection) {
         return;
     }
 

@@ -44,13 +44,20 @@ void noia_exhibitor_free(NoiaExhibitor* self)
 {
     NOIA_ENSURE(self, return);
 
+    FOR_EACH(self->displays, link) {
+        NoiaDisplay* display = (NoiaDisplay*) link->data;
+        noia_display_stop(display);
+    }
+
     noia_exhibitor_pointer_free(self->pointer);
     noia_strategist_free(self->strategist);
     noia_compositor_free(self->compositor);
+
     noia_list_free(self->displays);
     noia_list_free(self->surface_history);
 
     memset(self, 0, sizeof(NoiaExhibitor));
+    free(self);
 }
 
 //------------------------------------------------------------------------------
