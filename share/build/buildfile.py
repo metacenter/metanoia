@@ -273,7 +273,7 @@ p.add(Chk(output='check-pool',
           inputs=[target_test_pool, target_utils_debug, target_utils_pool]))
 
 p.add(Chk(output='check-store',
-          inputs=[target_test_store, target_utils_store]))
+          inputs=[target_utils_debug, target_test_store, target_utils_store]))
 
 p.add(Chk(output='check-chain',
           inputs=[target_test_chain, target_utils_chain]))

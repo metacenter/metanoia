@@ -239,11 +239,13 @@ checks/check-pool: Makefile \
 	    inter/utils-pool.o
 
 checks/check-store: Makefile \
+                    inter/utils-debug.o \
                     inter/test-store.o \
                     inter/utils-store.o
 	@mkdir -p checks
 	@echo "  LD   checks/check-store"
 	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-store \
+	    inter/utils-debug.o \
 	    inter/test-store.o \
 	    inter/utils-store.o
 
@@ -388,7 +390,6 @@ inter/utils-store.o: Makefile \
                      src/global-macros.h \
                      src/global-types.h \
                      src/utils-debug.h \
-                     src/utils-log.h \
                      src/utils-store.c \
                      src/utils-store.h
 	@mkdir -p inter
@@ -493,6 +494,7 @@ inter/config.o: Makefile \
                 src/input-bindings.h \
                 src/input-context.h \
                 src/input-functions.h \
+                src/input-mode.h \
                 src/utils-chain.h \
                 src/utils-debug.h \
                 src/utils-keymap.h \

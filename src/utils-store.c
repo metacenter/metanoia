@@ -57,7 +57,7 @@ void noia_store_destroy_id_key(void* data NOIA_UNUSED)
 void noia_store_destroy_string_key(void* data)
 {
     NoiaItem* item = (NoiaItem*) data;
-    if (item && item->str) {
+    if (item and item->str) {
         free(item->str);
     }
 }
@@ -69,9 +69,7 @@ NoiaStore* noia_store_new(NoiaStoreValueCompareFunc value_compare_func,
                           NoiaStoreKeyFreeFunc key_free_func)
 {
     NoiaStore* self = malloc(sizeof(NoiaStore));
-    if (!self) {
-        return NULL;
-    }
+    NOIA_ENSURE(self, abort());
 
     self->root = NULL;
     self->compare_value = value_compare_func;
@@ -102,9 +100,7 @@ NoiaStore* noia_store_new_for_str(void)
 /// Free store without freeing stored items.
 void noia_store_free(NoiaStore* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
 
     pthread_mutex_lock(&self->mutex);
     if (self->free_key) {
@@ -117,20 +113,14 @@ void noia_store_free(NoiaStore* self)
 
 //------------------------------------------------------------------------------
 
-#include "utils-log.h"
-
 /// Free store and stored items.
 void noia_store_free_with_items(NoiaStore* self, NoiaFreeFunc free_func)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
 
-    pthread_mutex_lock(&self->mutex);
     if (self->free_key) {
         tdestroy(self->root, free_func);
     }
-    pthread_mutex_unlock(&self->mutex);
     memset(self, 0, sizeof(NoiaStore));
     free(self);
 }
@@ -140,16 +130,14 @@ void noia_store_free_with_items(NoiaStore* self, NoiaFreeFunc free_func)
 /// Generate new ID that is not yet present in store.
 NoiaItemId noia_store_generate_new_id(NoiaStore* self)
 {
-    if (!self) {
-        return scInvalidItemId;
-    }
+    NOIA_ENSURE(self, return scInvalidItemId);
 
     pthread_mutex_lock(&self->mutex);
     NoiaItem item;
     do {
         item.id = (NoiaItemId) rand() & NOIA_RANDOM_MASK;
-    } while (item.id == scInvalidItemId
-          || tfind((void *) &item, &self->root, self->compare_value) != NULL);
+    } while ((item.id == scInvalidItemId)
+      or (tfind((void *) &item, &self->root, self->compare_value) != NULL));
 
     pthread_mutex_unlock(&self->mutex);
     return item.id;
@@ -162,19 +150,18 @@ NoiaItemId noia_store_generate_new_id(NoiaStore* self)
 /// @param data - item to be stored
 NoiaResult noia_store_add_with_id(NoiaStore* self, NoiaItemId key, void* data)
 {
-    if (!self) {
-        return NOIA_RESULT_INCORRECT_ARGUMENT;
-    }
+    NoiaResult result = NOIA_RESULT_NOT_FOUND;
+    NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
     NoiaItem* item = (NoiaItem*) data;
     item->id = key;
 
     pthread_mutex_lock(&self->mutex);
-    if (tsearch(item, &self->root, self->compare_value) == NULL) {
-        return NOIA_RESULT_NOT_FOUND;
+    if (tsearch(item, &self->root, self->compare_value)) {
+        result = NOIA_RESULT_SUCCESS;
     }
     pthread_mutex_unlock(&self->mutex);
-    return NOIA_RESULT_SUCCESS;
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -185,19 +172,18 @@ NoiaResult noia_store_add_with_id(NoiaStore* self, NoiaItemId key, void* data)
 /// @param data - item to be stored
 NoiaResult noia_store_add_with_str(NoiaStore* self, char* key, void* data)
 {
-    if (!self) {
-        return NOIA_RESULT_INCORRECT_ARGUMENT;
-    }
+    NoiaResult result = NOIA_RESULT_NOT_FOUND;
+    NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
     NoiaItem* item = (NoiaItem*) data;
     item->str = strdup(key);
 
     pthread_mutex_lock(&self->mutex);
-    if (tsearch(item, &self->root, self->compare_value) == NULL) {
-        return NOIA_RESULT_NOT_FOUND;
+    if (tsearch(item, &self->root, self->compare_value)) {
+        result = NOIA_RESULT_SUCCESS;
     }
     pthread_mutex_unlock(&self->mutex);
-    return NOIA_RESULT_SUCCESS;
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -238,14 +224,13 @@ void* noia_store_find_with_str(NoiaStore* self, char* key)
 /// @return pointer to found item or null if nothing found
 void* noia_store_delete_with_id(NoiaStore* self, NoiaItemId key)
 {
-    if (!self) {
-        return NULL;
-    }
+    void* result = NULL;
+    NOIA_ENSURE(self, return result);
 
     NoiaItem* item = noia_store_find(self, key);
     pthread_mutex_lock(&self->mutex);
-    if (tdelete(item, &self->root, self->compare_value) == NULL) {
-        return NULL;
+    if (tdelete(item, &self->root, self->compare_value)) {
+        result = item;
     }
     pthread_mutex_unlock(&self->mutex);
     return item;
@@ -258,20 +243,21 @@ void* noia_store_delete_with_id(NoiaStore* self, NoiaItemId key)
 /// @return pointer to found item or null if nothing found
 void* noia_store_delete_with_str(NoiaStore* self, char* key)
 {
-    if (!self) {
-        return NULL;
-    }
+    void* result = NULL;
+    NOIA_ENSURE(self, return result);
 
     NoiaItem* item = noia_store_find(self, key);
     pthread_mutex_lock(&self->mutex);
-    if (tdelete(item, &self->root, self->compare_value) == NULL) {
-        return NULL;
+    if (tdelete(item, &self->root, self->compare_value)) {
+        result = item;
     }
     pthread_mutex_unlock(&self->mutex);
 
-    free(item->str);
-    item->str = NULL;
-    return item;
+    if (result) {
+        free(item->str);
+        item->str = NULL;
+    }
+    return result;
 }
 
 //------------------------------------------------------------------------------

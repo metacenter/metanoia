@@ -80,7 +80,7 @@ build checks/check-globals: ld inter/test-globals.o inter/global-types.o
 
 build checks/check-pool: ld inter/test-pool.o inter/utils-debug.o inter/utils-pool.o
 
-build checks/check-store: ld inter/test-store.o inter/utils-store.o
+build checks/check-store: ld inter/utils-debug.o inter/test-store.o inter/utils-store.o
 
 build checks/check-chain: ld inter/test-chain.o inter/utils-chain.o
 
