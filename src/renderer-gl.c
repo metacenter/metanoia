@@ -7,6 +7,7 @@
 
 #include "surface-manager.h"
 #include "utils-log.h"
+#include "config.h"
 #include "global-macros.h"
 
 #include <GL/gl.h>
@@ -235,9 +236,9 @@ void noia_renderer_gl_finalize(NoiaRenderer* self)
 /// Setup GL environment.
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
-void noia_renderer_gl_prepare_view(NoiaRendererGL* mine)
+void noia_renderer_gl_prepare_view(NoiaRendererGL* mine, NoiaColor color)
 {
-    glClearColor(0.00, 0.25, 0.50, 1.00);
+    glClearColor(color.r / 256.0, color.g / 256.0, color.b / 256.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_BLEND);
@@ -390,11 +391,17 @@ void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine,
 /// @param x, y - position of hot point
 /// @param cursor_sid - surface ID of cursor
 /// @see noia_renderer_gl_draw
-void noia_renderer_gl_draw_pointer(NoiaRendererGL* mine     NOIA_UNUSED,
-                                   int x                    NOIA_UNUSED,
-                                   int y                    NOIA_UNUSED,
-                                   NoiaSurfaceId cursor_sid NOIA_UNUSED)
+void noia_renderer_gl_draw_pointer(NoiaRendererGL* mine,
+                                   NoiaSurfaceContext* pointer)
 {
+    if (pointer->sid != scInvalidSurfaceId) {
+        /// @todo Do not malloc here.
+        NoiaPool* surfaces = noia_pool_create(1, sizeof(NoiaSurfaceContext));
+        NoiaSurfaceContext* context = noia_pool_add(surfaces);
+        *context = *pointer;
+        noia_renderer_gl_draw_surfaces(mine, surfaces);
+        noia_pool_destroy(surfaces);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -431,13 +438,10 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
 
     // Make context current and perform the actual drawing
     if (noia_gl_make_current(&mine->egl) == NOIA_RESULT_SUCCESS) {
-        noia_renderer_gl_prepare_view(mine);
+        noia_renderer_gl_prepare_view(mine, context->background_color);
         noia_renderer_gl_draw_bg_image(mine);
         noia_renderer_gl_draw_surfaces(mine, surfaces);
-        noia_renderer_gl_draw_pointer(mine,
-                                      context->pointer.pos.x,
-                                      context->pointer.pos.y,
-                                      context->pointer.sid);
+        noia_renderer_gl_draw_pointer(mine, &context->pointer);
     }
 
     noia_renderer_gl_release_view(mine);

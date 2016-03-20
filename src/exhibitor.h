@@ -26,6 +26,9 @@ NoiaExhibitor* noia_exhibitor_new(void);
 /// Exhibitor destructor.
 void noia_exhibitor_free(NoiaExhibitor* self);
 
+/// Exhibitor setup
+void noia_exhibitor_setup(NoiaExhibitor* self);
+
 
 /// Get list of all displays.
 NoiaList* noia_exhibitor_get_displays(NoiaExhibitor* self);

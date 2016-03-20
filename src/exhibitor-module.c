@@ -142,6 +142,7 @@ void noia_exhibitor_initialize(NoiaLoop* this_loop)
     NOIA_ENSURE(this_loop, return);
 
     NoiaExhibitor* exhibitor = noia_exhibitor_new();
+    noia_exhibitor_setup(exhibitor);
 
     // actions
     noia_event_signal_subscribe(SIGNAL_ACTION,

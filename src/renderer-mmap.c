@@ -160,27 +160,6 @@ void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
 {
     if (context->sid != scInvalidSurfaceId) {
         noia_renderer_mmap_draw_surface(mine, context);
-    } else if (context->pos.x > INT_MIN && context->pos.y > INT_MIN) {
-        /// @todo: Create intenal backend (like Wayland but for internal use)
-        ///        and add default surface for cursor there.
-        int x, y;
-        int current_buffer = mine->front ^ 1;
-        int S = mine->buffer[current_buffer].stride;
-        int W = mine->size.width;
-        int H = mine->size.height;
-        int w = fmin(15, W - context->pos.x);
-        int h = fmin(15, H - context->pos.y);
-        uint8_t* D = mine->buffer[current_buffer].data;
-        float a = 0.8, A = (1.0-a);
-        for (y = 0; y < h; ++y) {
-            for (x = 0; x < w; ++x) {
-                int P = S * (context->pos.y + y) + 4 * (context->pos.x + x);
-                D[P+0] = (int) (a*255.0 + A*D[P+0]);
-                D[P+1] = (int) (a*255.0 + A*D[P+1]);
-                D[P+2] = (int) (a*255.0 + A*D[P+2]);
-                D[P+3] = 255;
-            }
-        }
     }
 }
 

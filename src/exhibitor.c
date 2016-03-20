@@ -62,6 +62,15 @@ void noia_exhibitor_free(NoiaExhibitor* self)
 
 //------------------------------------------------------------------------------
 
+void noia_exhibitor_setup(NoiaExhibitor* self)
+{
+    NOIA_ENSURE(self, return);
+
+    noia_exhibitor_pointer_setup(self->pointer);
+}
+
+//------------------------------------------------------------------------------
+
 NoiaList* noia_exhibitor_get_displays(NoiaExhibitor* self)
 {
     return self->displays;

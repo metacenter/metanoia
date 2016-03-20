@@ -14,6 +14,9 @@ NoiaPointer* noia_exhibitor_pointer_new(void);
 /// Pointer destructor.
 void noia_exhibitor_pointer_free(NoiaPointer* self);
 
+/// Pointer setup (prepare default cursor surface).
+void noia_exhibitor_pointer_setup(NoiaPointer* self);
+
 /// Return cursor position in global coordinates.
 NoiaPosition noia_exhibitor_pointer_get_global_position(NoiaPointer* self);
 

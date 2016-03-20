@@ -11,6 +11,8 @@
 
 #include <pthread.h>
 
+#define DEFAULT_CURSOR_SIZE 15
+
 static const int scInvalidPointerValue = -1;
 
 //------------------------------------------------------------------------------
@@ -38,6 +40,9 @@ struct NoiaPointerStruct {
 
     /// Surface ID of keyboard-focused surface.
     NoiaSurfaceId kfsid;
+
+    /// Default surface ID of cursor surface.
+    NoiaSurfaceId default_csid;
 
     /// Pointer functions may be called from display threads.
     pthread_mutex_t mutex;
@@ -99,6 +104,7 @@ NoiaPointer* noia_exhibitor_pointer_new()
     self->csid = scInvalidSurfaceId;
     self->pfsid = scInvalidSurfaceId;
     self->kfsid = scInvalidSurfaceId;
+    self->default_csid = scInvalidSurfaceId;
     pthread_mutex_init(&self->mutex, NULL);
 
     return self;
@@ -110,6 +116,29 @@ void noia_exhibitor_pointer_free(NoiaPointer* self)
 {
     NOIA_ENSURE(self, return);
     free(self);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_pointer_setup(NoiaPointer* self)
+{
+    NOIA_ENSURE(self, return);
+
+    uint8_t data[4 * DEFAULT_CURSOR_SIZE * DEFAULT_CURSOR_SIZE];
+    for (int z = 0; z < (DEFAULT_CURSOR_SIZE * DEFAULT_CURSOR_SIZE); ++z) {
+        int p = 4 * z;
+        data[p+0] = 255;
+        data[p+1] = 255;
+        data[p+2] = 255;
+        data[p+3] = 100;
+    }
+
+    self->default_csid = noia_surface_create();
+    noia_surface_attach(self->default_csid,
+                        DEFAULT_CURSOR_SIZE, DEFAULT_CURSOR_SIZE,
+                        4 * DEFAULT_CURSOR_SIZE, data, NULL);
+    noia_surface_commit(self->default_csid);
+    self->csid = self->default_csid;
 }
 
 //------------------------------------------------------------------------------
@@ -176,7 +205,7 @@ void noia_exhibitor_pointer_update_hover_state(NoiaPointer* self,
                   "(old sid: %d, new sid: %d, x: %d, y: %d)",
                   self->pfsid, sid, rel.x, rel.y);
         self->pfsid = sid;
-        self->csid = scInvalidSurfaceId;
+        self->csid = self->default_csid;
         noia_event_signal_emit(SIGNAL_POINTER_FOCUS_CHANGED,
                                (NoiaObject*) noia_motion_create(sid, rel));
     } else if ((self->pfsid != scInvalidSurfaceId)
@@ -262,7 +291,7 @@ void noia_exhibitor_pointer_on_surface_destroyed(NoiaPointer* self,
     pthread_mutex_lock(&self->mutex);
 
     if (self->csid == sid) {
-        self->csid = scInvalidSurfaceId;
+        self->csid = self->default_csid;
     }
 
     pthread_mutex_unlock(&self->mutex);
