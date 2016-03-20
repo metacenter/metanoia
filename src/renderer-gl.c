@@ -250,15 +250,6 @@ void noia_renderer_gl_prepare_view(NoiaRendererGL* mine, NoiaColor color)
 
 //------------------------------------------------------------------------------
 
-/// Draw background image.
-/// This is subroutine of `noia_renderer_gl_draw`.
-/// @see noia_renderer_gl_draw
-void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine NOIA_UNUSED)
-{
-}
-
-//------------------------------------------------------------------------------
-
 /// Load textures to memory and save vertices coordinates for given surface.
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
@@ -386,6 +377,26 @@ void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine,
 
 //------------------------------------------------------------------------------
 
+/// Draw background image.
+/// This is subroutine of `noia_renderer_gl_draw`.
+/// @see noia_renderer_gl_draw
+void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine, NoiaSurfaceId sid)
+{
+    NoiaSurfaceData* surface = noia_surface_get(sid);
+    if (surface) {
+        /// @todo Do not malloc here.
+        NoiaPool* surfaces = noia_pool_create(1, sizeof(NoiaSurfaceContext));
+        NoiaSurfaceContext* context = noia_pool_add(surfaces);
+        context->sid = sid;
+        context->pos.x = (mine->size.width - surface->buffer.width) / 2;
+        context->pos.y = (mine->size.height - surface->buffer.height) / 2;
+        noia_renderer_gl_draw_surfaces(mine, surfaces);
+        noia_pool_destroy(surfaces);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 /// Draw pointer.
 /// This is subroutine of `noia_renderer_gl_draw`
 /// @param x, y - position of hot point
@@ -439,7 +450,7 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
     // Make context current and perform the actual drawing
     if (noia_gl_make_current(&mine->egl) == NOIA_RESULT_SUCCESS) {
         noia_renderer_gl_prepare_view(mine, context->background_color);
-        noia_renderer_gl_draw_bg_image(mine);
+        noia_renderer_gl_draw_bg_image(mine, context->background_sid);
         noia_renderer_gl_draw_surfaces(mine, surfaces);
         noia_renderer_gl_draw_pointer(mine, &context->pointer);
     }

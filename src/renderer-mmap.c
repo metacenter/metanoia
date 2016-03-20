@@ -52,39 +52,6 @@ void noia_renderer_mmap_finalize(NoiaRenderer* self NOIA_UNUSED)
 
 //------------------------------------------------------------------------------
 
-/// Draw background image.
-/// This is subroutine of `noia_renderer_mmap_draw`.
-/// @see noia_renderer_mmap_draw
-void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine,
-                                      NoiaBuffer* buffer,
-                                      NoiaBGTransform transform NOIA_UNUSED,
-                                      NoiaColor color)
-{
-    int current_buffer = mine->front ^ 1;
-    uint8_t* D = mine->buffer[current_buffer].data;
-    int W = mine->size.width;
-    int H = mine->size.height;
-    int S = mine->buffer[current_buffer].stride;
-
-    for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            *((NoiaColor*) &D[y*S + 4*x]) = color;
-        }
-    }
-
-    if (buffer->data) {
-        uint8_t* d = buffer->data;
-        int w = fmin(W, buffer->width);
-        int h = fmin(H, buffer->height);
-        int s = 4 * w;
-        for (int y = 0; y < h; ++y) {
-            memcpy(&D[y*S], &d[y*buffer->stride], s);
-        }
-    }
-}
-
-//------------------------------------------------------------------------------
-
 /// Draw one surface.
 /// This is subroutine of `noia_renderer_mmap_draw_surfaces`.
 /// @see noia_renderer_mmap_draw_surfaces
@@ -95,7 +62,7 @@ void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
     NOIA_ENSURE(context, return);
 
     NoiaSurfaceData* surface = noia_surface_get(context->sid);
-    if (!surface) {
+    if (not surface) {
         return;
     }
 
@@ -126,6 +93,42 @@ void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
             D[P+2] = (int) (a*d[p+2] + A*D[P+2]);
             D[P+3] = 255;
         }
+    }
+}
+
+//------------------------------------------------------------------------------
+
+/// Draw background image.
+/// This is subroutine of `noia_renderer_mmap_draw`.
+/// @see noia_renderer_mmap_draw
+/// @todo Parameter `transform` should not be ignored.
+void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine,
+                                      NoiaSurfaceId background_sid,
+                                      NoiaBGTransform transform NOIA_UNUSED,
+                                      NoiaColor color)
+{
+    NoiaSurfaceData* surface = noia_surface_get(background_sid);
+    if (surface) {
+        // Draw background color
+        int current_buffer = mine->front ^ 1;
+        uint8_t* D = mine->buffer[current_buffer].data;
+        int W = mine->size.width;
+        int H = mine->size.height;
+        int S = mine->buffer[current_buffer].stride;
+
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                *((NoiaColor*) &D[y*S + 4*x]) = color;
+            }
+        }
+
+        // Draw background image
+        NoiaSurfaceContext context;
+        context.sid = background_sid;
+        context.pos.x = (W - surface->buffer.width) / 2;
+        context.pos.y = (H - surface->buffer.height) / 2;
+
+        noia_renderer_mmap_draw_surface(mine, &context);
     }
 }
 
@@ -177,7 +180,8 @@ void noia_renderer_mmap_draw(NoiaRenderer* self,
     NOIA_ENSURE(surfaces, return);
     NOIA_ENSURE(context, return);
 
-    noia_renderer_mmap_draw_bg_image(mine, &context->background_buffer,
+    noia_renderer_mmap_draw_bg_image(mine,
+                                     context->background_sid,
                                      context->background_transform,
                                      context->background_color);
 

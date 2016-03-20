@@ -95,7 +95,7 @@ typedef struct {
 /// Data needed by Renderer to draw layout
 typedef struct {
     NoiaSurfaceContext pointer;
-    NoiaBuffer background_buffer;
+    NoiaSurfaceId background_sid;
     NoiaBGTransform background_transform;
     NoiaColor background_color;
 } NoiaLayoutContext;

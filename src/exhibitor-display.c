@@ -30,8 +30,8 @@ struct NoiaDisplayStruct {
     /// @see noia_display_redraw_all
     NoiaPool* visible_surfaces;
 
-    /// Background image buffer.
-    NoiaBuffer background;
+    /// Background surface ID.
+    NoiaSurfaceId background_sid;
 
     /// State of the thread.
     bool run;
@@ -58,24 +58,33 @@ bool noia_display_is_valid(NoiaDisplay* self)
 /// Setup display loop.
 NoiaResult noia_display_setup(NoiaDisplay* self)
 {
+    NoiaResult result = NOIA_RESULT_ERROR;
+
     // Setup the thread
     char name[32];
     snprintf(name, sizeof(name), "noia@%s", self->output->unique_name);
     noia_environment_on_enter_new_thread(self->thread, name);
+
     LOG_INFO1("Threads: starting display loop '%s'", name);
-
-    // Initialize output
-    /// @todo Squash this to one function call.
     LOG_INFO1("Initializing output '%s'", self->output->unique_name);
-    self->output->renderer = self->output->initialize(self->output,
-                                                      self->output->area.size);
-    NoiaResult result = noia_output_initialize_rendering(self->output);
 
-    if (result == NOIA_RESULT_SUCCESS) {
+    NOIA_BLOCK {
+        // Initialize output
+        /// @todo Squash this to one function call.
+        self->output->renderer =
+                self->output->initialize(self->output, self->output->area.size);
+        result = noia_output_initialize_rendering(self->output);
+        NOIA_ASSERT_RESULT(result);
+
         // Read in background image
-        /// @todo Reimplement background as surface.
-        self->background =
-              noia_image_read(noia_config()->background_image_path);
+        NoiaBuffer buff = noia_image_read(noia_config()->background_image_path);
+        self->background_sid = noia_surface_create();
+        noia_surface_attach(self->background_sid,
+                            buff.width, buff.height, buff.stride,
+                            buff.data, NULL);
+        noia_surface_commit(self->background_sid);
+
+        result = NOIA_RESULT_SUCCESS;
     }
 
     return result;
@@ -104,7 +113,7 @@ void noia_display_setup_layout_context(NoiaDisplay* self,
     }
 
     // Setup background image
-    context->background_buffer = self->background;
+    context->background_sid = self->background_sid;
     context->background_transform = noia_config()->background_image_transform;
     context->background_color = noia_config()->background_color;
 }
@@ -192,7 +201,7 @@ NoiaDisplay* noia_display_new(NoiaOutput* output,
     self->workspace = workspace;
     self->exhibitor = exhibitor;
     self->visible_surfaces = noia_pool_create(8, sizeof(NoiaSurfaceContext));
-    noia_buffer_clean(&self->background);
+    self->background_sid = scInvalidSurfaceId;
 
     return self;
 }
