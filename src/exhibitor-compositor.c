@@ -203,6 +203,22 @@ void noia_compositor_jump(NoiaCompositor* self NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
+void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(title, return);
+
+    NoiaFrame* workspace = noia_compositor_find_workspace(self, title);
+    if (not workspace) {
+        LOG_WARN1("Compositor: Workspace '%s' not found!", title);
+        return;
+    }
+
+    noia_frame_jump(self->selection, workspace);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_compositor_focus(NoiaCompositor* self,
                            NoiaArgmand argmand,
                            int position)
@@ -375,7 +391,11 @@ void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
         noia_frame_move(self->selection, a->direction, a->magnitude);
         break;
     case NOIA_ARGMAND_JUMP:
-        noia_compositor_jump(self, self->selection, a->direction);
+        if (a->direction == NOIA_ARGMAND_WORKSPACE) {
+            noia_compositor_jump_to_workspace(self, a->str);
+        } else {
+            noia_compositor_jump(self, self->selection, a->direction);
+        }
         break;
     case NOIA_ARGMAND_FOCUS:
         if (a->direction == NOIA_ARGMAND_WORKSPACE) {

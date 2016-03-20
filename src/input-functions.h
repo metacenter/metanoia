@@ -24,6 +24,8 @@ void noia_put_number(NoiaInputContext* context);
 
 void noia_focus_workspace(NoiaInputContext* context);
 
+void noia_jump_to_workspace(NoiaInputContext* context);
+
 void noia_anchorize(NoiaInputContext* context);
 
 void noia_stackedize(NoiaInputContext* context);

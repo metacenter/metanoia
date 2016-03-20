@@ -306,10 +306,12 @@ void noia_frame_relax(NoiaFrame* self)
     // Resize and reposition all subframes recursively
     NoiaPosition pos = params->area.pos;
     FOR_EACH_TWIG (self, twig) {
-        noia_frame_set_size(twig, size);
-        noia_frame_set_position(twig, pos);
-        pos.x += increment.width;
-        pos.y += increment.height;
+        if (not noia_frame_has_type(twig, NOIA_FRAME_TYPE_FLOATING)) {
+            noia_frame_set_size(twig, size);
+            noia_frame_set_position(twig, pos);
+            pos.x += increment.width;
+            pos.y += increment.height;
+        }
     }
 }
 

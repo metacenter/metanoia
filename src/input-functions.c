@@ -178,6 +178,24 @@ void noia_focus_workspace(NoiaInputContext* context)
 
 //------------------------------------------------------------------------------
 
+void noia_jump_to_workspace(NoiaInputContext* context)
+{
+    NOIA_ENSURE(context, return);
+
+    char str[3];
+    int number = noia_get_number_from_key(context->code);
+    snprintf(str, sizeof(str), "%d", number);
+
+    NoiaAction* action = context->action;
+    noia_action_clean(action);
+    action->action = NOIA_ARGMAND_JUMP;
+    action->direction = NOIA_ARGMAND_WORKSPACE;
+    action->str = strdup(str);
+    noia_execute(action);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_anchorize(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return);
