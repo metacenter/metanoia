@@ -54,13 +54,13 @@ void noia_config_parse_arguments(int argc, char** argv)
 
 void noia_config_log_settings(void)
 {
-    LOG_INFO2("Settings: run in test mode = '%d'",
+    LOG_CONFG("Settings: run in test mode = '%d'",
               sSettings.run_in_test_mode);
-    LOG_INFO2("Settings: use GL = '%d'",
+    LOG_CONFG("Settings: use GL = '%d'",
               sSettings.use_gl);
-    LOG_INFO2("Settings: use DRM = '%d'",
+    LOG_CONFG("Settings: use DRM = '%d'",
               sSettings.use_drm);
-    LOG_INFO2("Settings: wayland display name = '%s'",
+    LOG_CONFG("Settings: wayland display name = '%s'",
               sSettings.wayland_display_name);
 }
 

@@ -75,7 +75,7 @@ void noia_wayland_surface_add_resource
     if (resource_type == NOIA_RESOURCE_FRAME) {
         noia_list_append(self->frame_resources, resource);
     } else if (self->resources[resource_type]) {
-        LOG_WARN1("Wayland: surface resource of type '%d' "
+        LOG_WAYL3("Wayland: surface resource of type '%d' "
                   "already here!", resource_type);
     }
 
