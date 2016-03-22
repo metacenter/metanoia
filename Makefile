@@ -50,6 +50,7 @@ build/metanoia: Makefile \
                 inter/utils-dbus.o \
                 inter/utils-gl.o \
                 inter/utils-keymap.o \
+                inter/utils-keyboard-state.o \
                 inter/utils-image.o \
                 inter/event-dispatcher.o \
                 inter/event-factory.o \
@@ -129,6 +130,7 @@ build/metanoia: Makefile \
 	    inter/utils-dbus.o \
 	    inter/utils-gl.o \
 	    inter/utils-keymap.o \
+	    inter/utils-keyboard-state.o \
 	    inter/utils-image.o \
 	    inter/event-dispatcher.o \
 	    inter/event-factory.o \
@@ -609,7 +611,9 @@ inter/utils-gl.o: Makefile \
 inter/utils-keymap.o: Makefile \
                       src/global-constants.h \
                       src/global-enums.h \
+                      src/global-macros.h \
                       src/global-types.h \
+                      src/utils-debug.h \
                       src/utils-environment.h \
                       src/utils-keymap.c \
                       src/utils-keymap.h \
@@ -618,6 +622,18 @@ inter/utils-keymap.o: Makefile \
 	@echo "  CC   inter/utils-keymap.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-keymap.o \
 	    src/utils-keymap.c
+
+inter/utils-keyboard-state.o: Makefile \
+                              src/global-enums.h \
+                              src/global-macros.h \
+                              src/global-types.h \
+                              src/utils-debug.h \
+                              src/utils-keyboard-state.c \
+                              src/utils-keyboard-state.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-keyboard-state.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-keyboard-state.o \
+	    src/utils-keyboard-state.c
 
 inter/utils-image.o: Makefile \
                      src/global-constants.h \
@@ -776,6 +792,7 @@ inter/renderer-mmap.o: Makefile \
 	    src/renderer-mmap.c
 
 inter/renderer-gl.o: Makefile \
+                     src/config.h \
                      src/global-constants.h \
                      src/global-enums.h \
                      src/global-macros.h \
@@ -785,8 +802,11 @@ inter/renderer-gl.o: Makefile \
                      src/renderer.h \
                      src/surface-data.h \
                      src/surface-manager.h \
+                     src/utils-chain.h \
                      src/utils-debug.h \
                      src/utils-gl.h \
+                     src/utils-keymap.h \
+                     src/utils-list.h \
                      src/utils-log.h \
                      src/utils-pool.h \
                      src/utils-store.h
@@ -1337,6 +1357,7 @@ inter/wayland-state.o: Makefile \
                        src/surface-manager.h \
                        src/utils-chain.h \
                        src/utils-debug.h \
+                       src/utils-keyboard-state.h \
                        src/utils-list.h \
                        src/utils-log.h \
                        src/utils-object.h \

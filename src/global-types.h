@@ -60,7 +60,7 @@ typedef struct {
 typedef struct {
     unsigned time;
     int code;
-    bool value;
+    NoiaKeyState value;
 } NoiaKeyData;
 
 /// Button event data

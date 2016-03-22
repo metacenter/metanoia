@@ -4,6 +4,7 @@
 #include "utils-keymap.h"
 #include "utils-log.h"
 #include "utils-environment.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -23,17 +24,12 @@ struct NoiaKeymapPriv {
 NoiaKeymap* noia_utils_keymap_new(void)
 {
     NoiaKeymap* self = malloc(sizeof(NoiaKeymap));
-    if (!self) {
-        return NULL;
-    }
     memset(self, 0, sizeof(NoiaKeymap));
 
-    self->priv = malloc(sizeof(NoiaKeymap));
-    if (!self->priv) {
-        free(self);
-        return NULL;
-    }
+    self->priv = malloc(sizeof(NoiaKeymapPriv));
     memset(self->priv, 0, sizeof(NoiaKeymapPriv));
+
+    self->keymap_fd = -1;
 
     return self;
 }
@@ -42,13 +38,10 @@ NoiaKeymap* noia_utils_keymap_new(void)
 
 void noia_utils_keymap_free(NoiaKeymap* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(self->priv, return);
 
-    if (self->priv) {
-        free(self->priv);
-    }
+    free(self->priv);
     free(self);
 }
 
@@ -57,10 +50,10 @@ void noia_utils_keymap_free(NoiaKeymap* self)
 int noia_utils_keymap_initialize(NoiaKeymap* self)
 {
     // Create context
-    self->priv->context = xkb_context_new(0);
+    self->priv->context = xkb_context_new(0x0);
     self->format = XKB_KEYMAP_FORMAT_TEXT_V1;
 
-    // Set keymap from names
+    // Create keymap from names
     struct xkb_rule_names names;
     names.rules = "evdev";
     names.model = "evdev";
@@ -69,7 +62,7 @@ int noia_utils_keymap_initialize(NoiaKeymap* self)
     names.options = NULL;
 
     self->priv->keymap = xkb_keymap_new_from_names(self->priv->context,
-                                                   &names, 0);
+                                                   &names, 0x0);
 
     // Save keymap to file
     char* keymap_str = xkb_keymap_get_as_string(self->priv->keymap,
@@ -108,16 +101,21 @@ int noia_utils_keymap_initialize(NoiaKeymap* self)
 
 void noia_utils_keymap_finalize(NoiaKeymap* self)
 {
+    NOIA_ENSURE(self, return);
+
     if (self->keymap_fd > 0) {
         close(self->keymap_fd);
+        self->keymap_fd = -1;
     }
 
     if (self->priv->keymap) {
         xkb_map_unref(self->priv->keymap);
+        self->priv->keymap = NULL;
     }
 
     if (self->priv->context) {
         xkb_context_unref(self->priv->context);
+        self->priv->context = NULL;
     }
 }
 

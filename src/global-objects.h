@@ -33,7 +33,7 @@ typedef struct {
     NoiaKeyData keydata;
 } NoiaKeyObject;
 
-NoiaKeyObject* noia_key_create(unsigned time, int code, bool value);
+NoiaKeyObject* noia_key_create(unsigned time, int code, NoiaKeyState value);
 
 //------------------------------------------------------------------------------
 

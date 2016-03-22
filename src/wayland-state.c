@@ -7,6 +7,7 @@
 #include "wayland-protocol-output.h"
 
 #include "surface-manager.h"
+#include "utils-keyboard-state.h"
 #include "utils-log.h"
 
 #include "xdg-shell-server-protocol.h"
@@ -22,6 +23,7 @@ pthread_mutex_t sStateMutex = PTHREAD_MUTEX_INITIALIZER;
 static struct {
     struct wl_display* display;
     NoiaStore* outputs;
+    NoiaKeyboardState* keyboard_state;
     NoiaSurfaceId keyboard_focused_sid;
     NoiaSurfaceId pointer_focused_sid;
     int pointer_serial;
@@ -45,9 +47,8 @@ struct wl_resource* noia_wayland_state_get_rc_for_sid(NoiaSurfaceId sid)
 NoiaResult noia_wayland_state_initialize(struct wl_display* display)
 {
     sState.outputs = noia_store_new_for_str();
-    if (!sState.outputs) {
-        return NOIA_RESULT_ERROR;
-    }
+    sState.keyboard_state = noia_keyboard_state_new();
+    noia_keyboard_state_initialize(sState.keyboard_state);
 
     sState.display = display;
     sState.keyboard_focused_sid = scInvalidItemId;
@@ -65,6 +66,10 @@ void noia_wayland_state_finalize(void)
     sState.pointer_focused_sid = scInvalidItemId;
     sState.keyboard_focused_sid = scInvalidItemId;
     sState.display = NULL;
+
+    noia_keyboard_state_finalize(sState.keyboard_state);
+    noia_keyboard_state_free(sState.keyboard_state);
+    sState.keyboard_state = NULL;
 
     if (sState.outputs) {
         noia_store_free_with_items(sState.outputs,
@@ -220,6 +225,12 @@ void noia_wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
 
     pthread_mutex_lock(&sStateMutex);
 
+    // Update keyboard state
+    NoiaKeyMods old_mods =
+                       noia_keyboard_state_get_modifiers(sState.keyboard_state);
+    noia_keyboard_state_update_key(sState.keyboard_state, key, state);
+
+    // Check if there is someone to be notified
     if (sState.keyboard_focused_sid == scInvalidItemId) {
         pthread_mutex_unlock(&sStateMutex);
         return;
@@ -233,14 +244,27 @@ void noia_wayland_state_key(uint32_t time, uint32_t key, uint32_t state)
         focused_client = wl_resource_get_client(resource);
     }
 
-    if (resource && focused_client) {
+    // Notify the client
+    if (resource and focused_client) {
         int serial = wl_display_next_serial(sState.display);
         NoiaList* resources =
                        noia_wayland_cache_get_resources(NOIA_RESOURCE_KEYBOARD);
         FOR_EACH (resources, link) {
             struct wl_resource* rc = link->data;
             if (focused_client == wl_resource_get_client(rc)) {
+                // Send key
                 wl_keyboard_send_key(rc, serial, time, key, state);
+
+                // Send modifiers
+                NoiaKeyMods new_mods =
+                       noia_keyboard_state_get_modifiers(sState.keyboard_state);
+                if (not noia_keymods_are_equal(&new_mods, &old_mods)) {
+                    wl_keyboard_send_modifiers(rc, serial,
+                                               new_mods.depressed,
+                                               new_mods.latched,
+                                               new_mods.locked,
+                                               new_mods.effective);
+                }
             }
         }
     }

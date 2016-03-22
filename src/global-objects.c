@@ -80,7 +80,7 @@ void noia_key_destroy(NoiaKeyObject* self)
 //------------------------------------------------------------------------------
 
 /// Allocate and initialize Key Object.
-NoiaKeyObject* noia_key_create(unsigned time, int code, bool value)
+NoiaKeyObject* noia_key_create(unsigned time, int code, NoiaKeyState value)
 {
     NoiaKeyObject* self = malloc(sizeof(NoiaKeyObject));
     noia_object_initialize(&self->base, (NoiaFreeFunc) noia_key_destroy);

@@ -43,13 +43,35 @@ static const uint32_t scIdInputKeyboardFlag    = 0x0040;
 void noia_evdev_handle_key(struct input_event* ev, NoiaInputContext* context)
 {
     if (ev->type == EV_KEY) {
-        bool catched =
-                    noia_input_catch_key(noia_gears()->modes, context, ev->code,
-                            (ev->value ? NOIA_KEY_PRESSED : NOIA_KEY_RELEASED));
+        NOIA_BLOCK {
+            unsigned code = ev->code;
+            NoiaKeyState value = ev->value ? NOIA_KEY_PRESSED
+                                           : NOIA_KEY_RELEASED;
 
-        if (not catched) {
+            // Ignore repeated mask key
+            if (ev->value) {
+                if ((((code == KEY_LEFTCTRL) or (code == KEY_RIGHTCTRL))
+                    and (context->modifiers & NOIA_KEY_CTRL))
+                 or (((code == KEY_LEFTSHIFT) or (code == KEY_RIGHTSHIFT))
+                    and (context->modifiers & NOIA_KEY_SHIFT))
+                 or (((code == KEY_LEFTALT) or (code == KEY_RIGHTALT))
+                    and (context->modifiers & NOIA_KEY_ALT))
+                 or (((code == KEY_LEFTMETA) or (code == KEY_RIGHTMETA))
+                    and (context->modifiers & NOIA_KEY_META))) {
+                    break;
+                }
+            }
+
+            // Check for key bindings
+            bool catched = noia_input_catch_key(noia_gears()->modes,
+                                                context, code, value);
+            if (catched) {
+                break;
+            }
+
+            // If no binding found inform the rest of the world
             unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
-            NoiaKeyObject* key = noia_key_create(time, ev->code, ev->value);
+            NoiaKeyObject* key = noia_key_create(time, ev->code, value);
             noia_event_signal_emit(SIGNAL_KEYBOARD_EVENT, (NoiaObject*) key);
             noia_object_unref((NoiaObject*) key);
         }

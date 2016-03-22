@@ -130,19 +130,20 @@ metanoia.add([target_global_enums,
 #-------------------------------------------------------------------------------
 # UTILS
 
-target_utils_debug       = Com(['utils-debug.c'])
-target_utils_object      = Com(['utils-object.c'])
-target_utils_pool        = Com(['utils-pool.c'])
-target_utils_store       = Com(['utils-store.c'])
-target_utils_chain       = Com(['utils-chain.c'])
-target_utils_list        = Com(['utils-list.c'])
-target_utils_branch      = Com(['utils-branch.c'])
-target_utils_log         = Com(['utils-log.c'])
-target_utils_environment = Com(['utils-environment.c'])
-target_utils_dbus        = Com(['utils-dbus.c'],   pkgs={'dbus-1'})
-target_utils_gl          = Com(['utils-gl.c'],     pkgs={'gl', 'egl'})
-target_utils_keymap      = Com(['utils-keymap.c'], pkgs={'xkbcommon'})
-target_utils_image       = Com(['utils-image.c'],  libs={'jpeg'})
+target_utils_debug          = Com(['utils-debug.c'])
+target_utils_object         = Com(['utils-object.c'])
+target_utils_pool           = Com(['utils-pool.c'])
+target_utils_store          = Com(['utils-store.c'])
+target_utils_chain          = Com(['utils-chain.c'])
+target_utils_list           = Com(['utils-list.c'])
+target_utils_branch         = Com(['utils-branch.c'])
+target_utils_log            = Com(['utils-log.c'])
+target_utils_environment    = Com(['utils-environment.c'])
+target_utils_dbus           = Com(['utils-dbus.c'],          pkgs={'dbus-1'})
+target_utils_gl             = Com(['utils-gl.c'],            pkgs={'gl', 'egl'})
+target_utils_keymap         = Com(['utils-keymap.c'],        pkgs={'xkbcommon'})
+target_utils_keyboard_state = Com(['utils-keyboard-state.c'],pkgs={'xkbcommon'})
+target_utils_image          = Com(['utils-image.c'],         libs={'jpeg'})
 
 metanoia.add([target_utils_debug,
               target_utils_object,
@@ -156,6 +157,7 @@ metanoia.add([target_utils_debug,
               target_utils_dbus,
               target_utils_gl,
               target_utils_keymap,
+              target_utils_keyboard_state,
               target_utils_image])
 
 #-------------------------------------------------------------------------------
@@ -191,7 +193,7 @@ metanoia.add([Com(['output.c']),
 metanoia.add(Com.from_mathing('surface-*.c', c))
 
 #-------------------------------------------------------------------------------
-# KEYBOARD
+# INPUT
 
 metanoia.add(Com.from_mathing('input-*.c', c))
 
