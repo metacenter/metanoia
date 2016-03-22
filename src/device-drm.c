@@ -66,8 +66,8 @@ char* noia_drm_get_connector_name(uint32_t connector_type)
             "HDMIA", "HDMIB", "TV", "eDP"
         };
 
-    if (connector_type < 1
-    ||  connector_type >= sizeof(scConnectorTypeName)) {
+    if ((connector_type < 1)
+    or  (connector_type >= sizeof(scConnectorTypeName))) {
         LOG_ERROR("Connector type '%u' out of range!", connector_type);
         return strdup("NONE");
     }
@@ -120,7 +120,7 @@ void noia_drm_log(int drm_fd, drmModeRes* resources)
 NoiaGBMBundle* noia_drm_gbm_create(int drm_fd, struct gbm_bo* bo)
 {
     NoiaGBMBundle* bundle = malloc(sizeof(NoiaGBMBundle));
-    if (!bundle) {
+    if (not bundle) {
         return NULL;
     }
 
@@ -166,20 +166,20 @@ void noia_drm_gbm_destroy_event(struct gbm_bo *bo, void *data NOIA_UNUSED)
 /// Lock GBM surface and create new frame buffer if needed.
 uint32_t noia_drm_gbm_lock_surface(NoiaOutputDRM* output_drm)
 {
-    if (!output_drm->gbm_surface) {
+    if (not output_drm->gbm_surface) {
         LOG_ERROR("Invalid GBM surface!");
         return INVALID_FB_ID;
     }
 
     struct gbm_bo* bo = gbm_surface_lock_front_buffer(output_drm->gbm_surface);
-    if (!bo) {
+    if (not bo) {
         LOG_ERROR("Could not lock GBM front buffer!");
     } else {
         output_drm->gbm_bo = bo;
     }
 
     NoiaGBMBundle* bundle = gbm_bo_get_user_data(output_drm->gbm_bo);
-    if (!bundle) {
+    if (not bundle) {
         bundle = noia_drm_gbm_create(output_drm->fd, output_drm->gbm_bo);
         gbm_bo_set_user_data(output_drm->gbm_bo, bundle,
                              noia_drm_gbm_destroy_event);
@@ -203,7 +203,7 @@ NoiaRenderer* noia_drm_initialize_egl(NoiaOutputDRM* output_drm)
 
     // Create GBM device and surface
     gbm_device = gbm_create_device(output_drm->fd);
-    if (!gbm_device) {
+    if (not gbm_device) {
         LOG_ERROR("Failed to create GBM device!");
         return NULL;
     }
@@ -213,7 +213,7 @@ NoiaRenderer* noia_drm_initialize_egl(NoiaOutputDRM* output_drm)
                                      size.width, size.height,
                                      GBM_FORMAT_XRGB8888,
                                      GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-    if (!output_drm->gbm_surface) {
+    if (not output_drm->gbm_surface) {
         LOG_ERROR("Failed to create GBM surface!");
         return NULL;
     }
@@ -240,65 +240,74 @@ NoiaResult noia_drm_create_dumb_buffer(NoiaOutputDRM* output_drm,
                                        NoiaRenderer* renderer,
                                        int num)
 {
-    int result = 0;
-    uint8_t* map;
+    int res;
+    uint8_t* map = NULL;
     struct drm_mode_create_dumb carg;
     struct drm_mode_destroy_dumb darg;
     struct drm_mode_map_dumb marg;
+    NoiaResult result = NOIA_RESULT_ERROR;
+    output_drm->fb[num] = 0;
 
-    // Create dumb buffer
-    memset(&carg, 0, sizeof(carg));
-    carg.width  = output_drm->mode.hdisplay;
-    carg.height = output_drm->mode.vdisplay;
-    carg.bpp = 32;
+    NOIA_BLOCK {
+        // Create dumb buffer
+        memset(&carg, 0, sizeof(carg));
+        carg.width  = output_drm->mode.hdisplay;
+        carg.height = output_drm->mode.vdisplay;
+        carg.bpp = 32;
 
-    result = drmIoctl(output_drm->fd, DRM_IOCTL_MODE_CREATE_DUMB, &carg);
-    if (result < 0) {
-        LOG_ERROR("Cannot create dumb buffer (%m)");
-        return NOIA_RESULT_ERROR;
+        res = drmIoctl(output_drm->fd, DRM_IOCTL_MODE_CREATE_DUMB, &carg);
+        if (res < 0) {
+            LOG_ERROR("Cannot create dumb buffer (%m)");
+            break;
+        }
+
+        // Create framebuffer object for the dumb-buffer
+        res = drmModeAddFB(output_drm->fd, carg.width, carg.height,
+                           24, carg.bpp, carg.pitch, carg.handle,
+                           &output_drm->fb[num]);
+        if (res) {
+            LOG_ERROR("Cannot create framebuffer (%m)");
+            break;
+        }
+
+        // Prepare buffer for memory mapping
+        memset(&marg, 0, sizeof(marg));
+        marg.handle = carg.handle;
+        res = drmIoctl(output_drm->fd, DRM_IOCTL_MODE_MAP_DUMB, &marg);
+        if (res) {
+            LOG_ERROR("Cannot map dumb buffer (%m)");
+            break;
+        }
+
+        // Perform actual memory mapping
+        map = mmap(0, carg.size, PROT_READ | PROT_WRITE,
+                   MAP_SHARED, output_drm->fd, marg.offset);
+
+        if (map == MAP_FAILED) {
+            LOG_ERROR("Cannot mmap dumb buffer (%m)");
+            break;
+        }
+
+        noia_renderer_mmap_set_buffer(renderer, num, map, carg.pitch);
+        result = NOIA_RESULT_SUCCESS;
+        LOG_INFO2("Created dumb buffer (fb: %u)", output_drm->fb[num]);
     }
 
-    // Create framebuffer object for the dumb-buffer
-    result = drmModeAddFB(output_drm->fd, carg.width, carg.height,
-                          24, carg.bpp, carg.pitch, carg.handle,
-                          &output_drm->fb[num]);
-    if (result) {
-        LOG_ERROR("Cannot create framebuffer (%m)");
-        goto clear_db;
+    // Clean up
+    if (result != NOIA_RESULT_SUCCESS) {
+        if (output_drm->fb[num]) {
+            drmModeRmFB(output_drm->fd, output_drm->fb[num]);
+            output_drm->fb[num] = 0;
+        }
+
+        if (carg.handle) {
+            memset(&darg, 0, sizeof(darg));
+            darg.handle = carg.handle;
+            drmIoctl(output_drm->fd, DRM_IOCTL_MODE_DESTROY_DUMB, &darg);
+        }
     }
 
-    LOG_INFO2("Creating dumb buffer (fb: %u)", output_drm->fb[num]);
-
-    // Prepare buffer for memory mapping
-    memset(&marg, 0, sizeof(marg));
-    marg.handle = carg.handle;
-    result = drmIoctl(output_drm->fd, DRM_IOCTL_MODE_MAP_DUMB, &marg);
-    if (result) {
-        LOG_ERROR("Cannot map dumb buffer (%m)");
-        goto clear_fb;
-    }
-
-    // Perform actual memory mapping
-    map = mmap(0, carg.size, PROT_READ | PROT_WRITE,
-               MAP_SHARED, output_drm->fd, marg.offset);
-
-    if (map == MAP_FAILED) {
-        LOG_ERROR("Cannot mmap dumb buffer (%m)");
-        goto clear_fb;
-    }
-
-    noia_renderer_mmap_set_buffer(renderer, num, map, carg.pitch);
-    return NOIA_RESULT_SUCCESS;
-
-clear_fb:
-    drmModeRmFB(output_drm->fd, output_drm->fb[num]);
-
-clear_db:
-    memset(&darg, 0, sizeof(darg));
-    darg.handle = carg.handle;
-    drmIoctl(output_drm->fd, DRM_IOCTL_MODE_DESTROY_DUMB, &darg);
-
-    return NOIA_RESULT_ERROR;
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -323,11 +332,8 @@ NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
                                          NoiaSize size NOIA_UNUSED)
 {
     NoiaRenderer* renderer = NULL;
-
     NoiaOutputDRM* output_drm = (NoiaOutputDRM*) output;
-    if (!output_drm) {
-        return NULL;
-    }
+    NOIA_ENSURE(output_drm, return renderer);
 
     if (noia_settings()->use_gl) {
         renderer = noia_drm_initialize_egl(output_drm);
@@ -339,9 +345,7 @@ NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
 
     if (renderer == NULL) {
         LOG_ERROR("DRM failed!");
-        return NULL;
     }
-
     return renderer;
 }
 
@@ -363,11 +367,9 @@ uint32_t noia_drm_output_swap_buffers(NoiaOutputDRM* output_drm)
 NoiaResult noia_drm_output_begin_drawing(NoiaOutput* output)
 {
     NoiaOutputDRM* output_drm = (NoiaOutputDRM*) output;
-    if (!output_drm) {
-        return NOIA_RESULT_ERROR;
-    }
+    NOIA_ENSURE(output_drm, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
-    if (output_drm->gbm_surface && output_drm->gbm_bo) {
+    if (output_drm->gbm_surface and output_drm->gbm_bo) {
         gbm_surface_release_buffer(output_drm->gbm_surface, output_drm->gbm_bo);
     }
 
@@ -379,14 +381,11 @@ NoiaResult noia_drm_output_begin_drawing(NoiaOutput* output)
 /// End drawing - swap buffers and set mode.
 NoiaResult noia_drm_output_end_drawing(NoiaOutput* output)
 {
-    pthread_mutex_lock(&drm_mutex);
-    NoiaResult result = NOIA_RESULT_SUCCESS;
-
     NoiaOutputDRM* output_drm = (NoiaOutputDRM*) output;
-    if (!output_drm) {
-        result = NOIA_RESULT_ERROR;
-        goto unlock;
-    }
+    NOIA_ENSURE(output_drm, return NOIA_RESULT_INCORRECT_ARGUMENT);
+
+    pthread_mutex_lock(&drm_mutex);
+    NoiaResult result = NOIA_RESULT_ERROR;
 
     int32_t fb = output_drm->gbm_surface
                ? noia_drm_gbm_lock_surface(output_drm)
@@ -401,11 +400,10 @@ NoiaResult noia_drm_output_end_drawing(NoiaOutput* output)
         LOG_ERROR("Failed to set mode for connector "
                   "(id: %u, crtc_id: %u, error: '%m')",
                   output_drm->connector_id, output_drm->crtc_id);
-        result = NOIA_RESULT_ERROR;
-        goto unlock;
+    } else {
+        result = NOIA_RESULT_SUCCESS;
     }
 
-unlock:
     pthread_mutex_unlock(&drm_mutex);
     return result;
 }
@@ -415,10 +413,7 @@ unlock:
 /// DRM Output destructor.
 void noia_drm_output_free(NoiaOutput* output)
 {
-    if (!output) {
-        return;
-    }
-
+    NOIA_ENSURE(output, return);
     if (output->unique_name) {
         free(output->unique_name);
     }
@@ -436,13 +431,11 @@ NoiaOutputDRM* noia_drm_output_new(NoiaSize size,
                                    drmModeModeInfo mode)
 {
     NoiaOutputDRM* output_drm = calloc(1, sizeof(NoiaOutputDRM));
-    if (output_drm == NULL) {
-        return NULL;
-    }
+    NOIA_ENSURE(output_drm, abort());
 
     noia_output_initialize(&output_drm->base,
                            size,
-                           connector_name ? strdup(connector_name) : "",
+                           strdup(connector_name ? connector_name : ""),
                            noia_drm_output_initialize,
                            noia_drm_output_begin_drawing,
                            noia_drm_output_end_drawing,
@@ -491,8 +484,8 @@ uint32_t noia_drm_find_crtc(int drm_fd,
         drmModeEncoderPtr encoder =
                                drmModeGetEncoder(drm_fd, connector->encoder_id);
         if (encoder
-        &&  encoder->crtc_id != INVALID_CRTC_ID
-        && !noia_drm_is_crtc_in_use(drm_outputs, encoder->crtc_id)) {
+        and (encoder->crtc_id != INVALID_CRTC_ID)
+        and (not noia_drm_is_crtc_in_use(drm_outputs, encoder->crtc_id))) {
             return encoder->crtc_id;
         }
     }
@@ -502,12 +495,12 @@ uint32_t noia_drm_find_crtc(int drm_fd,
         drmModeEncoderPtr encoder =
                               drmModeGetEncoder(drm_fd, connector->encoders[i]);
         for (int j = 0; j < resources->count_crtcs; ++j) {
-            if (!(encoder->possible_crtcs & (1 << j))) {
+            if (not (encoder->possible_crtcs & (1 << j))) {
                 continue;
             }
 
             drmModeCrtcPtr crtc = drmModeGetCrtc(drm_fd, resources->crtcs[j]);
-            if (!crtc) {
+            if (not crtc) {
                 continue;
             }
 
@@ -534,7 +527,7 @@ NoiaOutputDRM* noia_drm_update_connector(int drm_fd,
                                          drmModeConnector* connector,
                                          NoiaList* drm_outputs)
 {
-    if (!connector) {
+    if (not connector) {
         return NULL;
     }
 
@@ -587,6 +580,7 @@ int noia_drm_update_devices(NoiaList* outputs)
 {
     pthread_mutex_lock(&drm_mutex);
 
+    int ret;
     int num = 0;
     int fd = -1;
     drmModeRes* resources = NULL;
@@ -595,9 +589,9 @@ int noia_drm_update_devices(NoiaList* outputs)
 
     LOG_INFO1("Updating DRM devices");
 
-    // Find and open DRM device
-    /// @todo: try all devices, there may be more than one connected
-    if (fd < 0) {
+    NOIA_BLOCK {
+        // Find and open DRM device
+        /// @todo: try all devices, there may be more than one connected
         unsigned int i;
         for (i = 0; scModuleName[i]; ++i) {
             fd = drmOpen(scModuleName[i], NULL);
@@ -609,54 +603,54 @@ int noia_drm_update_devices(NoiaList* outputs)
             LOG_INFO1("Found DRM device (%s)", scModuleName[i]);
         } else {
             LOG_ERROR("Could not open DRM device!");
-            goto unlock;
+            break;
         }
-    }
 
-    // Check if device supports dumb buffers
-    uint64_t has_dumb;
-    if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0 || !has_dumb) {
-        LOG_ERROR("DRM device does not support dumb buffers!");
-        close(fd);
-        goto unlock;
-    }
+        // Check if device supports dumb buffers
+        uint64_t has_dumb = false;
+        ret = drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &has_dumb);
+        if ((ret < 0) or (not has_dumb)) {
+            LOG_ERROR("DRM device does not support dumb buffers!");
+            close(fd);
+            break;
+        }
 
-    // Try to set master
-    int ret = drmSetMaster(fd);
-    if (ret == -1) {
-        LOG_WARN1("Set Master: %m");
-    }
+        // Try to set master
+        ret = drmSetMaster(fd);
+        if (ret == -1) {
+            LOG_WARN1("Set Master: %m");
+        }
 
-    // Get resources
-    resources = drmModeGetResources(fd);
-    if (!resources) {
-        LOG_ERROR("drmModeGetResources failed: %m");
-        goto unlock;
-    }
+        // Get resources
+        resources = drmModeGetResources(fd);
+        if (not resources) {
+            LOG_ERROR("drmModeGetResources failed: %m");
+            break;
+        }
 
-    noia_drm_log(fd, resources);
+        noia_drm_log(fd, resources);
 
-    // Find a connected connectors
-    for (int i = 0; i < resources->count_connectors; ++i) {
-        connector = drmModeGetConnector(fd, resources->connectors[i]);
+        // Find connected connectors
+        for (int i = 0; i < resources->count_connectors; ++i) {
+            connector = drmModeGetConnector(fd, resources->connectors[i]);
 
-        NoiaOutputDRM* output =
+            NoiaOutputDRM* output =
                noia_drm_update_connector(fd, resources, connector, drm_outputs);
-        if (output) {
-            noia_list_append(drm_outputs, output);
+            if (output) {
+                noia_list_append(drm_outputs, output);
+            }
+            drmModeFreeConnector(connector);
         }
-        drmModeFreeConnector(connector);
+
+        num = noia_list_len(drm_outputs);
+        FOR_EACH (drm_outputs, link) {
+            noia_list_append(outputs, link->data);
+        }
+
+        // Free memory
+        drmModeFreeResources(resources);
     }
 
-    num = noia_list_len(drm_outputs);
-    FOR_EACH (drm_outputs, link) {
-        noia_list_append(outputs, link->data);
-    }
-
-    // Free memory
-    drmModeFreeResources(resources);
-
-unlock:
     noia_list_free(drm_outputs);
     pthread_mutex_unlock(&drm_mutex);
     return num;
