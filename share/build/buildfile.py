@@ -1,9 +1,6 @@
 #!/usr/bin/python
 # vim: tabstop=4 expandtab colorcolumn=81 list
 
-# TODO ninja
-# TODO comments
-
 import build
 from build import GeneratedTarget  as Gen
 from build import CompileTarget    as Com
@@ -19,7 +16,7 @@ c.add_cflags(['-Wpedantic', '-std=gnu11'])
 c.set_lflags(['-rdynamic', '-ldl', '-lrt', '-lpthread', '-lm'])
 
 p = build.Project(c)
-p.set_additional_clean_commands(['callgrind*', '*plist*', '.ninja*'])
+p.add_clean_commands(['doc', 'callgrind*', '*plist*', '.ninja*'])
 
 #-------------------------------------------------------------------------------
 # APPLICATIONS
@@ -62,6 +59,9 @@ p.add(Pny(build.Generator('make',
 
 p.add(Pny(build.Generator('ninja',
       ['python', '-B', './share/build/make.py', 'ninja'])))
+
+p.add(Pny(build.Generator('install',
+      ['python', '-B', './share/build/make.py', 'install'])))
 
 #-------------------------------------------------------------------------------
 # GENERATED FILES
@@ -163,7 +163,7 @@ metanoia.add([target_utils_debug,
 #-------------------------------------------------------------------------------
 # EVENTS
 
-metanoia.add(Com.from_mathing('event-*.c', c))
+metanoia.add(Com.from_matching('event-*.c', c))
 
 #-------------------------------------------------------------------------------
 # RENDERERS
@@ -190,12 +190,12 @@ metanoia.add([Com(['output.c']),
 #-------------------------------------------------------------------------------
 # SURFACE
 
-metanoia.add(Com.from_mathing('surface-*.c', c))
+metanoia.add(Com.from_matching('surface-*.c', c))
 
 #-------------------------------------------------------------------------------
 # INPUT
 
-metanoia.add(Com.from_mathing('input-*.c', c))
+metanoia.add(Com.from_matching('input-*.c', c))
 
 #-------------------------------------------------------------------------------
 # EXHIBITOR
@@ -225,7 +225,7 @@ metanoia.add([Com(['wayland-region.c']),
               Com([target_xdg_shell_code]),
               Com([target_screenshooter_code])])
 
-metanoia.add(Com.from_mathing('wayland-protocol-*.c', c))
+metanoia.add(Com.from_matching('wayland-protocol-*.c', c))
 
 #-------------------------------------------------------------------------------
 # OFFSCREEN BACKEND
@@ -310,6 +310,11 @@ def run(command):
 
     elif command == 'Makefile' or command == 'make':
         result = build.MakeWriter().write(p)
+
+    elif command == 'install':
+        ins = build.Installer(c)
+        ins(metanoia, build.InstallConfigExec())
+        result = 0
 
     else:
         print('Unknown command "{command}"'.format(command=command))

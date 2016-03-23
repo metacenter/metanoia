@@ -14,13 +14,16 @@ check: checks
 	@./checks/check-frame
 
 clean:
-	rm -rf build checks doc gen inter callgrind* *plist* .ninja*
+	rm -rf build checks gen install inter doc callgrind* *plist* .ninja*
 
 force:
 
 cppcheck: Makefile \
           checks
 	@python -B ./share/build/make.py cppcheck
+
+install: force
+	@python -B ./share/build/make.py install
 
 make: force
 	@python -B ./share/build/make.py make

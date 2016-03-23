@@ -12,7 +12,7 @@ build check: check force checks
 
 rule clean
     description = clean
-    command = rm -rf build checks doc gen inter callgrind* *plist* .ninja*
+    command = rm -rf build checks gen install inter doc callgrind* *plist* .ninja*
 
 build clean: clean
 
@@ -51,6 +51,12 @@ rule cppcheck
     command = python -B ./share/build/make.py cppcheck
 
 build cppcheck: cppcheck checks
+
+rule install
+    description =  $out
+    command = python -B ./share/build/make.py install
+
+build install: install force
 
 rule make
     description =  $out

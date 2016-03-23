@@ -25,7 +25,7 @@ def generate_version_file():
             with open(file_path, 'w') as vf:
                 contents = '#ifndef NOIA_VERSION\n' \
                            '#define NOIA_VERSION \"{version}\"\n' \
-                           '#endif\n'''.format(version=version)
+                           '#endif\n'.format(version=version)
                 vf.write(contents)
     else:
         prinf("Failed running git command!");

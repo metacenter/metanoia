@@ -1,8 +1,11 @@
 #!/usr/bin/python
 # vim: tabstop=4 expandtab colorcolumn=81 list
 
+# TODO comments
+
 import os
 import os.path
+import shutil
 import fnmatch
 import subprocess
 
@@ -32,6 +35,7 @@ class Config:
         self.intermediate_dir = 'inter'
         self.build_dir        = 'build'
         self.check_dir        = 'checks'
+        self.install_dir      = 'install'
 
     def set_source_directory(self, v):
         self.source_dir = str(v)
@@ -54,6 +58,9 @@ class Config:
     def set_check_directory(self, v):
         self.check_dir = str(v)
 
+    def set_install_directory(self, v):
+        self.install_dir = str(v)
+
     def set_c_compiler(self, v):
         self.c_compiler = str(v)
 
@@ -74,6 +81,13 @@ class Config:
 
     def add_lflags(self, v):
         self.lflags.extend(v)
+
+    def get_output_directories(self):
+        return sorted({self.gen_dir,
+                       self.intermediate_dir,
+                       self.build_dir,
+                       self.check_dir,
+                       self.install_dir})
 
 #===============================================================================
 
@@ -114,6 +128,20 @@ class ConfigGccRelease(Config):
         self.oflags     = ['-DNDEBUG', '-O3']
         self.cflags     = ['-Wall', '-W', '-Wextra', '-Wpedantic', '-Werror']
         self.lflags     = []
+
+################################################################################
+# Install config
+
+class InstallConfig:
+    def __init__(self, directory='/opt', mod=0o555):
+        self.directory = directory
+        self.mod =  mod
+
+#===============================================================================
+
+class InstallConfigExec(InstallConfig):
+    def __init__(self):
+        InstallConfig.__init__(self, directory='usr/bin', mod=0o755)
 
 ################################################################################
 # Run command
@@ -231,6 +259,9 @@ class Project:
         self._targets = dict()
         self._phonies = dict()
 
+        self._clean_commands = list()
+        self.add_clean_commands(config.get_output_directories())
+
     def add(self, targets, include_in_default=False):
         if not isinstance(targets, list) and not isinstance(targets, tuple):
             targets = [targets]
@@ -281,11 +312,11 @@ class Project:
         all.extend(self._check_targets)
         return all
 
-    def set_additional_clean_commands(self, commands):
-        self._additional_clean_commands = commands
+    def add_clean_commands(self, commands):
+        self._clean_commands.extend(commands)
 
-    def get_additional_clean_commands(self):
-        return self._additional_clean_commands
+    def get_clean_commands(self):
+        return self._clean_commands
 
 #-------------------------------------------------------------------------------
 
@@ -357,6 +388,9 @@ class Target:
 
     def __str__(self):
         return str(self._output)
+
+    def get_output_name(self):
+        return self._output
 
     def get_output(self):
         if self._alias is not None:
@@ -544,7 +578,7 @@ class CompileTarget(Target):
                      if hasattr(item, '_add_to_project')])
 
     @staticmethod
-    def from_mathing(match_str, config):
+    def from_matching(match_str, config):
         files = sorted(list(f for f in os.listdir(config.source_dir)
                        if fnmatch.fnmatch(f, match_str)))
         return list(CompileTarget([f]) for f in files)
@@ -639,6 +673,34 @@ class CheckTarget(ExecutableTarget):
         project.add(self._targets)
 
 ################################################################################
+# Installator
+
+class Installer:
+    """ """
+
+    def __init__(self, config):
+        self.prefix = config.install_dir \
+                   if config.install_dir is not None else '/'
+
+    def __call__(self, target, install_config):
+        directory = install_config.directory \
+                 if install_config.directory is not None else ''
+
+        dst_directory = os.path.join(self.prefix, directory)
+        dst_path = os.path.join(dst_directory, target.get_output_name())
+        src_path = target.get_output()
+
+        print('  CP   "{src}" > "{dst}"'.format(src=src_path, dst=dst_path))
+
+        if os.path.isfile(src_path):
+            try:
+                os.makedirs(dst_directory)
+            except FileExistsError:
+                pass
+            shutil.copyfile(src_path, dst_path)
+            os.chmod(dst_path, install_config.mod)
+
+################################################################################
 # Writer base
 
 class Writer:
@@ -679,7 +741,7 @@ class NinjaWriter(Writer):
                               c.cflags, c.lflags, c.oflags,
                               project.get_all_targets(),
                               project.get_check_targets(),
-                              project.get_additional_clean_commands())
+                              project.get_clean_commands())
 
         for item in project.get_generated_targets():
             self._wr_generated_rule(item)
@@ -762,7 +824,7 @@ class NinjaWriter(Writer):
                 .format(check=check_str))
         self.wr('rule clean\n'
                 '    description = clean\n'
-                '    command = rm -rf build checks doc gen inter {clean}\n\n'
+                '    command = rm -rf {clean}\n\n'
                 'build clean: clean\n\n'
                 .format(clean=' '.join(clean)))
 
@@ -815,7 +877,7 @@ class MakeWriter(Writer):
         self._wr_main_targets(project.get_default_targets(),
                               project.get_all_targets(),
                               project.get_check_targets(),
-                              project.get_additional_clean_commands())
+                              project.get_clean_commands())
 
         for item in project.get_phony_targets():
             self._wr_phony_target(item)
@@ -873,7 +935,7 @@ class MakeWriter(Writer):
         self.wr('all: {all}\n\n'.format(all=all_str))
         self.wr('checks: {checks}\n\n'.format(checks=checks_str))
         self.wr('check: checks\n{check}\n\n'.format(check=check_str))
-        self.wr('clean:\n\trm -rf build checks doc gen inter {clean}\n\n'
+        self.wr('clean:\n\trm -rf {clean}\n\n'
                 .format(clean=' '.join(clean)))
         self.wr('force:\n\n')
 
