@@ -36,7 +36,7 @@ rule wschg
 
 rule vgen
     description = GEN  $out
-    command = python -B ./share/build/make.py version
+    command = python3 -B ./share/build/make.py version
 
 rule wscg
     description = GEN  $out
@@ -48,31 +48,31 @@ rule glcr
 
 rule cppcheck
     description =  $out
-    command = python -B ./share/build/make.py cppcheck
+    command = python3 -B ./share/build/make.py cppcheck
 
 build cppcheck: cppcheck checks
 
 rule install
     description =  $out
-    command = python -B ./share/build/make.py install
+    command = python3 -B ./share/build/make.py install
 
 build install: install force
 
 rule make
     description =  $out
-    command = python -B ./share/build/make.py make
+    command = python3 -B ./share/build/make.py make
 
 build make: make force
 
 rule memcheck
     description =  $out
-    command = python -B ./share/build/make.py memcheck
+    command = python3 -B ./share/build/make.py memcheck
 
 build memcheck: memcheck checks
 
 rule ninja
     description =  $out
-    command = python -B ./share/build/make.py ninja
+    command = python3 -B ./share/build/make.py ninja
 
 build ninja: ninja force
 

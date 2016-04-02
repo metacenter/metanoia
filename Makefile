@@ -20,20 +20,20 @@ force:
 
 cppcheck: Makefile \
           checks
-	@python -B ./share/build/make.py cppcheck
+	@python3 -B ./share/build/make.py cppcheck
 
 install: force
-	@python -B ./share/build/make.py install
+	@python3 -B ./share/build/make.py install
 
 make: force
-	@python -B ./share/build/make.py make
+	@python3 -B ./share/build/make.py make
 
 memcheck: Makefile \
           checks
-	@python -B ./share/build/make.py memcheck
+	@python3 -B ./share/build/make.py memcheck
 
 ninja: force
-	@python -B ./share/build/make.py ninja
+	@python3 -B ./share/build/make.py ninja
 
 build/metanoia: Makefile \
                 inter/config.o \
@@ -335,7 +335,7 @@ gen/screenshooter-client-protocol.h: Makefile \
 version_info_file: force
 	@mkdir -p gen
 	@echo "  GEN  version_info_file"
-	@python -B ./share/build/make.py version
+	@python3 -B ./share/build/make.py version
 
 gen/xdg-shell-protocol.c: Makefile \
                           res/xdg-shell.xml

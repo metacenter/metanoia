@@ -1,10 +1,11 @@
-// file: utils-pool.h
-// vim: tabstop=4 expandtab colorcolumn=81 list
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #ifndef NOIA_UTILS_POOL_H
 #define NOIA_UTILS_POOL_H
 
-#include "stddef.h"
+#include <stddef.h>
 
 #define NOIA_ITERATE_POOL(POOL,INDEX,ELEMENT) \
     for (INDEX = 0, ELEMENT = noia_pool_get(POOL, INDEX); \

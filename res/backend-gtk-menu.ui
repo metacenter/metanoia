@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  vim: tabstop=2 expandtab list
--->
 <interface>
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkMenuButton" id="button">

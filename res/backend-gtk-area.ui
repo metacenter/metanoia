@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  vim: tabstop=2 expandtab list
--->
 <interface>
   <object class="GtkBox" id="box">
     <property name="visible">True</property>

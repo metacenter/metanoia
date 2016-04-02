@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# vim: tabstop=4 expandtab colorcolumn=81 list
+#!/usr/bin/python3
 
 import build
 from build import GeneratedTarget  as Gen
@@ -41,27 +40,27 @@ glcr = build.Generator('glcr',
               '--target={output}', '--generate-source'])
 
 vgen = build.Generator('vgen',
-             ['python', '-B', './share/build/make.py', 'version'])
+             ['python3', '-B', './share/build/make.py', 'version'])
 
 #-------------------------------------------------------------------------------
 # PHONY TARGETS
 
 p.add(Pny(build.Generator('memcheck',
-      ['python', '-B', './share/build/make.py', 'memcheck']),
+      ['python3', '-B', './share/build/make.py', 'memcheck']),
       deps=['checks']))
 
 p.add(Pny(build.Generator('cppcheck',
-      ['python', '-B', './share/build/make.py', 'cppcheck']),
+      ['python3', '-B', './share/build/make.py', 'cppcheck']),
       deps=['checks']))
 
 p.add(Pny(build.Generator('make',
-      ['python', '-B', './share/build/make.py', 'make'])))
+      ['python3', '-B', './share/build/make.py', 'make'])))
 
 p.add(Pny(build.Generator('ninja',
-      ['python', '-B', './share/build/make.py', 'ninja'])))
+      ['python3', '-B', './share/build/make.py', 'ninja'])))
 
 p.add(Pny(build.Generator('install',
-      ['python', '-B', './share/build/make.py', 'install'])))
+      ['python3', '-B', './share/build/make.py', 'install'])))
 
 #-------------------------------------------------------------------------------
 # GENERATED FILES

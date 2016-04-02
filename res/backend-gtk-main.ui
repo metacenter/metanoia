@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  vim: tabstop=2 expandtab list
--->
 <interface>
   <template class="NoiaWin" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>

@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# vim: tabstop=4 expandtab colorcolumn=81 list
+#!/usr/bin/python3
 
 # TODO comments
 

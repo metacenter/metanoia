@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  vim: tabstop=2 expandtab list
--->
 <gresources>
   <gresource prefix="/org/metanoia">
     <file preprocess="xml-stripblanks">res/metanoiactl-gtk-main.ui</file>
