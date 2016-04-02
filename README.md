@@ -1,32 +1,27 @@
-= AURA(1)
-:doctype: manpage
+Metanoia
+========
 
-== NAME
-
-aura - converts an AsciiDoc text file to HTML or DocBook
-a2x -f manpage README.md
-
-== TITLE
-
-Aura is in very early stage of development. It is meant to be tiling surface
+Metanoia is in very early stage of development. It is meant to be tiling surface
 compositor for Wayland.
 
-== ANOTHER
+Metanoia tries to merge concepts from most popular tiling window managers like
+i3, awesome, ratpoison or dwm, but there is still many things to work on. If you
+are looking for working compositor it is much to early to choose metanoia, but
+if you have programming skills and want to join development team, your help will
+be appreciated.
 
-*sth owwsdf*::
-If you are looking for working compositor it is much to early to choose Aura,
-but if you have programming skills and want to join development team, your help
-will be appreciated.
+Getting Started
+---------------
 
-*sth ty*::
-When Aura will become more usable, more information will be available.
+For instructions on building and running metanoia see
+[installation.md](./info/installation.md).
 
-== ENVIRONMENT
+For configuration options see [configuration.md](./info/configuration.md).
 
-aw
+If you want to see features from your favourite window manager in metanoia you
+are encouraged to contribute in brain-storming and development. For details see
+[contributing.md](./info/contributing.md).
 
-== FILES
- 
-ser
+Metanoia is licensed on MPL-2.0. For more information see
+[license.md](./info/license.md).
 
-// vim: ft=asciidoc
