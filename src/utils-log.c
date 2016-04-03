@@ -45,7 +45,7 @@ void noia_log_initialize(const char* filename)
 {
     if (filename and (strlen(filename) > 0)) {
         setbuf(stdout, NULL);
-        sLogFD = noia_environment_open_file(filename, 0, DATA_PATH);
+        sLogFD = noia_environment_open_file(filename, 0, RUNTIME_PATH);
         if (sLogFD == -1) {
             sLogFD = NOIA_DEFAULT_LOG_FD;
             LOG_ERROR("Log file could not be opened!");

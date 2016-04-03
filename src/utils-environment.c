@@ -185,11 +185,11 @@ NoiaResult noia_environment_setup(const char* log_filename)
     // Create $XDG_DATA_HOME/noia directory
     NoiaResult result1 = noia_environment_data_path_setup();
 
-    // Open log file
-    noia_log_initialize(log_filename);
-
     // Create temporary $XDG_RUNTIME_DIR/noia-XXXXXX directory
     NoiaResult result2 = noia_environment_runtime_path_setup();
+
+    // Open log file
+    noia_log_initialize(log_filename);
 
     LOG_INFO1("Data path: '%s'", sNoiaDataPath);
     LOG_INFO1("Runtime path: '%s'", sNoiaRuntimePath);
