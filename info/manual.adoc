@@ -1,0 +1,53 @@
+= METANOIA(1)
+:doctype: manpage
+
+== NAME
+
+metanoia - surface compositor with support for Wayland.
+
+== SYNOPSIS
+
+ metanoia [-d|--no-drm] [-g|--no-gl]
+ metanoia -?|--help|--usage
+
+== DESCRIPTION
+
+Metanoia is in very early stage of development. It is meant to be tiling surface
+compositor for Wayland.
+
+== OPTIONS
+
+*Output options*:: Communicating directly with graphic card is more efficient
+than using frame buffer so metanoia first tries to talk to graphic card via
+DRM. If that fails it uses framebuffer.
+
+  *-d --no-drm*::: Do not use DRM.
+
+*Rendering options*:: When drawing metanoia may simply copy surface buffers to
+mapped memory or use GL library. Using GL drawing happens on GPU saving CPU
+resources. This is default option.
+
+  *-g --no-gl*::: Do not use GL.
+
+== ENVIRONMENT
+
+*METANOIA_WAYLAND_DISPLAY*:: The name of the wayland display (socket). Clients
+to connect to this socket must have *WAYLAND_DISPLAY* set accordingly.
+
+*DISPLAY*:: When set metanoia assumes it is run under X server, so it does not
+render to real output but creates off-screen buffer.
+
+*WAYLAND_DEBUG*:: Tell libwayland to print debug information.
+
+*XDG_RUNTIME_DIR*:: Directory for runtime files. Metanoia will create temporary
+directory `$XDG_RUNTIME_DIR/noia-XXXXXX` for each instance. It variable not set
+it will default to `/tmp/noia-XXXXXX`.
+
+== FILES
+
+$XDG_RUNTIME_DIR/noia-XXXXXX/log:: Log file.
+
+== BUGS
+
+Bugs should be reported to https://github.com/metacenter/metanoia/issues
+

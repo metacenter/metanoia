@@ -1,14 +1,15 @@
 Metanoia
 ========
 
-Metanoia is in very early stage of development. It is meant to be tiling surface
-compositor for Wayland.
+Do you like configurability and lightweightness of tiling window managers? Do
+you like cutting-edge technology and want to try tiling window manager running
+Wayland? Metanoia is for you! Metanoia tries to merge concepts from most popular
+tiling window managers like i3, awesome, ratpoison or dwm with freshness of
+Wayland.
 
-Metanoia tries to merge concepts from most popular tiling window managers like
-i3, awesome, ratpoison or dwm, but there is still many things to work on. If you
-are looking for working compositor it is much to early to choose metanoia, but
-if you have programming skills and want to join development team, your help will
-be appreciated.
+There is still many things to work on. If you are looking for working compositor
+it is much to early to choose metanoia, but if you have programming skills and
+want to join development team, your help will be appreciated.
 
 Getting Started
 ---------------

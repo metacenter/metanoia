@@ -60,8 +60,11 @@ For GPU acceleration metanoia requires drivers which support KMS (Kernel Mode
 Setting). Without acceleration performance will be very poor.
 
 In case of **any** problems please make bug report in
-[bugtracker](https://github.com/metacenter/metanoia/issues).
-Providing logs will be helpful. They can be found in
-`$XDG_RUNTIME_DIR/noia-XXXXXX/log` where `XXXXXX` is string randomly generated
-for each metanoia instance (you will probably need the most recent one).
+[bugtracker](https://github.com/metacenter/metanoia/issues).  Providing logs
+will be helpful. They can be found in `$XDG_RUNTIME_DIR/noia-XXXXXX/log` where
+`XXXXXX` is string randomly generated for each metanoia instance (you will
+probably be able to figure out correct one by last access time).
+
+For list of options and environment variables you can refer to [manual
+page](./manual.adoc).
 

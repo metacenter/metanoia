@@ -22,8 +22,8 @@ Rationale
 
 MPL-2.0 was chosen as a license for source files because it is
 
- * popular and widely used or with strong community
-   (according to [OSI](https://opensource.org/licenses/category))
+ * popular and widely used or with strong community (according to
+   [OSI](https://opensource.org/licenses/category))
 
  * approved by FSF and OSI and compatible with GPL
 
