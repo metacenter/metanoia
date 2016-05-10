@@ -115,11 +115,13 @@ void noia_exhibitor_create_new_display(NoiaExhibitor* exhibitor,
     NOIA_ENSURE(exhibitor, return);
     NOIA_ENSURE(output, return);
 
-    NoiaFrame* workspace =
-               noia_compositor_create_new_workspace(exhibitor->compositor,
-                                                    output->area.size);
+    NoiaFrame* display_frame =
+                       noia_compositor_create_new_display(exhibitor->compositor,
+                                                          output->area,
+                                                          output->unique_name);
 
-    NoiaDisplay* display = noia_display_new(output, workspace, exhibitor);
+    noia_compositor_create_next_workspace(exhibitor->compositor, display_frame);
+    NoiaDisplay* display = noia_display_new(output, display_frame, exhibitor);
 
     noia_list_append(exhibitor->displays, display);
     noia_display_start(display);
@@ -155,7 +157,7 @@ void noia_exhibitor_on_surface_ready(NoiaExhibitor* self,
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(self->strategist, return);
     NOIA_ENSURE(self->strategist->on_surface_ready, return);
-    self->strategist->on_surface_ready(self, self->compositor, sid);
+    self->strategist->on_surface_ready(self, sid);
 }
 
 //------------------------------------------------------------------------------

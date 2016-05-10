@@ -22,50 +22,7 @@ struct NoiaCompositorStruct {
 
 //------------------------------------------------------------------------------
 
-NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
-                                          const char* title)
-{
-    NoiaFrame* workspace = NULL;
-    FOR_EACH_TWIG(self->root, twig) {
-        if (strcmp(title, noia_frame_get_title(twig)) == 0) {
-            workspace = twig;
-            break;
-        }
-    }
-    return workspace;
-}
-
-//------------------------------------------------------------------------------
-// PUBLIC
-
-NoiaCompositor* noia_compositor_new(NoiaExhibitor* exhibitor)
-{
-    NoiaCompositor* self = malloc(sizeof(NoiaCompositor));
-    NOIA_ENSURE(self, abort());
-
-    NoiaPosition pos = {0, 0};
-    NoiaSize size = {-1, -1};
-    self->exhibitor = exhibitor;
-    self->root = noia_frame_new();
-    noia_frame_configure(self->root, NOIA_FRAME_TYPE_STACKED,
-                         scInvalidSurfaceId, pos, size, "METANOIA");
-    return self;
-}
-
-//------------------------------------------------------------------------------
-
-void noia_compositor_free(NoiaCompositor* self)
-{
-    NOIA_ENSURE(self, return);
-
-    noia_frame_free(self->root);
-
-    memset(self, 0, sizeof(NoiaCompositor));
-    free(self);
-}
-
-//------------------------------------------------------------------------------
-
+/// Set given frame as selection.
 void noia_compositor_set_selection(NoiaCompositor* self, NoiaFrame* frame)
 {
     NOIA_ENSURE(self, return);
@@ -89,8 +46,121 @@ void noia_compositor_set_selection(NoiaCompositor* self, NoiaFrame* frame)
 
 //------------------------------------------------------------------------------
 
+/// Search for existing workspace with given title.
+NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
+                                          const char* title)
+{
+    NoiaFrame* result = NULL;
+    FOR_EACH_TWIG(self->root, output_frame) {
+        FOR_EACH_TWIG(output_frame, workspace) {
+            if (strcmp(title, noia_frame_get_title(workspace)) == 0) {
+                result = workspace;
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+/// Creates new frame, places it in proper place in frame tree and initializes
+/// it as a workspace.
 NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
-                                                NoiaSize size)
+                                                NoiaFrame* display,
+                                                const char* title)
+{
+    NOIA_ENSURE(self, return NULL);
+    NOIA_ENSURE(title, return NULL);
+    NOIA_ENSURE(strlen(title) > 0, return NULL);
+
+    // Create and configure workspace
+    NoiaFrame* workspace = noia_frame_new();
+    noia_frame_configure(workspace, NOIA_FRAME_TYPE_WORKSPACE, 0,
+                         noia_frame_get_area(display), title);
+    noia_frame_jumpin(display, workspace);
+
+    /// @todo Focusing new workspace should be configurable
+    noia_compositor_set_selection(self, workspace);
+    noia_frame_pop_recursively(self->root, workspace);
+    return workspace;
+}
+
+//------------------------------------------------------------------------------
+
+/// Search for existing workspace or create new with given title.
+NoiaFrame* noia_compositor_bring_workspace(NoiaCompositor* self,
+                                           const char* title)
+{
+    NoiaFrame* workspace = NULL;
+    NOIA_BLOCK {
+        workspace = noia_compositor_find_workspace(self, title);
+        if (workspace) {
+            break;
+        }
+
+        /// @todo For many output setup this should be cofigurable on which
+        ///       output the workspace will be created.
+        NoiaFrame* current_workspace = noia_frame_find_top(self->selection);
+        NOIA_ENSURE(current_workspace, break);
+        NoiaFrame* display_frame = noia_frame_get_parent(current_workspace);
+        NOIA_ENSURE(display_frame, break);
+
+        workspace = noia_compositor_create_new_workspace
+                                                   (self, display_frame, title);
+    }
+    return workspace;
+}
+
+//------------------------------------------------------------------------------
+// PUBLIC
+
+NoiaCompositor* noia_compositor_new(NoiaExhibitor* exhibitor)
+{
+    NoiaCompositor* self = malloc(sizeof(NoiaCompositor));
+    NOIA_ENSURE(self, abort());
+
+    NoiaArea area = {{0, 0}, {-1, -1}};
+    self->exhibitor = exhibitor;
+    self->root = noia_frame_new();
+    noia_frame_configure(self->root, NOIA_FRAME_TYPE_STACKED,
+                         scInvalidSurfaceId, area, "METANOIA");
+    return self;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_compositor_free(NoiaCompositor* self)
+{
+    NOIA_ENSURE(self, return);
+
+    noia_frame_free(self->root);
+
+    memset(self, 0, sizeof(NoiaCompositor));
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_compositor_create_new_display(NoiaCompositor* self,
+                                              NoiaArea area,
+                                              const char* title)
+{
+    NOIA_ENSURE(self, return NULL);
+    NOIA_ENSURE(title, return NULL);
+    NOIA_ENSURE(strlen(title) > 0, return NULL);
+
+    // Create and configure output frame
+    NoiaFrame* display = noia_frame_new();
+    noia_frame_configure(display, NOIA_FRAME_TYPE_DISPLAY, 0, area, title);
+    noia_frame_jumpin(self->root, display);
+    return display;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_compositor_create_next_workspace(NoiaCompositor* self,
+                                                 NoiaFrame* display)
 {
     NOIA_ENSURE(self, return NULL);
 
@@ -104,16 +174,8 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
         title[0] = '\0';
     }
 
-    NOIA_ENSURE(strlen(title) > 0, return NULL);
-
     // Create and configure workspace
-    NoiaFrame* workspace = noia_frame_new();
-    noia_frame_configure_as_workspace(workspace, size, title);
-    noia_frame_jumpin(self->root, workspace);
-
-    /// @todo This should be configurable
-    noia_compositor_set_selection(self, workspace);
-    return workspace;
+    return noia_compositor_create_new_workspace(self, display, title);
 }
 
 //------------------------------------------------------------------------------
@@ -136,9 +198,9 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 
     /// @todo Frame type, size and position should be configurable.
     NoiaFrame* frame = noia_frame_new();
+    NoiaArea area = {{0,0}, surface->requested_size};
     noia_frame_configure(frame, NOIA_FRAME_TYPE_FLOATING | NOIA_FRAME_TYPE_LEAF,
-                         sid, (NoiaPosition) {0,0}, surface->requested_size,
-                         NULL);
+                         sid, area, NULL);
 
     noia_frame_jumpin(self->selection, frame);
     /// @todo This should be configurable
@@ -209,13 +271,13 @@ void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(title, return);
 
-    NoiaFrame* workspace = noia_compositor_find_workspace(self, title);
-    if (not workspace) {
-        LOG_WARN1("Compositor: Workspace '%s' not found!", title);
-        return;
+    NoiaFrame* workspace = noia_compositor_bring_workspace(self, title);
+    if (workspace) {
+        noia_frame_jump(self->selection, workspace);
+    } else {
+        LOG_WARN1("Compositor: Workspace '%s' not found "
+                  "and could not be created!", title);
     }
-
-    noia_frame_jump(self->selection, workspace);
 }
 
 //------------------------------------------------------------------------------
@@ -285,7 +347,7 @@ void noia_compositor_focus_workspace(NoiaCompositor* self, char* title)
 
     LOG_INFO1("Compositor: Change workspace to '%s'", title);
 
-    NoiaFrame* workspace = noia_compositor_find_workspace(self, title);
+    NoiaFrame* workspace = noia_compositor_bring_workspace(self, title);
     if (not workspace) {
         LOG_WARN1("Compositor: Workspace '%s' not found!", title);
         return;
@@ -305,7 +367,9 @@ void noia_compositor_focus_workspace(NoiaCompositor* self, char* title)
         }
     }
 
+    noia_frame_pop_recursively(self->root, workspace);
     self->selection = (frame ? frame : workspace);
+    noia_compositor_log_frame(self);
 }
 
 //------------------------------------------------------------------------------

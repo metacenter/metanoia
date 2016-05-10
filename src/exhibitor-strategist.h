@@ -9,10 +9,11 @@
 #include "exhibitor-compositor.h"
 
 typedef void (*NoiaStrategistOnSurfaceReadyFunc)
-             (NoiaExhibitor*, NoiaCompositor*, NoiaSurfaceId);
+             (NoiaExhibitor*, NoiaSurfaceId);
 typedef void (*NoiaStrategistOnSurfaceDestroyedFunc)
              (NoiaExhibitor*, NoiaSurfaceId);
 
+/// `NoiaStrategist` provides strategies for user-configurable tasks.
 typedef struct {
     NoiaStrategistOnSurfaceReadyFunc     on_surface_ready;
     NoiaStrategistOnSurfaceDestroyedFunc on_surface_destroyed;

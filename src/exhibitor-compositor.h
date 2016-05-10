@@ -15,9 +15,14 @@ NoiaCompositor* noia_compositor_new(NoiaExhibitor* exhibitor);
 void noia_compositor_free(NoiaCompositor* self);
 
 /// Creates new frame, places it in proper place in frame tree and initializes
-/// is as a workspace.
-NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
-                                                NoiaSize size);
+/// is as a display frame.
+NoiaFrame* noia_compositor_create_new_display(NoiaCompositor* self,
+                                              NoiaArea area,
+                                              const char* title);
+
+/// Creates new workspace with not existing name.
+NoiaFrame* noia_compositor_create_next_workspace(NoiaCompositor* self,
+                                                 NoiaFrame* display);
 
 /// Handles creation of new surface.
 bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid);

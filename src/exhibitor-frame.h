@@ -36,14 +36,8 @@ void noia_frame_free(NoiaFrame* self);
 void noia_frame_configure(NoiaFrame* self,
                           NoiaFrameType type,
                           NoiaSurfaceId sid,
-                          NoiaPosition pos,
-                          NoiaSize size,
+                          NoiaArea area,
                           const char* title);
-
-/// Configure frame to be a workspace.
-void noia_frame_configure_as_workspace(NoiaFrame* self,
-                                       NoiaSize size,
-                                       const char* title);
 
 /// Append self and all children surface context to array `surfaces`.
 /// @see noia_display_redraw_all
@@ -114,6 +108,15 @@ NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
 /// Find first trunk which type has NOIA_FRAME_TYPE_SPECIAL.
 /// For normal frame this should be workspace.
 NoiaFrame* noia_frame_find_top(NoiaFrame* self);
+
+/// Return parent of the frame.
+NoiaFrame* noia_frame_get_parent(NoiaFrame* self);
+
+/// Return first subframe.
+NoiaFrame* noia_frame_get_first(NoiaFrame* self);
+
+/// Return last (most recently used) subframe.
+NoiaFrame* noia_frame_get_last(NoiaFrame* self);
 
 /// Initialize iterator.
 void noia_frame_start_iteration(NoiaFrameIterator* iter,

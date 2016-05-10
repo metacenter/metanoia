@@ -75,6 +75,10 @@ typedef enum {
     NOIA_FRAME_TYPE_WORKSPACE  = NOIA_FRAME_TYPE_SPECIAL
                                | NOIA_FRAME_TYPE_FIXED
                                | NOIA_FRAME_TYPE_STACKED,
+
+    NOIA_FRAME_TYPE_DISPLAY    = NOIA_FRAME_TYPE_SPECIAL
+                               | NOIA_FRAME_TYPE_FLOATING
+                               | NOIA_FRAME_TYPE_STACKED,
 } NoiaFrameType;
 
 /// Type of transformation used for background image.

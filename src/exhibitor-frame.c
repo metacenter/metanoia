@@ -32,10 +32,7 @@ NoiaFrame* noia_frame_new(void)
 
 void noia_frame_free(NoiaFrame* self)
 {
-    if (!self) {
-        return;
-    }
-
+    NOIA_ENSURE(self, return);
     noia_branch_free(self, (NoiaFreeFunc) noia_frame_params_free);
 }
 
@@ -44,32 +41,22 @@ void noia_frame_free(NoiaFrame* self)
 void noia_frame_configure(NoiaFrame* self,
                           NoiaFrameType type,
                           NoiaSurfaceId sid,
-                          NoiaPosition pos,
-                          NoiaSize size,
+                          NoiaArea area,
                           const char* title)
 {
     NoiaFrameParams* params = noia_frame_get_params(self);
     params->type = type;
-    params->area.pos = pos;
-    params->area.size = size;
+    params->area = area;
     params->title = (title ? strdup(title) : NULL);
     noia_frame_set_surface(self, sid);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_frame_configure_as_workspace(NoiaFrame* self,
-                                       NoiaSize size,
-                                       const char* title)
-{
-    noia_frame_configure(self, NOIA_FRAME_TYPE_WORKSPACE,
-                         scInvalidSurfaceId, (NoiaPosition) {0,0}, size, title);
-}
-
-//------------------------------------------------------------------------------
-
 void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces)
 {
+    NOIA_ENSURE(self, return);
+
     FOR_EACH_TWIG(self, twig) {
         NoiaFrameParams* params = noia_frame_get_params(twig);
         if (params->sid != scInvalidSurfaceId) {
@@ -406,6 +393,27 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self)
         frame = frame->trunk;
     }
     return frame;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_frame_get_parent(NoiaFrame* self)
+{
+    return (NoiaFrame*) self->trunk;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_frame_get_first(NoiaFrame* self)
+{
+    return (NoiaFrame*) self->twigs->first;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_frame_get_last(NoiaFrame* self)
+{
+    return (NoiaFrame*) self->twigs->last;
 }
 
 //------------------------------------------------------------------------------

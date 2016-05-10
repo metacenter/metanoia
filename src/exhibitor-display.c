@@ -25,7 +25,7 @@ struct NoiaDisplayStruct {
     NoiaOutput* output;
 
     /// Pointer to frame which represents active workspace.
-    NoiaFrame* workspace;
+    NoiaFrame* frame;
 
     /// Memory pool for storing visible surfaces.
     /// @see noia_display_redraw_all
@@ -51,7 +51,7 @@ bool noia_display_is_valid(NoiaDisplay* self)
 {
     NOIA_ENSURE(self, return false);
     NOIA_ENSURE(self->output, return false);
-    NOIA_ENSURE(self->workspace, return false);
+    NOIA_ENSURE(self->frame, return false);
     return true;
 }
 //------------------------------------------------------------------------------
@@ -125,7 +125,8 @@ void noia_display_setup_layout_context(NoiaDisplay* self,
 /// @todo Is order of calling renderer method for GL renderer correct?
 void noia_display_redraw_all(NoiaDisplay* self)
 {
-    noia_frame_to_array(self->workspace, self->visible_surfaces);
+    noia_frame_to_array(noia_frame_get_last(self->frame),
+                        self->visible_surfaces);
 
     NoiaPointer* pointer = noia_exhibitor_get_pointer(self->exhibitor);
     noia_exhibitor_pointer_update_hover_state(pointer,
@@ -192,14 +193,14 @@ void* noia_display_thread_loop(void* data)
 // PUBLIC
 
 NoiaDisplay* noia_display_new(NoiaOutput* output,
-                              NoiaFrame* workspace,
+                              NoiaFrame* frame,
                               NoiaExhibitor* exhibitor)
 {
     NoiaDisplay* self = malloc(sizeof(NoiaDisplay));
 
     self->run = false;
     self->output = output;
-    self->workspace = workspace;
+    self->frame = frame;
     self->exhibitor = exhibitor;
     self->visible_surfaces = noia_pool_create(8, sizeof(NoiaSurfaceContext));
     self->background_sid = scInvalidSurfaceId;

@@ -13,7 +13,7 @@ typedef struct NoiaDisplayStruct NoiaDisplay;
 
 /// Display constructor.
 NoiaDisplay* noia_display_new(NoiaOutput* output,
-                              NoiaFrame* workspace,
+                              NoiaFrame* frame,
                               NoiaExhibitor* exhibitor);
 
 /// Display destructor.

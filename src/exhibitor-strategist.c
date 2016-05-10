@@ -13,11 +13,11 @@
 // DEFAULT STRATEGIES
 
 void noia_strategist_default_on_surface_ready(NoiaExhibitor* exhibitor,
-                                              NoiaCompositor* compositor,
                                               NoiaSurfaceId sid)
 {
     NOIA_ENSURE(exhibitor, return);
-    NOIA_ENSURE(compositor, return);
+
+    NoiaCompositor* compositor = noia_exhibitor_get_compositor(exhibitor);
 
     // Put surface on current workspace on current display
     if (noia_compositor_manage_surface(compositor, sid)) {
