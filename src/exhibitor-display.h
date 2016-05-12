@@ -28,9 +28,8 @@ void noia_display_stop(NoiaDisplay* self);
 /// Get area of assigned output in global coordinates.
 NoiaArea noia_display_get_area(NoiaDisplay* self);
 
-/// Helper function for checking if displays output is named `unique_name`.
-int noia_display_compare_name(NoiaDisplay* self,
-                              const char* name);
+/// Helper function for checking if displays output is named `name`.
+int noia_display_compare_name(NoiaDisplay* self, const char* name);
 
 #endif // NOIA_EXHIBITOR_DISPLAY_H
 

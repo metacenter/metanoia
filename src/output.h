@@ -57,17 +57,31 @@ NoiaResult noia_output_initialize(NoiaOutput* self,
 /// Initialize the renderer.
 /// This function should be called in thread in which the rendering will be
 /// performed.
-NoiaResult noia_output_initialize_rendering(NoiaOutput* output);
+NoiaResult noia_output_initialize_rendering(NoiaOutput* self);
 
 /// Compare two outputs.
 /// @return `0` if identical.
 int noia_output_compare(NoiaOutput* first, NoiaOutput* second);
 
 /// Take screenshot.
-void noia_output_take_screenshot(NoiaOutput* output,
+void noia_output_take_screenshot(NoiaOutput* self,
                                  NoiaArea area,
                                  uint8_t* data,
                                  unsigned stride);
+
+/// Draw passed surfaces and over layer.
+void noia_output_draw(NoiaOutput* self,
+                      NoiaPool* surfaces,
+                      NoiaLayoutContext* layout_context);
+
+/// Swap renderers buffers.
+void noia_output_swap_buffers(NoiaOutput* self);
+
+/// Prepares output for drawing.
+void noia_output_begin_drawing(NoiaOutput* self);
+
+/// Finishes drawing.
+void noia_output_end_drawing(NoiaOutput* self);
 
 #endif // NOIA_OUTPUT_H
 

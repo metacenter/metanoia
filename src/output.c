@@ -36,9 +36,9 @@ NoiaResult noia_output_initialize(NoiaOutput* self,
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_output_initialize_rendering(NoiaOutput* output)
+NoiaResult noia_output_initialize_rendering(NoiaOutput* self)
 {
-    return output->renderer->initialize(output->renderer);
+    return self->renderer->initialize(self->renderer);
 }
 
 //------------------------------------------------------------------------------
@@ -50,17 +50,63 @@ int noia_output_compare(NoiaOutput* first, NoiaOutput* second)
 
 //------------------------------------------------------------------------------
 
-void noia_output_take_screenshot(NoiaOutput* output,
+void noia_output_take_screenshot(NoiaOutput* self,
                                  NoiaArea area,
                                  uint8_t* data,
                                  unsigned stride)
 {
     NOIA_ENSURE(data, return);
-    NOIA_ENSURE(output, return);
-    NOIA_ENSURE(output->renderer, return);
-    NOIA_ENSURE(output->renderer->copy_buffer, return);
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(self->renderer, return);
+    NOIA_ENSURE(self->renderer->copy_buffer, return);
 
-    output->renderer->copy_buffer(output->renderer, area, data, stride);
+    self->renderer->copy_buffer(self->renderer, area, data, stride);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_output_draw(NoiaOutput* self,
+                      NoiaPool* surfaces,
+                      NoiaLayoutContext* layout_context)
+{
+    NOIA_ENSURE(surfaces, return);
+    NOIA_ENSURE(layout_context, return);
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(self->renderer, return);
+    NOIA_ENSURE(self->renderer->draw, return);
+
+    self->renderer->draw(self->renderer, surfaces, layout_context);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_output_swap_buffers(NoiaOutput* self)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(self->renderer, return);
+    NOIA_ENSURE(self->renderer->swap_buffers, return);
+
+    self->renderer->swap_buffers(self->renderer);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_output_begin_drawing(NoiaOutput* self)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(self->begin_drawing, return);
+
+    self->begin_drawing(self);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_output_end_drawing(NoiaOutput* self)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(self->end_drawing, return);
+
+    self->end_drawing(self);
 }
 
 //------------------------------------------------------------------------------

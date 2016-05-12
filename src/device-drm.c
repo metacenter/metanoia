@@ -165,12 +165,14 @@ void noia_drm_gbm_destroy_event(struct gbm_bo *bo, void *data NOIA_UNUSED)
 //------------------------------------------------------------------------------
 
 /// Lock GBM surface and create new frame buffer if needed.
-uint32_t noia_drm_gbm_lock_surface(NoiaOutputDRM* output_drm)
+uint32_t noia_drm_output_swap_gbm_surfaces(NoiaOutputDRM* output_drm)
 {
     if (not output_drm->gbm_surface) {
         LOG_ERROR("Invalid GBM surface!");
         return INVALID_FB_ID;
     }
+
+    gbm_surface_release_buffer(output_drm->gbm_surface, output_drm->gbm_bo);
 
     struct gbm_bo* bo = gbm_surface_lock_front_buffer(output_drm->gbm_surface);
     if (not bo) {
@@ -324,6 +326,17 @@ NoiaRenderer* noia_drm_create_dumb_buffers(NoiaOutputDRM* output_drm)
 }
 
 //------------------------------------------------------------------------------
+
+/// Swap dumb buffers.
+/// This function is used only for dumb buffers.
+/// @see noia_drm_output_end_drawing, noia_drm_output_swap_gbm_surfaces
+uint32_t noia_drm_output_swap_dumb_buffers(NoiaOutputDRM* output_drm)
+{
+    output_drm->front = output_drm->front ^ 1;
+    return output_drm->fb[output_drm->front];
+}
+
+//------------------------------------------------------------------------------
 // OUTPUT
 
 /// Prepare output for rendering.
@@ -352,28 +365,12 @@ NoiaRenderer* noia_drm_output_initialize(NoiaOutput* output,
 
 //------------------------------------------------------------------------------
 
-/// Swap buffers.
-/// This function is used only for dumb buffers.
-/// @see noia_drm_output_end_drawing, noia_drm_gbm_lock_surface
-uint32_t noia_drm_output_swap_buffers(NoiaOutputDRM* output_drm)
-{
-    output_drm->front = output_drm->front ^ 1;
-    return output_drm->fb[output_drm->front];
-}
-
-//------------------------------------------------------------------------------
-
-/// Release GBM buffer locked with `noia_drm_gbm_lock_surface`.
-/// @see noia_drm_gbm_lock_surface
+/// Begin drawing.
+/// Nothing to do so far.
 NoiaResult noia_drm_output_begin_drawing(NoiaOutput* output)
 {
     NoiaOutputDRM* output_drm = (NoiaOutputDRM*) output;
     NOIA_ENSURE(output_drm, return NOIA_RESULT_INCORRECT_ARGUMENT);
-
-    if (output_drm->gbm_surface and output_drm->gbm_bo) {
-        gbm_surface_release_buffer(output_drm->gbm_surface, output_drm->gbm_bo);
-    }
-
     return NOIA_RESULT_SUCCESS;
 }
 
@@ -389,8 +386,8 @@ NoiaResult noia_drm_output_end_drawing(NoiaOutput* output)
     NoiaResult result = NOIA_RESULT_ERROR;
 
     int32_t fb = output_drm->gbm_surface
-               ? noia_drm_gbm_lock_surface(output_drm)
-               : noia_drm_output_swap_buffers(output_drm);
+               ? noia_drm_output_swap_gbm_surfaces(output_drm)
+               : noia_drm_output_swap_dumb_buffers(output_drm);
 
     int r = drmModeSetCrtc(output_drm->fd,
                            output_drm->crtc_id,

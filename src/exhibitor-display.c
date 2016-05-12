@@ -122,7 +122,6 @@ void noia_display_setup_layout_context(NoiaDisplay* self,
 //------------------------------------------------------------------------------
 
 /// Prepare context for drawing the whole scene and pass it to the renderer.
-/// @todo Is order of calling renderer method for GL renderer correct?
 void noia_display_redraw_all(NoiaDisplay* self)
 {
     noia_frame_to_array(noia_frame_get_last(self->frame),
@@ -136,21 +135,10 @@ void noia_display_redraw_all(NoiaDisplay* self)
     NoiaLayoutContext layout_context;
     noia_display_setup_layout_context(self, pointer, &layout_context);
 
-    self->output->renderer->draw(self->output->renderer,
-                                 self->visible_surfaces,
-                                 &layout_context);
-
-    if (self->output->renderer->swap_buffers) {
-        self->output->renderer->swap_buffers(self->output->renderer);
-    }
-
-    if (self->output->begin_drawing) {
-        self->output->begin_drawing(self->output);
-    }
-
-    if (self->output->end_drawing) {
-        self->output->end_drawing(self->output);
-    }
+    noia_output_begin_drawing(self->output);
+    noia_output_draw(self->output, self->visible_surfaces, &layout_context);
+    noia_output_swap_buffers(self->output);
+    noia_output_end_drawing(self->output);
 
     unsigned i;
     NoiaSurfaceContext* context;
