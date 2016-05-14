@@ -29,7 +29,7 @@ void noia_wayland_output_bind(struct wl_client* client,
     struct wl_resource* rc;
     NoiaOutput* output = (NoiaOutput*) data;
 
-    LOG_NYIMP("Binding Wayland output (version: %d, id: %d)", version, id);
+    LOG_WAYL2("Binding Wayland output (version: %d, id: %d)", version, id);
 
     if (!output) {
         LOG_WARN1("Invalid output!");

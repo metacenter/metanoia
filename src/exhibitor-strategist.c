@@ -24,9 +24,6 @@ void noia_strategist_default_on_surface_ready(NoiaExhibitor* exhibitor,
         NoiaList* history = noia_exhibitor_get_surface_history(exhibitor);
         noia_list_prepend(history, (void*) sid);
     }
-
-    /// @todo Focus changing should be done in compositor strategy.
-    noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
 }
 
 //------------------------------------------------------------------------------
@@ -35,9 +32,6 @@ void noia_strategist_default_on_surface_destroyed
                                           (NoiaExhibitor* exhibitor NOIA_UNUSED,
                                            NoiaSurfaceId sid        NOIA_UNUSED)
 {
-    /// @todo Move to compositor strategy
-    noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED,
-                               scInvalidSurfaceId);
 }
 
 //------------------------------------------------------------------------------

@@ -20,6 +20,13 @@ typedef enum {
                            | NOIA_SURFACE_SHOW_IN_SHELL,
 } NoiaSurfaceShowReason;
 
+typedef enum {
+    NOIA_SURFACE_STATE_MAXIMIZED  = 0x1,
+    NOIA_SURFACE_STATE_FULLSCREEN = 0x2,
+    NOIA_SURFACE_STATE_RESIZING   = 0x3,
+    NOIA_SURFACE_STATE_ACTIVATED  = 0x4,
+} NoiaSurfaceState;
+
 /// Container for all data required to draw the surface.
 typedef struct {
     int width;
@@ -49,6 +56,9 @@ typedef struct {
 
     /// Data to be used after commit.
     NoiaDrawBuffer pending_buffer;
+
+    /// Flags describing logical state of surface
+    uint8_t state_flags;
 
     /// Flags indicating if surface is ready to be shown.
     uint8_t show_flags;

@@ -65,7 +65,8 @@ void noia_frame_set_surface(NoiaFrame* self,
     // Resize to requested size
     if (sid != scInvalidSurfaceId) {
         NoiaSize size = {INT_MIN, INT_MIN};
-        noia_surface_set_desired_size(coordinator, sid, size);
+        noia_surface_reconfigure(coordinator, sid, size,
+                                 NOIA_SURFACE_STATE_MAXIMIZED);
     }
 }
 
@@ -78,7 +79,8 @@ void noia_frame_set_size(NoiaFrame* self,
     NoiaFrameParams* params = noia_frame_get_params(self);
     NoiaSize old_size = params->area.size;
     params->area.size = size;
-    noia_surface_set_desired_size(coordinator, params->sid, size);
+    noia_surface_reconfigure(coordinator, params->sid, size,
+                             NOIA_SURFACE_STATE_MAXIMIZED);
 
     if (noia_frame_has_type(self, NOIA_FRAME_TYPE_VERTICAL)) {
         if (old_size.height == size.height) {
@@ -191,9 +193,10 @@ void noia_frame_reconfigure(NoiaFrame* self,
     params->area.size.height += area.size.height;
 
     if (params->sid != scInvalidSurfaceId) {
-        noia_surface_set_desired_size(coordinator,
-                                      params->sid,
-                                      params->area.size);
+        noia_surface_reconfigure(coordinator,
+                                 params->sid,
+                                 params->area.size,
+                                 NOIA_SURFACE_STATE_MAXIMIZED);
     } else if (self->twigs and (noia_chain_len(self->twigs) != 0)) {
         int num_twigs = noia_chain_len(self->twigs);
         NoiaSize increment = {0, 0};

@@ -20,7 +20,7 @@
 ///  - 5 - not important, but worth logging
 
 #define LEVEL_ERROR "ERROR"
-#define LEVEL_NYIMP 0
+#define LEVEL_NYIMP "NYIMP"
 #define LEVEL_DEBUG "DEBUG"
 #define LEVEL_CONFG "CONFG"
 #define LEVEL_STATS "STATS"
@@ -30,16 +30,16 @@
 #define LEVEL_WARN2 "WARN2"
 #define LEVEL_INFO2 "INFO2"
 #define LEVEL_WAYL2 "WAYL2"
-#define LEVEL_EVNT2 0
+#define LEVEL_EVNT2 NULL
 #define LEVEL_WARN3 "WARN3"
-#define LEVEL_INFO3 0
-#define LEVEL_WAYL3 0
-#define LEVEL_EVNT3 0
-#define LEVEL_WARN4 0
-#define LEVEL_INFO4 0
-#define LEVEL_WAYL4 0
-#define LEVEL_EVNT4 0
-#define LEVEL_WAYL5 0
+#define LEVEL_INFO3 NULL
+#define LEVEL_WAYL3 NULL
+#define LEVEL_EVNT3 NULL
+#define LEVEL_WARN4 NULL
+#define LEVEL_INFO4 NULL
+#define LEVEL_WAYL4 NULL
+#define LEVEL_EVNT4 NULL
+#define LEVEL_WAYL5 NULL
 
 #define NOIA_LOG(L, ...) \
      do{if(LEVEL_##L)noia_log(LEVEL_##L,__LINE__,__FILE__,__VA_ARGS__);}while(0)

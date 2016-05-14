@@ -48,9 +48,10 @@ void noia_coordinator_mock_free(NoiaCoordinator* mock)
 
 //------------------------------------------------------------------------------
 
-void noia_surface_set_desired_size(NoiaCoordinator* mock,
-                                   NoiaSurfaceId sid,
-                                   NoiaSize size)
+void noia_surface_reconfigure(NoiaCoordinator* mock,
+                              NoiaSurfaceId sid,
+                              NoiaSize size,
+                              uint8_t state_flags NOIA_UNUSED)
 {
     NoiaMockSurfaceData* data = noia_store_find(mock->surfaces, sid);
     if (not data) {

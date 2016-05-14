@@ -230,8 +230,6 @@ void noia_wayland_state_keyboard_focus_update(NoiaSurfaceId new_sid)
     pthread_mutex_lock(&sStateMutex);
 
     NoiaSurfaceId old_sid = sState.keyboard_focused_sid;
-    LOG_WAYL2("Wayland < keyboard focus update (oldsid: %u, newsid: %u)",
-              old_sid, new_sid);
 
     new_resource = noia_wayland_state_get_rc_for_sid(new_sid);
     if (new_resource) {
@@ -245,6 +243,9 @@ void noia_wayland_state_keyboard_focus_update(NoiaSurfaceId new_sid)
 
     // Check if new and old clients are different
     if (new_client != old_client) {
+        LOG_WAYL2("Wayland < keyboard focus update "
+                  "(oldsid: %u, newsid: %u)", old_sid, new_sid);
+
         // Clear current client
         sState.keyboard_focused_sid = scInvalidItemId;
 
@@ -268,7 +269,11 @@ void noia_wayland_state_keyboard_focus_update(NoiaSurfaceId new_sid)
         // Update current client
         sState.keyboard_focused_sid = new_sid;
     }
+
     pthread_mutex_unlock(&sStateMutex);
+
+    noia_wayland_state_surface_reconfigured(old_sid);
+    noia_wayland_state_surface_reconfigured(new_sid);
 }
 
 //------------------------------------------------------------------------------
@@ -545,7 +550,17 @@ void noia_wayland_state_surface_reconfigured(NoiaSurfaceId sid)
             /// @todo Implement resizing for Wayland shell
         } else if (xdg_shell_surface_rc) {
             struct wl_array states;
+            uint32_t* s;
             wl_array_init(&states);
+            if (data->state_flags & NOIA_SURFACE_STATE_MAXIMIZED) {
+                s = wl_array_add(&states, sizeof(*s));
+                *s = XDG_SURFACE_STATE_MAXIMIZED;
+            }
+            if (data->state_flags & NOIA_SURFACE_STATE_ACTIVATED) {
+                s = wl_array_add(&states, sizeof(*s));
+                *s = XDG_SURFACE_STATE_ACTIVATED;
+            }
+
             int serial = wl_display_next_serial(sState.display);
             xdg_surface_send_configure(xdg_shell_surface_rc,
                                        data->desired_size.width,

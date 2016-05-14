@@ -50,13 +50,16 @@ void noia_surface_show(NoiaCoordinator* coordinator,
                        NoiaSurfaceId sid,
                        NoiaSurfaceShowReason reason);
 
+void noia_surface_reconfigure(NoiaCoordinator* coordinator,
+                              NoiaSurfaceId sid,
+                              NoiaSize size,
+                              uint8_t state_flags);
+
+void noia_surface_set_focus(NoiaCoordinator* coordinator, NoiaSurfaceId sid);
+
 void noia_surface_set_offset(NoiaCoordinator* coordinator,
                              NoiaSurfaceId sid,
                              NoiaPosition offset);
-
-void noia_surface_set_desired_size(NoiaCoordinator* coordinator,
-                                   NoiaSurfaceId sid,
-                                   NoiaSize size);
 
 void noia_surface_set_requested_size(NoiaCoordinator* coordinator,
                                      NoiaSurfaceId sid,

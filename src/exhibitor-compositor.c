@@ -43,7 +43,9 @@ void noia_compositor_set_selection(NoiaCompositor* self, NoiaFrame* frame)
         self->selection = frame;
     }
 
-    noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, sid);
+    if (sid != scInvalidSurfaceId) {
+        noia_surface_set_focus(self->coordinator, sid);
+    }
 }
 
 //------------------------------------------------------------------------------

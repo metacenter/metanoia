@@ -25,6 +25,7 @@
 struct NoiaCoordinatorStruct {
     NoiaStore* surfaces;
     NoiaMiliseconds last_notify_time;
+    NoiaSurfaceId kfsid;
     pthread_mutex_t surface_mutex;
 };
 
@@ -36,6 +37,7 @@ NoiaCoordinator* noia_coordinator_new()
 
     self->surfaces = noia_store_new_for_id();
     self->last_notify_time = 0;
+    self->kfsid = scInvalidSurfaceId;
     pthread_mutex_init(&self->surface_mutex, NULL);
 
     return self;
@@ -218,19 +220,10 @@ void noia_surface_show(NoiaCoordinator* coordinator,
 
 //------------------------------------------------------------------------------
 
-void noia_surface_set_offset(NoiaCoordinator* coordinator,
-                             NoiaSurfaceId sid,
-                             NoiaPosition offset)
-{
-    NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
-    surface->offset = offset;
-}
-
-//------------------------------------------------------------------------------
-
-void noia_surface_set_desired_size(NoiaCoordinator* coordinator,
-                                   NoiaSurfaceId sid,
-                                   NoiaSize size)
+void noia_surface_reconfigure(NoiaCoordinator* coordinator,
+                              NoiaSurfaceId sid,
+                              NoiaSize size,
+                              uint8_t state_flags)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
 
@@ -239,10 +232,47 @@ void noia_surface_set_desired_size(NoiaCoordinator* coordinator,
     }
 
     if ((surface->desired_size.width != size.width)
-    or  (surface->desired_size.height != size.height)) {
+    or  (surface->desired_size.height != size.height)
+    or  (surface->state_flags != state_flags)) {
         surface->desired_size = size;
+        surface->state_flags = state_flags;
         noia_event_signal_emit_int(SIGNAL_SURFACE_RECONFIGURED, sid);
     }
+}
+
+//------------------------------------------------------------------------------
+
+void noia_surface_set_focus(NoiaCoordinator* coordinator, NoiaSurfaceId new_sid)
+{
+    noia_coordinator_lock_surfaces(coordinator);
+
+    NoiaSurfaceId old_sid = coordinator->kfsid;
+    if (old_sid != new_sid) {
+        NoiaSurfaceData* old_surface = noia_surface_get(coordinator, old_sid);
+        NoiaSurfaceData* new_surface = noia_surface_get(coordinator, new_sid);
+
+        if (old_surface) {
+            old_surface->state_flags &= (~NOIA_SURFACE_STATE_ACTIVATED);
+        }
+        if (new_surface) {
+            new_surface->state_flags |= NOIA_SURFACE_STATE_ACTIVATED;
+        }
+
+        coordinator->kfsid = new_sid;
+        noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, new_sid);
+    }
+
+    noia_coordinator_unlock_surfaces(coordinator);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_surface_set_offset(NoiaCoordinator* coordinator,
+                             NoiaSurfaceId sid,
+                             NoiaPosition offset)
+{
+    NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+    surface->offset = offset;
 }
 
 //------------------------------------------------------------------------------
