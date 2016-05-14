@@ -56,12 +56,14 @@ void noia_frame_set_position(NoiaFrame* self, NoiaPosition position);
 /// Add child frame to ending.
 /// If `self` has twigs add `other` to them.
 /// If not, add to subframes of its trunk.
-void noia_frame_append(NoiaFrame* self, NoiaFrame* other);
+/// @return frame to which `other` was appended.
+NoiaFrame* noia_frame_append(NoiaFrame* self, NoiaFrame* other);
 
 /// Add child frame to beginning.
 /// If `self` has twigs add `other` to them.
 /// If not, add to subframes of its trunk.
-void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other);
+/// @return frame to which `other` was prepended.
+NoiaFrame* noia_frame_prepend(NoiaFrame* self, NoiaFrame* other);
 
 /// Insert `other` to twigs of `self`'s trunk just before `self`.
 static inline void noia_frame_insert_before(NoiaFrame* self, NoiaFrame* other)

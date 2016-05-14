@@ -20,7 +20,12 @@ static const NoiaConfig scConfig = {
         .background_image_transform = NOIA_BG_TRANS_REPEAT,
 
         // Color of background not covered with background image.
-        .background_color = {.b=0x21, .g=0x21, .r=0x21, .a=0xFF}
+        .background_color = {.b=0x21, .g=0x21, .r=0x21, .a=0xFF},
+
+        // Default type of workspace.
+        // Available: NOIA_FRAME_TYPE_NONE, NOIA_FRAME_TYPE_STACKED,
+        // NOIA_FRAME_TYPE_VERTICAL, NOIA_FRAME_TYPE_HORIZONTAL
+        .workspace_type = NOIA_FRAME_TYPE_HORIZONTAL
     };
 
 static const NoiaBinding scBindingsCommon[] = {

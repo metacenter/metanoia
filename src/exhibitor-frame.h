@@ -27,6 +27,8 @@ typedef struct {
     NoiaFramePosition position;
 } NoiaFrameIterator;
 
+//------------------------------------------------------------------------------
+
 /// Create new frame.
 NoiaFrame* noia_frame_new(void);
 
@@ -45,6 +47,8 @@ void noia_frame_configure(NoiaFrame* self,
 /// @see noia_display_redraw_all
 void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces);
 
+//------------------------------------------------------------------------------
+
 /// Check if frame has compatible type.
 bool noia_frame_has_type(NoiaFrame* self, NoiaFrameType type);
 
@@ -56,6 +60,8 @@ NoiaSurfaceId noia_frame_get_sid(NoiaFrame* self);
 
 /// Get frame area.
 NoiaArea noia_frame_get_area(NoiaFrame* self);
+
+//------------------------------------------------------------------------------
 
 /// Swap surface ID of given frames.
 /// This does not rearrange frames.
@@ -90,14 +96,16 @@ NoiaResult noia_frame_remove_self(NoiaFrame* self);
 /// Remove frame `self` from its current trunk and insert to frame `target`.
 /// @todo Add unit tests.
 NoiaResult noia_frame_jump(NoiaFrame* self,
-                           NoiaCoordinator* coordinator,
-                           NoiaFrame* target);
+                           NoiaFrame* target,
+                           NoiaCoordinator* coordinator);
 
 /// Insert frame `self` in frame `target`.
 /// @todo Add unit tests.
 NoiaResult noia_frame_jumpin(NoiaFrame* self,
-                             NoiaCoordinator* coordinator,
-                             NoiaFrame* target);
+                             NoiaFrame* target,
+                             NoiaCoordinator* coordinator);
+
+//------------------------------------------------------------------------------
 
 /// Find a frame holding surface with given ID.
 NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid);
@@ -116,9 +124,14 @@ NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
                                     NoiaArgmand direction,
                                     unsigned distance);
 
+//------------------------------------------------------------------------------
+
 /// Find first trunk which type has NOIA_FRAME_TYPE_SPECIAL.
 /// For normal frame this should be workspace.
 NoiaFrame* noia_frame_find_top(NoiaFrame* self);
+
+/// Find first trunk which type has not type NOIA_FRAME_TYPE_LEAF.
+NoiaFrame* noia_frame_buildable(NoiaFrame* self);
 
 /// Return parent of the frame.
 NoiaFrame* noia_frame_get_parent(NoiaFrame* self);
@@ -129,6 +142,8 @@ NoiaFrame* noia_frame_get_first(NoiaFrame* self);
 /// Return last (most recently used) subframe.
 NoiaFrame* noia_frame_get_last(NoiaFrame* self);
 
+//------------------------------------------------------------------------------
+
 /// Initialize iterator.
 void noia_frame_start_iteration(NoiaFrameIterator* iter,
                                 NoiaFrame* frame,
@@ -137,8 +152,12 @@ void noia_frame_start_iteration(NoiaFrameIterator* iter,
 /// Iterate through Frames.
 void noia_frame_iterate(NoiaFrameIterator* iter);
 
+//------------------------------------------------------------------------------
+
 /// Print frame tree to log file.
 void noia_frame_log(NoiaFrame* self, NoiaPrintFunc print, NoiaFrame* selection);
+
+//------------------------------------------------------------------------------
 
 #endif // NOIA_EXHIBITOR_FRAME_H
 

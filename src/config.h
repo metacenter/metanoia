@@ -15,6 +15,7 @@ typedef struct {
     const char* background_image_path;
     NoiaBGTransform background_image_transform;
     NoiaColor background_color;
+    NoiaFrameType workspace_type;
 } NoiaConfig;
 
 /// Keeps information about variable internal application configuration.

@@ -7,6 +7,7 @@
 #include "surface-coordinator.h"
 #include "event-signals.h"
 #include "utils-log.h"
+#include "config.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -77,10 +78,12 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
 
     // Create and configure workspace
     NoiaFrame* workspace = noia_frame_new();
-    noia_frame_configure(workspace, self->coordinator,
-                         NOIA_FRAME_TYPE_WORKSPACE, 0,
+    NoiaFrameType type = NOIA_FRAME_TYPE_WORKSPACE
+                       | noia_config()->workspace_type;
+
+    noia_frame_configure(workspace, self->coordinator, type, 0,
                          noia_frame_get_area(display), title);
-    noia_frame_jumpin(display, self->coordinator, workspace);
+    noia_frame_jumpin(display, workspace, self->coordinator);
 
     /// @todo Focusing new workspace should be configurable
     noia_compositor_set_selection(self, workspace);
@@ -157,7 +160,7 @@ NoiaFrame* noia_compositor_create_new_display(NoiaCompositor* self,
     NoiaFrame* display = noia_frame_new();
     noia_frame_configure(display, self->coordinator,
                          NOIA_FRAME_TYPE_DISPLAY, 0, area, title);
-    noia_frame_jumpin(self->root, self->coordinator, display);
+    noia_frame_jumpin(self->root, display, self->coordinator);
     return display;
 }
 
@@ -200,14 +203,17 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     NoiaSurfaceData* surface = noia_surface_get(self->coordinator, sid);
     NOIA_ENSURE(surface, return false);
 
-    /// @todo Frame type, size and position should be configurable.
+    NoiaFrame* target = noia_frame_buildable(self->selection);
+
+    NoiaFrameType type =
+      (noia_frame_has_type(target, NOIA_FRAME_TYPE_DIRECTED)
+      ? NOIA_FRAME_TYPE_NONE : NOIA_FRAME_TYPE_FLOATING) | NOIA_FRAME_TYPE_LEAF;
+
     NoiaFrame* frame = noia_frame_new();
     NoiaArea area = {{0,0}, surface->requested_size};
-    noia_frame_configure(frame, self->coordinator,
-                         NOIA_FRAME_TYPE_FLOATING | NOIA_FRAME_TYPE_LEAF,
-                         sid, area, NULL);
+    noia_frame_configure(frame, self->coordinator, type, sid, area, NULL);
 
-    noia_frame_jumpin(self->selection, self->coordinator, frame);
+    noia_frame_jumpin(target, frame, self->coordinator);
     /// @todo This should be configurable
     noia_compositor_set_selection(self, frame);
 
@@ -278,7 +284,7 @@ void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
 
     NoiaFrame* workspace = noia_compositor_bring_workspace(self, title);
     if (workspace) {
-        noia_frame_jump(self->selection, self->coordinator, workspace);
+        noia_frame_jump(self->selection, workspace, self->coordinator);
     } else {
         LOG_WARN1("Compositor: Workspace '%s' not found "
                   "and could not be created!", title);
@@ -409,6 +415,8 @@ void noia_compositor_configure(NoiaCompositor* self,
         break;
     }
 
+    LOG_INFO2("Compositor: Change frame type to 0x%04x", type);
+
     // Change frame type
     if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
         /// @todo: Create new frame at trunk and resettle selection.
@@ -437,7 +445,7 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
             break;
         }
 
-        noia_frame_jump(frame, self->coordinator, workspace);
+        noia_frame_jump(frame, workspace, self->coordinator);
     }
     noia_compositor_log_frame(self);
 }

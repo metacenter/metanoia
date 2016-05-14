@@ -244,8 +244,8 @@ NoiaResult noia_frame_remove_self(NoiaFrame* self)
 //------------------------------------------------------------------------------
 
 NoiaResult noia_frame_jump(NoiaFrame* self,
-                           NoiaCoordinator* coordinator,
-                           NoiaFrame* target)
+                           NoiaFrame* target,
+                           NoiaCoordinator* coordinator)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
     NOIA_ENSURE(self->trunk, return NOIA_RESULT_INCORRECT_ARGUMENT);
@@ -264,11 +264,10 @@ NoiaResult noia_frame_jump(NoiaFrame* self,
 //------------------------------------------------------------------------------
 
 NoiaResult noia_frame_jumpin(NoiaFrame* self,
-                             NoiaCoordinator* coordinator,
-                             NoiaFrame* target)
+                             NoiaFrame* target,
+                             NoiaCoordinator* coordinator)
 {
-    noia_frame_append(self, target);
-    noia_frame_relax(target, coordinator);
+    noia_frame_relax(noia_frame_append(self, target), coordinator);
     return NOIA_RESULT_SUCCESS;
 }
 
@@ -403,6 +402,14 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self)
         frame = frame->trunk;
     }
     return frame;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_frame_buildable(NoiaFrame* self)
+{
+    return (noia_frame_get_params(self)->sid == scInvalidSurfaceId)
+         ? self : self->trunk;
 }
 
 //------------------------------------------------------------------------------

@@ -122,30 +122,26 @@ void noia_frame_set_position(NoiaFrame* self, NoiaPosition position)
 
 //------------------------------------------------------------------------------
 
-void noia_frame_append(NoiaFrame* self, NoiaFrame* other)
+NoiaFrame* noia_frame_append(NoiaFrame* self, NoiaFrame* other)
 {
-    NOIA_ENSURE(self, return);
-    NOIA_ENSURE(other, return);
+    NOIA_ENSURE(self, return NULL);
+    NOIA_ENSURE(other, return NULL);
 
-    if (noia_frame_get_params(self)->sid == scInvalidSurfaceId) {
-        noia_branch_append(self, other);
-    } else {
-        noia_branch_append(self->trunk, other);
-    }
+    NoiaFrame* target = noia_frame_buildable(self);
+    noia_branch_append(target, other);
+    return target;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_frame_prepend(NoiaFrame* self, NoiaFrame* other)
+NoiaFrame* noia_frame_prepend(NoiaFrame* self, NoiaFrame* other)
 {
-    NOIA_ENSURE(self, return);
-    NOIA_ENSURE(other, return);
+    NOIA_ENSURE(self, return NULL);
+    NOIA_ENSURE(other, return NULL);
 
-    if (noia_frame_get_params(self)->sid == scInvalidSurfaceId) {
-        noia_branch_prepend(self, other);
-    } else {
-        noia_branch_prepend(self->trunk, other);
-    }
+    NoiaFrame* target = noia_frame_buildable(self);
+    noia_branch_prepend(target, other);
+    return target;
 }
 
 //------------------------------------------------------------------------------
@@ -357,7 +353,7 @@ void noia_frame_log_internal(NoiaFrame* self,
         print("    ");
     }
 
-    print("NoiaFrame(type='0x%x', sid='%d', len='%d', "
+    print("NoiaFrame(type='0x%04x', sid='%d', len='%d', "
           "x='%d', y='%d', w='%d', h='%d', title='%s')%s\n",
           params->type, params->sid, noia_chain_len(self->twigs),
           params->area.pos.x, params->area.pos.y,
