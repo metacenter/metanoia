@@ -39,6 +39,7 @@ void noia_frame_free(NoiaFrame* self)
 //------------------------------------------------------------------------------
 
 void noia_frame_configure(NoiaFrame* self,
+                          NoiaCoordinator* coordinator,
                           NoiaFrameType type,
                           NoiaSurfaceId sid,
                           NoiaArea area,
@@ -48,7 +49,7 @@ void noia_frame_configure(NoiaFrame* self,
     params->type = type;
     params->area = area;
     params->title = (title ? strdup(title) : NULL);
-    noia_frame_set_surface(self, sid);
+    noia_frame_set_surface(self, coordinator, sid);
 }
 
 //------------------------------------------------------------------------------
@@ -104,7 +105,9 @@ NoiaArea noia_frame_get_area(NoiaFrame* self)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame)
+NoiaResult noia_frame_swap(NoiaFrame* self,
+                           NoiaFrame* frame,
+                           NoiaCoordinator* coordinator)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
     NOIA_ENSURE(frame, return NOIA_RESULT_INCORRECT_ARGUMENT);
@@ -119,8 +122,8 @@ NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame)
     if ((param1->area.size.width  != param2->area.size.width)
     or  (param1->area.size.height != param2->area.size.height)) {
         /// @todo Use set_desired_size
-        noia_frame_set_size(self,  param1->area.size);
-        noia_frame_set_size(frame, param2->area.size);
+        noia_frame_set_size(self,  coordinator, param1->area.size);
+        noia_frame_set_size(frame, coordinator, param2->area.size);
     }
 
     return NOIA_RESULT_SUCCESS;
@@ -129,6 +132,7 @@ NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame)
 //------------------------------------------------------------------------------
 
 void noia_frame_resize(NoiaFrame* self,
+                       NoiaCoordinator* coordinator,
                        NoiaArgmand border,
                        int magnitude)
 {
@@ -151,9 +155,9 @@ void noia_frame_resize(NoiaFrame* self,
     // Resize using proper algorithm
     NoiaFrame* trunk = resizee->trunk;
     if (noia_frame_has_type(trunk, type)) {
-        noia_frame_resize_anchored(resizee, border, magnitude);
+        noia_frame_resize_anchored(resizee, coordinator, border, magnitude);
     } else if (not noia_frame_has_type(trunk, NOIA_FRAME_TYPE_SPECIAL)) {
-        noia_frame_resize_floating(trunk, border, magnitude);
+        noia_frame_resize_floating(trunk, coordinator, border, magnitude);
     } else {
         // Special frames can't be resized anyway...
     }
@@ -192,7 +196,9 @@ void noia_frame_move(NoiaFrame* self,
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type)
+NoiaResult noia_frame_change_type(NoiaFrame* self,
+                                  NoiaCoordinator* coordinator,
+                                  NoiaFrameType type)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
@@ -200,7 +206,7 @@ NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type)
     params->type &= (~NOIA_FRAME_TYPE_DIRECTED);
     params->type |= type;
 
-    noia_frame_relax(self);
+    noia_frame_relax(self, coordinator);
 
     return NOIA_RESULT_SUCCESS;
 }
@@ -237,17 +243,19 @@ NoiaResult noia_frame_remove_self(NoiaFrame* self)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_frame_jump(NoiaFrame* self, NoiaFrame* target)
+NoiaResult noia_frame_jump(NoiaFrame* self,
+                           NoiaCoordinator* coordinator,
+                           NoiaFrame* target)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
     NOIA_ENSURE(self->trunk, return NOIA_RESULT_INCORRECT_ARGUMENT);
     NOIA_ENSURE(target, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
     NoiaFrame* source = self->trunk;
-    NoiaResult result = noia_frame_resettle(self, target);
+    NoiaResult result = noia_frame_resettle(self, target, coordinator);
     if (result == NOIA_RESULT_SUCCESS) {
-        noia_frame_relax(source);
-        noia_frame_relax(target);
+        noia_frame_relax(source, coordinator);
+        noia_frame_relax(target, coordinator);
     }
 
     return result;
@@ -255,10 +263,12 @@ NoiaResult noia_frame_jump(NoiaFrame* self, NoiaFrame* target)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_frame_jumpin(NoiaFrame* self, NoiaFrame* target)
+NoiaResult noia_frame_jumpin(NoiaFrame* self,
+                             NoiaCoordinator* coordinator,
+                             NoiaFrame* target)
 {
     noia_frame_append(self, target);
-    noia_frame_relax(target);
+    noia_frame_relax(target, coordinator);
     return NOIA_RESULT_SUCCESS;
 }
 

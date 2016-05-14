@@ -4,7 +4,7 @@
 
 #include "renderer-mmap.h"
 
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 #include "utils-log.h"
 #include "global-macros.h"
 
@@ -57,12 +57,13 @@ void noia_renderer_mmap_finalize(NoiaRenderer* self NOIA_UNUSED)
 /// This is subroutine of `noia_renderer_mmap_draw_surfaces`.
 /// @see noia_renderer_mmap_draw_surfaces
 void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
+                                     NoiaCoordinator* coordinator,
                                      NoiaSurfaceContext* context)
 {
     NOIA_ENSURE(mine, return);
     NOIA_ENSURE(context, return);
 
-    NoiaSurfaceData* surface = noia_surface_get(context->sid);
+    NoiaSurfaceData* surface = noia_surface_get(coordinator, context->sid);
     if (not surface) {
         return;
     }
@@ -104,11 +105,12 @@ void noia_renderer_mmap_draw_surface(NoiaRendererMMap* mine,
 /// @see noia_renderer_mmap_draw
 /// @todo Parameter `transform` should not be ignored.
 void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine,
+                                      NoiaCoordinator* coordinator,
                                       NoiaSurfaceId background_sid,
                                       NoiaBGTransform transform NOIA_UNUSED,
                                       NoiaColor color)
 {
-    NoiaSurfaceData* surface = noia_surface_get(background_sid);
+    NoiaSurfaceData* surface = noia_surface_get(coordinator, background_sid);
     if (surface) {
         // Draw background color
         int current_buffer = mine->front ^ 1;
@@ -129,7 +131,7 @@ void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine,
         context.pos.x = (W - surface->buffer.width) / 2;
         context.pos.y = (H - surface->buffer.height) / 2;
 
-        noia_renderer_mmap_draw_surface(mine, &context);
+        noia_renderer_mmap_draw_surface(mine, coordinator, &context);
     }
 }
 
@@ -140,6 +142,7 @@ void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine,
 /// @note MMap renderer can not display surfaces passed trouhgt GPU.
 /// @see noia_renderer_mmap_draw noia_renderer_mmap_draw_surface
 void noia_renderer_mmap_draw_surfaces(NoiaRendererMMap* mine,
+                                      NoiaCoordinator* coordinator,
                                       NoiaPool* surfaces)
 {
     if (surfaces == NULL) {
@@ -150,7 +153,7 @@ void noia_renderer_mmap_draw_surfaces(NoiaRendererMMap* mine,
     unsigned i;
     NoiaSurfaceContext* context;
     NOIA_ITERATE_POOL(surfaces, i, context) {
-        noia_renderer_mmap_draw_surface(mine, context);
+        noia_renderer_mmap_draw_surface(mine, coordinator, context);
     }
 }
 
@@ -160,10 +163,11 @@ void noia_renderer_mmap_draw_surfaces(NoiaRendererMMap* mine,
 /// This is subroutine of `noia_renderer_mmap_draw`.
 /// @see noia_renderer_mmap_draw, noia_renderer_mmap_draw_surface
 void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
+                                     NoiaCoordinator* coordinator,
                                      NoiaSurfaceContext* context)
 {
     if (context->sid != scInvalidSurfaceId) {
-        noia_renderer_mmap_draw_surface(mine, context);
+        noia_renderer_mmap_draw_surface(mine, coordinator, context);
     }
 }
 
@@ -172,8 +176,8 @@ void noia_renderer_mmap_draw_pointer(NoiaRendererMMap* mine,
 /// Draw whole the scene.
 /// @see noia_renderer_gl_draw_bg_image, noia_renderer_gl_draw_surfaces,
 ///      noia_renderer_gl_draw_pointer
-
 void noia_renderer_mmap_draw(NoiaRenderer* self,
+                             NoiaCoordinator* coordinator,
                              NoiaPool* surfaces,
                              NoiaLayoutContext* context)
 {
@@ -182,13 +186,14 @@ void noia_renderer_mmap_draw(NoiaRenderer* self,
     NOIA_ENSURE(context, return);
 
     noia_renderer_mmap_draw_bg_image(mine,
+                                     coordinator,
                                      context->background_sid,
                                      context->background_transform,
                                      context->background_color);
 
-    noia_renderer_mmap_draw_surfaces(mine, surfaces);
+    noia_renderer_mmap_draw_surfaces(mine, coordinator, surfaces);
 
-    noia_renderer_mmap_draw_pointer(mine, &context->pointer);
+    noia_renderer_mmap_draw_pointer(mine, coordinator, &context->pointer);
 }
 
 //------------------------------------------------------------------------------

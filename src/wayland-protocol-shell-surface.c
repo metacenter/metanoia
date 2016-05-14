@@ -4,8 +4,8 @@
 
 #include "wayland-protocol-shell-surface.h"
 #include "wayland-cache.h"
+#include "wayland-state.h"
 
-#include "surface-manager.h"
 #include "utils-log.h"
 
 //------------------------------------------------------------------------------
@@ -174,12 +174,10 @@ void noia_wayland_shell_surface_bind(struct wl_client* client,
     rc = wl_resource_create(client, &wl_shell_surface_interface, version, id);
     NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
 
-    noia_wayland_cache_add_surface_resource
-                                   (sid, NOIA_RESOURCE_SHELL_SURFACE, rc);
-    noia_surface_show(sid, NOIA_SURFACE_SHOW_IN_SHELL);
+    wl_resource_set_implementation(rc, &scShellSurfaceImplementation, data,
+                                   noia_wayland_shell_surface_unbind);
 
-    wl_resource_set_implementation(rc, &scShellSurfaceImplementation,
-                                   data, noia_wayland_shell_surface_unbind);
+    noia_wayland_state_add_shell_surface(sid, NOIA_RESOURCE_SHELL_SURFACE, rc);
 }
 
 //------------------------------------------------------------------------------

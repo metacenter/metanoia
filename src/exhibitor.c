@@ -8,7 +8,7 @@
 #include "exhibitor-pointer.h"
 
 #include "utils-log.h"
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -22,19 +22,21 @@ struct NoiaExhibitorStruct {
     NoiaCompositor* compositor;
     NoiaStrategist* strategist;
     NoiaPointer* pointer;
+    NoiaCoordinator* coordinator;
 };
 
 //------------------------------------------------------------------------------
 
-NoiaExhibitor* noia_exhibitor_new(void)
+NoiaExhibitor* noia_exhibitor_new(NoiaCoordinator* coordinator)
 {
     NoiaExhibitor* self = malloc(sizeof(NoiaExhibitor));
 
+    self->coordinator = coordinator;
     self->surface_history = noia_list_new(NULL);
     self->displays = noia_list_new((NoiaFreeFunc) noia_display_free);
     self->compositor = noia_compositor_new(self);
     self->strategist = noia_strategist_new();
-    self->pointer = noia_exhibitor_pointer_new();
+    self->pointer = noia_exhibitor_pointer_new(self);
 
     return self;
 }
@@ -96,6 +98,13 @@ NoiaCompositor* noia_exhibitor_get_compositor(NoiaExhibitor* self)
 NoiaPointer* noia_exhibitor_get_pointer(NoiaExhibitor* self)
 {
     return self->pointer;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaCoordinator* noia_exhibitor_get_coordinator(NoiaExhibitor* self)
+{
+    return self->coordinator;
 }
 
 //------------------------------------------------------------------------------

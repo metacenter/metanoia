@@ -4,9 +4,9 @@
 
 #include "wayland-protocol-xdg-surface.h"
 #include "wayland-cache.h"
+#include "wayland-state.h"
 
 #include "utils-log.h"
-#include "surface-manager.h"
 #include "global-macros.h"
 
 #include "xdg-shell-server-protocol.h"
@@ -133,7 +133,7 @@ void noia_wayland_xdg_surface_set_window_geometry
                sid, x, y, width, height);
 
     NoiaSize size = {width, height};
-    noia_surface_set_requested_size(sid, size);
+    noia_wayland_state_surface_set_requested_size(sid, size);
 }
 
 //------------------------------------------------------------------------------
@@ -221,12 +221,11 @@ void noia_wayland_xdg_surface_bind(struct wl_client* client,
     rc = wl_resource_create(client, &xdg_surface_interface, version, id);
     NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
 
-    noia_wayland_cache_add_surface_resource
-                                   (sid, NOIA_RESOURCE_XDG_SHELL_SURFACE, rc);
-    noia_surface_show(sid, NOIA_SURFACE_SHOW_IN_SHELL);
-
     wl_resource_set_implementation(rc, &scXdgSurfaceImplementation, data,
                                    noia_wayland_xdg_surface_unbind);
+
+    noia_wayland_state_add_shell_surface
+                           (sid, NOIA_RESOURCE_XDG_SHELL_SURFACE, rc);
 }
 
 //------------------------------------------------------------------------------

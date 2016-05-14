@@ -143,6 +143,7 @@ target_utils_gl             = Com(['utils-gl.c'],            pkgs={'gl', 'egl'})
 target_utils_keymap         = Com(['utils-keymap.c'],        pkgs={'xkbcommon'})
 target_utils_keyboard_state = Com(['utils-keyboard-state.c'],pkgs={'xkbcommon'})
 target_utils_image          = Com(['utils-image.c'],         libs={'jpeg'})
+target_utils_time           = Com(['utils-time.c'])
 
 metanoia.add([target_utils_debug,
               target_utils_object,
@@ -157,12 +158,18 @@ metanoia.add([target_utils_debug,
               target_utils_gl,
               target_utils_keymap,
               target_utils_keyboard_state,
-              target_utils_image])
+              target_utils_image,
+              target_utils_time])
 
 #-------------------------------------------------------------------------------
 # EVENTS
 
 metanoia.add(Com.from_matching('event-*.c', c))
+
+#-------------------------------------------------------------------------------
+# SURFACE
+
+metanoia.add(Com.from_matching('surface-*.c', c))
 
 #-------------------------------------------------------------------------------
 # RENDERERS
@@ -185,11 +192,6 @@ metanoia.add([Com(['device-common.c']),
 
 metanoia.add([Com(['output.c']),
               Com(['output-collector.c'])])
-
-#-------------------------------------------------------------------------------
-# SURFACE
-
-metanoia.add(Com.from_matching('surface-*.c', c))
 
 #-------------------------------------------------------------------------------
 # INPUT
@@ -265,7 +267,7 @@ target_test_store   = Tst(['test-store.c'])
 target_test_branch  = Tst(['test-branch.c'])
 target_test_frame   = Tst(['test-frame.c'])
 
-target_mock_surface_manager = Tst(['mock-surface-manager.c'])
+target_mock_surface_coordinator = Tst(['mock-surface-coordinator.c'])
 
 p.add(Chk(output='check-globals',
           inputs=[target_test_globals, target_global_types]))
@@ -287,7 +289,7 @@ p.add(Chk(output='check-branch',
           inputs=[target_test_branch, target_utils_chain, target_utils_branch]))
 
 p.add(Chk(output='check-frame',
-          inputs=[target_test_frame, target_mock_surface_manager,
+          inputs=[target_test_frame, target_mock_surface_coordinator,
                   target_utils_pool, target_utils_debug,
                   target_utils_store, target_utils_chain, target_utils_branch,
                   target_global_enums, target_global_types,

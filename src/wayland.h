@@ -6,9 +6,8 @@
 #define NOIA_WAYLAND_H
 
 #include "event-loop.h"
+#include "surface-coordinator.h"
 
-struct wl_display* get_wayland_display(void);
-
-void noia_wayland_initialize(NoiaLoop* this_loop);
+void noia_wayland_initialize(NoiaLoop* this_loop, NoiaCoordinator* coordinator);
 
 #endif // NOIA_WAYLAND_H

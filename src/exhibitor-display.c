@@ -6,11 +6,12 @@
 #include "exhibitor-pointer.h"
 
 #include "utils-log.h"
+#include "utils-time.h"
 #include "utils-image.h"
 #include "utils-environment.h"
 #include "event-timer.h"
 #include "event-signals.h"
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 #include "config.h"
 
 #include <malloc.h>
@@ -40,8 +41,14 @@ struct NoiaDisplayStruct {
     /// Reference to exhibitor.
     NoiaExhibitor* exhibitor;
 
+    /// Reference to coordinator.
+    NoiaCoordinator* coordinator;
+
     /// Thread object.
     pthread_t thread;
+
+    /// Time of last display redraw in monotinic clock miliseconds.
+    NoiaMiliseconds last_time;
 };
 
 //------------------------------------------------------------------------------
@@ -79,11 +86,12 @@ NoiaResult noia_display_setup(NoiaDisplay* self)
 
         // Read in background image
         NoiaBuffer buff = noia_image_read(noia_config()->background_image_path);
-        self->background_sid = noia_surface_create();
-        noia_surface_attach(self->background_sid,
+        self->background_sid = noia_surface_create(self->coordinator);
+        noia_surface_attach(self->coordinator,
+                            self->background_sid,
                             buff.width, buff.height, buff.stride,
                             buff.data, NULL);
-        noia_surface_commit(self->background_sid);
+        noia_surface_commit(self->coordinator, self->background_sid);
 
         result = NOIA_RESULT_SUCCESS;
     }
@@ -124,9 +132,16 @@ void noia_display_setup_layout_context(NoiaDisplay* self,
 /// Prepare context for drawing the whole scene and pass it to the renderer.
 void noia_display_redraw_all(NoiaDisplay* self)
 {
+    // Check if there is something to do.
+    if (noia_coordinator_get_last_notify(self->coordinator) < self->last_time) {
+        return;
+    }
+
+    // Prepare surfaces.
     noia_frame_to_array(noia_frame_get_last(self->frame),
                         self->visible_surfaces);
 
+    // Prepare overlayer
     NoiaPointer* pointer = noia_exhibitor_get_pointer(self->exhibitor);
     noia_exhibitor_pointer_update_hover_state(pointer,
                                               self->output->area,
@@ -135,17 +150,24 @@ void noia_display_redraw_all(NoiaDisplay* self)
     NoiaLayoutContext layout_context;
     noia_display_setup_layout_context(self, pointer, &layout_context);
 
+    // Draw
     noia_output_begin_drawing(self->output);
-    noia_output_draw(self->output, self->visible_surfaces, &layout_context);
+    noia_output_draw(self->output,
+                     self->coordinator,
+                     self->visible_surfaces,
+                     &layout_context);
     noia_output_swap_buffers(self->output);
     noia_output_end_drawing(self->output);
 
+    // Send notifications
     unsigned i;
     NoiaSurfaceContext* context;
     NOIA_ITERATE_POOL(self->visible_surfaces, i, context) {
         noia_event_signal_emit_int(SIGNAL_SCREEN_REFRESH, context->sid);
     }
 
+    // Finish
+    self->last_time = noia_time_get_monotonic_miliseconds();
     noia_pool_release(self->visible_surfaces);
 }
 
@@ -164,9 +186,9 @@ void* noia_display_thread_loop(void* data)
         LOG_INFO1("Initialized new renderer!");
         self->run = true;
         while (self->run) {
-            noia_surface_lock();
+            noia_coordinator_lock_surfaces(self->coordinator);
             noia_display_redraw_all(self);
-            noia_surface_unlock();
+            noia_coordinator_unlock_surfaces(self->coordinator);
             noia_event_timer_nanosleep(100 * 1000000);
         }
     } else {
@@ -190,8 +212,10 @@ NoiaDisplay* noia_display_new(NoiaOutput* output,
     self->output = output;
     self->frame = frame;
     self->exhibitor = exhibitor;
+    self->coordinator = noia_exhibitor_get_coordinator(exhibitor);
     self->visible_surfaces = noia_pool_create(8, sizeof(NoiaSurfaceContext));
     self->background_sid = scInvalidSurfaceId;
+    self->last_time = 0;
 
     return self;
 }

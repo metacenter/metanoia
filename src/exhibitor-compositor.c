@@ -4,7 +4,7 @@
 
 #include "exhibitor-compositor.h"
 
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 #include "event-signals.h"
 #include "utils-log.h"
 
@@ -18,6 +18,7 @@ struct NoiaCompositorStruct {
     NoiaFrame* root;
     NoiaFrame* selection;
     NoiaExhibitor* exhibitor;
+    NoiaCoordinator* coordinator;
 };
 
 //------------------------------------------------------------------------------
@@ -76,9 +77,10 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
 
     // Create and configure workspace
     NoiaFrame* workspace = noia_frame_new();
-    noia_frame_configure(workspace, NOIA_FRAME_TYPE_WORKSPACE, 0,
+    noia_frame_configure(workspace, self->coordinator,
+                         NOIA_FRAME_TYPE_WORKSPACE, 0,
                          noia_frame_get_area(display), title);
-    noia_frame_jumpin(display, workspace);
+    noia_frame_jumpin(display, self->coordinator, workspace);
 
     /// @todo Focusing new workspace should be configurable
     noia_compositor_set_selection(self, workspace);
@@ -122,8 +124,9 @@ NoiaCompositor* noia_compositor_new(NoiaExhibitor* exhibitor)
 
     NoiaArea area = {{0, 0}, {-1, -1}};
     self->exhibitor = exhibitor;
+    self->coordinator = noia_exhibitor_get_coordinator(exhibitor);
     self->root = noia_frame_new();
-    noia_frame_configure(self->root, NOIA_FRAME_TYPE_STACKED,
+    noia_frame_configure(self->root, self->coordinator, NOIA_FRAME_TYPE_STACKED,
                          scInvalidSurfaceId, area, "METANOIA");
     return self;
 }
@@ -152,8 +155,9 @@ NoiaFrame* noia_compositor_create_new_display(NoiaCompositor* self,
 
     // Create and configure output frame
     NoiaFrame* display = noia_frame_new();
-    noia_frame_configure(display, NOIA_FRAME_TYPE_DISPLAY, 0, area, title);
-    noia_frame_jumpin(self->root, display);
+    noia_frame_configure(display, self->coordinator,
+                         NOIA_FRAME_TYPE_DISPLAY, 0, area, title);
+    noia_frame_jumpin(self->root, self->coordinator, display);
     return display;
 }
 
@@ -193,16 +197,17 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 {
     NOIA_ENSURE(self, return false);
 
-    NoiaSurfaceData* surface = noia_surface_get(sid);
+    NoiaSurfaceData* surface = noia_surface_get(self->coordinator, sid);
     NOIA_ENSURE(surface, return false);
 
     /// @todo Frame type, size and position should be configurable.
     NoiaFrame* frame = noia_frame_new();
     NoiaArea area = {{0,0}, surface->requested_size};
-    noia_frame_configure(frame, NOIA_FRAME_TYPE_FLOATING | NOIA_FRAME_TYPE_LEAF,
+    noia_frame_configure(frame, self->coordinator,
+                         NOIA_FRAME_TYPE_FLOATING | NOIA_FRAME_TYPE_LEAF,
                          sid, area, NULL);
 
-    noia_frame_jumpin(self->selection, frame);
+    noia_frame_jumpin(self->selection, self->coordinator, frame);
     /// @todo This should be configurable
     noia_compositor_set_selection(self, frame);
 
@@ -273,7 +278,7 @@ void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
 
     NoiaFrame* workspace = noia_compositor_bring_workspace(self, title);
     if (workspace) {
-        noia_frame_jump(self->selection, workspace);
+        noia_frame_jump(self->selection, self->coordinator, workspace);
     } else {
         LOG_WARN1("Compositor: Workspace '%s' not found "
                   "and could not be created!", title);
@@ -333,7 +338,7 @@ void noia_compositor_swap(NoiaCompositor* self,
         NoiaFrame* frame =
                    noia_frame_find_adjacent(self->selection, argmand, position);
         if (frame) {
-            noia_frame_swap(self->selection, frame);
+            noia_frame_swap(self->selection, frame, self->coordinator);
         }
     }
 }
@@ -407,9 +412,9 @@ void noia_compositor_configure(NoiaCompositor* self,
     // Change frame type
     if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
         /// @todo: Create new frame at trunk and resettle selection.
-        noia_frame_change_type(frame->trunk, type);
+        noia_frame_change_type(frame->trunk, self->coordinator, type);
     } else {
-        noia_frame_change_type(frame, type);
+        noia_frame_change_type(frame, self->coordinator, type);
     }
 
     noia_compositor_log_frame(self);
@@ -432,7 +437,7 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
             break;
         }
 
-        noia_frame_jump(frame, workspace);
+        noia_frame_jump(frame, self->coordinator, workspace);
     }
     noia_compositor_log_frame(self);
 }
@@ -450,7 +455,8 @@ void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
 
     switch (a->action) {
     case NOIA_ARGMAND_RESIZE:
-        noia_frame_resize(self->selection, a->direction, a->magnitude);
+        noia_frame_resize(self->selection, self->coordinator,
+                          a->direction, a->magnitude);
         break;
     case NOIA_ARGMAND_MOVE:
         noia_frame_move(self->selection, a->direction, a->magnitude);
@@ -480,6 +486,8 @@ void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
         break;
     default: break;
     }
+
+    noia_coordinator_notify(self->coordinator);
 }
 
 //------------------------------------------------------------------------------

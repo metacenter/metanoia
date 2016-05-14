@@ -29,16 +29,10 @@
 
 //------------------------------------------------------------------------------
 
+/// @todo Do not use global variables.
 static pthread_t wayland_thread;
 static struct wl_display* wayland_display = NULL;
 static struct wl_event_source* src = NULL;
-
-//------------------------------------------------------------------------------
-
-struct wl_display* get_wayland_display(void)
-{
-    return wayland_display;
-}
 
 //------------------------------------------------------------------------------
 
@@ -167,7 +161,7 @@ void noia_wayland_finalize(void* edata NOIA_UNUSED, void* sdata NOIA_UNUSED)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_initialize(NoiaLoop* this_loop)
+void noia_wayland_initialize(NoiaLoop* this_loop, NoiaCoordinator* coordinator)
 {
     LOG_INFO1("Initializing Wayland...");
     NOIA_ENSURE(this_loop, return);
@@ -180,7 +174,7 @@ void noia_wayland_initialize(NoiaLoop* this_loop)
     }
 
     noia_wayland_cache_initialize();
-    noia_wayland_state_initialize(wayland_display);
+    noia_wayland_state_initialize(wayland_display, coordinator);
 
     // Create singleton objects
     if (!wl_global_create(wayland_display, &wl_compositor_interface, 3,

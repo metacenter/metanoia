@@ -2,7 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-#include "utils-store.h"
+#include "mock-surface-coordinator.h"
+#include "surface-coordinator.h"
+
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <assert.h>
@@ -12,7 +15,9 @@ typedef struct {
     NoiaSize size;
 } NoiaMockSurfaceData;
 
-static NoiaStore* sSurfaceStore = NULL;
+struct NoiaCoordinatorStruct {
+    NoiaStore* surfaces;
+};
 
 //------------------------------------------------------------------------------
 
@@ -26,36 +31,42 @@ NoiaMockSurfaceData* noia_mock_surface_manager_data_create(NoiaSize size)
 
 //------------------------------------------------------------------------------
 
-void noia_mock_surface_manager_initialize(void)
+NoiaCoordinator* noia_coordinator_mock_new(void)
 {
-    sSurfaceStore = noia_store_new_for_id();
+    NoiaCoordinator* mock = malloc(sizeof(*mock));
+    mock->surfaces = noia_store_new_for_id();
+    return mock;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_mock_surface_manager_finalize(void)
+void noia_coordinator_mock_free(NoiaCoordinator* mock)
 {
-    noia_store_free_with_items(sSurfaceStore, free);
+    noia_store_free_with_items(mock->surfaces, free);
+    free(mock);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_surface_set_desired_size(NoiaSurfaceId sid, NoiaSize size)
+void noia_surface_set_desired_size(NoiaCoordinator* mock,
+                                   NoiaSurfaceId sid,
+                                   NoiaSize size)
 {
-    NoiaMockSurfaceData* data = noia_store_find(sSurfaceStore, sid);
-    if (!data) {
+    NoiaMockSurfaceData* data = noia_store_find(mock->surfaces, sid);
+    if (not data) {
         data = noia_mock_surface_manager_data_create(size);
     }
     data->size = size;
-    noia_store_add_with_id(sSurfaceStore, sid, data);
+    noia_store_add_with_id(mock->surfaces, sid, data);
 }
 
 //------------------------------------------------------------------------------
 
-NoiaSize noia_mock_surface_get_desired_size(NoiaSurfaceId sid)
+NoiaSize noia_surface_get_desired_size(NoiaCoordinator* mock,
+                                       NoiaSurfaceId sid)
 {
     NoiaSize size = {0, 0};
-    NoiaMockSurfaceData* data = noia_store_find(sSurfaceStore, sid);
+    NoiaMockSurfaceData* data = noia_store_find(mock->surfaces, sid);
     if (data) {
         size = data->size;
     }

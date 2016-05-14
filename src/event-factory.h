@@ -7,6 +7,7 @@
 
 #include "event-task.h"
 #include "event-dispatcher.h"
+#include "surface-coordinator.h"
 
 NoiaTask* factorize_setup_input_devices_task(NoiaEventDispatcher* ed);
 
@@ -14,11 +15,11 @@ NoiaTask* factorize_setup_device_monitor_task(NoiaEventDispatcher* ed);
 
 NoiaTask* factorize_backend_offscreen_run_task(NoiaLoop* loop);
 
-NoiaTask* factorize_stop_dispatcher_task(NoiaEventDispatcher* dispatcher);
+NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop,
+                                            NoiaCoordinator* coordinator);
 
-NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop);
-
-NoiaTask* factorize_initialize_exhibitor_task(NoiaLoop* loop);
+NoiaTask* factorize_initialize_exhibitor_task(NoiaLoop* loop,
+                                              NoiaCoordinator* coordinator);
 
 NoiaTask* factorize_initialize_output_collector_task(NoiaLoop* loop);
 

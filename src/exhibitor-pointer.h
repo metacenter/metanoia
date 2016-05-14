@@ -10,7 +10,7 @@
 #include "global-types.h"
 
 /// Pointer constructor.
-NoiaPointer* noia_exhibitor_pointer_new(void);
+NoiaPointer* noia_exhibitor_pointer_new(NoiaExhibitor* exhibitor);
 
 /// Pointer destructor.
 void noia_exhibitor_pointer_free(NoiaPointer* self);

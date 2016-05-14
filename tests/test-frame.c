@@ -3,9 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "exhibitor-frame-internal.h"
+#include "mock-surface-coordinator.h"
 #include "tests-suit.h"
-#include "mock-surface-manager.h"
 
+#include "surface-coordinator.h"
 #include "global-macros.h"
 
 #include <malloc.h>
@@ -15,11 +16,12 @@
 //------------------------------------------------------------------------------
 
 void noia_test_frame_config(NoiaFrame* frame,
+                            NoiaCoordinator* coordinator,
                             NoiaFrameType type,
                             NoiaSurfaceId sid)
 {
     NoiaArea area = {{0,0}, {0,0}};
-    noia_frame_configure(frame, type, sid, area, "");
+    noia_frame_configure(frame, coordinator, type, sid, area, "");
 }
 
 //------------------------------------------------------------------------------
@@ -44,25 +46,25 @@ void noia_test_frame_config(NoiaFrame* frame,
     NoiaFrame* s3 = noia_frame_new(); \
     NoiaFrame* s4 = noia_frame_new(); \
     NoiaFrame* s5 = noia_frame_new(); \
-    noia_test_frame_config(r,  NOIA_FRAME_TYPE_NONE,       INV); \
-    noia_test_frame_config(v,  NOIA_FRAME_TYPE_VERTICAL,   INV); \
-    noia_test_frame_config(h,  NOIA_FRAME_TYPE_HORIZONTAL, INV); \
-    noia_test_frame_config(s,  NOIA_FRAME_TYPE_STACKED,    INV); \
-    noia_test_frame_config(v1, NOIA_FRAME_TYPE_LEAF, 11); \
-    noia_test_frame_config(v2, NOIA_FRAME_TYPE_LEAF, 12); \
-    noia_test_frame_config(v3, NOIA_FRAME_TYPE_LEAF, 13); \
-    noia_test_frame_config(v4, NOIA_FRAME_TYPE_LEAF, 14); \
-    noia_test_frame_config(v5, NOIA_FRAME_TYPE_LEAF, 15); \
-    noia_test_frame_config(h1, NOIA_FRAME_TYPE_LEAF, 21); \
-    noia_test_frame_config(h2, NOIA_FRAME_TYPE_LEAF, 22); \
-    noia_test_frame_config(h3, NOIA_FRAME_TYPE_LEAF, 23); \
-    noia_test_frame_config(h4, NOIA_FRAME_TYPE_LEAF, 24); \
-    noia_test_frame_config(h5, NOIA_FRAME_TYPE_LEAF, 25); \
-    noia_test_frame_config(s1, NOIA_FRAME_TYPE_LEAF, 31); \
-    noia_test_frame_config(s2, NOIA_FRAME_TYPE_LEAF, 32); \
-    noia_test_frame_config(s3, NOIA_FRAME_TYPE_LEAF, 33); \
-    noia_test_frame_config(s4, NOIA_FRAME_TYPE_LEAF, 34); \
-    noia_test_frame_config(s5, NOIA_FRAME_TYPE_LEAF, 35); \
+    noia_test_frame_config(r,  co, NOIA_FRAME_TYPE_NONE,       INV); \
+    noia_test_frame_config(v,  co, NOIA_FRAME_TYPE_VERTICAL,   INV); \
+    noia_test_frame_config(h,  co, NOIA_FRAME_TYPE_HORIZONTAL, INV); \
+    noia_test_frame_config(s,  co, NOIA_FRAME_TYPE_STACKED,    INV); \
+    noia_test_frame_config(v1, co, NOIA_FRAME_TYPE_LEAF, 11); \
+    noia_test_frame_config(v2, co, NOIA_FRAME_TYPE_LEAF, 12); \
+    noia_test_frame_config(v3, co, NOIA_FRAME_TYPE_LEAF, 13); \
+    noia_test_frame_config(v4, co, NOIA_FRAME_TYPE_LEAF, 14); \
+    noia_test_frame_config(v5, co, NOIA_FRAME_TYPE_LEAF, 15); \
+    noia_test_frame_config(h1, co, NOIA_FRAME_TYPE_LEAF, 21); \
+    noia_test_frame_config(h2, co, NOIA_FRAME_TYPE_LEAF, 22); \
+    noia_test_frame_config(h3, co, NOIA_FRAME_TYPE_LEAF, 23); \
+    noia_test_frame_config(h4, co, NOIA_FRAME_TYPE_LEAF, 24); \
+    noia_test_frame_config(h5, co, NOIA_FRAME_TYPE_LEAF, 25); \
+    noia_test_frame_config(s1, co, NOIA_FRAME_TYPE_LEAF, 31); \
+    noia_test_frame_config(s2, co, NOIA_FRAME_TYPE_LEAF, 32); \
+    noia_test_frame_config(s3, co, NOIA_FRAME_TYPE_LEAF, 33); \
+    noia_test_frame_config(s4, co, NOIA_FRAME_TYPE_LEAF, 34); \
+    noia_test_frame_config(s5, co, NOIA_FRAME_TYPE_LEAF, 35); \
     noia_frame_append (s,  s3); \
     noia_frame_prepend(s,  s2); \
     noia_frame_append (s,  s4); \
@@ -117,26 +119,26 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(abcde, de); \
     noia_frame_append(r,     abcde); \
     noia_frame_append(r,     f); \
-    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
+    noia_frame_configure(a, co, NOIA_FRAME_TYPE_LEAF, 1, \
                          (NoiaArea) {{ 0,  0}, { 40,  60}}, ""); \
-    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
+    noia_frame_configure(b, co, NOIA_FRAME_TYPE_LEAF, 2, \
                          (NoiaArea) {{ 0,  0}, { 40,  60}}, ""); \
-    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
+    noia_frame_configure(c, co, NOIA_FRAME_TYPE_LEAF, 3, \
                          (NoiaArea) {{ 0,  0}, { 40,  60}}, ""); \
-    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
+    noia_frame_configure(d, co, NOIA_FRAME_TYPE_LEAF, 4, \
                          (NoiaArea) {{40,  0}, { 30,  60}}, ""); \
-    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
+    noia_frame_configure(e, co, NOIA_FRAME_TYPE_LEAF, 5, \
                          (NoiaArea) {{40,  0}, { 30,  60}}, ""); \
-    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 6, \
                          (NoiaArea) {{ 0, 60}, { 70,  60}}, ""); \
-    noia_frame_configure(r, \
+    noia_frame_configure(r, co, \
                          NOIA_FRAME_TYPE_VERTICAL | NOIA_FRAME_TYPE_SPECIAL, \
                          INV, (NoiaArea) {{ 0,  0}, {100, 120}}, ""); \
-    noia_frame_configure(abc, NOIA_FRAME_TYPE_STACKED, INV, \
+    noia_frame_configure(abc, co, NOIA_FRAME_TYPE_STACKED, INV, \
                          (NoiaArea) {{ 0,  0}, { 40,  60}}, ""); \
-    noia_frame_configure(de, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
+    noia_frame_configure(de, co, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
                          (NoiaArea) {{40,  0}, { 60,  60}}, ""); \
-    noia_frame_configure(abcde, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
+    noia_frame_configure(abcde, co, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
                          (NoiaArea) {{ 0,  0}, {100,  60}}, "");
 
 /// Frame set for testing iteration.
@@ -186,35 +188,35 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(fghi,  ghi); \
     noia_frame_append(r,     abcde); \
     noia_frame_append(r,     fghi); \
-    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
+    noia_frame_configure(a, co, NOIA_FRAME_TYPE_LEAF, 1, \
                          (NoiaArea) {{ 0,  0}, { 40,  40}}, ""); \
-    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
+    noia_frame_configure(b, co, NOIA_FRAME_TYPE_LEAF, 2, \
                          (NoiaArea) {{40,  0}, { 40,  40}}, ""); \
-    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
+    noia_frame_configure(c, co, NOIA_FRAME_TYPE_LEAF, 3, \
                          (NoiaArea) {{40,  0}, { 40,  40}}, ""); \
-    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
+    noia_frame_configure(d, co, NOIA_FRAME_TYPE_LEAF, 4, \
                          (NoiaArea) {{40,  0}, { 40,  40}}, ""); \
-    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
+    noia_frame_configure(e, co, NOIA_FRAME_TYPE_LEAF, 5, \
                          (NoiaArea) {{80,  0}, { 40,  40}}, ""); \
-    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 6, \
                          (NoiaArea) {{ 0, 40}, {120,  40}}, ""); \
-    noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 7, \
+    noia_frame_configure(g, co, NOIA_FRAME_TYPE_LEAF, 7, \
                          (NoiaArea) {{ 0, 80}, {120,  40}}, ""); \
-    noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 8, \
+    noia_frame_configure(h, co, NOIA_FRAME_TYPE_LEAF, 8, \
                          (NoiaArea) {{ 0, 80}, {120,  40}}, ""); \
-    noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 9, \
+    noia_frame_configure(i, co, NOIA_FRAME_TYPE_LEAF, 9, \
                          (NoiaArea) {{ 0, 80}, {120,  40}}, ""); \
-    noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL, INV, \
+    noia_frame_configure(r, co, NOIA_FRAME_TYPE_VERTICAL, INV, \
                          (NoiaArea) {{ 0,  0}, {120, 120}}, ""); \
-    noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, INV, \
+    noia_frame_configure(bcd, co, NOIA_FRAME_TYPE_STACKED, INV, \
                          (NoiaArea) {{40,  0}, { 40,  40}}, ""); \
-    noia_frame_configure(bcde, NOIA_FRAME_TYPE_HORIZONTAL, INV,\
+    noia_frame_configure(bcde, co, NOIA_FRAME_TYPE_HORIZONTAL, INV,\
                          (NoiaArea) {{40,  0}, { 80,  40}}, ""); \
-    noia_frame_configure(abcde, NOIA_FRAME_TYPE_HORIZONTAL, INV,\
+    noia_frame_configure(abcde, co, NOIA_FRAME_TYPE_HORIZONTAL, INV,\
                          (NoiaArea) {{ 0,  0}, {120,  40}}, ""); \
-    noia_frame_configure(ghi, NOIA_FRAME_TYPE_STACKED, INV,\
+    noia_frame_configure(ghi, co, NOIA_FRAME_TYPE_STACKED, INV,\
                          (NoiaArea) {{ 0, 80}, {120,  40}}, ""); \
-    noia_frame_configure(fghi, NOIA_FRAME_TYPE_VERTICAL, INV,\
+    noia_frame_configure(fghi, co, NOIA_FRAME_TYPE_VERTICAL, INV,\
                          (NoiaArea) {{ 0, 40}, {120,  80}}, "");
 
 /// Frame set for testing resizing with horizontal floating.
@@ -260,33 +262,33 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(r,      abcdef); \
     noia_frame_append(r,      g); \
     noia_frame_append(r,      hi); \
-    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
+    noia_frame_configure(a, co, NOIA_FRAME_TYPE_LEAF, 1, \
                          (NoiaArea) {{  0,  0}, {120,  40}}, ""); \
-    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
+    noia_frame_configure(b, co, NOIA_FRAME_TYPE_LEAF, 2, \
                          (NoiaArea) {{  0, 40}, {120,  40}}, ""); \
-    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
+    noia_frame_configure(c, co, NOIA_FRAME_TYPE_LEAF, 3, \
                          (NoiaArea) {{  0, 40}, {120,  40}}, ""); \
-    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
+    noia_frame_configure(d, co, NOIA_FRAME_TYPE_LEAF, 4, \
                          (NoiaArea) {{  0, 40}, {120,  40}}, ""); \
-    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
+    noia_frame_configure(e, co, NOIA_FRAME_TYPE_LEAF, 5, \
                          (NoiaArea) {{  0, 80}, { 60,  40}}, ""); \
-    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 6, \
                          (NoiaArea) {{ 60, 80}, { 60,  40}}, ""); \
-    noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 7, \
+    noia_frame_configure(g, co, NOIA_FRAME_TYPE_LEAF, 7, \
                          (NoiaArea) {{120,  0}, { 60, 120}}, ""); \
-    noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 8, \
+    noia_frame_configure(h, co, NOIA_FRAME_TYPE_LEAF, 8, \
                          (NoiaArea) {{180,  0}, { 60, 120}}, ""); \
-    noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 9, \
+    noia_frame_configure(i, co, NOIA_FRAME_TYPE_LEAF, 9, \
                          (NoiaArea) {{240,  0}, { 60, 120}}, ""); \
-    noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, INV, \
+    noia_frame_configure(bcd, co, NOIA_FRAME_TYPE_STACKED, INV, \
                          (NoiaArea) {{  0, 40}, {120,  40}}, ""); \
-    noia_frame_configure(ef, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
+    noia_frame_configure(ef, co, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
                          (NoiaArea) {{  0, 80}, {120,  40}}, ""); \
-    noia_frame_configure(abcdef, NOIA_FRAME_TYPE_VERTICAL, INV, \
+    noia_frame_configure(abcdef, co, NOIA_FRAME_TYPE_VERTICAL, INV, \
                          (NoiaArea) {{  0,  0}, {120, 120}}, ""); \
-    noia_frame_configure(hi, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
+    noia_frame_configure(hi, co, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
                          (NoiaArea) {{180,  0}, {120, 120}}, ""); \
-    noia_frame_configure(r, \
+    noia_frame_configure(r, co, \
                          NOIA_FRAME_TYPE_HORIZONTAL | NOIA_FRAME_TYPE_FLOATING,\
                          INV, (NoiaArea) {{  0,  0}, {300, 120}}, ""); \
 
@@ -339,33 +341,33 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(r,      abcdef); \
     noia_frame_append(r,      g); \
     noia_frame_append(r,      hi); \
-    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
+    noia_frame_configure(a, co, NOIA_FRAME_TYPE_LEAF, 1, \
                          (NoiaArea) {{  0,   0}, { 40, 120}}, "");\
-    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
+    noia_frame_configure(b, co, NOIA_FRAME_TYPE_LEAF, 2, \
                          (NoiaArea) {{ 40,   0}, { 40, 120}}, "");\
-    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
+    noia_frame_configure(c, co, NOIA_FRAME_TYPE_LEAF, 3, \
                          (NoiaArea) {{ 40,   0}, { 40, 120}}, "");\
-    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
+    noia_frame_configure(d, co, NOIA_FRAME_TYPE_LEAF, 4, \
                          (NoiaArea) {{ 40,   0}, { 40, 120}}, "");\
-    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
+    noia_frame_configure(e, co, NOIA_FRAME_TYPE_LEAF, 5, \
                          (NoiaArea) {{ 80,   0}, { 40,  60}}, "");\
-    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 6, \
                          (NoiaArea) {{ 80,  60}, { 40,  60}}, "");\
-    noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 7, \
+    noia_frame_configure(g, co, NOIA_FRAME_TYPE_LEAF, 7, \
                          (NoiaArea) {{  0, 120}, {120,  60}}, "");\
-    noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 8, \
+    noia_frame_configure(h, co, NOIA_FRAME_TYPE_LEAF, 8, \
                          (NoiaArea) {{  0, 180}, {120,  60}}, "");\
-    noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 9, \
+    noia_frame_configure(i, co, NOIA_FRAME_TYPE_LEAF, 9, \
                          (NoiaArea) {{  0, 240}, {120,  60}}, "");\
-    noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, INV, \
+    noia_frame_configure(bcd, co, NOIA_FRAME_TYPE_STACKED, INV, \
                          (NoiaArea) {{ 40,   0}, { 40, 120}}, "");\
-    noia_frame_configure(ef, NOIA_FRAME_TYPE_VERTICAL, INV, \
+    noia_frame_configure(ef, co, NOIA_FRAME_TYPE_VERTICAL, INV, \
                          (NoiaArea) {{ 80,   0}, { 40, 120}}, "");\
-    noia_frame_configure(abcdef, NOIA_FRAME_TYPE_HORIZONTAL, INV,\
+    noia_frame_configure(abcdef, co, NOIA_FRAME_TYPE_HORIZONTAL, INV,\
                          (NoiaArea) {{  0,   0}, {120, 120}}, "");\
-    noia_frame_configure(hi, NOIA_FRAME_TYPE_VERTICAL, INV, \
+    noia_frame_configure(hi, co, NOIA_FRAME_TYPE_VERTICAL, INV, \
                          (NoiaArea) {{  0, 180}, {120, 120}}, "");\
-    noia_frame_configure(r, \
+    noia_frame_configure(r, co, \
                          NOIA_FRAME_TYPE_VERTICAL | NOIA_FRAME_TYPE_FLOATING, \
                          INV, (NoiaArea) {{  0,   0}, {120, 300}}, "");
 
@@ -400,33 +402,33 @@ void noia_test_frame_config(NoiaFrame* frame,
     noia_frame_append(r,      abcdef); \
     noia_frame_append(r,      g); \
     noia_frame_append(r,      hi); \
-    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1, \
+    noia_frame_configure(a, co, NOIA_FRAME_TYPE_LEAF, 1, \
                          (NoiaArea) {{  0,   0}, {180, 120}}, "");\
-    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2, \
+    noia_frame_configure(b, co, NOIA_FRAME_TYPE_LEAF, 2, \
                          (NoiaArea) {{  0, 120}, {180, 180}}, "");\
-    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3, \
+    noia_frame_configure(c, co, NOIA_FRAME_TYPE_LEAF, 3, \
                          (NoiaArea) {{  0, 120}, {180, 180}}, "");\
-    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4, \
+    noia_frame_configure(d, co, NOIA_FRAME_TYPE_LEAF, 4, \
                          (NoiaArea) {{  0, 120}, {180, 180}}, "");\
-    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5, \
+    noia_frame_configure(e, co, NOIA_FRAME_TYPE_LEAF, 5, \
                          (NoiaArea) {{  0, 300}, { 60,  60}}, "");\
-    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6, \
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 6, \
                          (NoiaArea) {{ 60, 300}, {120,  60}}, "");\
-    noia_frame_configure(g, NOIA_FRAME_TYPE_LEAF, 7, \
+    noia_frame_configure(g, co, NOIA_FRAME_TYPE_LEAF, 7, \
                          (NoiaArea) {{180,   0}, { 60, 360}}, "");\
-    noia_frame_configure(h, NOIA_FRAME_TYPE_LEAF, 8, \
+    noia_frame_configure(h, co, NOIA_FRAME_TYPE_LEAF, 8, \
                          (NoiaArea) {{240,   0}, { 80, 360}}, "");\
-    noia_frame_configure(i, NOIA_FRAME_TYPE_LEAF, 9, \
+    noia_frame_configure(i, co, NOIA_FRAME_TYPE_LEAF, 9, \
                          (NoiaArea) {{320,   0}, { 40, 360}}, "");\
-    noia_frame_configure(bcd, NOIA_FRAME_TYPE_STACKED, INV, \
+    noia_frame_configure(bcd, co, NOIA_FRAME_TYPE_STACKED, INV, \
                          (NoiaArea) {{  0, 120}, {180, 180}}, "");\
-    noia_frame_configure(ef, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
+    noia_frame_configure(ef, co, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
                          (NoiaArea) {{  0, 300}, {180,  60}}, "");\
-    noia_frame_configure(abcdef, NOIA_FRAME_TYPE_VERTICAL, INV, \
+    noia_frame_configure(abcdef, co, NOIA_FRAME_TYPE_VERTICAL, INV, \
                          (NoiaArea) {{  0,   0}, {180, 360}}, "");\
-    noia_frame_configure(hi, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
+    noia_frame_configure(hi, co, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
                          (NoiaArea) {{240,   0}, {120, 360}}, "");\
-    noia_frame_configure(r, \
+    noia_frame_configure(r, co, \
                          NOIA_FRAME_TYPE_HORIZONTAL | NOIA_FRAME_TYPE_FLOATING,\
                          INV, (NoiaArea) {{  0,   0}, {360, 360}}, "");
 
@@ -469,7 +471,7 @@ void noia_test_frame_config(NoiaFrame* frame,
 #define NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(FRAME, X, Y, W, H) { \
     NoiaArea area = noia_frame_get_area(FRAME); \
     NoiaSurfaceId sid = noia_frame_get_sid(FRAME); \
-    NoiaSize size = noia_mock_surface_get_desired_size(sid); \
+    NoiaSize size = noia_surface_get_desired_size(co, sid); \
     NOIA_ASSERT(((area.pos.x       == X) and (area.pos.y       == Y) \
              and (area.size.width  == W) and (area.size.height == H) \
              and (size.width       == W) and (size.height      == H)), \
@@ -485,8 +487,7 @@ void noia_test_frame_config(NoiaFrame* frame,
 /// Content check will be done in `should_translate_to_array`
 NoiaTestResult should_append_and_prepend_values(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_SIMPLE;
 
     NOIA_ASSERT_TRUNK(r,  NULL);
@@ -515,8 +516,7 @@ NoiaTestResult should_append_and_prepend_values(void)
     NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -525,20 +525,19 @@ NoiaTestResult should_append_and_prepend_values(void)
 /// Check if inserted frames are assigned to correct trunk.
 NoiaTestResult should_insert_values(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NoiaFrame* r  = noia_frame_new();
     NoiaFrame* f1 = noia_frame_new();
     NoiaFrame* f2 = noia_frame_new();
     NoiaFrame* f3 = noia_frame_new();
     NoiaFrame* f4 = noia_frame_new();
     NoiaFrame* f5 = noia_frame_new();
-    noia_test_frame_config(r,  NOIA_FRAME_TYPE_NONE, scInvalidSurfaceId);
-    noia_test_frame_config(f1, NOIA_FRAME_TYPE_LEAF, 1);
-    noia_test_frame_config(f2, NOIA_FRAME_TYPE_LEAF, 2);
-    noia_test_frame_config(f3, NOIA_FRAME_TYPE_LEAF, 3);
-    noia_test_frame_config(f4, NOIA_FRAME_TYPE_LEAF, 4);
-    noia_test_frame_config(f5, NOIA_FRAME_TYPE_LEAF, 5);
+    noia_test_frame_config(r,  co, NOIA_FRAME_TYPE_NONE, scInvalidSurfaceId);
+    noia_test_frame_config(f1, co, NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(f2, co, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_test_frame_config(f3, co, NOIA_FRAME_TYPE_LEAF, 3);
+    noia_test_frame_config(f4, co, NOIA_FRAME_TYPE_LEAF, 4);
+    noia_test_frame_config(f5, co, NOIA_FRAME_TYPE_LEAF, 5);
     noia_frame_append(r, f2);
     noia_frame_insert_after(f2, f4);
     noia_frame_insert_before(f4, f3);
@@ -553,8 +552,7 @@ NoiaTestResult should_insert_values(void)
     NOIA_ASSERT_CHAIN_LEN(r->twigs, 5u);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -563,7 +561,7 @@ NoiaTestResult should_insert_values(void)
 /// Check order and position when translating whole frame to array.
 NoiaTestResult should_translate_frame_to_array(void)
 {
-    noia_mock_surface_manager_initialize();
+    NoiaCoordinator* co = noia_coordinator_mock_new();
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
@@ -594,8 +592,7 @@ NoiaTestResult should_translate_frame_to_array(void)
     NOIA_ASSERT_FRAME_ARRAY(a, pool);
 
     noia_pool_destroy(pool);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -604,7 +601,7 @@ NoiaTestResult should_translate_frame_to_array(void)
 /// Check order and position when translating subframes to array.
 NoiaTestResult should_translate_subframes_to_array(void)
 {
-    noia_mock_surface_manager_initialize();
+    NoiaCoordinator* co = noia_coordinator_mock_new();
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
@@ -650,7 +647,7 @@ NoiaTestResult should_translate_subframes_to_array(void)
     noia_pool_destroy(ph);
     noia_pool_destroy(ps);
 
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -659,7 +656,7 @@ NoiaTestResult should_translate_subframes_to_array(void)
 /// Check correctness of frame after removing several leafs.
 NoiaTestResult should_remove_some_leaf_frames(void)
 {
-    noia_mock_surface_manager_initialize();
+    NoiaCoordinator* co = noia_coordinator_mock_new();
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
@@ -709,7 +706,7 @@ NoiaTestResult should_remove_some_leaf_frames(void)
     noia_frame_free(s2);
     noia_frame_free(r);
 
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -718,7 +715,7 @@ NoiaTestResult should_remove_some_leaf_frames(void)
 /// Check correctness of frame after removing frame with leafs.
 NoiaTestResult should_remove_frame_with_subframes(void)
 {
-    noia_mock_surface_manager_initialize();
+    NoiaCoordinator* co = noia_coordinator_mock_new();
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
@@ -752,7 +749,7 @@ NoiaTestResult should_remove_frame_with_subframes(void)
     noia_frame_free(h);
     noia_frame_free(r);
 
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -761,11 +758,11 @@ NoiaTestResult should_remove_frame_with_subframes(void)
 /// Resettle one frame without children and check if trunks are OK.
 NoiaTestResult should_resettle_one_frame(void)
 {
-    noia_mock_surface_manager_initialize();
+    NoiaCoordinator* co = noia_coordinator_mock_new();
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
-    noia_frame_resettle(h3, s);
+    noia_frame_resettle(h3, s, co);
 
     NOIA_ASSERT_TRUNK(r,  NULL);
     NOIA_ASSERT_TRUNK(h,  r);
@@ -793,8 +790,7 @@ NoiaTestResult should_resettle_one_frame(void)
     NOIA_ASSERT_CHAIN_LEN(s->twigs, 6u);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -803,11 +799,11 @@ NoiaTestResult should_resettle_one_frame(void)
 /// Resettle one frame with children and check if trunks are OK.
 NoiaTestResult should_resettle_frame_with_subframes(void)
 {
-    noia_mock_surface_manager_initialize();
+    NoiaCoordinator* co = noia_coordinator_mock_new();
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
-    noia_frame_resettle(h, s);
+    noia_frame_resettle(h, s, co);
 
     NOIA_ASSERT_TRUNK(r,  NULL);
     NOIA_ASSERT_TRUNK(h,  s);
@@ -835,8 +831,7 @@ NoiaTestResult should_resettle_frame_with_subframes(void)
     NOIA_ASSERT_CHAIN_LEN(s->twigs, 6u);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -859,14 +854,13 @@ NoiaTestResult should_resettle_frame_with_subframes(void)
 ///
 NoiaTestResult should_swap_frames(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaSize size_b = noia_frame_get_area(b).size;
     NoiaSize size_f = noia_frame_get_area(f).size;
 
-    noia_frame_swap(b, f);
+    noia_frame_swap(b, f, co);
 
     NOIA_ASSERT_TRUNK(b, abc);
     NOIA_ASSERT_TRUNK(f, r);
@@ -878,8 +872,8 @@ NoiaTestResult should_swap_frames(void)
                 "SID of frame B should be 2 (is '%lu')",
                 noia_frame_get_sid(f));
 
-    NoiaSize size_2 = noia_mock_surface_get_desired_size(2);
-    NoiaSize size_6 = noia_mock_surface_get_desired_size(6);
+    NoiaSize size_2 = noia_surface_get_desired_size(co, 2);
+    NoiaSize size_6 = noia_surface_get_desired_size(co, 6);
 
     NOIA_ASSERT(((size_b.width  == size_6.width)
              and (size_b.height == size_6.height)),
@@ -892,8 +886,7 @@ NoiaTestResult should_swap_frames(void)
                 size_f.width, size_f.height, size_2.width, size_2.height);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -902,8 +895,7 @@ NoiaTestResult should_swap_frames(void)
 /// Check if frame covered with other frames correctly pops up.
 NoiaTestResult should_pop_frame_recursively(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NoiaFrame* r  = noia_frame_new();
     NoiaFrame* u  = noia_frame_new();
     NoiaFrame* s  = noia_frame_new();
@@ -916,18 +908,18 @@ NoiaTestResult should_pop_frame_recursively(void)
     NoiaFrame* z1 = noia_frame_new();
     NoiaFrame* z2 = noia_frame_new();
     NoiaFrame* z3 = noia_frame_new();
-    noia_test_frame_config(r, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
-    noia_test_frame_config(u, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId);
-    noia_test_frame_config(s, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
-    noia_test_frame_config(z, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
-    noia_test_frame_config(s1, NOIA_FRAME_TYPE_LEAF, 11);
-    noia_test_frame_config(s2, NOIA_FRAME_TYPE_LEAF, 12);
-    noia_test_frame_config(s3, NOIA_FRAME_TYPE_LEAF, 13);
-    noia_test_frame_config(u1, NOIA_FRAME_TYPE_LEAF, 21);
-    noia_test_frame_config(u3, NOIA_FRAME_TYPE_LEAF, 23);
-    noia_test_frame_config(z1, NOIA_FRAME_TYPE_LEAF, 31);
-    noia_test_frame_config(z2, NOIA_FRAME_TYPE_LEAF, 32);
-    noia_test_frame_config(z3, NOIA_FRAME_TYPE_LEAF, 33);
+    noia_test_frame_config(r,  co, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
+    noia_test_frame_config(u,  co, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId);
+    noia_test_frame_config(s,  co, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
+    noia_test_frame_config(z,  co, NOIA_FRAME_TYPE_STACKED, scInvalidSurfaceId);
+    noia_test_frame_config(s1, co, NOIA_FRAME_TYPE_LEAF, 11);
+    noia_test_frame_config(s2, co, NOIA_FRAME_TYPE_LEAF, 12);
+    noia_test_frame_config(s3, co, NOIA_FRAME_TYPE_LEAF, 13);
+    noia_test_frame_config(u1, co, NOIA_FRAME_TYPE_LEAF, 21);
+    noia_test_frame_config(u3, co, NOIA_FRAME_TYPE_LEAF, 23);
+    noia_test_frame_config(z1, co, NOIA_FRAME_TYPE_LEAF, 31);
+    noia_test_frame_config(z2, co, NOIA_FRAME_TYPE_LEAF, 32);
+    noia_test_frame_config(z3, co, NOIA_FRAME_TYPE_LEAF, 33);
     noia_frame_prepend(r, s);
     noia_frame_prepend(r, u);
     noia_frame_prepend(u, u1);
@@ -961,8 +953,7 @@ NoiaTestResult should_pop_frame_recursively(void)
     NOIA_ASSERT_FRAME_ARRAY(a, pool);
 
     noia_pool_destroy(pool);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -971,8 +962,7 @@ NoiaTestResult should_pop_frame_recursively(void)
 /// Check if `noia_frame_find_with_sid` returns correct frames.
 NoiaTestResult should_find_with_sid(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_SIMPLE;
 
     NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(r, 666), NULL)
@@ -998,8 +988,7 @@ NoiaTestResult should_find_with_sid(void)
     NOIA_ASSERT_FRAME_POINTER(noia_frame_find_with_sid(s, 22), NULL);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1008,8 +997,7 @@ NoiaTestResult should_find_with_sid(void)
 /// Find first frame above given with type Special
 NoiaTestResult should_find_top(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(a), r);
@@ -1021,10 +1009,8 @@ NoiaTestResult should_find_top(void)
     NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(r), r);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
-
 }
 
 //------------------------------------------------------------------------------
@@ -1045,16 +1031,16 @@ NoiaTestResult should_find_top(void)
 ///
 NoiaTestResult should_find_contiguous_on_the_same_level_one_further(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NoiaFrame* p = NULL;
     NoiaFrame* r = noia_frame_new();
     NoiaFrame* a = noia_frame_new();
     NoiaFrame* b = noia_frame_new();
-    noia_test_frame_config(r, NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_VERTICAL,
+    noia_test_frame_config(r, co,
+                           NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_VERTICAL,
                            scInvalidSurfaceId);
-    noia_test_frame_config(a, NOIA_FRAME_TYPE_LEAF, 1);
-    noia_test_frame_config(b, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_test_frame_config(a, co, NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(b, co, NOIA_FRAME_TYPE_LEAF, 2);
     noia_frame_append(r, a);
     noia_frame_append(r, b);
 
@@ -1071,8 +1057,7 @@ NoiaTestResult should_find_contiguous_on_the_same_level_one_further(void)
     NOIA_ASSERT(p == NULL, "1*South from B should be NULL");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1090,8 +1075,7 @@ NoiaTestResult should_find_contiguous_on_the_same_level_one_further(void)
 ///
 NoiaTestResult should_find_contiguous_on_the_same_level_many_further(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NoiaFrame* p = NULL;
     NoiaFrame* r = noia_frame_new();
     NoiaFrame* a = noia_frame_new();
@@ -1100,15 +1084,15 @@ NoiaTestResult should_find_contiguous_on_the_same_level_many_further(void)
     NoiaFrame* d = noia_frame_new();
     NoiaFrame* e = noia_frame_new();
     NoiaFrame* f = noia_frame_new();
-    noia_test_frame_config(r,
+    noia_test_frame_config(r, co,
                            NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_HORIZONTAL,
                            scInvalidSurfaceId);
-    noia_test_frame_config(a, NOIA_FRAME_TYPE_LEAF, 1);
-    noia_test_frame_config(b, NOIA_FRAME_TYPE_LEAF, 2);
-    noia_test_frame_config(c, NOIA_FRAME_TYPE_LEAF, 3);
-    noia_test_frame_config(d, NOIA_FRAME_TYPE_LEAF, 4);
-    noia_test_frame_config(e, NOIA_FRAME_TYPE_LEAF, 5);
-    noia_test_frame_config(f, NOIA_FRAME_TYPE_LEAF, 6);
+    noia_test_frame_config(a, co, NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(b, co, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_test_frame_config(c, co, NOIA_FRAME_TYPE_LEAF, 3);
+    noia_test_frame_config(d, co, NOIA_FRAME_TYPE_LEAF, 4);
+    noia_test_frame_config(e, co, NOIA_FRAME_TYPE_LEAF, 5);
+    noia_test_frame_config(f, co, NOIA_FRAME_TYPE_LEAF, 6);
     noia_frame_append(r, a);
     noia_frame_append(r, b);
     noia_frame_append(r, c);
@@ -1123,8 +1107,7 @@ NoiaTestResult should_find_contiguous_on_the_same_level_many_further(void)
     NOIA_ASSERT(p == a, "5*East from F should be A");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1149,8 +1132,7 @@ NoiaTestResult should_find_contiguous_on_the_same_level_many_further(void)
 ///
 NoiaTestResult should_find_contiguous_on_the_second_level(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NoiaFrame* p  = NULL;
     NoiaFrame* r  = noia_frame_new();
     NoiaFrame* a  = noia_frame_new();
@@ -1158,14 +1140,15 @@ NoiaTestResult should_find_contiguous_on_the_second_level(void)
     NoiaFrame* b  = noia_frame_new();
     NoiaFrame* c  = noia_frame_new();
     NoiaFrame* d  = noia_frame_new();
-    noia_test_frame_config(r,
+    noia_test_frame_config(r, co,
                            NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_HORIZONTAL,
                            scInvalidSurfaceId);
-    noia_test_frame_config(a,  NOIA_FRAME_TYPE_LEAF, 1);
-    noia_test_frame_config(bc, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId);
-    noia_test_frame_config(b,  NOIA_FRAME_TYPE_LEAF, 2);
-    noia_test_frame_config(c,  NOIA_FRAME_TYPE_LEAF, 3);
-    noia_test_frame_config(d,  NOIA_FRAME_TYPE_LEAF, 4);
+    noia_test_frame_config(a,  co, NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(bc, co, NOIA_FRAME_TYPE_VERTICAL,
+                           scInvalidSurfaceId);
+    noia_test_frame_config(b,  co, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_test_frame_config(c,  co, NOIA_FRAME_TYPE_LEAF, 3);
+    noia_test_frame_config(d,  co, NOIA_FRAME_TYPE_LEAF, 4);
     noia_frame_append(r,  a);
     noia_frame_append(r,  bc);
     noia_frame_append(bc, b);
@@ -1188,8 +1171,7 @@ NoiaTestResult should_find_contiguous_on_the_second_level(void)
     NOIA_ASSERT(p == c->trunk, "1*Trunk from C should be BC");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1210,8 +1192,7 @@ NoiaTestResult should_find_contiguous_on_the_second_level(void)
 ///
 NoiaTestResult should_find_contiguous_on_the_third_level(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NoiaFrame* p    = NULL;
     NoiaFrame* r    = noia_frame_new();
     NoiaFrame* a    = noia_frame_new();
@@ -1220,15 +1201,17 @@ NoiaTestResult should_find_contiguous_on_the_third_level(void)
     NoiaFrame* d    = noia_frame_new();
     NoiaFrame* bc   = noia_frame_new();
     NoiaFrame* abc  = noia_frame_new();
-    noia_test_frame_config(r,
+    noia_test_frame_config(r, co,
                            NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_HORIZONTAL,
                            scInvalidSurfaceId);
-    noia_test_frame_config(a,   NOIA_FRAME_TYPE_LEAF, 1);
-    noia_test_frame_config(b,   NOIA_FRAME_TYPE_LEAF, 2);
-    noia_test_frame_config(c,   NOIA_FRAME_TYPE_LEAF, 3);
-    noia_test_frame_config(d,   NOIA_FRAME_TYPE_LEAF, 4);
-    noia_test_frame_config(bc,  NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId);
-    noia_test_frame_config(abc, NOIA_FRAME_TYPE_VERTICAL, scInvalidSurfaceId);
+    noia_test_frame_config(a,   co, NOIA_FRAME_TYPE_LEAF, 1);
+    noia_test_frame_config(b,   co, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_test_frame_config(c,   co, NOIA_FRAME_TYPE_LEAF, 3);
+    noia_test_frame_config(d,   co, NOIA_FRAME_TYPE_LEAF, 4);
+    noia_test_frame_config(bc,  co, NOIA_FRAME_TYPE_VERTICAL,
+                           scInvalidSurfaceId);
+    noia_test_frame_config(abc, co, NOIA_FRAME_TYPE_VERTICAL,
+                           scInvalidSurfaceId);
     noia_frame_append(bc, b);
     noia_frame_append(bc, c);
     noia_frame_append(abc, a);
@@ -1240,8 +1223,7 @@ NoiaTestResult should_find_contiguous_on_the_third_level(void)
     NOIA_ASSERT(p == d, "1*East from C should be D");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1265,8 +1247,7 @@ NoiaTestResult should_find_contiguous_on_the_third_level(void)
 ///
 NoiaTestResult should_find_stacked_pointed_inside(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {10, 10};
@@ -1274,8 +1255,7 @@ NoiaTestResult should_find_stacked_pointed_inside(void)
     NOIA_ASSERT(p == a, "Pointed inside ABC should be A");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1299,8 +1279,7 @@ NoiaTestResult should_find_stacked_pointed_inside(void)
 ///
 NoiaTestResult should_find_flat_pointed_inside(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {50, 10};
@@ -1309,8 +1288,7 @@ NoiaTestResult should_find_flat_pointed_inside(void)
     NOIA_ASSERT(p == d, "Pointed inside D should be D");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1335,8 +1313,7 @@ NoiaTestResult should_find_flat_pointed_inside(void)
 ///
 NoiaTestResult should_find_stacked_pointed_outside(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {20, -10};
@@ -1345,8 +1322,7 @@ NoiaTestResult should_find_stacked_pointed_outside(void)
     NOIA_ASSERT(p == a, "Pointed outside ABCDEF above A should be A");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1371,8 +1347,7 @@ NoiaTestResult should_find_stacked_pointed_outside(void)
 ///
 NoiaTestResult should_find_flat_pointed_outside(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {60, -10};
@@ -1381,8 +1356,7 @@ NoiaTestResult should_find_flat_pointed_outside(void)
     NOIA_ASSERT(p == d, "Pointed outside ABCDEF above D should be D");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1406,8 +1380,7 @@ NoiaTestResult should_find_flat_pointed_outside(void)
 ///
 NoiaTestResult should_find_frame_over_another(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {50, 70};
@@ -1416,8 +1389,7 @@ NoiaTestResult should_find_frame_over_another(void)
     NOIA_ASSERT(p == d, "Pointed in F searching in ABCDE should be D");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1441,8 +1413,7 @@ NoiaTestResult should_find_frame_over_another(void)
 ///
 NoiaTestResult should_find_frame_in_empty_space(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     NoiaPosition point = {80, 80};
@@ -1451,8 +1422,7 @@ NoiaTestResult should_find_frame_in_empty_space(void)
     NOIA_ASSERT(p == r, "Pointed in ABCDEF outside subframes should be ABCDEF");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1483,8 +1453,7 @@ NoiaTestResult should_find_frame_in_empty_space(void)
 ///
 NoiaTestResult should_find_adjacent_frames(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NoiaFrame* p  = NULL;
     NoiaFrame* r  = noia_frame_new();
     NoiaFrame* a  = noia_frame_new();
@@ -1505,25 +1474,25 @@ NoiaTestResult should_find_adjacent_frames(void)
     noia_frame_append(r, ab);
     noia_frame_append(r, cd);
     noia_frame_append(r, ef);
-    noia_frame_configure(a, NOIA_FRAME_TYPE_LEAF, 1,
+    noia_frame_configure(a, co, NOIA_FRAME_TYPE_LEAF, 1,
                          (NoiaArea) {{ 0,  0}, { 70, 10}}, "");
-    noia_frame_configure(b, NOIA_FRAME_TYPE_LEAF, 2,
+    noia_frame_configure(b, co, NOIA_FRAME_TYPE_LEAF, 2,
                          (NoiaArea) {{70,  0}, { 30, 10}}, "");
-    noia_frame_configure(c, NOIA_FRAME_TYPE_LEAF, 3,
+    noia_frame_configure(c, co, NOIA_FRAME_TYPE_LEAF, 3,
                          (NoiaArea) {{ 0, 10}, { 50, 10}}, "");
-    noia_frame_configure(d, NOIA_FRAME_TYPE_LEAF, 4,
+    noia_frame_configure(d, co, NOIA_FRAME_TYPE_LEAF, 4,
                          (NoiaArea) {{50, 10}, { 50, 10}}, "");
-    noia_frame_configure(e, NOIA_FRAME_TYPE_LEAF, 5,
+    noia_frame_configure(e, co, NOIA_FRAME_TYPE_LEAF, 5,
                          (NoiaArea) {{ 0, 20}, { 30, 10}}, "");
-    noia_frame_configure(f, NOIA_FRAME_TYPE_LEAF, 6,
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 6,
                          (NoiaArea) {{30, 20}, { 70, 10}}, "");
-    noia_frame_configure(r, NOIA_FRAME_TYPE_VERTICAL, INV,
+    noia_frame_configure(r, co, NOIA_FRAME_TYPE_VERTICAL, INV,
                          (NoiaArea) {{ 0,  0}, {100, 30}}, "");
-    noia_frame_configure(ab, NOIA_FRAME_TYPE_HORIZONTAL, INV,
+    noia_frame_configure(ab, co, NOIA_FRAME_TYPE_HORIZONTAL, INV,
                          (NoiaArea) {{ 0,  0}, {100, 10}}, "");
-    noia_frame_configure(cd, NOIA_FRAME_TYPE_HORIZONTAL, INV,
+    noia_frame_configure(cd, co, NOIA_FRAME_TYPE_HORIZONTAL, INV,
                          (NoiaArea) {{ 0, 10}, {100, 10}}, "");
-    noia_frame_configure(ef, NOIA_FRAME_TYPE_HORIZONTAL, INV,
+    noia_frame_configure(ef, co, NOIA_FRAME_TYPE_HORIZONTAL, INV,
                          (NoiaArea) {{ 0, 20}, {100, 10}}, "");
 
     p = noia_frame_find_adjacent(a, NOIA_ARGMAND_S, 1);
@@ -1542,8 +1511,7 @@ NoiaTestResult should_find_adjacent_frames(void)
     NOIA_ASSERT(p == NULL, "1*North from AB should be NULL");
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1568,8 +1536,7 @@ NoiaTestResult should_find_adjacent_frames(void)
 ///
 NoiaTestResult should_correctly_iterate_east(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_ITERATION;
 
     NoiaFrameIterator iter;
@@ -1592,8 +1559,7 @@ NoiaTestResult should_correctly_iterate_east(void)
     NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1618,8 +1584,7 @@ NoiaTestResult should_correctly_iterate_east(void)
 ///
 NoiaTestResult should_correctly_iterate_west(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_ITERATION;
 
     NoiaFrameIterator iter;
@@ -1642,8 +1607,7 @@ NoiaTestResult should_correctly_iterate_west(void)
     NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1668,8 +1632,7 @@ NoiaTestResult should_correctly_iterate_west(void)
 ///
 NoiaTestResult should_correctly_iterate_south(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_ITERATION;
 
     NoiaFrameIterator iter;
@@ -1692,8 +1655,7 @@ NoiaTestResult should_correctly_iterate_south(void)
     NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1718,8 +1680,7 @@ NoiaTestResult should_correctly_iterate_south(void)
 ///
 NoiaTestResult should_correctly_iterate_north(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_ITERATION;
 
     NoiaFrameIterator iter;
@@ -1742,8 +1703,7 @@ NoiaTestResult should_correctly_iterate_north(void)
     NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1752,8 +1712,7 @@ NoiaTestResult should_correctly_iterate_north(void)
 /// Test if frames for resizing with horizontal floating are correctly set up.
 NoiaTestResult check_setup_for_resizing_with_horizontal_floating(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
     NOIA_ASSERT_FRAME_AREA(r,        0,  0, 300, 120);
@@ -1772,8 +1731,7 @@ NoiaTestResult check_setup_for_resizing_with_horizontal_floating(void)
     NOIA_ASSERT_FRAME_AREA(f,       60, 80,  60,  40);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1782,8 +1740,7 @@ NoiaTestResult check_setup_for_resizing_with_horizontal_floating(void)
 /// Test if frames for resizing with vertical floating are correctly set up.
 NoiaTestResult check_setup_for_resizing_with_vertical_floating(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_VERTICAL_FLOATING;
 
     NOIA_ASSERT_FRAME_AREA(r,       0,   0, 120, 300);
@@ -1802,8 +1759,7 @@ NoiaTestResult check_setup_for_resizing_with_vertical_floating(void)
     NOIA_ASSERT_FRAME_AREA(f,      80,  60,  40,  60);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1812,11 +1768,10 @@ NoiaTestResult check_setup_for_resizing_with_vertical_floating(void)
 /// Test if frame correctly resizes when shrunk with south border.
 NoiaTestResult should_shrink_from_south(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_S, -30);
+    noia_frame_resize(g, co, NOIA_ARGMAND_S, -30);
 
     NOIA_ASSERT_FRAME_AREA(r,        0,  0, 300, 90);
     NOIA_ASSERT_FRAME_AREA(abcdef,   0,  0, 120, 90);
@@ -1834,8 +1789,7 @@ NoiaTestResult should_shrink_from_south(void)
     NOIA_ASSERT_FRAME_AREA(f,       60, 60,  60, 30);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1844,11 +1798,10 @@ NoiaTestResult should_shrink_from_south(void)
 /// Test if frame correctly resizes when expanded with south border.
 NoiaTestResult should_expand_to_south(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_S, 30);
+    noia_frame_resize(g, co, NOIA_ARGMAND_S, 30);
 
     NOIA_ASSERT_FRAME_AREA(r,        0,   0, 300, 150);
     NOIA_ASSERT_FRAME_AREA(abcdef,   0,   0, 120, 150);
@@ -1866,8 +1819,7 @@ NoiaTestResult should_expand_to_south(void)
     NOIA_ASSERT_FRAME_AREA(f,       60, 100,  60,  50);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1876,11 +1828,10 @@ NoiaTestResult should_expand_to_south(void)
 /// Test if frame correctly resizes when shrunk with north border.
 NoiaTestResult should_shrink_from_north(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_N, -30);
+    noia_frame_resize(g, co, NOIA_ARGMAND_N, -30);
 
     NOIA_ASSERT_FRAME_AREA             (r,        0, 30, 300, 90);
     NOIA_ASSERT_FRAME_AREA             (abcdef,   0, 30, 120, 90);
@@ -1898,8 +1849,7 @@ NoiaTestResult should_shrink_from_north(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,       60, 90,  60, 30);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1908,11 +1858,10 @@ NoiaTestResult should_shrink_from_north(void)
 /// Test if frame correctly resizes when expanded with north border.
 NoiaTestResult should_expand_to_north(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_N, 30);
+    noia_frame_resize(g, co, NOIA_ARGMAND_N, 30);
 
     NOIA_ASSERT_FRAME_AREA             (r,        0, -30, 300, 150);
     NOIA_ASSERT_FRAME_AREA             (abcdef,   0, -30, 120, 150);
@@ -1930,8 +1879,7 @@ NoiaTestResult should_expand_to_north(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,       60,  70,  60,  50);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1940,11 +1888,10 @@ NoiaTestResult should_expand_to_north(void)
 /// Test if frame correctly resizes when shrunk with east border.
 NoiaTestResult should_shrink_from_east(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_VERTICAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_E, -30);
+    noia_frame_resize(g, co, NOIA_ARGMAND_E, -30);
 
     NOIA_ASSERT_FRAME_AREA             (r,       0,   0,  90, 300);
     NOIA_ASSERT_FRAME_AREA             (abcdef,  0,   0,  90, 120);
@@ -1962,8 +1909,7 @@ NoiaTestResult should_shrink_from_east(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,      60,  60,  30,  60);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -1972,11 +1918,10 @@ NoiaTestResult should_shrink_from_east(void)
 /// Test if frame correctly resizes when expanded with east border.
 NoiaTestResult should_expand_to_east(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_VERTICAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_E, 30);
+    noia_frame_resize(g, co, NOIA_ARGMAND_E, 30);
 
     NOIA_ASSERT_FRAME_AREA             (r,       0,   0, 150, 300);
     NOIA_ASSERT_FRAME_AREA             (abcdef,  0,   0, 150, 120);
@@ -1994,8 +1939,7 @@ NoiaTestResult should_expand_to_east(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,     100,  60,  50,  60);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2004,11 +1948,10 @@ NoiaTestResult should_expand_to_east(void)
 /// Test if frame correctly resizes when shrunk with west border.
 NoiaTestResult should_shrink_from_west(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_VERTICAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_W, -30);
+    noia_frame_resize(g, co, NOIA_ARGMAND_W, -30);
 
     NOIA_ASSERT_FRAME_AREA             (r,      30,   0,  90, 300);
     NOIA_ASSERT_FRAME_AREA             (abcdef, 30,   0,  90, 120);
@@ -2026,8 +1969,7 @@ NoiaTestResult should_shrink_from_west(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,      90,  60,  30,  60);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2036,11 +1978,10 @@ NoiaTestResult should_shrink_from_west(void)
 /// Test if frame correctly resizes when expanded with west border.
 NoiaTestResult should_expand_to_west(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_VERTICAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_W, 30);
+    noia_frame_resize(g, co, NOIA_ARGMAND_W, 30);
 
     NOIA_ASSERT_FRAME_AREA             (r,      -30,   0, 150, 300);
     NOIA_ASSERT_FRAME_AREA             (abcdef, -30,   0, 150, 120);
@@ -2058,8 +1999,7 @@ NoiaTestResult should_expand_to_west(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,       70,  60,  50,  60);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2069,11 +2009,10 @@ NoiaTestResult should_expand_to_west(void)
 /// vertical frame.
 NoiaTestResult should_vertical_shrink_from_north(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_VERTICAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_N, -20);
+    noia_frame_resize(g, co, NOIA_ARGMAND_N, -20);
 
     NOIA_ASSERT_FRAME_AREA             (r,       0,   0, 120, 300);
     NOIA_ASSERT_FRAME_AREA             (abcdef,  0,   0, 120, 140);
@@ -2091,8 +2030,7 @@ NoiaTestResult should_vertical_shrink_from_north(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,      80,  70,  40,  70);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2102,11 +2040,10 @@ NoiaTestResult should_vertical_shrink_from_north(void)
 /// vertical frame.
 NoiaTestResult should_vertical_expand_to_north(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_VERTICAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_N, 20);
+    noia_frame_resize(g, co, NOIA_ARGMAND_N, 20);
 
     NOIA_ASSERT_FRAME_AREA             (r,       0,   0, 120, 300);
     NOIA_ASSERT_FRAME_AREA             (abcdef,  0,   0, 120, 100);
@@ -2125,8 +2062,7 @@ NoiaTestResult should_vertical_expand_to_north(void)
 
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2136,11 +2072,10 @@ NoiaTestResult should_vertical_expand_to_north(void)
 /// horizontal frame.
 NoiaTestResult should_horizontal_shrink_from_west(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_W, -20);
+    noia_frame_resize(g, co, NOIA_ARGMAND_W, -20);
 
     NOIA_ASSERT_FRAME_AREA             (r,        0,  0, 300, 120);
     NOIA_ASSERT_FRAME_AREA             (abcdef,   0,  0, 140, 120);
@@ -2158,8 +2093,7 @@ NoiaTestResult should_horizontal_shrink_from_west(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,       70, 80,  70,  40);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2169,11 +2103,10 @@ NoiaTestResult should_horizontal_shrink_from_west(void)
 /// horizontal frame.
 NoiaTestResult should_horizontal_expand_to_west(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
-    noia_frame_resize(g, NOIA_ARGMAND_W, 20);
+    noia_frame_resize(g, co, NOIA_ARGMAND_W, 20);
 
     NOIA_ASSERT_FRAME_AREA             (r,        0,  0, 300, 120);
     NOIA_ASSERT_FRAME_AREA             (abcdef,   0,  0, 100, 120);
@@ -2191,8 +2124,7 @@ NoiaTestResult should_horizontal_expand_to_west(void)
     NOIA_ASSERT_FRAME_AREA_WITH_SURFACE(f,       50, 80,  50,  40);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2201,8 +2133,7 @@ NoiaTestResult should_horizontal_expand_to_west(void)
 /// Check position of frame moved to north-west.
 NoiaTestResult should_move_to_north_west(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
     noia_frame_move(r, NOIA_ARGMAND_N, 20);
@@ -2224,8 +2155,7 @@ NoiaTestResult should_move_to_north_west(void)
     NOIA_ASSERT_FRAME_AREA(f,       30,  60,  60,  40);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2234,8 +2164,7 @@ NoiaTestResult should_move_to_north_west(void)
 /// Check position of frame moved to south-east.
 NoiaTestResult should_move_to_south_east(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
     noia_frame_move(r, NOIA_ARGMAND_S, 20);
@@ -2257,8 +2186,7 @@ NoiaTestResult should_move_to_south_east(void)
     NOIA_ASSERT_FRAME_AREA(f,       90, 100,  60,  40);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2267,8 +2195,7 @@ NoiaTestResult should_move_to_south_east(void)
 /// Check position of frame moved to north-east.
 NoiaTestResult should_move_from_north_east(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
     noia_frame_move(r, NOIA_ARGMAND_N, -20);
@@ -2290,8 +2217,7 @@ NoiaTestResult should_move_from_north_east(void)
     NOIA_ASSERT_FRAME_AREA(f,       30, 100,  60,  40);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2300,8 +2226,7 @@ NoiaTestResult should_move_from_north_east(void)
 /// Check if frame is not moved when trying to move not-floating frame.
 NoiaTestResult should_not_move_when_frame_is_not_floating(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RESIZING_WITH_HORIZONTAL_FLOATING;
 
     noia_frame_move(f, NOIA_ARGMAND_N, -20);
@@ -2323,8 +2248,7 @@ NoiaTestResult should_not_move_when_frame_is_not_floating(void)
     NOIA_ASSERT_FRAME_AREA(f,       60, 80,  60,  40);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2339,11 +2263,10 @@ NoiaTestResult should_not_move_when_frame_is_not_floating(void)
 ///
 NoiaTestResult should_relax_horizontal(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RELAXING;
 
-    noia_frame_relax(r);
+    noia_frame_relax(r, co);
 
     NOIA_ASSERT_FRAME_AREA(r,        0,   0, 360, 360);
     NOIA_ASSERT_FRAME_AREA(abcdef,   0,   0, 120, 360);
@@ -2361,8 +2284,7 @@ NoiaTestResult should_relax_horizontal(void)
     NOIA_ASSERT_FRAME_AREA(f,       60, 300,  60,  60);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2375,11 +2297,10 @@ NoiaTestResult should_relax_horizontal(void)
 ///
 NoiaTestResult should_change_type_to_stacked(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RELAXING;
 
-    noia_frame_change_type(r, NOIA_FRAME_TYPE_STACKED);
+    noia_frame_change_type(r, co, NOIA_FRAME_TYPE_STACKED);
 
     NOIA_ASSERT_FRAME_AREA(r,      0,   0, 360, 360);
     NOIA_ASSERT_FRAME_AREA(abcdef, 0,   0, 360, 360);
@@ -2397,8 +2318,7 @@ NoiaTestResult should_change_type_to_stacked(void)
     NOIA_ASSERT_FRAME_AREA(f,    180, 300, 180,  60);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2411,11 +2331,10 @@ NoiaTestResult should_change_type_to_stacked(void)
 ///
 NoiaTestResult should_change_type_to_vertical(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_RELAXING;
 
-    noia_frame_change_type(r, NOIA_FRAME_TYPE_VERTICAL);
+    noia_frame_change_type(r, co, NOIA_FRAME_TYPE_VERTICAL);
 
     NOIA_ASSERT_FRAME_AREA(r,      0,   0, 360, 360);
     NOIA_ASSERT_FRAME_AREA(abcdef, 0,   0, 360, 120);
@@ -2433,8 +2352,7 @@ NoiaTestResult should_change_type_to_vertical(void)
     NOIA_ASSERT_FRAME_AREA(f,    180,  80, 180,  40);
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 
@@ -2443,15 +2361,13 @@ NoiaTestResult should_change_type_to_vertical(void)
 /// Empty test
 NoiaTestResult should(void)
 {
-    noia_mock_surface_manager_initialize();
-
+    NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
     // ...
 
     noia_frame_free(r);
-
-    noia_mock_surface_manager_finalize();
+    noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
 

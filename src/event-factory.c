@@ -18,14 +18,6 @@
 
 //------------------------------------------------------------------------------
 
-NoiaTask* factorize_setup_device_monitor_task(NoiaEventDispatcher* ed)
-{
-    return noia_task_new((NoiaTaskProcessor) noia_udev_setup_device_monitoring,
-                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, ed);
-}
-
-//------------------------------------------------------------------------------
-
 NoiaTask* factorize_setup_input_devices_task(NoiaEventDispatcher* ed)
 {
     return noia_task_new((NoiaTaskProcessor) noia_evdev_setup_input_devices,
@@ -34,10 +26,10 @@ NoiaTask* factorize_setup_input_devices_task(NoiaEventDispatcher* ed)
 
 //------------------------------------------------------------------------------
 
-NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop)
+NoiaTask* factorize_setup_device_monitor_task(NoiaEventDispatcher* ed)
 {
-    return noia_task_new((NoiaTaskProcessor) noia_wayland_initialize,
-                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, loop);
+    return noia_task_new((NoiaTaskProcessor) noia_udev_setup_device_monitoring,
+                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, ed);
 }
 
 //------------------------------------------------------------------------------
@@ -50,10 +42,22 @@ NoiaTask* factorize_backend_offscreen_run_task(NoiaLoop* loop)
 
 //------------------------------------------------------------------------------
 
-NoiaTask* factorize_initialize_exhibitor_task(NoiaLoop* loop)
+NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop,
+                                            NoiaCoordinator* coordinator)
+{
+    return noia_task_new((NoiaTaskProcessor) noia_wayland_initialize,
+                         (NoiaTaskFreeFunc) noia_task_free, NULL,
+                         coordinator, loop);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaTask* factorize_initialize_exhibitor_task(NoiaLoop* loop,
+                                              NoiaCoordinator* coordinator)
 {
     return noia_task_new((NoiaTaskProcessor) noia_exhibitor_initialize,
-                         (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, loop);
+                         (NoiaTaskFreeFunc) noia_task_free, NULL,
+                         coordinator, loop);
 }
 
 //------------------------------------------------------------------------------

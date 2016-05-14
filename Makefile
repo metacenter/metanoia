@@ -55,12 +55,15 @@ build/metanoia: Makefile \
                 inter/utils-keymap.o \
                 inter/utils-keyboard-state.o \
                 inter/utils-image.o \
+                inter/utils-time.o \
                 inter/event-dispatcher.o \
                 inter/event-factory.o \
                 inter/event-loop.o \
                 inter/event-signals.o \
                 inter/event-task.o \
                 inter/event-timer.o \
+                inter/surface-coordinator.o \
+                inter/surface-data.o \
                 inter/renderer.o \
                 inter/renderer-mmap.o \
                 inter/renderer-gl.o \
@@ -71,8 +74,6 @@ build/metanoia: Makefile \
                 inter/device-udev.o \
                 inter/output.o \
                 inter/output-collector.o \
-                inter/surface-data.o \
-                inter/surface-manager.o \
                 inter/input-binding.o \
                 inter/input-bindings.o \
                 inter/input-context.o \
@@ -135,12 +136,15 @@ build/metanoia: Makefile \
 	    inter/utils-keymap.o \
 	    inter/utils-keyboard-state.o \
 	    inter/utils-image.o \
+	    inter/utils-time.o \
 	    inter/event-dispatcher.o \
 	    inter/event-factory.o \
 	    inter/event-loop.o \
 	    inter/event-signals.o \
 	    inter/event-task.o \
 	    inter/event-timer.o \
+	    inter/surface-coordinator.o \
+	    inter/surface-data.o \
 	    inter/renderer.o \
 	    inter/renderer-mmap.o \
 	    inter/renderer-gl.o \
@@ -151,8 +155,6 @@ build/metanoia: Makefile \
 	    inter/device-udev.o \
 	    inter/output.o \
 	    inter/output-collector.o \
-	    inter/surface-data.o \
-	    inter/surface-manager.o \
 	    inter/input-binding.o \
 	    inter/input-bindings.o \
 	    inter/input-context.o \
@@ -289,7 +291,7 @@ checks/check-branch: Makefile \
 
 checks/check-frame: Makefile \
                     inter/test-frame.o \
-                    inter/mock-surface-manager.o \
+                    inter/mock-surface-coordinator.o \
                     inter/utils-pool.o \
                     inter/utils-debug.o \
                     inter/utils-store.o \
@@ -303,7 +305,7 @@ checks/check-frame: Makefile \
 	@echo "  LD   checks/check-frame"
 	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -o checks/check-frame \
 	    inter/test-frame.o \
-	    inter/mock-surface-manager.o \
+	    inter/mock-surface-coordinator.o \
 	    inter/utils-pool.o \
 	    inter/utils-debug.o \
 	    inter/utils-store.o \
@@ -456,10 +458,13 @@ inter/exhibitor-frame.o: Makefile \
                          src/global-enums.h \
                          src/global-macros.h \
                          src/global-types.h \
+                         src/surface-coordinator.h \
+                         src/surface-data.h \
                          src/utils-branch.h \
                          src/utils-chain.h \
                          src/utils-debug.h \
-                         src/utils-pool.h
+                         src/utils-pool.h \
+                         src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/exhibitor-frame.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-frame.o \
@@ -473,8 +478,8 @@ inter/exhibitor-frame-internal.o: Makefile \
                                   src/global-enums.h \
                                   src/global-macros.h \
                                   src/global-types.h \
+                                  src/surface-coordinator.h \
                                   src/surface-data.h \
-                                  src/surface-manager.h \
                                   src/utils-branch.h \
                                   src/utils-chain.h \
                                   src/utils-debug.h \
@@ -536,8 +541,11 @@ inter/global-functions.o: Makefile \
                           src/global-functions.c \
                           src/global-functions.h \
                           src/global-types.h \
+                          src/surface-coordinator.h \
+                          src/surface-data.h \
                           src/utils-log.h \
-                          src/utils-object.h
+                          src/utils-object.h \
+                          src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/global-functions.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/global-functions.o \
@@ -652,6 +660,16 @@ inter/utils-image.o: Makefile \
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-image.o \
 	    src/utils-image.c
 
+inter/utils-time.o: Makefile \
+                    src/global-enums.h \
+                    src/global-types.h \
+                    src/utils-time.c \
+                    src/utils-time.h
+	@mkdir -p inter
+	@echo "  CC   inter/utils-time.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-time.o \
+	    src/utils-time.c
+
 inter/event-dispatcher.o: Makefile \
                           src/event-dispatcher.c \
                           src/event-dispatcher.h \
@@ -685,12 +703,15 @@ inter/event-factory.o: Makefile \
                        src/output-collector.h \
                        src/output.h \
                        src/renderer.h \
+                       src/surface-coordinator.h \
+                       src/surface-data.h \
                        src/utils-chain.h \
                        src/utils-debug.h \
                        src/utils-environment.h \
                        src/utils-list.h \
                        src/utils-object.h \
                        src/utils-pool.h \
+                       src/utils-store.h \
                        src/wayland.h
 	@mkdir -p inter
 	@echo "  CC   inter/event-factory.o"
@@ -761,13 +782,50 @@ inter/event-timer.o: Makefile \
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/event-timer.o \
 	    src/event-timer.c
 
+inter/surface-coordinator.o: Makefile \
+                             src/event-signals.h \
+                             src/event-task.h \
+                             src/global-constants.h \
+                             src/global-enums.h \
+                             src/global-macros.h \
+                             src/global-types.h \
+                             src/surface-coordinator.c \
+                             src/surface-coordinator.h \
+                             src/surface-data.h \
+                             src/utils-debug.h \
+                             src/utils-log.h \
+                             src/utils-object.h \
+                             src/utils-store.h \
+                             src/utils-time.h
+	@mkdir -p inter
+	@echo "  CC   inter/surface-coordinator.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/surface-coordinator.o \
+	    src/surface-coordinator.c
+
+inter/surface-data.o: Makefile \
+                      src/global-constants.h \
+                      src/global-enums.h \
+                      src/global-macros.h \
+                      src/global-types.h \
+                      src/surface-data.c \
+                      src/surface-data.h \
+                      src/utils-debug.h \
+                      src/utils-store.h
+	@mkdir -p inter
+	@echo "  CC   inter/surface-data.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/surface-data.o \
+	    src/surface-data.c
+
 inter/renderer.o: Makefile \
                   src/global-constants.h \
                   src/global-enums.h \
                   src/global-types.h \
                   src/renderer.c \
                   src/renderer.h \
-                  src/utils-pool.h
+                  src/surface-coordinator.h \
+                  src/surface-data.h \
+                  src/utils-pool.h \
+                  src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/renderer.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/renderer.o \
@@ -782,8 +840,8 @@ inter/renderer-mmap.o: Makefile \
                        src/renderer-mmap.c \
                        src/renderer-mmap.h \
                        src/renderer.h \
+                       src/surface-coordinator.h \
                        src/surface-data.h \
-                       src/surface-manager.h \
                        src/utils-debug.h \
                        src/utils-log.h \
                        src/utils-object.h \
@@ -803,8 +861,8 @@ inter/renderer-gl.o: Makefile \
                      src/renderer-gl.c \
                      src/renderer-gl.h \
                      src/renderer.h \
+                     src/surface-coordinator.h \
                      src/surface-data.h \
-                     src/surface-manager.h \
                      src/utils-chain.h \
                      src/utils-debug.h \
                      src/utils-gl.h \
@@ -843,12 +901,15 @@ inter/device-fb.o: Makefile \
                    src/output.h \
                    src/renderer-mmap.h \
                    src/renderer.h \
+                   src/surface-coordinator.h \
+                   src/surface-data.h \
                    src/utils-chain.h \
                    src/utils-debug.h \
                    src/utils-list.h \
                    src/utils-log.h \
                    src/utils-object.h \
-                   src/utils-pool.h
+                   src/utils-pool.h \
+                   src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/device-fb.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/device-fb.o \
@@ -866,6 +927,8 @@ inter/device-drm.o: Makefile \
                     src/renderer-gl.h \
                     src/renderer-mmap.h \
                     src/renderer.h \
+                    src/surface-coordinator.h \
+                    src/surface-data.h \
                     src/utils-chain.h \
                     src/utils-debug.h \
                     src/utils-gl.h \
@@ -873,7 +936,8 @@ inter/device-drm.o: Makefile \
                     src/utils-list.h \
                     src/utils-log.h \
                     src/utils-object.h \
-                    src/utils-pool.h
+                    src/utils-pool.h \
+                    src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/device-drm.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -I/usr/include/libdrm -o inter/device-drm.o \
@@ -931,9 +995,12 @@ inter/output.o: Makefile \
                 src/output.c \
                 src/output.h \
                 src/renderer.h \
+                src/surface-coordinator.h \
+                src/surface-data.h \
                 src/utils-debug.h \
                 src/utils-object.h \
-                src/utils-pool.h
+                src/utils-pool.h \
+                src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/output.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/output.o \
@@ -955,50 +1022,20 @@ inter/output-collector.o: Makefile \
                           src/output-collector.h \
                           src/output.h \
                           src/renderer.h \
+                          src/surface-coordinator.h \
+                          src/surface-data.h \
                           src/utils-chain.h \
                           src/utils-debug.h \
                           src/utils-keymap.h \
                           src/utils-list.h \
                           src/utils-log.h \
                           src/utils-object.h \
-                          src/utils-pool.h
+                          src/utils-pool.h \
+                          src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/output-collector.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/output-collector.o \
 	    src/output-collector.c
-
-inter/surface-data.o: Makefile \
-                      src/global-constants.h \
-                      src/global-enums.h \
-                      src/global-macros.h \
-                      src/global-types.h \
-                      src/surface-data.c \
-                      src/surface-data.h \
-                      src/utils-debug.h \
-                      src/utils-store.h
-	@mkdir -p inter
-	@echo "  CC   inter/surface-data.o"
-	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/surface-data.o \
-	    src/surface-data.c
-
-inter/surface-manager.o: Makefile \
-                         src/event-signals.h \
-                         src/event-task.h \
-                         src/global-constants.h \
-                         src/global-enums.h \
-                         src/global-macros.h \
-                         src/global-types.h \
-                         src/surface-data.h \
-                         src/surface-manager.c \
-                         src/surface-manager.h \
-                         src/utils-debug.h \
-                         src/utils-log.h \
-                         src/utils-object.h \
-                         src/utils-store.h
-	@mkdir -p inter
-	@echo "  CC   inter/surface-manager.o"
-	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/surface-manager.o \
-	    src/surface-manager.c
 
 inter/input-binding.o: Makefile \
                        src/global-constants.h \
@@ -1074,12 +1111,15 @@ inter/input-functions.o: Makefile \
                          src/input-functions.c \
                          src/input-functions.h \
                          src/input-mode.h \
+                         src/surface-coordinator.h \
+                         src/surface-data.h \
                          src/utils-chain.h \
                          src/utils-debug.h \
                          src/utils-keymap.h \
                          src/utils-list.h \
                          src/utils-log.h \
-                         src/utils-object.h
+                         src/utils-object.h \
+                         src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/input-functions.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/input-functions.o \
@@ -1120,12 +1160,15 @@ inter/exhibitor-strategist.o: Makefile \
                               src/global-types.h \
                               src/output.h \
                               src/renderer.h \
+                              src/surface-coordinator.h \
+                              src/surface-data.h \
                               src/utils-branch.h \
                               src/utils-chain.h \
                               src/utils-debug.h \
                               src/utils-list.h \
                               src/utils-object.h \
-                              src/utils-pool.h
+                              src/utils-pool.h \
+                              src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/exhibitor-strategist.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-strategist.o \
@@ -1145,8 +1188,8 @@ inter/exhibitor-compositor.o: Makefile \
                               src/global-types.h \
                               src/output.h \
                               src/renderer.h \
+                              src/surface-coordinator.h \
                               src/surface-data.h \
-                              src/surface-manager.h \
                               src/utils-branch.h \
                               src/utils-chain.h \
                               src/utils-debug.h \
@@ -1178,8 +1221,8 @@ inter/exhibitor-display.o: Makefile \
                            src/global-types.h \
                            src/output.h \
                            src/renderer.h \
+                           src/surface-coordinator.h \
                            src/surface-data.h \
-                           src/surface-manager.h \
                            src/utils-branch.h \
                            src/utils-chain.h \
                            src/utils-debug.h \
@@ -1190,7 +1233,8 @@ inter/exhibitor-display.o: Makefile \
                            src/utils-log.h \
                            src/utils-object.h \
                            src/utils-pool.h \
-                           src/utils-store.h
+                           src/utils-store.h \
+                           src/utils-time.h
 	@mkdir -p inter
 	@echo "  CC   inter/exhibitor-display.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-display.o \
@@ -1212,8 +1256,8 @@ inter/exhibitor-pointer.o: Makefile \
                            src/global-types.h \
                            src/output.h \
                            src/renderer.h \
+                           src/surface-coordinator.h \
                            src/surface-data.h \
-                           src/surface-manager.h \
                            src/utils-branch.h \
                            src/utils-chain.h \
                            src/utils-debug.h \
@@ -1242,8 +1286,8 @@ inter/exhibitor.o: Makefile \
                    src/global-types.h \
                    src/output.h \
                    src/renderer.h \
+                   src/surface-coordinator.h \
                    src/surface-data.h \
-                   src/surface-manager.h \
                    src/utils-branch.h \
                    src/utils-chain.h \
                    src/utils-debug.h \
@@ -1271,12 +1315,15 @@ inter/exhibitor-module.o: Makefile \
                           src/global-types.h \
                           src/output.h \
                           src/renderer.h \
+                          src/surface-coordinator.h \
+                          src/surface-data.h \
                           src/utils-chain.h \
                           src/utils-debug.h \
                           src/utils-list.h \
                           src/utils-log.h \
                           src/utils-object.h \
-                          src/utils-pool.h
+                          src/utils-pool.h \
+                          src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/exhibitor-module.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/exhibitor-module.o \
@@ -1317,6 +1364,8 @@ inter/wayland-output.o: Makefile \
                         src/global-types.h \
                         src/output.h \
                         src/renderer.h \
+                        src/surface-coordinator.h \
+                        src/surface-data.h \
                         src/utils-log.h \
                         src/utils-object.h \
                         src/utils-pool.h \
@@ -1356,8 +1405,8 @@ inter/wayland-state.o: Makefile \
                        src/global-types.h \
                        src/output.h \
                        src/renderer.h \
+                       src/surface-coordinator.h \
                        src/surface-data.h \
-                       src/surface-manager.h \
                        src/utils-chain.h \
                        src/utils-debug.h \
                        src/utils-keyboard-state.h \
@@ -1393,6 +1442,8 @@ inter/wayland.o: Makefile \
                  src/global-types.h \
                  src/output.h \
                  src/renderer.h \
+                 src/surface-coordinator.h \
+                 src/surface-data.h \
                  src/utils-chain.h \
                  src/utils-debug.h \
                  src/utils-environment.h \
@@ -1441,12 +1492,16 @@ inter/wayland-protocol-compositor.o: Makefile \
                                      src/global-enums.h \
                                      src/global-macros.h \
                                      src/global-types.h \
+                                     src/output.h \
+                                     src/renderer.h \
+                                     src/surface-coordinator.h \
                                      src/surface-data.h \
-                                     src/surface-manager.h \
                                      src/utils-chain.h \
                                      src/utils-debug.h \
                                      src/utils-list.h \
                                      src/utils-log.h \
+                                     src/utils-object.h \
+                                     src/utils-pool.h \
                                      src/utils-store.h \
                                      src/wayland-cache.h \
                                      src/wayland-protocol-compositor.c \
@@ -1454,6 +1509,7 @@ inter/wayland-protocol-compositor.o: Makefile \
                                      src/wayland-protocol-region.h \
                                      src/wayland-protocol-surface.h \
                                      src/wayland-region.h \
+                                     src/wayland-state.h \
                                      src/wayland-surface.h \
                                      src/wayland-types.h
 	@mkdir -p inter
@@ -1520,6 +1576,8 @@ inter/wayland-protocol-keyboard.o: Makefile \
                                    src/global-types.h \
                                    src/output.h \
                                    src/renderer.h \
+                                   src/surface-coordinator.h \
+                                   src/surface-data.h \
                                    src/utils-chain.h \
                                    src/utils-debug.h \
                                    src/utils-keymap.h \
@@ -1547,6 +1605,8 @@ inter/wayland-protocol-output.o: Makefile \
                                  src/global-types.h \
                                  src/output.h \
                                  src/renderer.h \
+                                 src/surface-coordinator.h \
+                                 src/surface-data.h \
                                  src/utils-chain.h \
                                  src/utils-debug.h \
                                  src/utils-list.h \
@@ -1572,6 +1632,8 @@ inter/wayland-protocol-pointer.o: Makefile \
                                   src/global-types.h \
                                   src/output.h \
                                   src/renderer.h \
+                                  src/surface-coordinator.h \
+                                  src/surface-data.h \
                                   src/utils-chain.h \
                                   src/utils-debug.h \
                                   src/utils-list.h \
@@ -1620,6 +1682,8 @@ inter/wayland-protocol-screenshooter.o: Makefile \
                                         src/global-types.h \
                                         src/output.h \
                                         src/renderer.h \
+                                        src/surface-coordinator.h \
+                                        src/surface-data.h \
                                         src/utils-chain.h \
                                         src/utils-debug.h \
                                         src/utils-list.h \
@@ -1646,6 +1710,8 @@ inter/wayland-protocol-seat.o: Makefile \
                                src/global-types.h \
                                src/output.h \
                                src/renderer.h \
+                               src/surface-coordinator.h \
+                               src/surface-data.h \
                                src/utils-chain.h \
                                src/utils-debug.h \
                                src/utils-keymap.h \
@@ -1673,17 +1739,22 @@ inter/wayland-protocol-shell-surface.o: Makefile \
                                         src/global-enums.h \
                                         src/global-macros.h \
                                         src/global-types.h \
+                                        src/output.h \
+                                        src/renderer.h \
+                                        src/surface-coordinator.h \
                                         src/surface-data.h \
-                                        src/surface-manager.h \
                                         src/utils-chain.h \
                                         src/utils-debug.h \
                                         src/utils-list.h \
                                         src/utils-log.h \
+                                        src/utils-object.h \
+                                        src/utils-pool.h \
                                         src/utils-store.h \
                                         src/wayland-cache.h \
                                         src/wayland-protocol-shell-surface.c \
                                         src/wayland-protocol-shell-surface.h \
                                         src/wayland-region.h \
+                                        src/wayland-state.h \
                                         src/wayland-surface.h \
                                         src/wayland-types.h
 	@mkdir -p inter
@@ -1696,11 +1767,8 @@ inter/wayland-protocol-shell.o: Makefile \
                                 src/global-enums.h \
                                 src/global-macros.h \
                                 src/global-types.h \
-                                src/surface-data.h \
-                                src/surface-manager.h \
                                 src/utils-debug.h \
                                 src/utils-log.h \
-                                src/utils-store.h \
                                 src/wayland-protocol-shell-surface.h \
                                 src/wayland-protocol-shell.c \
                                 src/wayland-protocol-shell.h
@@ -1752,8 +1820,8 @@ inter/wayland-protocol-surface.o: Makefile \
                                   src/global-types.h \
                                   src/output.h \
                                   src/renderer.h \
+                                  src/surface-coordinator.h \
                                   src/surface-data.h \
-                                  src/surface-manager.h \
                                   src/utils-chain.h \
                                   src/utils-debug.h \
                                   src/utils-list.h \
@@ -1802,17 +1870,22 @@ inter/wayland-protocol-xdg-surface.o: Makefile \
                                       src/global-enums.h \
                                       src/global-macros.h \
                                       src/global-types.h \
+                                      src/output.h \
+                                      src/renderer.h \
+                                      src/surface-coordinator.h \
                                       src/surface-data.h \
-                                      src/surface-manager.h \
                                       src/utils-chain.h \
                                       src/utils-debug.h \
                                       src/utils-list.h \
                                       src/utils-log.h \
+                                      src/utils-object.h \
+                                      src/utils-pool.h \
                                       src/utils-store.h \
                                       src/wayland-cache.h \
                                       src/wayland-protocol-xdg-surface.c \
                                       src/wayland-protocol-xdg-surface.h \
                                       src/wayland-region.h \
+                                      src/wayland-state.h \
                                       src/wayland-surface.h \
                                       src/wayland-types.h
 	@mkdir -p inter
@@ -1834,13 +1907,16 @@ inter/backend-offscreen.o: Makefile \
                            src/renderer-gl.h \
                            src/renderer-mmap.h \
                            src/renderer.h \
+                           src/surface-coordinator.h \
+                           src/surface-data.h \
                            src/utils-chain.h \
                            src/utils-debug.h \
                            src/utils-gl.h \
                            src/utils-list.h \
                            src/utils-log.h \
                            src/utils-object.h \
-                           src/utils-pool.h
+                           src/utils-pool.h \
+                           src/utils-store.h
 	@mkdir -p inter
 	@echo "  CC   inter/backend-offscreen.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/backend-offscreen.o \
@@ -1858,8 +1934,8 @@ inter/metanoia.o: Makefile \
                   src/global-macros.h \
                   src/global-types.h \
                   src/metanoia.c \
+                  src/surface-coordinator.h \
                   src/surface-data.h \
-                  src/surface-manager.h \
                   src/utils-chain.h \
                   src/utils-dbus.h \
                   src/utils-debug.h \
@@ -2043,14 +2119,14 @@ inter/test-frame.o: Makefile \
                     src/global-enums.h \
                     src/global-macros.h \
                     src/global-types.h \
+                    src/surface-coordinator.h \
                     src/surface-data.h \
-                    src/surface-manager.h \
                     src/utils-branch.h \
                     src/utils-chain.h \
                     src/utils-debug.h \
                     src/utils-pool.h \
                     src/utils-store.h \
-                    tests/mock-surface-manager.h \
+                    tests/mock-surface-coordinator.h \
                     tests/test-frame.c \
                     tests/tests-suit.h
 	@mkdir -p inter
@@ -2058,14 +2134,19 @@ inter/test-frame.o: Makefile \
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/test-frame.o \
 	    tests/test-frame.c
 
-inter/mock-surface-manager.o: Makefile \
-                              src/global-constants.h \
-                              src/global-enums.h \
-                              src/global-types.h \
-                              src/utils-store.h \
-                              tests/mock-surface-manager.c
+inter/mock-surface-coordinator.o: Makefile \
+                                  src/global-constants.h \
+                                  src/global-enums.h \
+                                  src/global-macros.h \
+                                  src/global-types.h \
+                                  src/surface-coordinator.h \
+                                  src/surface-data.h \
+                                  src/utils-debug.h \
+                                  src/utils-store.h \
+                                  tests/mock-surface-coordinator.c \
+                                  tests/mock-surface-coordinator.h
 	@mkdir -p inter
-	@echo "  CC   inter/mock-surface-manager.o"
-	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/mock-surface-manager.o \
-	    tests/mock-surface-manager.c
+	@echo "  CC   inter/mock-surface-coordinator.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Itests -o inter/mock-surface-coordinator.o \
+	    tests/mock-surface-coordinator.c
 

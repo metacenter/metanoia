@@ -13,6 +13,9 @@
 /// Id for NoiaItem
 typedef uintptr_t NoiaItemId;
 
+/// Miliseconds
+typedef unsigned long long NoiaMiliseconds;
+
 /// Free function definition
 typedef void (*NoiaFreeFunc) (void*);
 

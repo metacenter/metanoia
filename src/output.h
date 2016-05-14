@@ -71,6 +71,7 @@ void noia_output_take_screenshot(NoiaOutput* self,
 
 /// Draw passed surfaces and over layer.
 void noia_output_draw(NoiaOutput* self,
+                      NoiaCoordinator* coordinator,
                       NoiaPool* surfaces,
                       NoiaLayoutContext* layout_context);
 

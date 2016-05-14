@@ -22,7 +22,7 @@ typedef struct NoiaPointerStruct NoiaPointer;
 
 
 /// Exhibitor constructor.
-NoiaExhibitor* noia_exhibitor_new(void);
+NoiaExhibitor* noia_exhibitor_new(NoiaCoordinator* coordinator);
 
 /// Exhibitor destructor.
 void noia_exhibitor_free(NoiaExhibitor* self);
@@ -42,6 +42,9 @@ NoiaCompositor* noia_exhibitor_get_compositor(NoiaExhibitor* self);
 
 /// Get pointer manager.
 NoiaPointer* noia_exhibitor_get_pointer(NoiaExhibitor* self);
+
+/// Get surface coordinator.
+NoiaCoordinator* noia_exhibitor_get_coordinator(NoiaExhibitor* self);
 
 
 /// Execute an action.

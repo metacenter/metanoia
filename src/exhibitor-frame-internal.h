@@ -6,6 +6,7 @@
 #define NOIA_EXHIBITOR_FRAME_INTERNAL_H
 
 #include "exhibitor-frame.h"
+#include "surface-coordinator.h"
 
 /// Parameters describing state of surface hold by frame.
 typedef struct {
@@ -40,10 +41,14 @@ bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
 int noia_frame_params_compare_sid(NoiaFrameParams* params, NoiaSurfaceId sid);
 
 /// Set surface ID.
-void noia_frame_set_surface(NoiaFrame* self, NoiaSurfaceId sid);
+void noia_frame_set_surface(NoiaFrame* self,
+                            NoiaCoordinator* coordinator,
+                            NoiaSurfaceId sid);
 
 /// Set frame size.
-void noia_frame_set_size(NoiaFrame* self, NoiaSize size);
+void noia_frame_set_size(NoiaFrame* self,
+                         NoiaCoordinator* coordinator,
+                         NoiaSize size);
 
 /// Set frame position.
 void noia_frame_set_position(NoiaFrame* self, NoiaPosition position);
@@ -71,27 +76,33 @@ static inline void noia_frame_insert_after(NoiaFrame* self, NoiaFrame* other)
 }
 
 /// Remove frame `self` from its current trunk and prepend to frame `target`.
-NoiaResult noia_frame_resettle(NoiaFrame* self, NoiaFrame* target);
+NoiaResult noia_frame_resettle(NoiaFrame* self,
+                               NoiaFrame* target,
+                               NoiaCoordinator* coordinator);
 
 /// @see noia_frame_resize
 NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame,
                                            NoiaFrameType type);
 
 /// Resize the surface frame is holding.
-void noia_frame_reconfigure(NoiaFrame* self, NoiaArea area);
+void noia_frame_reconfigure(NoiaFrame* self,
+                            NoiaCoordinator* coordinator,
+                            NoiaArea area);
 
 /// Resize anchored frame.
 void noia_frame_resize_anchored(NoiaFrame* self,
+                                NoiaCoordinator* coordinator,
                                 NoiaArgmand border,
                                 int magnitude);
 
 /// Resize floating frame.
 void noia_frame_resize_floating(NoiaFrame* self,
+                                NoiaCoordinator* coordinator,
                                 NoiaArgmand border,
                                 int magnitude);
 
 /// Make all subsurfaces have the same size and proper layout.
-void noia_frame_relax(NoiaFrame* self);
+void noia_frame_relax(NoiaFrame* self, NoiaCoordinator* coordinator);
 
 /// Move the frame with all twigs.
 void noia_frame_move_with_contents(NoiaFrame* self, NoiaPosition vector);

@@ -6,7 +6,7 @@
 #include "wayland-cache.h"
 #include "wayland-state.h"
 
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 #include "utils-log.h"
 
 //------------------------------------------------------------------------------
@@ -16,7 +16,6 @@ void noia_wayland_surface_unbind(struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_WAYL2("Wayland: unbind surface (sid: %u)", sid);
-    noia_surface_destroy(sid);
     noia_wayland_state_remove_surface(sid, resource);
 }
 
@@ -67,8 +66,8 @@ void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
         LOG_WARN3("Wayland: wrong shared memory buffer!");
     }
 
-    noia_wayland_state_surface_attach(sid, buffer_resource);
-    noia_surface_attach(sid, width, height, stride, data, resource);
+    noia_wayland_state_surface_attach(sid, resource, buffer_resource,
+                                      width, height, stride, data);
 }
 
 //------------------------------------------------------------------------------
@@ -144,8 +143,8 @@ void noia_wayland_surface_set_input_region(struct wl_client* client NOIA_UNUSED,
 
     NoiaWaylandRegion* region = noia_wayland_cache_find_region(rid);
     if (region) {
-        noia_surface_set_offset(sid, region->pos);
-        noia_surface_set_requested_size(sid, region->size);
+        noia_wayland_state_surface_set_offset(sid, region->pos);
+        noia_wayland_state_surface_set_requested_size(sid, region->size);
     }
 }
 
@@ -160,7 +159,7 @@ void noia_wayland_surface_commit(struct wl_client* client NOIA_UNUSED,
 
     LOG_WAYL3("Wayland > commit (sid: %d)", sid);
 
-    noia_surface_commit(sid);
+    noia_wayland_state_surface_commit(sid);
 }
 
 //------------------------------------------------------------------------------
@@ -223,7 +222,9 @@ void noia_wayland_surface_bind(struct wl_client* client,
                                uint32_t version,
                                uint32_t id)
 {
-    LOG_WAYL2("Binding Wayland surface (version: %u, id: %u)", version, id);
+    NoiaSurfaceId sid = (NoiaSurfaceId) data;
+    LOG_WAYL2("Binding Wayland surface "
+              "(version: %u, id: %u, sid: %u)", version, id, sid);
 
     struct wl_resource* rc;
     rc = wl_resource_create(client, &wl_surface_interface, version, id);
@@ -232,7 +233,6 @@ void noia_wayland_surface_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scSurfaceImplementation,
                                    data, noia_wayland_surface_unbind);
 
-    NoiaSurfaceId sid = (NoiaSurfaceId) data;
     noia_wayland_state_add_surface(sid, rc);
 }
 

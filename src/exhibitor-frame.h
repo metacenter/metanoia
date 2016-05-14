@@ -7,6 +7,7 @@
 
 #include "utils-branch.h"
 #include "utils-pool.h"
+#include "surface-coordinator.h"
 
 /// Structure representing frame containing surfaces and other frames.
 typedef NoiaBranch NoiaFrame;
@@ -34,6 +35,7 @@ void noia_frame_free(NoiaFrame* self);
 
 /// Configure frame parameters.
 void noia_frame_configure(NoiaFrame* self,
+                          NoiaCoordinator* coordinator,
                           NoiaFrameType type,
                           NoiaSurfaceId sid,
                           NoiaArea area,
@@ -57,10 +59,13 @@ NoiaArea noia_frame_get_area(NoiaFrame* self);
 
 /// Swap surface ID of given frames.
 /// This does not rearrange frames.
-NoiaResult noia_frame_swap(NoiaFrame* self, NoiaFrame* frame);
+NoiaResult noia_frame_swap(NoiaFrame* self,
+                           NoiaFrame* frame,
+                           NoiaCoordinator* coordinator);
 
 /// Resize the frame.
 void noia_frame_resize(NoiaFrame* self,
+                       NoiaCoordinator* coordinator,
                        NoiaArgmand border,
                        int magnitude);
 
@@ -72,7 +77,9 @@ void noia_frame_move(NoiaFrame* self,
 
 /// Change directed type of frame.
 /// @todo Add unit tests.
-NoiaResult noia_frame_change_type(NoiaFrame* self, NoiaFrameType type);
+NoiaResult noia_frame_change_type(NoiaFrame* self,
+                                  NoiaCoordinator* coordinator,
+                                  NoiaFrameType type);
 
 /// Pop the surface `pop` and its parents recursively ending on `self`.
 void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
@@ -82,11 +89,15 @@ NoiaResult noia_frame_remove_self(NoiaFrame* self);
 
 /// Remove frame `self` from its current trunk and insert to frame `target`.
 /// @todo Add unit tests.
-NoiaResult noia_frame_jump(NoiaFrame* self, NoiaFrame* target);
+NoiaResult noia_frame_jump(NoiaFrame* self,
+                           NoiaCoordinator* coordinator,
+                           NoiaFrame* target);
 
 /// Insert frame `self` in frame `target`.
 /// @todo Add unit tests.
-NoiaResult noia_frame_jumpin(NoiaFrame* self, NoiaFrame* target);
+NoiaResult noia_frame_jumpin(NoiaFrame* self,
+                             NoiaCoordinator* coordinator,
+                             NoiaFrame* target);
 
 /// Find a frame holding surface with given ID.
 NoiaFrame* noia_frame_find_with_sid(NoiaFrame* self, NoiaSurfaceId sid);

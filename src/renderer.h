@@ -7,6 +7,7 @@
 
 #include "utils-pool.h"
 #include "global-constants.h"
+#include "surface-coordinator.h"
 
 /// This type defines general interface for drawing on screen.
 /// Specifications of this interface can use OpenGL, Cairo, etc.
@@ -18,6 +19,7 @@ typedef NoiaResult (*NoiaRendererInitializeFunc) (NoiaRenderer*);
 typedef void (*NoiaRendererFinalizeFunc) (NoiaRenderer*);
 
 typedef void (*NoiaRendererDrawFunc) (NoiaRenderer*,
+                                      NoiaCoordinator*,
                                       NoiaPool*,
                                       NoiaLayoutContext*);
 

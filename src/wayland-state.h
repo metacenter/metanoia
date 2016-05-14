@@ -11,15 +11,35 @@
 
 #include <wayland-server.h>
 
-NoiaResult noia_wayland_state_initialize(struct wl_display* display);
+NoiaResult noia_wayland_state_initialize(struct wl_display* display,
+                                         NoiaCoordinator* coordinator);
 
 void noia_wayland_state_finalize(void);
 
+NoiaSurfaceId noia_wayland_state_create_surface();
+
 void noia_wayland_state_add_surface(NoiaItemId sid, struct wl_resource* rc);
+
+void noia_wayland_state_add_shell_surface(NoiaSurfaceId sid,
+                                          NoiaWaylandSurfaceResourceType type,
+                                          struct wl_resource* rc);
 
 void noia_wayland_state_remove_surface(NoiaItemId sid, struct wl_resource* rc);
 
-void noia_wayland_state_surface_attach(NoiaItemId sid, struct wl_resource* rc);
+void noia_wayland_state_surface_attach(NoiaSurfaceId sid,
+                                       struct wl_resource* rc,
+                                       struct wl_resource* brc,
+                                       int width,
+                                       int height,
+                                       int stride,
+                                       uint8_t* buffer);
+
+void noia_wayland_state_surface_commit(NoiaItemId sid);
+
+void noia_wayland_state_surface_set_offset(NoiaItemId sid, NoiaPosition pos);
+
+void noia_wayland_state_surface_set_requested_size(NoiaItemId sid,
+                                                   NoiaSize size);
 
 void noia_wayland_state_subscribe_frame(NoiaItemId sid, struct wl_resource* rc);
 

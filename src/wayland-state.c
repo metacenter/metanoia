@@ -7,7 +7,7 @@
 #include "wayland-cache.h"
 #include "wayland-protocol-output.h"
 
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 #include "utils-keyboard-state.h"
 #include "utils-log.h"
 
@@ -23,6 +23,7 @@ pthread_mutex_t sStateMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static struct {
     struct wl_display* display;
+    NoiaCoordinator* coordinator;
     NoiaStore* outputs;
     NoiaKeyboardState* keyboard_state;
     NoiaSurfaceId keyboard_focused_sid;
@@ -45,13 +46,15 @@ struct wl_resource* noia_wayland_state_get_rc_for_sid(NoiaSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_wayland_state_initialize(struct wl_display* display)
+NoiaResult noia_wayland_state_initialize(struct wl_display* display,
+                                         NoiaCoordinator* coordinator)
 {
     sState.outputs = noia_store_new_for_str();
     sState.keyboard_state = noia_keyboard_state_new();
     noia_keyboard_state_initialize(sState.keyboard_state);
 
     sState.display = display;
+    sState.coordinator = coordinator;
     sState.keyboard_focused_sid = scInvalidItemId;
     sState.pointer_focused_sid = scInvalidItemId;
     sState.pointer_serial = 0;
@@ -81,6 +84,13 @@ void noia_wayland_state_finalize(void)
 
 //------------------------------------------------------------------------------
 
+NoiaSurfaceId noia_wayland_state_create_surface()
+{
+    return noia_surface_create(sState.coordinator);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_wayland_state_add_surface(NoiaSurfaceId sid, struct wl_resource* rc)
 {
     pthread_mutex_lock(&sStateMutex);
@@ -95,12 +105,27 @@ void noia_wayland_state_add_surface(NoiaSurfaceId sid, struct wl_resource* rc)
 
 //------------------------------------------------------------------------------
 
+void noia_wayland_state_add_shell_surface(NoiaSurfaceId sid,
+                                          NoiaWaylandSurfaceResourceType type,
+                                          struct wl_resource* rc)
+{
+    pthread_mutex_lock(&sStateMutex);
+
+    noia_wayland_cache_add_surface_resource(sid, type, rc);
+    noia_surface_show(sState.coordinator, sid, NOIA_SURFACE_SHOW_IN_SHELL);
+
+    pthread_mutex_unlock(&sStateMutex);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_wayland_state_remove_surface(NoiaSurfaceId sid,
                                        struct wl_resource* rc)
 {
     pthread_mutex_lock(&sStateMutex);
 
     LOG_WAYL1("Wayland: removing surface (sid: %d)", sid);
+    noia_surface_destroy(sState.coordinator, sid);
     noia_wayland_cache_remove_surface_resource(sid, NOIA_RESOURCE_SURFACE, rc);
     noia_wayland_cache_remove_surface(sid);
 
@@ -110,14 +135,43 @@ void noia_wayland_state_remove_surface(NoiaSurfaceId sid,
 //------------------------------------------------------------------------------
 
 void noia_wayland_state_surface_attach(NoiaSurfaceId sid,
-                                       struct wl_resource* rc)
+                                       struct wl_resource* rc,
+                                       struct wl_resource* brc,
+                                       int width,
+                                       int height,
+                                       int stride,
+                                       uint8_t* data)
 {
     pthread_mutex_lock(&sStateMutex);
 
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(sid);
-    noia_wayland_surface_add_resource(surface, NOIA_RESOURCE_BUFFER, rc);
+    noia_wayland_surface_add_resource(surface, NOIA_RESOURCE_BUFFER, brc);
+    noia_surface_attach(sState.coordinator, sid,
+                        width, height, stride, data, rc);
 
     pthread_mutex_unlock(&sStateMutex);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_state_surface_commit(NoiaItemId sid)
+{
+    noia_surface_commit(sState.coordinator, sid);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_state_surface_set_offset(NoiaItemId sid, NoiaPosition pos)
+{
+    noia_surface_set_offset(sState.coordinator, sid, pos);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_state_surface_set_requested_size(NoiaItemId sid,
+                                                   NoiaSize size)
+{
+    noia_surface_set_requested_size(sState.coordinator, sid, size);
 }
 
 //------------------------------------------------------------------------------
@@ -394,7 +448,7 @@ void noia_wayland_state_set_cursor(int serial,
     }
 
     NoiaPosition hotspot = {hotspot_x, hotspot_y};
-    noia_surface_set_offset(sid, hotspot);
+    noia_surface_set_offset(sState.coordinator, sid, hotspot);
     noia_surface_set_as_cursor(sid);
 }
 
@@ -472,10 +526,10 @@ void noia_wayland_state_surface_reconfigured(NoiaSurfaceId sid)
     NoiaSurfaceData* data = NULL;
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(sid);
     if (surface) {
-        data = noia_surface_get(sid);
+        data = noia_surface_get(sState.coordinator, sid);
     }
 
-    if (surface && data) {
+    if (surface and data) {
         LOG_INFO2("Wayland < surface reconfiguration "
                   "(sid: %d, width: %d, height: %d)",
                    sid, data->desired_size.width, data->desired_size.height);

@@ -2,9 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 
 #include "utils-log.h"
+#include "utils-time.h"
 #include "event-signals.h"
 #include "global-macros.h"
 
@@ -12,65 +13,114 @@
 #include <memory.h>
 #include <pthread.h>
 
-static NoiaStore* sStore = NULL;
-pthread_mutex_t surface_mutex = PTHREAD_MUTEX_INITIALIZER;
-
 //------------------------------------------------------------------------------
 
 #define NOIA_GET_AND_ASSERT_SURFACE(NAME, SID) \
-    NoiaSurfaceData* NAME = noia_surface_get(SID); \
+    NoiaSurfaceData* NAME = noia_surface_get(coordinator, SID); \
     if (!NAME) {LOG_WARN2("Could not find surface (sid: %d)", SID); return;}
 
 //------------------------------------------------------------------------------
+// COORDINATOR
 
-NoiaSurfaceId noia_surface_create(void)
+struct NoiaCoordinatorStruct {
+    NoiaStore* surfaces;
+    NoiaMiliseconds last_notify_time;
+    pthread_mutex_t surface_mutex;
+};
+
+//------------------------------------------------------------------------------
+
+NoiaCoordinator* noia_coordinator_new()
 {
-    if (!sStore) {
-        sStore = noia_store_new_for_id();
-    }
+    NoiaCoordinator* self = malloc(sizeof(*self));
 
+    self->surfaces = noia_store_new_for_id();
+    self->last_notify_time = 0;
+    pthread_mutex_init(&self->surface_mutex, NULL);
+
+    return self;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_coordinator_free(NoiaCoordinator* self)
+{
+    NOIA_ENSURE(self, return);
+
+    noia_coordinator_lock_surfaces(self);
+    noia_store_free_with_items
+                        (self->surfaces, (NoiaFreeFunc) noia_surface_data_free);
+    noia_coordinator_unlock_surfaces(self);
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_coordinator_lock_surfaces(NoiaCoordinator* self)
+{
+    pthread_mutex_lock(&self->surface_mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_coordinator_unlock_surfaces(NoiaCoordinator* self)
+{
+    pthread_mutex_unlock(&self->surface_mutex);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_coordinator_notify(NoiaCoordinator* self)
+{
+    self->last_notify_time = noia_time_get_monotonic_miliseconds();
+}
+
+//------------------------------------------------------------------------------
+
+NoiaMiliseconds noia_coordinator_get_last_notify(NoiaCoordinator* self)
+{
+    return self->last_notify_time;
+}
+
+//------------------------------------------------------------------------------
+// SURFACES
+
+NoiaSurfaceId noia_surface_create(NoiaCoordinator* coordinator)
+{
     // Create new surface
     NoiaSurfaceData* data = noia_surface_data_new();
-    if (!data) {
-        LOG_ERROR("Could not create new surface!");
-        return scInvalidSurfaceId;
-    }
+    NOIA_ENSURE(data, return scInvalidSurfaceId);
 
-    NoiaItemId sid = noia_store_generate_new_id(sStore);
-    noia_store_add(sStore, sid, data);
+    noia_coordinator_lock_surfaces(coordinator);
+    NoiaSurfaceId sid = noia_store_generate_new_id(coordinator->surfaces);
+    noia_store_add(coordinator->surfaces, sid, data);
+    noia_coordinator_unlock_surfaces(coordinator);
 
     return sid;
 }
 
 //------------------------------------------------------------------------------
 
-void noia_surface_destroy(NoiaSurfaceId sid)
+void noia_surface_destroy(NoiaCoordinator* coordinator, NoiaSurfaceId sid)
 {
     noia_event_signal_emit_int(SIGNAL_SURFACE_DESTROYED, sid);
-    noia_surface_lock();
-    noia_surface_data_free(noia_store_delete(sStore, sid));
-    noia_surface_unlock();
+    noia_coordinator_lock_surfaces(coordinator);
+    noia_surface_data_free(noia_store_delete(coordinator->surfaces, sid));
+    noia_coordinator_unlock_surfaces(coordinator);
 }
 
 //------------------------------------------------------------------------------
 
-NoiaSurfaceData* noia_surface_get(NoiaSurfaceId sid)
+NoiaSurfaceData* noia_surface_get(NoiaCoordinator* coordinator,
+                                  NoiaSurfaceId sid)
 {
-    return noia_store_find(sStore, sid);
+    return noia_store_find(coordinator->surfaces, sid);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_surface_clear_all(void)
-{
-    noia_surface_lock();
-    noia_store_free_with_items(sStore, (NoiaFreeFunc) noia_surface_data_free);
-    noia_surface_unlock();
-}
-
-//------------------------------------------------------------------------------
-
-void noia_surface_attach_egl(NoiaSurfaceId sid,
+void noia_surface_attach_egl(NoiaCoordinator* coordinator,
+                             NoiaSurfaceId sid,
                              void* resource)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
@@ -79,7 +129,8 @@ void noia_surface_attach_egl(NoiaSurfaceId sid,
 
 //------------------------------------------------------------------------------
 
-void noia_surface_attach(NoiaSurfaceId sid,
+void noia_surface_attach(NoiaCoordinator* coordinator,
+                         NoiaSurfaceId sid,
                          int width,
                          int height,
                          int stride,
@@ -88,7 +139,7 @@ void noia_surface_attach(NoiaSurfaceId sid,
 {
     NOIA_ENSURE(data or resource, return);
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
-    noia_surface_lock();
+    noia_coordinator_lock_surfaces(coordinator);
 
     surface->pending_buffer.width    = width;
     surface->pending_buffer.height   = height;
@@ -96,15 +147,15 @@ void noia_surface_attach(NoiaSurfaceId sid,
     surface->pending_buffer.data     = data;
     surface->pending_buffer.resource = resource;
 
-    noia_surface_unlock();
+    noia_coordinator_unlock_surfaces(coordinator);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_surface_commit(NoiaSurfaceId sid)
+void noia_surface_commit(NoiaCoordinator* coordinator, NoiaSurfaceId sid)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
-    noia_surface_lock();
+    noia_coordinator_lock_surfaces(coordinator);
 
     int is_first_time_commited = (not surface->buffer.data)
                              and (not surface->buffer.resource);
@@ -142,16 +193,20 @@ void noia_surface_commit(NoiaSurfaceId sid)
         }
 
         if (surface->buffer.data or surface->buffer.resource) {
-            noia_surface_show(sid, NOIA_SURFACE_SHOW_DRAWABLE);
+            noia_surface_show(coordinator, sid, NOIA_SURFACE_SHOW_DRAWABLE);
         }
     }
 
-    noia_surface_unlock();
+    noia_coordinator_notify(coordinator);
+
+    noia_coordinator_unlock_surfaces(coordinator);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_surface_show(NoiaSurfaceId sid, NoiaSurfaceShowReason reason)
+void noia_surface_show(NoiaCoordinator* coordinator,
+                       NoiaSurfaceId sid,
+                       NoiaSurfaceShowReason reason)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
 
@@ -163,7 +218,9 @@ void noia_surface_show(NoiaSurfaceId sid, NoiaSurfaceShowReason reason)
 
 //------------------------------------------------------------------------------
 
-void noia_surface_set_offset(NoiaSurfaceId sid, NoiaPosition offset)
+void noia_surface_set_offset(NoiaCoordinator* coordinator,
+                             NoiaSurfaceId sid,
+                             NoiaPosition offset)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
     surface->offset = offset;
@@ -171,16 +228,18 @@ void noia_surface_set_offset(NoiaSurfaceId sid, NoiaPosition offset)
 
 //------------------------------------------------------------------------------
 
-void noia_surface_set_desired_size(NoiaSurfaceId sid, NoiaSize size)
+void noia_surface_set_desired_size(NoiaCoordinator* coordinator,
+                                   NoiaSurfaceId sid,
+                                   NoiaSize size)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
 
-    if (size.width < 0 || size.height < 0) {
+    if ((size.width < 0) or (size.height < 0)) {
         size = surface->requested_size;
     }
 
-    if (surface->desired_size.width != size.width
-    ||  surface->desired_size.height != size.height) {
+    if ((surface->desired_size.width != size.width)
+    or  (surface->desired_size.height != size.height)) {
         surface->desired_size = size;
         noia_event_signal_emit_int(SIGNAL_SURFACE_RECONFIGURED, sid);
     }
@@ -188,31 +247,20 @@ void noia_surface_set_desired_size(NoiaSurfaceId sid, NoiaSize size)
 
 //------------------------------------------------------------------------------
 
-void noia_surface_set_requested_size(NoiaSurfaceId sid, NoiaSize size)
+void noia_surface_set_requested_size(NoiaCoordinator* coordinator,
+                                     NoiaSurfaceId sid,
+                                     NoiaSize size)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
     surface->requested_size = size;
 }
 
 //------------------------------------------------------------------------------
+// HELPERS
 
 void noia_surface_set_as_cursor(NoiaSurfaceId sid)
 {
     noia_event_signal_emit_int(SIGNAL_CURSOR_SURFACE_CHANGE, sid);
-}
-
-//------------------------------------------------------------------------------
-
-void noia_surface_lock(void)
-{
-    pthread_mutex_lock(&surface_mutex);
-}
-
-//------------------------------------------------------------------------------
-
-void noia_surface_unlock(void)
-{
-    pthread_mutex_unlock(&surface_mutex);
 }
 
 //------------------------------------------------------------------------------

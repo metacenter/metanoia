@@ -7,7 +7,7 @@
 #include "exhibitor.h"
 
 #include "utils-log.h"
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 #include "event-signals.h"
 
 #include <pthread.h>
@@ -44,6 +44,9 @@ struct NoiaPointerStruct {
 
     /// Default surface ID of cursor surface.
     NoiaSurfaceId default_csid;
+
+    /// Reference to coordinator.
+    NoiaCoordinator* coordinator;
 
     /// Pointer functions may be called from display threads.
     pthread_mutex_t mutex;
@@ -91,7 +94,7 @@ NoiaPosition noia_exhibitor_pointer_cast(NoiaPointer* self,
 //------------------------------------------------------------------------------
 // PUBLIC
 
-NoiaPointer* noia_exhibitor_pointer_new()
+NoiaPointer* noia_exhibitor_pointer_new(NoiaExhibitor* exhibitor)
 {
     NoiaPointer* self = malloc(sizeof(NoiaPointer));
 
@@ -106,6 +109,7 @@ NoiaPointer* noia_exhibitor_pointer_new()
     self->pfsid = scInvalidSurfaceId;
     self->kfsid = scInvalidSurfaceId;
     self->default_csid = scInvalidSurfaceId;
+    self->coordinator = noia_exhibitor_get_coordinator(exhibitor);
     pthread_mutex_init(&self->mutex, NULL);
 
     return self;
@@ -134,11 +138,11 @@ void noia_exhibitor_pointer_setup(NoiaPointer* self)
         data[p+3] = 100;
     }
 
-    self->default_csid = noia_surface_create();
-    noia_surface_attach(self->default_csid,
+    self->default_csid = noia_surface_create(self->coordinator);
+    noia_surface_attach(self->coordinator, self->default_csid,
                         DEFAULT_CURSOR_SIZE, DEFAULT_CURSOR_SIZE,
                         4 * DEFAULT_CURSOR_SIZE, data, NULL);
-    noia_surface_commit(self->default_csid);
+    noia_surface_commit(self->coordinator, self->default_csid);
     self->csid = self->default_csid;
 }
 
@@ -185,7 +189,8 @@ void noia_exhibitor_pointer_update_hover_state(NoiaPointer* self,
     int i;
     NoiaSurfaceContext* context;
     NOIA_ITERATE_POOL_REVERSE(visible_surfaces, i, context) {
-        NoiaSurfaceData* data = noia_surface_get(context->sid);
+        NoiaSurfaceData* data = noia_surface_get(self->coordinator,
+                                                 context->sid);
         if (data) {
             surface_area.pos.x = context->pos.x;
             surface_area.pos.y = context->pos.y;
@@ -248,6 +253,7 @@ void noia_exhibitor_pointer_on_motion_x(NoiaPointer* self,
     }
     self->last_abs.x = abs_value;
 
+    noia_coordinator_notify(self->coordinator);
     pthread_mutex_unlock(&self->mutex);
 }
 
@@ -266,6 +272,7 @@ void noia_exhibitor_pointer_on_motion_y(NoiaPointer* self,
     }
     self->last_abs.y = abs_value;
 
+    noia_coordinator_notify(self->coordinator);
     pthread_mutex_unlock(&self->mutex);
 }
 
@@ -276,11 +283,12 @@ void noia_exhibitor_pointer_on_surface_change(NoiaPointer* self,
 {
     pthread_mutex_lock(&self->mutex);
 
-    NoiaSurfaceData* surface_data = noia_surface_get(sid);
+    NoiaSurfaceData* surface_data = noia_surface_get(self->coordinator, sid);
     if (surface_data) {
         self->csid = sid;
     }
 
+    noia_coordinator_notify(self->coordinator);
     pthread_mutex_unlock(&self->mutex);
 }
 

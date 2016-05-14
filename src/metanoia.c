@@ -9,7 +9,6 @@
 #include "event-loop.h"
 #include "event-signals.h"
 #include "event-factory.h"
-#include "surface-manager.h"
 #include "config.h"
 
 int main(int argc, char** argv)
@@ -22,6 +21,9 @@ int main(int argc, char** argv)
     noia_environment_setup("log");
     noia_config_apply(argc, argv);
     noia_dbus_initalize();
+
+    // Prepare coordinator
+    NoiaCoordinator* coordinator = noia_coordinator_new();
 
     // Prepare event dispatcher
     NoiaEventDispatcher* dispatcher = noia_event_dispatcher_new();
@@ -47,10 +49,10 @@ int main(int argc, char** argv)
     task = factorize_initialize_output_collector_task(loop_devices);
     noia_loop_schedule_task(loop_devices, task);
 
-    task = factorize_initialize_wayland_task(loop_displays);
+    task = factorize_initialize_wayland_task(loop_displays, coordinator);
     noia_loop_schedule_task(loop_displays, task);
 
-    task = factorize_initialize_exhibitor_task(loop_displays);
+    task = factorize_initialize_exhibitor_task(loop_displays, coordinator);
     noia_loop_schedule_task(loop_displays, task);
 
     // Start threads
@@ -79,7 +81,7 @@ int main(int argc, char** argv)
     noia_loop_free(loop_devices);
     noia_event_dispatcher_free(dispatcher);
     noia_event_signal_clear_all_substriptions();
-    noia_surface_clear_all();
+    noia_coordinator_free(coordinator);
 
     noia_dbus_finalize();
     noia_config_finalize();

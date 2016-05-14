@@ -2,11 +2,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-/// @todo Add credits
-
 #include "renderer-gl.h"
 
-#include "surface-manager.h"
+#include "surface-coordinator.h"
 #include "utils-log.h"
 #include "config.h"
 #include "global-macros.h"
@@ -255,13 +253,14 @@ void noia_renderer_gl_prepare_view(NoiaRendererGL* mine, NoiaColor color)
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
 void noia_renderer_gl_load_texture_and_prepare_vertices
-                                                   (NoiaRendererGL* mine,
-                                                    NoiaSurfaceContext* context,
-                                                    int i,
-                                                    GLfloat* vertices,
-                                                    GLfloat* texcoords)
+                                                  (NoiaRendererGL* mine,
+                                                   NoiaCoordinator* coordinator,
+                                                   NoiaSurfaceContext* context,
+                                                   int i,
+                                                   GLfloat* vertices,
+                                                   GLfloat* texcoords)
 {
-    NoiaSurfaceData* surface = noia_surface_get(context->sid);
+    NoiaSurfaceData* surface = noia_surface_get(coordinator, context->sid);
     NOIA_ENSURE(surface, return);
 
     int width = surface->buffer.width;
@@ -329,6 +328,7 @@ void noia_renderer_gl_load_texture_and_prepare_vertices
 /// @see noia_renderer_gl_draw
 ///      noia_renderer_gl_load_texture_and_prepare_vertices
 void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine,
+                                    NoiaCoordinator* coordinator,
                                     NoiaPool* surfaces)
 {
     if ((surfaces == NULL) or (noia_pool_get_size(surfaces) == 0)) {
@@ -347,7 +347,7 @@ void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine,
     NoiaSurfaceContext* context;
     NOIA_ITERATE_POOL(surfaces, i, context) {
         noia_renderer_gl_load_texture_and_prepare_vertices
-                          (mine, context, i, &vertices[12*i], &texcoords[12*i]);
+             (mine, coordinator, context, i, &vertices[12*i], &texcoords[12*i]);
     }
 
     // Upload positions to vertex buffer object
@@ -381,9 +381,11 @@ void noia_renderer_gl_draw_surfaces(NoiaRendererGL* mine,
 /// Draw background image.
 /// This is subroutine of `noia_renderer_gl_draw`.
 /// @see noia_renderer_gl_draw
-void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine, NoiaSurfaceId sid)
+void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine,
+                                    NoiaCoordinator* coordinator,
+                                    NoiaSurfaceId sid)
 {
-    NoiaSurfaceData* surface = noia_surface_get(sid);
+    NoiaSurfaceData* surface = noia_surface_get(coordinator, sid);
     if (surface) {
         /// @todo Do not malloc here.
         NoiaPool* surfaces = noia_pool_create(1, sizeof(NoiaSurfaceContext));
@@ -391,7 +393,7 @@ void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine, NoiaSurfaceId sid)
         context->sid = sid;
         context->pos.x = (mine->size.width - surface->buffer.width) / 2;
         context->pos.y = (mine->size.height - surface->buffer.height) / 2;
-        noia_renderer_gl_draw_surfaces(mine, surfaces);
+        noia_renderer_gl_draw_surfaces(mine, coordinator, surfaces);
         noia_pool_destroy(surfaces);
     }
 }
@@ -404,6 +406,7 @@ void noia_renderer_gl_draw_bg_image(NoiaRendererGL* mine, NoiaSurfaceId sid)
 /// @param cursor_sid - surface ID of cursor
 /// @see noia_renderer_gl_draw
 void noia_renderer_gl_draw_pointer(NoiaRendererGL* mine,
+                                   NoiaCoordinator* coordinator,
                                    NoiaSurfaceContext* pointer)
 {
     if (pointer->sid != scInvalidSurfaceId) {
@@ -411,7 +414,7 @@ void noia_renderer_gl_draw_pointer(NoiaRendererGL* mine,
         NoiaPool* surfaces = noia_pool_create(1, sizeof(NoiaSurfaceContext));
         NoiaSurfaceContext* context = noia_pool_add(surfaces);
         *context = *pointer;
-        noia_renderer_gl_draw_surfaces(mine, surfaces);
+        noia_renderer_gl_draw_surfaces(mine, coordinator, surfaces);
         noia_pool_destroy(surfaces);
     }
 }
@@ -439,6 +442,7 @@ void noia_renderer_gl_release_view(NoiaRendererGL* mine)
 ///      noia_renderer_gl_draw_surfaces, noia_renderer_gl_draw_pointer,
 ///      noia_renderer_gl_release_view
 void noia_renderer_gl_draw(NoiaRenderer* self,
+                           NoiaCoordinator* coordinator,
                            NoiaPool* surfaces,
                            NoiaLayoutContext* context)
 {
@@ -451,9 +455,10 @@ void noia_renderer_gl_draw(NoiaRenderer* self,
     // Make context current and perform the actual drawing
     if (noia_gl_make_current(&mine->egl) == NOIA_RESULT_SUCCESS) {
         noia_renderer_gl_prepare_view(mine, context->background_color);
-        noia_renderer_gl_draw_bg_image(mine, context->background_sid);
-        noia_renderer_gl_draw_surfaces(mine, surfaces);
-        noia_renderer_gl_draw_pointer(mine, &context->pointer);
+        noia_renderer_gl_draw_bg_image(mine, coordinator,
+                                       context->background_sid);
+        noia_renderer_gl_draw_surfaces(mine, coordinator, surfaces);
+        noia_renderer_gl_draw_pointer(mine, coordinator, &context->pointer);
     }
 
     noia_renderer_gl_release_view(mine);

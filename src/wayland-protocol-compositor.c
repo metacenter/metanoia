@@ -6,8 +6,8 @@
 #include "wayland-protocol-surface.h"
 #include "wayland-protocol-region.h"
 #include "wayland-cache.h"
+#include "wayland-state.h"
 
-#include "surface-manager.h"
 #include "utils-log.h"
 
 //------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ void noia_wayland_create_surface(struct wl_client* client,
                                  struct wl_resource* resource,
                                  uint32_t id)
 {
-    NoiaSurfaceId new_sid = noia_surface_create();
+    NoiaSurfaceId new_sid = noia_wayland_state_create_surface();
     int32_t version = wl_resource_get_version(resource);
     noia_wayland_surface_bind(client, (void*) new_sid, version, id);
 }

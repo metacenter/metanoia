@@ -138,11 +138,12 @@ void noia_exhibitor_module_finalize(void* edata NOIA_UNUSED, void* sdata)
 //------------------------------------------------------------------------------
 // PUBLIC
 
-void noia_exhibitor_initialize(NoiaLoop* this_loop)
+void noia_exhibitor_initialize(NoiaLoop* this_loop,
+                               NoiaCoordinator* coordinator)
 {
     NOIA_ENSURE(this_loop, return);
 
-    NoiaExhibitor* exhibitor = noia_exhibitor_new();
+    NoiaExhibitor* exhibitor = noia_exhibitor_new(coordinator);
     noia_exhibitor_setup(exhibitor);
 
     // actions

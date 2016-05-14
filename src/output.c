@@ -66,16 +66,18 @@ void noia_output_take_screenshot(NoiaOutput* self,
 //------------------------------------------------------------------------------
 
 void noia_output_draw(NoiaOutput* self,
+                      NoiaCoordinator* coordinator,
                       NoiaPool* surfaces,
                       NoiaLayoutContext* layout_context)
 {
+    NOIA_ENSURE(coordinator, return);
     NOIA_ENSURE(surfaces, return);
     NOIA_ENSURE(layout_context, return);
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(self->renderer, return);
     NOIA_ENSURE(self->renderer->draw, return);
 
-    self->renderer->draw(self->renderer, surfaces, layout_context);
+    self->renderer->draw(self->renderer, coordinator, surfaces, layout_context);
 }
 
 //------------------------------------------------------------------------------
