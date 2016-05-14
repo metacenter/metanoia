@@ -81,15 +81,32 @@ void noia_evdev_handle_key(struct input_event* ev, NoiaInputContext* context)
 
 //------------------------------------------------------------------------------
 
+/// Handle epoll events from EventDispatcher comming from mouses.
+void noia_evdev_handle_mouse(struct input_event* ev)
+{
+    if (ev->code == ABS_X) {
+        noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_X, ev->value);
+    } else if (ev->code == ABS_Y) {
+        noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y, ev->value);
+    } else if ((ev->code == BTN_LEFT) or (ev->code == BTN_RIGHT)) {
+        unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
+        NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
+        noia_event_signal_emit(SIGNAL_POINTER_BUTTON, (NoiaObject*) btn);
+        noia_object_unref((NoiaObject*) btn);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 /// Handle epoll events from EventDispatcher comming from touch devices.
-void noia_evdev_handle_touch(struct input_event* ev)
+void noia_evdev_handle_touchpad(struct input_event* ev)
 {
     if (ev->code == ABS_MT_TRACKING_ID) {
-        noia_event_signal_emit(SIGNAL_POINTER_MOTION_RESET, NULL);
+        noia_event_signal_emit(SIGNAL_POINTER_POSITION_RESET, NULL);
     } else if (ev->code == ABS_MT_POSITION_X) {
-        noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_X, ev->value);
+        noia_event_signal_emit_int(SIGNAL_POINTER_POSITION_X, ev->value);
     } else if (ev->code == ABS_MT_POSITION_Y) {
-        noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y, ev->value);
+        noia_event_signal_emit_int(SIGNAL_POINTER_POSITION_Y, ev->value);
     } else if ((ev->code == BTN_LEFT) or (ev->code == BTN_RIGHT)) {
         unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
         NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
@@ -127,8 +144,10 @@ void noia_evdev_handle_event(NoiaEventData* data, struct epoll_event* epev)
 
     if (flags & scIdInputKeyboardFlag) {
         noia_evdev_handle_key(&ev, context);
+    } else if (flags & scIdInputMouseFlag) {
+        noia_evdev_handle_mouse(&ev);
     } else if (flags & scIdInputTouchpadFlag) {
-        noia_evdev_handle_touch(&ev);
+        noia_evdev_handle_touchpad(&ev);
     }
 }
 
@@ -150,7 +169,6 @@ void noia_evdev_handle_exit(NoiaEventData* data)
 void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
 {
     int fd;
-    uint32_t flags;
     char name[256];
     const char* propname;
     struct stat st;
@@ -194,7 +212,7 @@ void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
         }
 
         // Get device properties
-        flags = 0;
+        uint32_t flags = 0x0;
         prop_list_entry = udev_device_get_properties_list_entry(dev);
         while (prop_list_entry) {
             propname = udev_list_entry_get_name(prop_list_entry);
@@ -217,7 +235,7 @@ void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
             prop_list_entry = udev_list_entry_get_next(prop_list_entry);
         }
 
-        if (flags == 0) {
+        if (flags == 0x0) {
             // Did not find interesting input device
             udev_device_unref(dev);
             continue;

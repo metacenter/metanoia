@@ -66,14 +66,20 @@ void noia_exhibitor_on_surface_destroyed(NoiaExhibitor* self,
 /// Handle change surface notification.
 void noia_exhibitor_on_surface_change(NoiaExhibitor* self, NoiaSurfaceId sid);
 
-/// Handle motion reset notification.
-void noia_exhibitor_on_motion_reset(NoiaExhibitor* self);
-
 /// Handle motion in X-axis notification.
-void noia_exhibitor_on_motion_x(NoiaExhibitor* self, int abs_value);
+void noia_exhibitor_on_motion_x(NoiaExhibitor* self, int value);
 
 /// Handle motion in Y-axis notification.
-void noia_exhibitor_on_motion_y(NoiaExhibitor* self, int abs_value);
+void noia_exhibitor_on_motion_y(NoiaExhibitor* self, int value);
+
+/// Handle position reset notification.
+void noia_exhibitor_on_position_reset(NoiaExhibitor* self);
+
+/// Handle position in X-axis notification.
+void noia_exhibitor_on_position_x(NoiaExhibitor* self, int value);
+
+/// Handle position in Y-axis notification.
+void noia_exhibitor_on_position_y(NoiaExhibitor* self, int value);
 
 /// Handle button press or release.
 void noia_exhibitor_on_button(NoiaExhibitor* self,

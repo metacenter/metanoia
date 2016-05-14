@@ -29,18 +29,32 @@ void noia_exhibitor_pointer_update_hover_state(NoiaPointer* self,
                                                NoiaArea area,
                                                NoiaPool* visible_surfaces);
 
-/// Handle motion reset notification.
-void noia_exhibitor_pointer_on_motion_reset(NoiaPointer* self);
-
 /// Handle motion in X-axis notification.
 void noia_exhibitor_pointer_on_motion_x(NoiaPointer* self,
                                         NoiaExhibitor* exhibitor,
-                                        int abs_value);
+                                        int value);
 
 /// Handle motion in Y-axis notification.
 void noia_exhibitor_pointer_on_motion_y(NoiaPointer* self,
                                         NoiaExhibitor* exhibitor,
-                                        int abs_value);
+                                        int value);
+
+/// Handle position reset notification.
+void noia_exhibitor_pointer_on_position_reset(NoiaPointer* self);
+
+/// Handle position on X-axis notification.
+void noia_exhibitor_pointer_on_position_x(NoiaPointer* self,
+                                          NoiaExhibitor* exhibitor,
+                                          int value);
+
+/// Handle position on Y-axis notification.
+void noia_exhibitor_pointer_on_position_y(NoiaPointer* self,
+                                          NoiaExhibitor* exhibitor,
+                                          int value);
+
+/// Handle button press or release.
+void noia_exhibitor_pointer_on_button(NoiaPointer* self,
+                                      NoiaExhibitor* exhibitor);
 
 /// Handle change surface notification.
 void noia_exhibitor_pointer_on_surface_change(NoiaPointer* self,
@@ -49,10 +63,6 @@ void noia_exhibitor_pointer_on_surface_change(NoiaPointer* self,
 /// Handle surface destruction notification.
 void noia_exhibitor_pointer_on_surface_destroyed(NoiaPointer* self,
                                                  NoiaSurfaceId sid);
-
-/// Handle button press or release.
-void noia_exhibitor_pointer_on_button(NoiaPointer* self,
-                                      NoiaExhibitor* exhibitor);
 
 /// Handle change of keyboard focus.
 void noia_exhibitor_pointer_on_keyboard_focus_changed(NoiaPointer* self,

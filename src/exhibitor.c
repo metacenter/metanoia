@@ -197,26 +197,42 @@ void noia_exhibitor_on_surface_change(NoiaExhibitor* self, NoiaSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_on_motion_reset(NoiaExhibitor* self)
+void noia_exhibitor_on_motion_x(NoiaExhibitor* self, int value)
 {
     NOIA_ENSURE(self, return);
-    noia_exhibitor_pointer_on_motion_reset(self->pointer);
+    noia_exhibitor_pointer_on_motion_x(self->pointer, self, value);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_on_motion_x(NoiaExhibitor* self, int abs_value)
+void noia_exhibitor_on_motion_y(NoiaExhibitor* self, int value)
 {
     NOIA_ENSURE(self, return);
-    noia_exhibitor_pointer_on_motion_x(self->pointer, self, abs_value);
+    noia_exhibitor_pointer_on_motion_y(self->pointer, self, value);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_on_motion_y(NoiaExhibitor* self, int abs_value)
+void noia_exhibitor_on_position_reset(NoiaExhibitor* self)
 {
     NOIA_ENSURE(self, return);
-    noia_exhibitor_pointer_on_motion_y(self->pointer, self, abs_value);
+    noia_exhibitor_pointer_on_position_reset(self->pointer);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_on_position_x(NoiaExhibitor* self, int value)
+{
+    NOIA_ENSURE(self, return);
+    noia_exhibitor_pointer_on_position_x(self->pointer, self, value);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_exhibitor_on_position_y(NoiaExhibitor* self, int value)
+{
+    NOIA_ENSURE(self, return);
+    noia_exhibitor_pointer_on_position_y(self->pointer, self, value);
 }
 
 //------------------------------------------------------------------------------

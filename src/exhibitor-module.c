@@ -74,21 +74,12 @@ void noia_exhibitor_module_on_surface_change(void* edata,
 
 //------------------------------------------------------------------------------
 
-/// Handle motion reset notification.
-void noia_exhibitor_module_on_motion_reset(void* edata NOIA_UNUSED, void* sdata)
-{
-    NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
-    noia_exhibitor_on_motion_reset(exhibitor);
-}
-
-//------------------------------------------------------------------------------
-
 /// Handle motion in X-axis notification.
 void noia_exhibitor_module_on_motion_x(void* edata, void* sdata)
 {
     NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
-    int abs_value = noia_int_unref_get((NoiaIntObject*) edata);
-    noia_exhibitor_on_motion_x(exhibitor, abs_value);
+    int value = noia_int_unref_get((NoiaIntObject*) edata);
+    noia_exhibitor_on_motion_x(exhibitor, value);
 }
 
 //------------------------------------------------------------------------------
@@ -97,8 +88,38 @@ void noia_exhibitor_module_on_motion_x(void* edata, void* sdata)
 void noia_exhibitor_module_on_motion_y(void* edata, void* sdata)
 {
     NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
-    int abs_value = noia_int_unref_get((NoiaIntObject*) edata);
-    noia_exhibitor_on_motion_y(exhibitor, abs_value);
+    int value = noia_int_unref_get((NoiaIntObject*) edata);
+    noia_exhibitor_on_motion_y(exhibitor, value);
+}
+
+//------------------------------------------------------------------------------
+
+/// Handle position reset notification.
+void noia_exhibitor_module_on_position_reset(void* edata NOIA_UNUSED,
+                                             void* sdata)
+{
+    NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
+    noia_exhibitor_on_position_reset(exhibitor);
+}
+
+//------------------------------------------------------------------------------
+
+/// Handle position on X-axis notification.
+void noia_exhibitor_module_on_position_x(void* edata, void* sdata)
+{
+    NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
+    int value = noia_int_unref_get((NoiaIntObject*) edata);
+    noia_exhibitor_on_position_x(exhibitor, value);
+}
+
+//------------------------------------------------------------------------------
+
+/// Handle position on Y-axis notification.
+void noia_exhibitor_module_on_position_y(void* edata, void* sdata)
+{
+    NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
+    int value = noia_int_unref_get((NoiaIntObject*) edata);
+    noia_exhibitor_on_position_y(exhibitor, value);
 }
 
 //------------------------------------------------------------------------------
@@ -174,16 +195,24 @@ void noia_exhibitor_initialize(NoiaLoop* this_loop,
                                 this_loop, exhibitor));
 
     // pointer
-    noia_event_signal_subscribe(SIGNAL_POINTER_MOTION_RESET,
-               noia_task_create(noia_exhibitor_module_on_motion_reset,
-                                this_loop, exhibitor));
-
     noia_event_signal_subscribe(SIGNAL_POINTER_MOTION_X,
                noia_task_create(noia_exhibitor_module_on_motion_x,
                                 this_loop, exhibitor));
 
     noia_event_signal_subscribe(SIGNAL_POINTER_MOTION_Y,
                noia_task_create(noia_exhibitor_module_on_motion_y,
+                                this_loop, exhibitor));
+
+    noia_event_signal_subscribe(SIGNAL_POINTER_POSITION_RESET,
+               noia_task_create(noia_exhibitor_module_on_position_reset,
+                                this_loop, exhibitor));
+
+    noia_event_signal_subscribe(SIGNAL_POINTER_POSITION_X,
+               noia_task_create(noia_exhibitor_module_on_position_x,
+                                this_loop, exhibitor));
+
+    noia_event_signal_subscribe(SIGNAL_POINTER_POSITION_Y,
+               noia_task_create(noia_exhibitor_module_on_position_y,
                                 this_loop, exhibitor));
 
     noia_event_signal_subscribe(SIGNAL_POINTER_BUTTON,
