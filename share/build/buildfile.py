@@ -43,26 +43,6 @@ vgen = build.Generator('vgen',
              ['python3', '-B', './share/build/make.py', 'version'])
 
 #-------------------------------------------------------------------------------
-# PHONY TARGETS
-
-p.add(Pny(build.Generator('memcheck',
-      ['python3', '-B', './share/build/make.py', 'memcheck']),
-      deps=['checks']))
-
-p.add(Pny(build.Generator('cppcheck',
-      ['python3', '-B', './share/build/make.py', 'cppcheck']),
-      deps=['checks']))
-
-p.add(Pny(build.Generator('make',
-      ['python3', '-B', './share/build/make.py', 'make'])))
-
-p.add(Pny(build.Generator('ninja',
-      ['python3', '-B', './share/build/make.py', 'ninja'])))
-
-p.add(Pny(build.Generator('install',
-      ['python3', '-B', './share/build/make.py', 'install'])))
-
-#-------------------------------------------------------------------------------
 # GENERATED FILES
 
 target_version_info = Gen(vgen, output=None, alias='version_info_file')
@@ -107,6 +87,36 @@ target_gtk_resources = Gen(
 p.add([target_xdg_shell_server,
        target_screenshooter_server,
        target_screenshooter_client])
+
+#-------------------------------------------------------------------------------
+# PHONY TARGETS
+
+generated_files = [target_version_info,
+                   target_xdg_shell_server,
+                   target_xdg_shell_code,
+                   target_screenshooter_server,
+                   target_screenshooter_client,
+                   target_screenshooter_code,
+                   target_gtk_resources]
+
+p.add(Pny(build.Generator('memcheck',
+      ['python3', '-B', './share/build/make.py', 'memcheck']),
+      deps=['checks']))
+
+p.add(Pny(build.Generator('cppcheck',
+      ['python3', '-B', './share/build/make.py', 'cppcheck']),
+      deps=['checks']))
+
+p.add(Pny(build.Generator('make',
+      ['python3', '-B', './share/build/make.py', 'make']),
+      deps=generated_files))
+
+p.add(Pny(build.Generator('ninja',
+      ['python3', '-B', './share/build/make.py', 'ninja']),
+      deps=generated_files))
+
+p.add(Pny(build.Generator('install',
+      ['python3', '-B', './share/build/make.py', 'install'])))
 
 #-------------------------------------------------------------------------------
 # CONFIGURATION

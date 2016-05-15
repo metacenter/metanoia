@@ -25,14 +25,28 @@ cppcheck: Makefile \
 install: force
 	@python3 -B ./share/build/make.py install
 
-make: force
+make: Makefile \
+      version_info_file \
+      gen/xdg-shell-server-protocol.h \
+      gen/xdg-shell-protocol.c \
+      gen/screenshooter-server-protocol.h \
+      gen/screenshooter-client-protocol.h \
+      gen/screenshooter-protocol.c \
+      gen/controller-gtk-res.c
 	@python3 -B ./share/build/make.py make
 
 memcheck: Makefile \
           checks
 	@python3 -B ./share/build/make.py memcheck
 
-ninja: force
+ninja: Makefile \
+       version_info_file \
+       gen/xdg-shell-server-protocol.h \
+       gen/xdg-shell-protocol.c \
+       gen/screenshooter-server-protocol.h \
+       gen/screenshooter-client-protocol.h \
+       gen/screenshooter-protocol.c \
+       gen/controller-gtk-res.c
 	@python3 -B ./share/build/make.py ninja
 
 build/metanoia: Makefile \
