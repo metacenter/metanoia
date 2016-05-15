@@ -198,6 +198,7 @@ build/metanoia: Makefile \
 
 build/metanoiactl-gtk: Makefile \
                        inter/utils-debug.o \
+                       inter/utils-time.o \
                        inter/utils-log.o \
                        inter/utils-environment.o \
                        gen/screenshooter-protocol.c \
@@ -213,6 +214,7 @@ build/metanoiactl-gtk: Makefile \
 	@echo "  LD   build/metanoiactl-gtk"
 	@clang -DDEBUG -g -O0 -rdynamic -ldl -lrt -lpthread -lm -latk-1.0 -lcairo -lcairo-gobject -lgdk-3 -lgdk_pixbuf-2.0 -lgio-2.0 -lglib-2.0 -lgobject-2.0 -lgtk-3 -lpango-1.0 -lpangocairo-1.0 -lwayland-client -o build/metanoiactl-gtk \
 	    inter/utils-debug.o \
+	    inter/utils-time.o \
 	    inter/utils-log.o \
 	    inter/utils-environment.o \
 	    gen/screenshooter-protocol.c \
@@ -571,7 +573,8 @@ inter/utils-log.o: Makefile \
                    src/utils-debug.h \
                    src/utils-environment.h \
                    src/utils-log.c \
-                   src/utils-log.h
+                   src/utils-log.h \
+                   src/utils-time.h
 	@mkdir -p inter
 	@echo "  CC   inter/utils-log.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/utils-log.o \
@@ -1175,6 +1178,7 @@ inter/exhibitor-strategist.o: Makefile \
 	    src/exhibitor-strategist.c
 
 inter/exhibitor-compositor.o: Makefile \
+                              src/config.h \
                               src/event-signals.h \
                               src/event-task.h \
                               src/exhibitor-compositor.c \
@@ -1193,6 +1197,7 @@ inter/exhibitor-compositor.o: Makefile \
                               src/utils-branch.h \
                               src/utils-chain.h \
                               src/utils-debug.h \
+                              src/utils-keymap.h \
                               src/utils-list.h \
                               src/utils-log.h \
                               src/utils-object.h \
@@ -1415,6 +1420,7 @@ inter/wayland-state.o: Makefile \
                        src/utils-object.h \
                        src/utils-pool.h \
                        src/utils-store.h \
+                       src/utils-time.h \
                        src/wayland-cache.h \
                        src/wayland-output.h \
                        src/wayland-protocol-output.h \

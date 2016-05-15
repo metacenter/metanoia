@@ -24,7 +24,7 @@
 
 struct NoiaCoordinatorStruct {
     NoiaStore* surfaces;
-    NoiaMiliseconds last_notify_time;
+    NoiaMilliseconds last_notify_time;
     NoiaSurfaceId kfsid;
     pthread_mutex_t surface_mutex;
 };
@@ -74,12 +74,12 @@ void noia_coordinator_unlock_surfaces(NoiaCoordinator* self)
 
 void noia_coordinator_notify(NoiaCoordinator* self)
 {
-    self->last_notify_time = noia_time_get_monotonic_miliseconds();
+    self->last_notify_time = noia_time_get_monotonic_milliseconds();
 }
 
 //------------------------------------------------------------------------------
 
-NoiaMiliseconds noia_coordinator_get_last_notify(NoiaCoordinator* self)
+NoiaMilliseconds noia_coordinator_get_last_notify(NoiaCoordinator* self)
 {
     return self->last_notify_time;
 }

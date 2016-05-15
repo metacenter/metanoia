@@ -7,7 +7,22 @@
 
 #include "global-types.h"
 
-NoiaMiliseconds noia_time_get_monotonic_miliseconds(void);
+/// Represents daytime.
+typedef struct {
+    int hours;    ///< Hours
+    int minutes;  ///< Minutes
+    int seconds;  ///< Seconds
+    int useconds; ///< Microseconds
+} NoiaDayTime;
+
+/// Return number of milliseconds since arbitrary point in time.
+NoiaMilliseconds noia_time_get_monotonic_milliseconds(void);
+
+/// Return best guess for number of milliseconds since Epoch.
+NoiaMilliseconds noia_time_get_realtime_milliseconds(void);
+
+/// Return local time.
+NoiaDayTime noia_time_get_local_daytime(void);
 
 #endif // NOIA_UTILS_TIME_H
 

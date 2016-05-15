@@ -48,7 +48,7 @@ struct NoiaDisplayStruct {
     pthread_t thread;
 
     /// Time of last display redraw in monotinic clock miliseconds.
-    NoiaMiliseconds last_time;
+    NoiaMilliseconds last_time;
 };
 
 //------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ void noia_display_redraw_all(NoiaDisplay* self)
     }
 
     // Finish
-    self->last_time = noia_time_get_monotonic_miliseconds();
+    self->last_time = noia_time_get_monotonic_milliseconds();
     noia_pool_release(self->visible_surfaces);
 }
 

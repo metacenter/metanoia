@@ -242,6 +242,7 @@ metanoia.add([Com(['metanoia.c'])])
 # METANOIACTL
 
 metanoiactl_gtk.add([target_utils_debug,
+                     target_utils_time,
                      target_utils_log,
                      target_utils_environment,
                      target_screenshooter_code])

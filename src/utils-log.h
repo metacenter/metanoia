@@ -97,9 +97,5 @@ int noia_log_failure(int line, const char* filename, const char* condition);
 /// Print backtrace.
 int noia_log_backtrace(void);
 
-/// Return number of miliseconds since Epoch.
-/// @todo Move elsewhere.
-int noia_log_get_miliseconds(void);
-
 #endif // NOIA_UTILS_LOG_H
 

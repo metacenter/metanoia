@@ -2,9 +2,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-#include "global-macros.h"
 #include "utils-log.h"
+
+#include "global-macros.h"
 #include "utils-environment.h"
+#include "utils-time.h"
 #include "version.h"
 
 #include <execinfo.h>
@@ -86,12 +88,9 @@ int noia_log(const char* log_level,
     size_t n;
     char buff[128];
     char thread_name[16];
-    struct timeval tv;
-    struct tm* tm;
 
     // Get time
-    gettimeofday(&tv, NULL);
-    tm = localtime(&tv.tv_sec);
+    NoiaDayTime dt = noia_time_get_local_daytime();
 
     // Lock Mutex
     pthread_mutex_lock(&mutex);
@@ -102,7 +101,7 @@ int noia_log(const char* log_level,
     // Fill buffer
     n = snprintf(buff, sizeof(buff),
                 "%02d:%02d:%02d.%06d | %-5s | %-15s | %4d | %-40s%s",
-                tm->tm_hour, tm->tm_min, tm->tm_sec, (int) tv.tv_usec,
+                dt.hours, dt.minutes, dt.seconds, dt.useconds,
                 log_level, thread_name, line, file, scLogEnd);
 
     // Print text
@@ -187,16 +186,6 @@ int noia_log_backtrace(void)
     return noia_log_begin("BACKTRACE")
          + noia_print_backtrace()
          + noia_log_end();
-}
-
-//------------------------------------------------------------------------------
-
-int noia_log_get_miliseconds(void)
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    int msec = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
-    return msec;
 }
 
 //------------------------------------------------------------------------------

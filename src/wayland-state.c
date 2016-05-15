@@ -10,6 +10,7 @@
 #include "surface-coordinator.h"
 #include "utils-keyboard-state.h"
 #include "utils-log.h"
+#include "utils-time.h"
 
 #include "xdg-shell-server-protocol.h"
 
@@ -400,7 +401,8 @@ void noia_wayland_state_pointer_motion(NoiaSurfaceId sid, NoiaPosition pos)
     FOR_EACH (resources, link) {
         struct wl_resource* rc = link->data;
         if (client == wl_resource_get_client(rc)) {
-            wl_pointer_send_motion(rc, (int32_t) noia_log_get_miliseconds(),
+            wl_pointer_send_motion(rc,
+                            (int32_t) noia_time_get_monotonic_milliseconds(),
                             wl_fixed_from_int(pos.x), wl_fixed_from_int(pos.y));
         }
     }
@@ -481,7 +483,8 @@ void noia_wayland_state_screen_refresh(NoiaSurfaceId sid)
     FOR_EACH(frcs, link) {
         struct wl_resource* frame_rc = (struct wl_resource*) link->data;
         LOG_WAYL3("Wayland < frame (sid: %u)", sid);
-        wl_callback_send_done(frame_rc, (uint32_t) noia_log_get_miliseconds());
+        wl_callback_send_done(frame_rc,
+                             (uint32_t) noia_time_get_monotonic_milliseconds());
     }
     noia_wayland_surface_remove_frame_resources(surface);
 

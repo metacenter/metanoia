@@ -21,7 +21,7 @@ void noia_coordinator_unlock_surfaces(NoiaCoordinator* self);
 
 void noia_coordinator_notify(NoiaCoordinator* self);
 
-NoiaMiliseconds noia_coordinator_get_last_notify(NoiaCoordinator* self);
+NoiaMilliseconds noia_coordinator_get_last_notify(NoiaCoordinator* self);
 
 //------------------------------------------------------------------------------
 

@@ -13,8 +13,8 @@
 /// Id for NoiaItem
 typedef uintptr_t NoiaItemId;
 
-/// Miliseconds
-typedef unsigned long long NoiaMiliseconds;
+/// Milliseconds
+typedef uint_least64_t NoiaMilliseconds;
 
 /// Free function definition
 typedef void (*NoiaFreeFunc) (void*);
@@ -25,7 +25,7 @@ typedef int (*NoiaCompareFunc) (const void*, const void*);
 /// Duplicate function definition
 typedef void* (*NoiaDuplicateFunc) (void*);
 
-/// Print formated string function
+/// Print formatted string function
 typedef int (*NoiaPrintFunc) (const char*, ...);
 
 /// Structure to be inherited by all types that want to be stored in NoiaStore

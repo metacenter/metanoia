@@ -8,11 +8,37 @@
 
 //------------------------------------------------------------------------------
 
-NoiaMiliseconds noia_time_get_monotonic_miliseconds(void)
+NoiaMilliseconds noia_time_get_monotonic_milliseconds(void)
 {
-    struct timespec spec;
-    clock_gettime(CLOCK_MONOTONIC, &spec);
-    return 1000*spec.tv_sec + spec.tv_nsec / 1000000;
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (1000 * ts.tv_sec) + (ts.tv_nsec / 1000000);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaMilliseconds noia_time_get_realtime_milliseconds(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (1000 * ts.tv_sec) + (ts.tv_nsec / 1000000);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaDayTime noia_time_get_local_daytime(void)
+{
+    struct tm* tm;
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    tm = localtime(&ts.tv_sec);
+
+    NoiaDayTime dt;
+    dt.hours = tm->tm_hour;
+    dt.minutes = tm->tm_min;
+    dt.seconds = tm->tm_sec;
+    dt.useconds = ts.tv_nsec / 1000;
+    return dt;
 }
 
 //------------------------------------------------------------------------------
