@@ -25,7 +25,15 @@ static const NoiaConfig scConfig = {
         // Default type of workspace.
         // Available: NOIA_FRAME_TYPE_NONE, NOIA_FRAME_TYPE_STACKED,
         // NOIA_FRAME_TYPE_VERTICAL, NOIA_FRAME_TYPE_HORIZONTAL
-        .workspace_type = NOIA_FRAME_TYPE_HORIZONTAL
+        .workspace_type = NOIA_FRAME_TYPE_HORIZONTAL,
+
+        // Scale for touchpad event position values.
+        // In future will be replaced by non-linear scale per dimension.
+        .touchpad_scale = 1.0,
+
+        // Scale for mouse event motion values
+        // In future will be replaced by non-linear scale per dimension.
+        .mouse_scale = 1.0
     };
 
 static const NoiaBinding scBindingsCommon[] = {

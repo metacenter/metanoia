@@ -16,6 +16,8 @@ typedef struct {
     NoiaBGTransform background_image_transform;
     NoiaColor background_color;
     NoiaFrameType workspace_type;
+    double touchpad_scale;
+    double mouse_scale;
 } NoiaConfig;
 
 /// Keeps information about variable internal application configuration.
