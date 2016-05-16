@@ -91,7 +91,8 @@ NoiaResult noia_frame_change_type(NoiaFrame* self,
 void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
 
 /// Detach frame `self` from its trunk.
-NoiaResult noia_frame_remove_self(NoiaFrame* self);
+NoiaResult noia_frame_remove_self(NoiaFrame* self,
+                                  NoiaCoordinator* coordinator);
 
 /// Remove frame `self` from its current trunk and insert to frame `target`.
 /// @todo Add unit tests.

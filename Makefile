@@ -124,6 +124,7 @@ build/metanoia: Makefile \
                 inter/wayland-protocol-subcompositor.o \
                 inter/wayland-protocol-subsurface.o \
                 inter/wayland-protocol-surface.o \
+                inter/wayland-protocol-xdg-popup.o \
                 inter/wayland-protocol-xdg-shell.o \
                 inter/wayland-protocol-xdg-surface.o \
                 inter/backend-offscreen.o \
@@ -205,6 +206,7 @@ build/metanoia: Makefile \
 	    inter/wayland-protocol-subcompositor.o \
 	    inter/wayland-protocol-subsurface.o \
 	    inter/wayland-protocol-surface.o \
+	    inter/wayland-protocol-xdg-popup.o \
 	    inter/wayland-protocol-xdg-shell.o \
 	    inter/wayland-protocol-xdg-surface.o \
 	    inter/backend-offscreen.o \
@@ -1860,6 +1862,21 @@ inter/wayland-protocol-surface.o: Makefile \
 	@echo "  CC   inter/wayland-protocol-surface.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-surface.o \
 	    src/wayland-protocol-surface.c
+
+inter/wayland-protocol-xdg-popup.o: Makefile \
+                                    gen/xdg-shell-server-protocol.h \
+                                    src/global-constants.h \
+                                    src/global-enums.h \
+                                    src/global-macros.h \
+                                    src/global-types.h \
+                                    src/utils-debug.h \
+                                    src/utils-log.h \
+                                    src/wayland-protocol-xdg-popup.c \
+                                    src/wayland-protocol-xdg-popup.h
+	@mkdir -p inter
+	@echo "  CC   inter/wayland-protocol-xdg-popup.o"
+	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-xdg-popup.o \
+	    src/wayland-protocol-xdg-popup.c
 
 inter/wayland-protocol-xdg-shell.o: Makefile \
                                     gen/xdg-shell-server-protocol.h \

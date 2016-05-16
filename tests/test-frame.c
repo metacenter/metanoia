@@ -660,15 +660,15 @@ NoiaTestResult should_remove_some_leaf_frames(void)
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
-    noia_frame_remove_self(v1);
-    noia_frame_remove_self(v2);
-    noia_frame_remove_self(v3);
-    noia_frame_remove_self(h5);
-    noia_frame_remove_self(h4);
-    noia_frame_remove_self(h3);
-    noia_frame_remove_self(s3);
-    noia_frame_remove_self(s4);
-    noia_frame_remove_self(s2);
+    noia_frame_remove_self(v1, co);
+    noia_frame_remove_self(v2, co);
+    noia_frame_remove_self(v3, co);
+    noia_frame_remove_self(h5, co);
+    noia_frame_remove_self(h4, co);
+    noia_frame_remove_self(h3, co);
+    noia_frame_remove_self(s3, co);
+    noia_frame_remove_self(s4, co);
+    noia_frame_remove_self(s2, co);
 
     NOIA_ASSERT_TRUNK(r,  NULL);
     NOIA_ASSERT_TRUNK(h,  r);
@@ -719,7 +719,7 @@ NoiaTestResult should_remove_frame_with_subframes(void)
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
-    noia_frame_remove_self(h);
+    noia_frame_remove_self(h, co);
 
     NOIA_ASSERT_TRUNK(r,  NULL);
     NOIA_ASSERT_TRUNK(h,  NULL);

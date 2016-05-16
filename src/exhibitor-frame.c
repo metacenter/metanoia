@@ -233,12 +233,15 @@ void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_frame_remove_self(NoiaFrame* self)
+NoiaResult noia_frame_remove_self(NoiaFrame* self, NoiaCoordinator* coordinator)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
     NOIA_ENSURE(self->trunk, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
-    return noia_branch_remove(self->trunk, self);
+    NoiaFrame* trunk = self->trunk;
+    NoiaResult result = noia_branch_remove(self->trunk, self);
+    noia_frame_relax(trunk, coordinator);
+    return result;
 }
 
 //------------------------------------------------------------------------------

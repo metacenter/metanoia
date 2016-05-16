@@ -4,6 +4,7 @@
 
 #include "wayland-protocol-xdg-shell.h"
 #include "wayland-protocol-xdg-surface.h"
+#include "wayland-protocol-xdg-popup.h"
 #include "wayland-cache.h"
 
 #include "utils-log.h"
@@ -43,9 +44,13 @@ void noia_wayland_xdg_get_xdg_surface(struct wl_client* client,
                                       uint32_t id,
                                       struct wl_resource* surface_resource)
 {
-    void* data = wl_resource_get_user_data(surface_resource);
+    NoiaSurfaceId sid =
+                    (NoiaSurfaceId) wl_resource_get_user_data(surface_resource);
+
+    LOG_WAYL2("Wayland > get XDG surface (sid: %u)", sid);
+
     uint32_t version = wl_resource_get_version(resource);
-    noia_wayland_xdg_surface_bind(client, data, version, id);
+    noia_wayland_xdg_surface_bind(client, (void*) sid, version, id);
 }
 
 //------------------------------------------------------------------------------
@@ -61,9 +66,18 @@ void noia_wayland_xdg_get_xdg_popup
                                int32_t x,
                                int32_t y)
 {
-    LOG_NYIMP("Wayland: XDG popup "
-              "(id: %d, serial: %d, x: %d, y: %d)",
-              id, serial, x, y);
+    NoiaSurfaceId popup_sid =
+                    (NoiaSurfaceId) wl_resource_get_user_data(surface_resource);
+    NoiaSurfaceId parent_sid =
+                     (NoiaSurfaceId) wl_resource_get_user_data(parent_resource);
+
+    LOG_WAYL2("Wayland > get XDG popup (id: %d, serial: %d, "
+              "x: %d, y: %d, popup sid: %u, parent sid: %u)",
+              id, serial, x, y, popup_sid, parent_sid);
+
+    uint32_t version = wl_resource_get_version(resource);
+    noia_wayland_xdg_popup_bind(client, (void*) popup_sid, version, id);
+
 }
 
 //------------------------------------------------------------------------------
@@ -72,7 +86,7 @@ void noia_wayland_xdg_pong(struct wl_client* client     NOIA_UNUSED,
                            struct wl_resource* resource NOIA_UNUSED,
                            uint32_t serial)
 {
-    LOG_NYIMP("Wayland: XDG pong (serial: %d)", serial);
+    LOG_NYIMP("Wayland > XDG pong (serial: %d)", serial);
 }
 
 //------------------------------------------------------------------------------

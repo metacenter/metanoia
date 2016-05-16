@@ -154,7 +154,7 @@ NoiaResult noia_frame_resettle(NoiaFrame* self,
 {
     NoiaResult result = NOIA_RESULT_SUCCESS;
     NOIA_BLOCK {
-        result = noia_frame_remove_self(self);
+        result = noia_frame_remove_self(self, coordinator);
         NOIA_ASSERT_RESULT(result);
 
         noia_frame_prepend(target, self);

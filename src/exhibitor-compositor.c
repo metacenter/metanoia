@@ -230,13 +230,16 @@ void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 {
     NOIA_ENSURE(self, return);
 
-    /// @todo This should be configurable
-    noia_compositor_set_selection(self, NULL);
-
     NoiaFrame* frame = noia_frame_find_with_sid(self->root, sid);
-    noia_frame_remove_self(frame);
+    if (frame == self->selection) {
+        /// @todo This should be configurable
+        noia_compositor_set_selection(self, NULL);
+    }
+
+    noia_frame_remove_self(frame, self->coordinator);
     noia_frame_free(frame);
 
+    noia_coordinator_notify(self->coordinator);
     noia_compositor_log_frame(self);
 }
 
