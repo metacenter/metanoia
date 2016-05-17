@@ -4,7 +4,6 @@
 #ifndef NOIA_CONFIGURATION_H
 #define NOIA_CONFIGURATION_H
 
-#include "global-functions.h"
 #include "input-functions.h"
 #include "input-binding.h"
 

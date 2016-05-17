@@ -80,22 +80,25 @@ void noia_config_apply(int argc, char** argv)
 
     sGears.modes = noia_list_new((NoiaFreeFunc) noia_mode_destroy);
 
+    NoiaMode* common_mode = noia_mode_create(NOIA_MODE_COMMON, true, NULL);
+    NoiaMode* insert_mode = noia_mode_create(NOIA_MODE_INSERT, true, NULL);
+    NoiaMode* normal_mode = noia_mode_create(NOIA_MODE_NORMAL, false,
+                                             noia_swallow);
+
+    noia_list_append(sGears.modes, common_mode);
+    noia_list_append(sGears.modes, insert_mode);
+    noia_list_append(sGears.modes, normal_mode);
+
     // Apply binding config
     for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsCommon); ++i) {
-        noia_input_add_binding(sGears.modes, NOIA_MODE_COMMON,
-                               &scBindingsCommon[i]);
-    }
-    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsNormal); ++i) {
-        noia_input_add_binding(sGears.modes, NOIA_MODE_NORMAL,
-                               &scBindingsNormal[i]);
+        noia_mode_add_binding(common_mode, &scBindingsCommon[i]);
     }
     for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsInsert); ++i) {
-        noia_input_add_binding(sGears.modes, NOIA_MODE_INSERT,
-                               &scBindingsInsert[i]);
+        noia_mode_add_binding(insert_mode, &scBindingsInsert[i]);
     }
-    noia_input_mode_make_active(sGears.modes, NOIA_MODE_COMMON, true);
-    noia_input_mode_make_active(sGears.modes, NOIA_MODE_NORMAL, true);
-    noia_input_mode_make_active(sGears.modes, NOIA_MODE_INSERT, false);
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(scBindingsNormal); ++i) {
+        noia_mode_add_binding(normal_mode, &scBindingsNormal[i]);
+    }
 
     // Apply evironment variables
     sSettings.run_in_test_mode = (getenv("DISPLAY") != NULL);

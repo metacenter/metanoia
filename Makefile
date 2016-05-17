@@ -54,7 +54,6 @@ build/metanoia: Makefile \
                 inter/global-enums.o \
                 inter/global-types.o \
                 inter/global-objects.o \
-                inter/global-functions.o \
                 inter/utils-debug.o \
                 inter/utils-object.o \
                 inter/utils-pool.o \
@@ -136,7 +135,6 @@ build/metanoia: Makefile \
 	    inter/global-enums.o \
 	    inter/global-types.o \
 	    inter/global-objects.o \
-	    inter/global-functions.o \
 	    inter/utils-debug.o \
 	    inter/utils-object.o \
 	    inter/utils-pool.o \
@@ -514,7 +512,6 @@ inter/config.o: Makefile \
                 src/configuration.h \
                 src/global-constants.h \
                 src/global-enums.h \
-                src/global-functions.h \
                 src/global-macros.h \
                 src/global-objects.h \
                 src/global-types.h \
@@ -548,26 +545,6 @@ inter/global-objects.o: Makefile \
 	@echo "  CC   inter/global-objects.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/global-objects.o \
 	    src/global-objects.c
-
-inter/global-functions.o: Makefile \
-                          src/event-loop.h \
-                          src/event-signals.h \
-                          src/event-task.h \
-                          src/exhibitor-module.h \
-                          src/global-constants.h \
-                          src/global-enums.h \
-                          src/global-functions.c \
-                          src/global-functions.h \
-                          src/global-types.h \
-                          src/surface-coordinator.h \
-                          src/surface-data.h \
-                          src/utils-log.h \
-                          src/utils-object.h \
-                          src/utils-store.h
-	@mkdir -p inter
-	@echo "  CC   inter/global-functions.o"
-	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/global-functions.o \
-	    src/global-functions.c
 
 inter/utils-object.o: Makefile \
                       src/global-constants.h \
@@ -1065,9 +1042,7 @@ inter/input-binding.o: Makefile \
                        src/input-binding.c \
                        src/input-binding.h \
                        src/input-context.h \
-                       src/utils-chain.h \
                        src/utils-debug.h \
-                       src/utils-list.h \
                        src/utils-log.h \
                        src/utils-object.h
 	@mkdir -p inter
@@ -1104,9 +1079,7 @@ inter/input-context.o: Makefile \
                        src/global-types.h \
                        src/input-context.c \
                        src/input-context.h \
-                       src/utils-chain.h \
                        src/utils-debug.h \
-                       src/utils-list.h \
                        src/utils-object.h
 	@mkdir -p inter
 	@echo "  CC   inter/input-context.o"
@@ -1154,9 +1127,7 @@ inter/input-mode.o: Makefile \
                     src/input-context.h \
                     src/input-mode.c \
                     src/input-mode.h \
-                    src/utils-chain.h \
                     src/utils-debug.h \
-                    src/utils-list.h \
                     src/utils-log.h \
                     src/utils-object.h
 	@mkdir -p inter
@@ -1869,10 +1840,22 @@ inter/wayland-protocol-xdg-popup.o: Makefile \
                                     src/global-enums.h \
                                     src/global-macros.h \
                                     src/global-types.h \
+                                    src/output.h \
+                                    src/renderer.h \
+                                    src/surface-coordinator.h \
+                                    src/surface-data.h \
+                                    src/utils-chain.h \
                                     src/utils-debug.h \
+                                    src/utils-list.h \
                                     src/utils-log.h \
+                                    src/utils-object.h \
+                                    src/utils-pool.h \
+                                    src/utils-store.h \
                                     src/wayland-protocol-xdg-popup.c \
-                                    src/wayland-protocol-xdg-popup.h
+                                    src/wayland-protocol-xdg-popup.h \
+                                    src/wayland-state.h \
+                                    src/wayland-surface.h \
+                                    src/wayland-types.h
 	@mkdir -p inter
 	@echo "  CC   inter/wayland-protocol-xdg-popup.o"
 	@clang -DDEBUG -g -O0 -Wall -W -Wextra -Werror -Wpedantic -std=gnu11 -c -Isrc -Igen -o inter/wayland-protocol-xdg-popup.o \
@@ -1890,6 +1873,7 @@ inter/wayland-protocol-xdg-shell.o: Makefile \
                                     src/utils-log.h \
                                     src/utils-store.h \
                                     src/wayland-cache.h \
+                                    src/wayland-protocol-xdg-popup.h \
                                     src/wayland-protocol-xdg-shell.c \
                                     src/wayland-protocol-xdg-shell.h \
                                     src/wayland-protocol-xdg-surface.h \

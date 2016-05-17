@@ -129,12 +129,10 @@ metanoia.add([Com(['config.c'])])
 target_global_enums     = Com(['global-enums.c'])
 target_global_types     = Com(['global-types.c'])
 target_global_objects   = Com(['global-objects.c'])
-target_global_functions = Com(['global-functions.c'])
 
 metanoia.add([target_global_enums,
               target_global_types,
-              target_global_objects,
-              target_global_functions])
+              target_global_objects])
 
 #-------------------------------------------------------------------------------
 # UTILS

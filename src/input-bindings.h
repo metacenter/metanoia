@@ -7,11 +7,7 @@
 
 #include "input-binding.h"
 #include "global-constants.h"
-
-/// Add binding `binding` to mode specified by `modeid`.
-void noia_input_add_binding(NoiaList* modes,
-                            NoiaModeEnum modeid,
-                            const NoiaBinding* binding);
+#include "utils-list.h"
 
 /// Make mode specified by `modeid` active or inactive.
 void noia_input_mode_make_active(NoiaList* modes,

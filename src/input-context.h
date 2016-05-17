@@ -5,7 +5,6 @@
 #ifndef NOIA_INPUT_CONTEXT_H
 #define NOIA_INPUT_CONTEXT_H
 
-#include "utils-list.h"
 #include "global-objects.h"
 #include "global-constants.h"
 

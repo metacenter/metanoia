@@ -10,13 +10,16 @@
 
 /// Data type representing input mode.
 typedef struct {
-    NoiaModeEnum modeid;
-    void* bindings;
-    bool active;
+    NoiaModeEnum modeid;            ///< ID of the mode.
+    void* bindings;                 ///< tree of bindings.
+    NoiaBindingExecuteFunc execute; ///< Default execute function.
+    bool active;                    ///< Defines if mode is currently active.
 } NoiaMode;
 
 /// Construct NoiaMode.
-NoiaMode* noia_mode_create(NoiaModeEnum modeid);
+NoiaMode* noia_mode_create(NoiaModeEnum modeid,
+                           bool active,
+                           NoiaBindingExecuteFunc execute);
 
 /// Destruct NoiaMode.
 void noia_mode_destroy(NoiaMode* self);
@@ -24,11 +27,13 @@ void noia_mode_destroy(NoiaMode* self);
 /// Add new input binding to given mode.
 void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding);
 
-/// Find binding specified by `code` and `modifiers` in given mode.
-/// @return Pointer to binding if found; `NULL` otherwise.
-NoiaBinding* noia_mode_find_binding(NoiaMode* self,
-                                    int code,
-                                    uint32_t Noiamodifiers);
+/// Find binding execute function specified by `code` and `modifiers`
+/// in given mode.
+/// @return Pointer to execute binding function if found; default function
+///         (which may be `NULL`) otherwise.
+NoiaBindingExecuteFunc noia_mode_find_binding(NoiaMode* self,
+                                              int code,
+                                              uint32_t Noiamodifiers);
 
 #endif // NOIA_INPUT_MODE_H
 

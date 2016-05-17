@@ -6,6 +6,7 @@
 #include "input-binding.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 #include <memory.h>
@@ -16,14 +17,17 @@
 
 //------------------------------------------------------------------------------
 
-NoiaMode* noia_mode_create(NoiaModeEnum modeid)
+NoiaMode* noia_mode_create(NoiaModeEnum modeid,
+                           bool active,
+                           NoiaBindingExecuteFunc execute)
 {
     NoiaMode* self = malloc(sizeof(NoiaMode));
     NOIA_ENSURE(self, abort());
 
     self->modeid = modeid;
     self->bindings = NULL;
-    self->active = 0;
+    self->execute = execute;
+    self->active = active;
     return self;
 }
 
@@ -42,6 +46,9 @@ void noia_mode_destroy(NoiaMode* self)
 
 void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding)
 {
+    NOIA_ENSURE(binding, return);
+    NOIA_ENSURE(binding->execute, return);
+
     // Skip if already exists
     void* found = tfind((void*) binding, &self->bindings,
                         (NoiaCompareFunc) noia_binding_compare);
@@ -68,11 +75,11 @@ void noia_mode_add_binding(NoiaMode* self, const NoiaBinding* binding)
 
 //------------------------------------------------------------------------------
 
-NoiaBinding* noia_mode_find_binding(NoiaMode* self,
-                                    int code,
-                                    uint32_t modifiers)
+NoiaBindingExecuteFunc noia_mode_find_binding(NoiaMode* self,
+                                              int code,
+                                              uint32_t modifiers)
 {
-    NoiaBinding* result = NULL;
+    NoiaBindingExecuteFunc result = NULL;
     NoiaBinding searched;
     searched.code = code;
     searched.modifiers = modifiers;
@@ -80,7 +87,9 @@ NoiaBinding* noia_mode_find_binding(NoiaMode* self,
     NoiaBinding** found = tfind((void*) &searched, &self->bindings,
                                 (NoiaCompareFunc) noia_binding_compare);
     if (found) {
-        result = *found;
+        result = (*found)->execute;
+    } else {
+        result = self->execute;
     }
     return result;
 }

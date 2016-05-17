@@ -7,7 +7,9 @@
 
 #include "input-context.h"
 
-typedef void (*NoiaBindingExecuteFunc) (NoiaInputContext*);
+/// Type for execution callback.
+/// @return true if key chould be catched, false otherwise.
+typedef bool (*NoiaBindingExecuteFunc) (NoiaInputContext*);
 
 /// Data type representing key binding.
 typedef struct {

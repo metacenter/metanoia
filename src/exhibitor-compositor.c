@@ -306,7 +306,7 @@ void noia_compositor_focus(NoiaCompositor* self,
     NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
 
     if ((argmand == NOIA_ARGMAND_BACK) or (argmand == NOIA_ARGMAND_FORWARD)) {
-        if (argmand == NOIA_ARGMAND_BACK) {
+        if (argmand == NOIA_ARGMAND_FORWARD) {
             position = -1 * position;
         }
 

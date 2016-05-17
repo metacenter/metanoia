@@ -4,6 +4,7 @@
 
 #include "input-binding.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include <malloc.h>
 
