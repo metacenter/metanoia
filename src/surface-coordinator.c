@@ -272,7 +272,8 @@ void noia_surface_set_offset(NoiaCoordinator* coordinator,
                              NoiaPosition offset)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
-    surface->offset = offset;
+    surface->offset.x = (offset.x > 0) ? offset.x : 0;
+    surface->offset.y = (offset.y > 0) ? offset.y : 0;
 }
 
 //------------------------------------------------------------------------------
