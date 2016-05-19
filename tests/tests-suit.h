@@ -38,7 +38,7 @@
 
 #define NOIA_ASSERT_POOL(POOL, ARRAY, TYPE, SIZE) { \
     NOIA_ASSERT_POOL_SIZE(POOL, NOIA_SIZEOF_ARRAY(ARRAY), SIZE) \
-    TYPE *ptr = noia_pool_top(POOL); \
+    TYPE* ptr = noia_pool_top(POOL); \
     TYPE array_data = ARRAY[NOIA_SIZEOF_ARRAY(ARRAY)-1]; \
     NOIA_ASSERT(array_data == *ptr, \
                 "Top element should be '%d' (is '%d')", \
@@ -47,7 +47,10 @@
         TYPE* ptr = noia_pool_get(POOL, i); \
         NOIA_ASSERT(ARRAY[i] == *ptr, \
                     "Element should be '%d' (is '%d')", \
-                    ARRAY[i], *ptr); }}
+                    ARRAY[i], *ptr); } \
+    ptr = noia_pool_get(POOL, SIZE); \
+    NOIA_ASSERT(ptr == NULL, \
+                "Element outside pool should be NULL (is '%p')", (void*) ptr); };
 
 #define NOIA_FILL_POOL(POOL, ARRAY, TYPE) { \
     for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(ARRAY); ++i) { \

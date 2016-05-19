@@ -34,7 +34,8 @@ def generate_version_file():
 ################################################################################
 
 def run_memcheck():
-    success_str = 'All heap blocks were freed -- no leaks are possible'
+    invalid_read_str = 'Invalid read'
+    no_leak_str = 'All heap blocks were freed -- no leaks are possible'
     command = ['valgrind', '--leak-check=full', '--show-leak-kinds=all']
 
     for f in ['./checks/check-globals',
@@ -48,11 +49,13 @@ def run_memcheck():
         cmd.extend([f, '-q'])
         result = build.Run.command(cmd)
 
-        if result.returncode:
-            print('Valgrind reported error!')
+        is_failure = (result.returncode != 0) \
+                  or (no_leak_str not in result.stderr) \
+                  or (invalid_read_str in result.stderr)
 
-        if success_str not in result.stdout:
-            print(result.stdout)
+        print(result.stdout)
+        if is_failure:
+            print('Valgrind reported error!\n')
 
 ################################################################################
 

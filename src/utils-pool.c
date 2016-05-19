@@ -93,7 +93,7 @@ void* noia_pool_get(NoiaPool* self, unsigned index)
 {
     void* result = NULL;
     NOIA_BLOCK {
-        if (self->num_elements < index) {
+        if (self->num_elements <= index) {
             break;
         }
 
