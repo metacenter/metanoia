@@ -297,7 +297,8 @@ void noia_renderer_gl_load_texture_and_prepare_vertices
             LOG_WARN1("Could not create KHR image! (%d)", eglGetError());
         }
     } else {
-        LOG_WARN1("RendererGL: surface '%d' does not have data nor resource!");
+        LOG_WARN1("RendererGL: surface '%u' does not have data nor resource!",
+                  context->sid);
         return;
     }
 

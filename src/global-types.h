@@ -119,8 +119,14 @@ void noia_area_invalidate(NoiaArea* area);
 ///         `false` if not or at least one area is invalid.
 bool noia_area_is_equal(NoiaArea area1, NoiaArea area2);
 
+/// Check if buffer is valid.
+bool noia_buffer_is_valid(NoiaBuffer* buffer);
+
 /// Clear the buffer.
 void noia_buffer_clean(NoiaBuffer* buffer);
+
+/// Frees the buffers allocated memory.
+void noia_buffer_release(NoiaBuffer* buffer);
 
 #endif // NOIA_GLOBAL_TYPES_H
 

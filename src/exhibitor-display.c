@@ -86,12 +86,15 @@ NoiaResult noia_display_setup(NoiaDisplay* self)
 
         // Read in background image
         NoiaBuffer buff = noia_image_read(noia_config()->background_image_path);
-        self->background_sid = noia_surface_create(self->coordinator);
-        noia_surface_attach(self->coordinator,
-                            self->background_sid,
-                            buff.width, buff.height, buff.stride,
-                            buff.data, NULL);
-        noia_surface_commit(self->coordinator, self->background_sid);
+        if (noia_buffer_is_valid(&buff)) {
+            self->background_sid = noia_surface_create(self->coordinator);
+            noia_surface_attach(self->coordinator,
+                                self->background_sid,
+                                buff.width, buff.height, buff.stride,
+                                buff.data, NULL);
+            noia_surface_commit(self->coordinator, self->background_sid);
+            noia_buffer_release(&buff);
+        }
 
         result = NOIA_RESULT_SUCCESS;
     }
