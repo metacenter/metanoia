@@ -5,5 +5,5 @@ gen/
 inter/
 .ninja_deps
 .ninja_log
-session.vim
-tags
+Makefile
+build.ninja
