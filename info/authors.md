@@ -4,7 +4,7 @@ Contributions
 Developers
 ----------
 
- * Wojciech Kluczka < wojciech kluczka at gmail dot com >
+ * Wojciech Kluczka < wojciech dot kluczka at gmail dot com >
 
 Contributors
 ------------

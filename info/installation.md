@@ -5,8 +5,14 @@ Build
 -----
 
 Metanoia uses its home-grown (python) script generating make files or ninja
-files (could not find any sufficiently flexible and clean build system). Default
-Makefile and build.ninja files are provided in git so compilation takes only:
+files (could not find any sufficiently flexible and clean build system). To
+generate them use:
+
+```
+./configure.sh
+```
+
+Then compilation takes only:
 
 ```
 make

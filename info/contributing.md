@@ -124,10 +124,11 @@ Git workflow and versioning
 Metanoia is hosted on GitHub and uses GitHub flow (pull requests) but patches
 sent by mail will also be accepted.
 
-Active development takes place on subbranches, on `master` land only complete
-features. Every release has version and codename. Version is used to tag commit.
-Code name is used for branch. If bugs were found fixes are make on this branch,
-then are merged to master (never other way).
+Active development takes place on subbranches. Main development branch is
+`development`. On `master` land only working features; `master` should always be
+buildable. Every release has version and codename. Version is used to tag
+commit. Code name is used for branch. If bugs were found fixes are made on this
+branch, then merged to `development`, then to `master`.
 
 Version string consists of three numbers: EPOCH.MAJOR.MINOR
  * MINOR - bug-fixed release
