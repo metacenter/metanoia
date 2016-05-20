@@ -77,11 +77,6 @@ static inline void noia_frame_insert_after(NoiaFrame* self, NoiaFrame* other)
     noia_branch_insert_after(self, other);
 }
 
-/// Remove frame `self` from its current trunk and prepend to frame `target`.
-NoiaResult noia_frame_resettle(NoiaFrame* self,
-                               NoiaFrame* target,
-                               NoiaCoordinator* coordinator);
-
 /// @see noia_frame_resize
 NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame,
                                            NoiaFrameType type);

@@ -15,7 +15,7 @@ typedef struct {
     const char* background_image_path;
     NoiaBGTransform background_image_transform;
     NoiaColor background_color;
-    NoiaFrameType workspace_type;
+    NoiaFrameType default_frame_type;
     double touchpad_scale;
     double mouse_scale;
 } NoiaConfig;

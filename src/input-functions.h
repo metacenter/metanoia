@@ -35,6 +35,8 @@ bool noia_jump_to_workspace(NoiaInputContext* context);
 
 bool noia_anchorize(NoiaInputContext* context);
 
+bool noia_branchize(NoiaInputContext* context);
+
 bool noia_stackedize(NoiaInputContext* context);
 
 bool noia_verticalize(NoiaInputContext* context);

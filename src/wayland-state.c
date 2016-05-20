@@ -559,7 +559,7 @@ void noia_wayland_state_surface_reconfigured(NoiaSurfaceId sid)
                 s = wl_array_add(&states, sizeof(*s));
                 *s = XDG_SURFACE_STATE_MAXIMIZED;
             }
-            if (data->state_flags & NOIA_SURFACE_STATE_ACTIVATED) {
+            if (sid == sState.keyboard_focused_sid) {
                 s = wl_array_add(&states, sizeof(*s));
                 *s = XDG_SURFACE_STATE_ACTIVATED;
             }

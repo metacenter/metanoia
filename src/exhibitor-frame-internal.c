@@ -148,24 +148,6 @@ NoiaFrame* noia_frame_prepend(NoiaFrame* self, NoiaFrame* other)
 
 //------------------------------------------------------------------------------
 
-NoiaResult noia_frame_resettle(NoiaFrame* self,
-                               NoiaFrame* target,
-                               NoiaCoordinator* coordinator)
-{
-    NoiaResult result = NOIA_RESULT_SUCCESS;
-    NOIA_BLOCK {
-        result = noia_frame_remove_self(self, coordinator);
-        NOIA_ASSERT_RESULT(result);
-
-        noia_frame_prepend(target, self);
-        noia_frame_set_size(self, coordinator,
-                            noia_frame_get_params(target)->area.size);
-    }
-    return result;
-}
-
-//------------------------------------------------------------------------------
-
 NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame, NoiaFrameType type)
 {
     NOIA_ENSURE(frame, return NULL);

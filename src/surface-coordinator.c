@@ -248,16 +248,6 @@ void noia_surface_set_focus(NoiaCoordinator* coordinator, NoiaSurfaceId new_sid)
 
     NoiaSurfaceId old_sid = coordinator->kfsid;
     if (old_sid != new_sid) {
-        NoiaSurfaceData* old_surface = noia_surface_get(coordinator, old_sid);
-        NoiaSurfaceData* new_surface = noia_surface_get(coordinator, new_sid);
-
-        if (old_surface) {
-            old_surface->state_flags &= (~NOIA_SURFACE_STATE_ACTIVATED);
-        }
-        if (new_surface) {
-            new_surface->state_flags |= NOIA_SURFACE_STATE_ACTIVATED;
-        }
-
         coordinator->kfsid = new_sid;
         noia_event_signal_emit_int(SIGNAL_KEYBOARD_FOCUS_CHANGED, new_sid);
     }

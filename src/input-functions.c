@@ -247,6 +247,19 @@ bool noia_anchorize(NoiaInputContext* context)
 
 //------------------------------------------------------------------------------
 
+bool noia_branchize(NoiaInputContext* context)
+{
+    NOIA_ENSURE(context, return true);
+    NoiaAction* action = context->action;
+    noia_action_clean(action);
+    action->action = NOIA_ARGMAND_JUMP;
+    action->direction = NOIA_ARGMAND_END;
+    noia_execute(action);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
 bool noia_stackedize(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return true);

@@ -94,6 +94,11 @@ void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
 NoiaResult noia_frame_remove_self(NoiaFrame* self,
                                   NoiaCoordinator* coordinator);
 
+/// Remove frame `self` from its current trunk and prepend to frame `target`.
+NoiaResult noia_frame_resettle(NoiaFrame* self,
+                               NoiaFrame* target,
+                               NoiaCoordinator* coordinator);
+
 /// Remove frame `self` from its current trunk and insert to frame `target`.
 /// @todo Add unit tests.
 NoiaResult noia_frame_jump(NoiaFrame* self,

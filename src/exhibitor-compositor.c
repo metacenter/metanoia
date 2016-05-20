@@ -81,7 +81,7 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
     // Create and configure workspace
     NoiaFrame* workspace = noia_frame_new();
     NoiaFrameType type = NOIA_FRAME_TYPE_WORKSPACE
-                       | noia_config()->workspace_type;
+                       | noia_config()->default_frame_type;
 
     noia_frame_configure(workspace, self->coordinator, type, 0,
                          noia_frame_get_area(display), title);
@@ -278,6 +278,24 @@ void noia_compositor_jump(NoiaCompositor* self NOIA_UNUSED,
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(frame, return);
     NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
+
+    noia_compositor_log_frame(self);
+
+    if (argmand == NOIA_ARGMAND_END) {
+        NoiaFrame* distancer = noia_frame_new();
+        noia_frame_configure(distancer, self->coordinator,
+                             noia_config()->default_frame_type,
+                             scInvalidSurfaceId,
+                             noia_frame_get_area(self->selection),
+                             NULL);
+        NoiaFrame* target = self->selection->trunk;
+        noia_frame_resettle(self->selection, distancer, self->coordinator);
+        noia_frame_jumpin(target, distancer, self->coordinator);
+    } else {
+        /// @todo
+    }
+
+    noia_compositor_log_frame(self);
 }
 
 //------------------------------------------------------------------------------
@@ -462,42 +480,41 @@ void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
     NOIA_ENSURE(a, return);
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(noia_argmand_is_actionable(a->action), return);
-    if (not self->selection) {
-        return;
-    }
 
-    switch (a->action) {
-    case NOIA_ARGMAND_RESIZE:
-        noia_frame_resize(self->selection, self->coordinator,
-                          a->direction, a->magnitude);
-        break;
-    case NOIA_ARGMAND_MOVE:
-        noia_frame_move(self->selection, a->direction, a->magnitude);
-        break;
-    case NOIA_ARGMAND_JUMP:
-        if (a->direction == NOIA_ARGMAND_WORKSPACE) {
-            noia_compositor_jump_to_workspace(self, a->str);
-        } else {
-            noia_compositor_jump(self, self->selection, a->direction);
+    if (self->selection) {
+        switch (a->action) {
+        case NOIA_ARGMAND_RESIZE:
+            noia_frame_resize(self->selection, self->coordinator,
+                              a->direction, a->magnitude);
+            break;
+        case NOIA_ARGMAND_MOVE:
+            noia_frame_move(self->selection, a->direction, a->magnitude);
+            break;
+        case NOIA_ARGMAND_JUMP:
+            if (a->direction == NOIA_ARGMAND_WORKSPACE) {
+                noia_compositor_jump_to_workspace(self, a->str);
+            } else {
+                noia_compositor_jump(self, self->selection, a->direction);
+            }
+            break;
+        case NOIA_ARGMAND_FOCUS:
+            if (a->direction == NOIA_ARGMAND_WORKSPACE) {
+                noia_compositor_focus_workspace(self, a->str);
+            } else {
+                noia_compositor_focus(self, a->direction, a->magnitude);
+            }
+            break;
+        case NOIA_ARGMAND_SWAP:
+            noia_compositor_swap(self, a->direction, a->magnitude);
+            break;
+        case NOIA_ARGMAND_CONF:
+            noia_compositor_configure(self, self->selection, a->direction);
+            break;
+        case NOIA_ARGMAND_ANCHOR:
+            noia_compositor_anchorize(self, self->selection);
+            break;
+        default: break;
         }
-        break;
-    case NOIA_ARGMAND_FOCUS:
-        if (a->direction == NOIA_ARGMAND_WORKSPACE) {
-            noia_compositor_focus_workspace(self, a->str);
-        } else {
-            noia_compositor_focus(self, a->direction, a->magnitude);
-        }
-        break;
-    case NOIA_ARGMAND_SWAP:
-        noia_compositor_swap(self, a->direction, a->magnitude);
-        break;
-    case NOIA_ARGMAND_CONF:
-        noia_compositor_configure(self, self->selection, a->direction);
-        break;
-    case NOIA_ARGMAND_ANCHOR:
-        noia_compositor_anchorize(self, self->selection);
-        break;
-    default: break;
     }
 
     noia_coordinator_notify(self->coordinator);
