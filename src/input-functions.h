@@ -23,6 +23,8 @@ bool noia_put_focus(NoiaInputContext* context);
 
 bool noia_put_swap(NoiaInputContext* context);
 
+bool noia_put_jump(NoiaInputContext* context);
+
 bool noia_put_move(NoiaInputContext* context);
 
 bool noia_put_resize(NoiaInputContext* context);
@@ -35,7 +37,7 @@ bool noia_jump_to_workspace(NoiaInputContext* context);
 
 bool noia_anchorize(NoiaInputContext* context);
 
-bool noia_branchize(NoiaInputContext* context);
+bool noia_ramify(NoiaInputContext* context);
 
 bool noia_stackedize(NoiaInputContext* context);
 

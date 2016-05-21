@@ -26,6 +26,14 @@ void noia_test_frame_config(NoiaFrame* frame,
 
 //------------------------------------------------------------------------------
 
+bool noia_test_streq(const char * s1, const char * s2)
+{
+    return ((s1 == NULL) and (s2 == NULL))
+        or ((s1 != NULL) and (s2 != NULL) and (strcmp(s1, s2) == 0));
+}
+
+//------------------------------------------------------------------------------
+
 #define NOIA_MAKE_FRAMES_SIMPLE \
     NoiaFrame* r  = noia_frame_new(); \
     NoiaFrame* v  = noia_frame_new(); \
@@ -46,25 +54,44 @@ void noia_test_frame_config(NoiaFrame* frame,
     NoiaFrame* s3 = noia_frame_new(); \
     NoiaFrame* s4 = noia_frame_new(); \
     NoiaFrame* s5 = noia_frame_new(); \
-    noia_test_frame_config(r,  co, NOIA_FRAME_TYPE_NONE,       INV); \
-    noia_test_frame_config(v,  co, NOIA_FRAME_TYPE_VERTICAL,   INV); \
-    noia_test_frame_config(h,  co, NOIA_FRAME_TYPE_HORIZONTAL, INV); \
-    noia_test_frame_config(s,  co, NOIA_FRAME_TYPE_STACKED,    INV); \
-    noia_test_frame_config(v1, co, NOIA_FRAME_TYPE_LEAF, 11); \
-    noia_test_frame_config(v2, co, NOIA_FRAME_TYPE_LEAF, 12); \
-    noia_test_frame_config(v3, co, NOIA_FRAME_TYPE_LEAF, 13); \
-    noia_test_frame_config(v4, co, NOIA_FRAME_TYPE_LEAF, 14); \
-    noia_test_frame_config(v5, co, NOIA_FRAME_TYPE_LEAF, 15); \
-    noia_test_frame_config(h1, co, NOIA_FRAME_TYPE_LEAF, 21); \
-    noia_test_frame_config(h2, co, NOIA_FRAME_TYPE_LEAF, 22); \
-    noia_test_frame_config(h3, co, NOIA_FRAME_TYPE_LEAF, 23); \
-    noia_test_frame_config(h4, co, NOIA_FRAME_TYPE_LEAF, 24); \
-    noia_test_frame_config(h5, co, NOIA_FRAME_TYPE_LEAF, 25); \
-    noia_test_frame_config(s1, co, NOIA_FRAME_TYPE_LEAF, 31); \
-    noia_test_frame_config(s2, co, NOIA_FRAME_TYPE_LEAF, 32); \
-    noia_test_frame_config(s3, co, NOIA_FRAME_TYPE_LEAF, 33); \
-    noia_test_frame_config(s4, co, NOIA_FRAME_TYPE_LEAF, 34); \
-    noia_test_frame_config(s5, co, NOIA_FRAME_TYPE_LEAF, 35); \
+    noia_frame_configure(r,  co, NOIA_FRAME_TYPE_VERTICAL, INV, \
+                         (NoiaArea) {{  0,  0}, {180, 60}}, "r"); \
+    noia_frame_configure(v,  co, NOIA_FRAME_TYPE_VERTICAL, INV, \
+                         (NoiaArea) {{  0,  0}, { 60, 60}}, "v"); \
+    noia_frame_configure(h,  co, NOIA_FRAME_TYPE_HORIZONTAL, INV, \
+                         (NoiaArea) {{ 60,  0}, { 60, 60}}, "h"); \
+    noia_frame_configure(s,  co, NOIA_FRAME_TYPE_STACKED, INV, \
+                         (NoiaArea) {{120,  0}, { 60, 60}}, "s"); \
+    noia_frame_configure(v1, co, NOIA_FRAME_TYPE_LEAF, 11, \
+                         (NoiaArea) {{  0,  0}, { 60, 12}}, "v1"); \
+    noia_frame_configure(v2, co, NOIA_FRAME_TYPE_LEAF, 12, \
+                         (NoiaArea) {{  0, 12}, { 60, 12}}, "v2"); \
+    noia_frame_configure(v3, co, NOIA_FRAME_TYPE_LEAF, 13, \
+                         (NoiaArea) {{  0, 24}, { 60, 12}}, "v3"); \
+    noia_frame_configure(v4, co, NOIA_FRAME_TYPE_LEAF, 14, \
+                         (NoiaArea) {{  0, 36}, { 60, 12}}, "v4"); \
+    noia_frame_configure(v5, co, NOIA_FRAME_TYPE_LEAF, 15, \
+                         (NoiaArea) {{  0, 48}, { 60, 12}}, "v5"); \
+    noia_frame_configure(h1, co, NOIA_FRAME_TYPE_LEAF, 21, \
+                         (NoiaArea) {{ 60,  0}, { 12, 60}}, "h1"); \
+    noia_frame_configure(h2, co, NOIA_FRAME_TYPE_LEAF, 22, \
+                         (NoiaArea) {{ 72,  0}, { 12, 60}}, "h2"); \
+    noia_frame_configure(h3, co, NOIA_FRAME_TYPE_LEAF, 23, \
+                         (NoiaArea) {{ 84,  0}, { 12, 60}}, "h3"); \
+    noia_frame_configure(h4, co, NOIA_FRAME_TYPE_LEAF, 24, \
+                         (NoiaArea) {{ 96,  0}, { 12, 60}}, "h4"); \
+    noia_frame_configure(h5, co, NOIA_FRAME_TYPE_LEAF, 25, \
+                         (NoiaArea) {{108,  0}, { 12, 60}}, "h5"); \
+    noia_frame_configure(s1, co, NOIA_FRAME_TYPE_LEAF, 31, \
+                         (NoiaArea) {{120,  0}, { 60, 60}}, "s1"); \
+    noia_frame_configure(s2, co, NOIA_FRAME_TYPE_LEAF, 32, \
+                         (NoiaArea) {{120,  0}, { 60, 60}}, "s2"); \
+    noia_frame_configure(s3, co, NOIA_FRAME_TYPE_LEAF, 33, \
+                         (NoiaArea) {{120,  0}, { 60, 60}}, "s3"); \
+    noia_frame_configure(s4, co, NOIA_FRAME_TYPE_LEAF, 34, \
+                         (NoiaArea) {{120,  0}, { 60, 60}}, "s4"); \
+    noia_frame_configure(s5, co, NOIA_FRAME_TYPE_LEAF, 35, \
+                         (NoiaArea) {{120,  0}, { 60, 60}}, "s5"); \
     noia_frame_append (s,  s3); \
     noia_frame_prepend(s,  s2); \
     noia_frame_append (s,  s4); \
@@ -443,8 +470,8 @@ void noia_test_frame_config(NoiaFrame* frame,
         NOIA_ASSERT(c1->sid == c2->sid && \
                     c1->pos.x == c2->pos.x && \
                     c1->pos.y == c2->pos.y, \
-                    "Element should be {'%lu', '%u', '%u'} " \
-                    "(is {'%lu', '%u', %u})", \
+                    "Element should be {'%lu', {'%u', '%u'}} " \
+                    "(is {'%lu', {'%u', '%u'}})", \
                     c1->sid, c1->pos.x, c1->pos.y, \
                     c2->sid, c2->pos.x, c2->pos.y); }
 
@@ -461,8 +488,8 @@ void noia_test_frame_config(NoiaFrame* frame,
 
 #define NOIA_ASSERT_FRAME_AREA(FRAME, X, Y, W, H) { \
     NoiaArea area = noia_frame_get_area(FRAME); \
-    NOIA_ASSERT(((area.pos.x       == X) and (area.pos.y       == Y) \
-             and (area.size.width  == W) and (area.size.height == H)), \
+    NOIA_ASSERT(((area.pos.x      == X) and (area.pos.y       == Y) \
+             and (area.size.width == W) and (area.size.height == H)), \
                 "Frame size should be {x='%d', y='%d', w='%d', h='%d'} " \
                 "(is {x='%d', y='%d', w='%d', h='%d'})", \
                 X, Y, W, H, area.pos.x, area.pos.y, \
@@ -472,14 +499,32 @@ void noia_test_frame_config(NoiaFrame* frame,
     NoiaArea area = noia_frame_get_area(FRAME); \
     NoiaSurfaceId sid = noia_frame_get_sid(FRAME); \
     NoiaSize size = noia_surface_get_desired_size(co, sid); \
-    NOIA_ASSERT(((area.pos.x       == X) and (area.pos.y       == Y) \
-             and (area.size.width  == W) and (area.size.height == H) \
-             and (size.width       == W) and (size.height      == H)), \
+    NOIA_ASSERT(((area.pos.x      == X) and (area.pos.y       == Y) \
+             and (area.size.width == W) and (area.size.height == H) \
+             and (size.width      == W) and (size.height      == H)), \
                 "Frame size should be {x='%d', y='%d', w='%d', h='%d'} " \
                 "(is {x='%d', y='%d', w='%d', h='%d'}; " \
                 "surface size is {w='%d', h='%d'})", \
                 X, Y, W, H, area.pos.x, area.pos.y, \
                 area.size.width, area.size.height, size.width, size.height); }
+
+#define NOIA_ASSERT_FRAME_PARAMETERS(FRAME, SID, TYPE, X, Y, W, H, TITLE) { \
+    NoiaFrameParams* params = noia_frame_get_params(FRAME); \
+    NOIA_ASSERT((params->sid              == SID) \
+            and (params->type             == TYPE) \
+            and (params->area.pos.x       == X) \
+            and (params->area.pos.y       == Y) \
+            and (params->area.size.width  == W) \
+            and (params->area.size.height == H) \
+            and (noia_test_streq(params->title, TITLE)), \
+                "Frame should be {sid='%lu', type='0x%04x', x='%d', y='%d', " \
+                "width='%d', height='%d', title='%s'} (is {sid='%lu', " \
+                "type='0x%04x', x='%d', y='%d', width='%d', height='%d', " \
+                "title='%s'})", SID, TYPE, X, Y, W, H, TITLE, \
+                params->sid, params->type, \
+                params->area.pos.x, params->area.pos.y, \
+                params->area.size.width, params->area.size.height, \
+                params->title); }
 
 //------------------------------------------------------------------------------
 
@@ -565,22 +610,22 @@ NoiaTestResult should_translate_frame_to_array(void)
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
-    NoiaSurfaceContext a[] = {
-            {11, {0, 0}},
-            {12, {0, 0}},
-            {13, {0, 0}},
-            {14, {0, 0}},
-            {15, {0, 0}},
-            {21, {0, 0}},
-            {22, {0, 0}},
-            {23, {0, 0}},
-            {24, {0, 0}},
-            {25, {0, 0}},
-            {31, {0, 0}},
-            {32, {0, 0}},
-            {33, {0, 0}},
-            {34, {0, 0}},
-            {35, {0, 0}},
+;    NoiaSurfaceContext a[] = {
+            {11, {  0,  0}},
+            {12, {  0, 12}},
+            {13, {  0, 24}},
+            {14, {  0, 36}},
+            {15, {  0, 48}},
+            {21, { 60,  0}},
+            {22, { 72,  0}},
+            {23, { 84,  0}},
+            {24, { 96,  0}},
+            {25, {108,  0}},
+            {31, {120,  0}},
+            {32, {120,  0}},
+            {33, {120,  0}},
+            {34, {120,  0}},
+            {35, {120,  0}},
         };
 
     NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
@@ -606,25 +651,25 @@ NoiaTestResult should_translate_subframes_to_array(void)
     NOIA_MAKE_FRAMES_SIMPLE;
 
     NoiaSurfaceContext av[] = {
-            {11, {0, 0}},
-            {12, {0, 0}},
-            {13, {0, 0}},
-            {14, {0, 0}},
-            {15, {0, 0}},
+            {11, {0,  0}},
+            {12, {0, 12}},
+            {13, {0, 24}},
+            {14, {0, 36}},
+            {15, {0, 48}},
         };
     NoiaSurfaceContext ah[] = {
-            {21, {0, 0}},
-            {22, {0, 0}},
-            {23, {0, 0}},
-            {24, {0, 0}},
-            {25, {0, 0}},
+            {21, { 60, 0}},
+            {22, { 72, 0}},
+            {23, { 84, 0}},
+            {24, { 96, 0}},
+            {25, {108, 0}},
         };
     NoiaSurfaceContext as[] = {
-            {31, {0, 0}},
-            {32, {0, 0}},
-            {33, {0, 0}},
-            {34, {0, 0}},
-            {35, {0, 0}},
+            {31, {120, 0}},
+            {32, {120, 0}},
+            {33, {120, 0}},
+            {34, {120, 0}},
+            {35, {120, 0}},
         };
 
     NoiaPool* pv = noia_pool_create(NOIA_SIZEOF_ARRAY(ah),
@@ -953,6 +998,68 @@ NoiaTestResult should_pop_frame_recursively(void)
     NOIA_ASSERT_FRAME_ARRAY(a, pool);
 
     noia_pool_destroy(pool);
+    noia_coordinator_mock_free(co);
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Check if leaf frame is correctly ramified.
+NoiaTestResult should_ramify_leaf(void)
+{
+    NoiaCoordinator* co = noia_coordinator_mock_new();
+    NOIA_MAKE_FRAMES_SIMPLE;
+
+    NoiaFrameType type = NOIA_FRAME_TYPE_HORIZONTAL;
+    NoiaFrame* d = noia_frame_ramify(v3, type, co);
+
+    NOIA_ASSERT_FRAME_POINTER(v3->trunk, d);
+    NOIA_ASSERT_FRAME_POINTER(d->trunk, v);
+    NOIA_ASSERT_FRAME_POINTER(v->trunk, r);
+
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(d->twigs, 1u);
+
+    NOIA_ASSERT_FRAME_PARAMETERS(d, scInvalidSurfaceId, type,
+                                 0, 24, 60, 12, NULL);
+    NOIA_ASSERT_FRAME_PARAMETERS(v3, 13ul, NOIA_FRAME_TYPE_LEAF,
+                                 0, 24, 60, 12, "v3");
+
+    noia_frame_free(r);
+    noia_coordinator_mock_free(co);
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Check if non-leaf frame is correctly ramified.
+NoiaTestResult should_ramify_nonleaf(void)
+{
+    NoiaCoordinator* co = noia_coordinator_mock_new();
+    NOIA_MAKE_FRAMES_SIMPLE;
+
+    NoiaFrameType type = NOIA_FRAME_TYPE_HORIZONTAL;
+    NoiaFrame* d = noia_frame_ramify(v, type, co);
+
+    NOIA_ASSERT_FRAME_POINTER(v->trunk, d);
+    NOIA_ASSERT_FRAME_POINTER(d->trunk, r);
+
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(d->twigs, 1u);
+
+    NOIA_ASSERT_FRAME_PARAMETERS(d, scInvalidSurfaceId, type,
+                                 0, 0, 60, 60, NULL);
+    NOIA_ASSERT_FRAME_PARAMETERS(v, scInvalidSurfaceId,
+                                 NOIA_FRAME_TYPE_VERTICAL,
+                                 0, 0, 60, 60, "v");
+
+    noia_frame_free(r);
     noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
@@ -2358,6 +2465,145 @@ NoiaTestResult should_change_type_to_vertical(void)
 
 //------------------------------------------------------------------------------
 
+/// Check if new frame if correctly inserted before given frame.
+NoiaTestResult should_jumpin_before(void)
+{
+    NoiaCoordinator* co = noia_coordinator_mock_new();
+    NOIA_MAKE_FRAMES_SIMPLE;
+
+    NoiaFrame* f = noia_frame_new();
+    NoiaArea area = {{0,0},{0,0}};
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 66, area, "test");
+    noia_frame_jumpin(f, NOIA_FRAME_POSITION_BEFORE, v3, co);
+
+    NOIA_ASSERT_TRUNK(f,  v);
+    NOIA_ASSERT_TRUNK(v3, v);
+    NOIA_ASSERT_TRUNK(v2, v);
+    NOIA_ASSERT_TRUNK(v,  r);
+
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 6u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+
+    NoiaSurfaceContext a[] = {
+            {11, {0,  0}},
+            {12, {0, 10}},
+            {66, {0, 20}},
+            {13, {0, 30}},
+            {14, {0, 40}},
+            {15, {0, 50}},
+        };
+
+    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
+                                      sizeof(NoiaSurfaceContext));
+
+    noia_frame_to_array(v, pool);
+    noia_frame_free(r);
+
+    NOIA_ASSERT_FRAME_ARRAY(a, pool);
+
+    noia_pool_destroy(pool);
+    noia_coordinator_mock_free(co);
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Check if new frame if correctly inserted after given frame.
+NoiaTestResult should_jumpin_after(void)
+{
+    NoiaCoordinator* co = noia_coordinator_mock_new();
+    NOIA_MAKE_FRAMES_SIMPLE;
+
+    NoiaFrame* f = noia_frame_new();
+    NoiaArea area = {{0,0},{0,0}};
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 66, area, "test");
+    noia_frame_jumpin(f, NOIA_FRAME_POSITION_AFTER, v3, co);
+
+    NOIA_ASSERT_TRUNK(f,  v);
+    NOIA_ASSERT_TRUNK(v3, v);
+    NOIA_ASSERT_TRUNK(v4, v);
+    NOIA_ASSERT_TRUNK(v,  r);
+
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 6u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+
+    NoiaSurfaceContext a[] = {
+            {11, {0,  0}},
+            {12, {0, 10}},
+            {13, {0, 20}},
+            {66, {0, 30}},
+            {14, {0, 40}},
+            {15, {0, 50}},
+        };
+
+    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
+                                      sizeof(NoiaSurfaceContext));
+
+    noia_frame_to_array(v, pool);
+    noia_frame_free(r);
+
+    NOIA_ASSERT_FRAME_ARRAY(a, pool);
+
+    noia_pool_destroy(pool);
+    noia_coordinator_mock_free(co);
+    return NOIA_TEST_SUCCESS;
+}
+
+
+//------------------------------------------------------------------------------
+
+/// Check if new frame if correctly inserted on given frame.
+NoiaTestResult should_jumpin_on(void)
+{
+    NoiaCoordinator* co = noia_coordinator_mock_new();
+    NOIA_MAKE_FRAMES_SIMPLE;
+
+    NoiaFrame* f = noia_frame_new();
+    NoiaArea area = {{0,0},{0,0}};
+    noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 66, area, "test");
+    noia_frame_jumpin(f, NOIA_FRAME_POSITION_ON, v3, co);
+
+    NOIA_ASSERT_FRAME_POINTER(v3->trunk, f->trunk);
+    NOIA_ASSERT_TRUNK(v3->trunk, v);
+    NOIA_ASSERT_TRUNK(v,  r);
+
+    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
+    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+    NOIA_ASSERT_CHAIN_LEN(f->trunk->twigs, 2u);
+
+    NOIA_ASSERT_FRAME_PARAMETERS(v3, 13ul, NOIA_FRAME_TYPE_LEAF,
+                                 0, 24, 60, 12, "v3");
+
+    NoiaSurfaceContext a[] = {
+            {11, {0,  0}},
+            {12, {0, 12}},
+            {13, {0, 24}},
+            {66, {0, 24}},
+            {14, {0, 36}},
+            {15, {0, 48}},
+        };
+
+    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
+                                      sizeof(NoiaSurfaceContext));
+
+    noia_frame_to_array(v, pool);
+    noia_frame_free(r);
+
+    NOIA_ASSERT_FRAME_ARRAY(a, pool);
+
+    noia_pool_destroy(pool);
+    noia_coordinator_mock_free(co);
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 /// Empty test
 NoiaTestResult should(void)
 {
@@ -2391,6 +2637,8 @@ int main(int argc, char** argv)
             NOIA_TEST(should_resettle_frame_with_subframes),
             NOIA_TEST(should_swap_frames),
             NOIA_TEST(should_pop_frame_recursively),
+            NOIA_TEST(should_ramify_leaf),
+            NOIA_TEST(should_ramify_nonleaf),
 
             // finding
             NOIA_TEST(should_find_with_sid),
@@ -2443,6 +2691,11 @@ int main(int argc, char** argv)
             NOIA_TEST(should_relax_horizontal),
             NOIA_TEST(should_change_type_to_stacked),
             NOIA_TEST(should_change_type_to_vertical),
+
+            // jumping
+            NOIA_TEST(should_jumpin_before),
+            NOIA_TEST(should_jumpin_after),
+            NOIA_TEST(should_jumpin_on),
         };
 
     return noia_test_run("Frame", test, NOIA_NUM_TESTS(test));

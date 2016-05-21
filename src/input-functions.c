@@ -162,6 +162,15 @@ bool noia_put_swap(NoiaInputContext* context)
 
 //------------------------------------------------------------------------------
 
+bool noia_put_jump(NoiaInputContext* context)
+{
+    NOIA_ENSURE(context, return true);
+    noia_action(context->action, NOIA_ARGMAND_JUMP);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
 bool noia_put_move(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return true);
@@ -247,7 +256,7 @@ bool noia_anchorize(NoiaInputContext* context)
 
 //------------------------------------------------------------------------------
 
-bool noia_branchize(NoiaInputContext* context)
+bool noia_ramify(NoiaInputContext* context)
 {
     NOIA_ENSURE(context, return true);
     NoiaAction* action = context->action;

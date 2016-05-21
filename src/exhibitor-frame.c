@@ -248,20 +248,25 @@ NoiaResult noia_frame_remove_self(NoiaFrame* self, NoiaCoordinator* coordinator)
 
 NoiaResult noia_frame_jump(NoiaFrame* self,
                            NoiaFrame* target,
-                           NoiaCoordinator* coordinator)
+                           NoiaCoordinator* coordinator NOIA_UNUSED)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
     NOIA_ENSURE(self->trunk, return NOIA_RESULT_INCORRECT_ARGUMENT);
     NOIA_ENSURE(target, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
-    NoiaFrame* source = self->trunk;
-    NoiaResult result = noia_frame_resettle(self, target, coordinator);
-    if (result == NOIA_RESULT_SUCCESS) {
-        noia_frame_relax(source, coordinator);
-        noia_frame_relax(target, coordinator);
-    }
-
+    NoiaResult result = NOIA_RESULT_SUCCESS;
+    /// @todo: to be implemented.
     return result;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaResult noia_frame_settle(NoiaFrame* self,
+                             NoiaFrame* target,
+                             NoiaCoordinator* coordinator)
+{
+    noia_frame_relax(noia_frame_append(target, self), coordinator);
+    return NOIA_RESULT_SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -270,25 +275,50 @@ NoiaResult noia_frame_resettle(NoiaFrame* self,
                                NoiaFrame* target,
                                NoiaCoordinator* coordinator)
 {
-    NoiaResult result = NOIA_RESULT_SUCCESS;
-    NOIA_BLOCK {
-        result = noia_frame_remove_self(self, coordinator);
-        NOIA_ASSERT_RESULT(result);
-
+    NoiaFrame* source = self->trunk;
+    NoiaResult result = noia_frame_remove_self(self, coordinator);
+    if (result == NOIA_RESULT_SUCCESS) {
         noia_frame_prepend(target, self);
-        noia_frame_set_size(self, coordinator,
-                            noia_frame_get_params(target)->area.size);
+        noia_frame_relax(source, coordinator);
+        noia_frame_relax(target, coordinator);
     }
     return result;
 }
 
 //------------------------------------------------------------------------------
 
+NoiaFrame* noia_frame_ramify(NoiaFrame* self,
+                             NoiaFrameType type,
+                             NoiaCoordinator* coordinator)
+{
+    NoiaFrame* distancer = noia_frame_new();
+    noia_branch_insert_before(self, distancer);
+    noia_branch_remove(self->trunk, self);
+    noia_branch_prepend(distancer, self);
+    noia_frame_configure(distancer, coordinator, type, scInvalidSurfaceId,
+                         noia_frame_get_area(self), NULL);
+    return distancer;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaResult noia_frame_jumpin(NoiaFrame* self,
+                             NoiaFramePosition position,
                              NoiaFrame* target,
                              NoiaCoordinator* coordinator)
 {
-    noia_frame_relax(noia_frame_append(self, target), coordinator);
+    if (position == NOIA_FRAME_POSITION_BEFORE) {
+        noia_branch_insert_before(target, self);
+        noia_frame_relax(target->trunk, coordinator);
+    } else if (position == NOIA_FRAME_POSITION_AFTER) {
+        noia_branch_insert_after(target, self);
+        noia_frame_relax(target->trunk, coordinator);
+    } else if (position == NOIA_FRAME_POSITION_ON) {
+        NoiaFrame* distancer =
+                noia_frame_ramify(target, NOIA_FRAME_TYPE_STACKED, coordinator);
+        noia_frame_settle(self, distancer, coordinator);
+    }
+
     return NOIA_RESULT_SUCCESS;
 }
 

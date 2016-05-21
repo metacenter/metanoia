@@ -49,13 +49,14 @@ static const NoiaBinding scBindingsNormal[] = {
         // actions
         {KEY_F, NOIA_KEY_NONE,  noia_put_focus},
         {KEY_F, NOIA_KEY_SHIFT, noia_put_swap},
+        {KEY_J, NOIA_KEY_NONE,  noia_put_jump},
         {KEY_M, NOIA_KEY_NONE,  noia_put_move},
         {KEY_R, NOIA_KEY_NONE,  noia_put_resize},
         {KEY_A, NOIA_KEY_NONE,  noia_anchorize},
         {KEY_S, NOIA_KEY_NONE,  noia_stackedize},
         {KEY_V, NOIA_KEY_NONE,  noia_verticalize},
         {KEY_H, NOIA_KEY_NONE,  noia_horizontalize},
-        {KEY_B, NOIA_KEY_NONE,  noia_branchize},
+        {KEY_B, NOIA_KEY_NONE,  noia_ramify},
         {KEY_P, NOIA_KEY_NONE,  noia_select_trunk},
         // directions
         {KEY_RIGHT,    NOIA_KEY_NONE, noia_right},

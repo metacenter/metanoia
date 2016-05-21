@@ -82,7 +82,6 @@ void noia_frame_move(NoiaFrame* self,
                      int magnitude);
 
 /// Change directed type of frame.
-/// @todo Add unit tests.
 NoiaResult noia_frame_change_type(NoiaFrame* self,
                                   NoiaCoordinator* coordinator,
                                   NoiaFrameType type);
@@ -94,10 +93,22 @@ void noia_frame_pop_recursively(NoiaFrame* self, NoiaFrame* pop);
 NoiaResult noia_frame_remove_self(NoiaFrame* self,
                                   NoiaCoordinator* coordinator);
 
+/// Insert frame `self` in frame `target`.
+NoiaResult noia_frame_settle(NoiaFrame* self,
+                             NoiaFrame* target,
+                             NoiaCoordinator* coordinator);
+
 /// Remove frame `self` from its current trunk and prepend to frame `target`.
 NoiaResult noia_frame_resettle(NoiaFrame* self,
                                NoiaFrame* target,
                                NoiaCoordinator* coordinator);
+
+/// Ramify given frame by creating new subframe and transfer configuration.
+/// @return newly created frame.
+/// @todo Add unit tests.
+NoiaFrame* noia_frame_ramify(NoiaFrame* self,
+                             NoiaFrameType type,
+                             NoiaCoordinator* coordinator);
 
 /// Remove frame `self` from its current trunk and insert to frame `target`.
 /// @todo Add unit tests.
@@ -108,6 +119,7 @@ NoiaResult noia_frame_jump(NoiaFrame* self,
 /// Insert frame `self` in frame `target`.
 /// @todo Add unit tests.
 NoiaResult noia_frame_jumpin(NoiaFrame* self,
+                             NoiaFramePosition position,
                              NoiaFrame* target,
                              NoiaCoordinator* coordinator);
 
