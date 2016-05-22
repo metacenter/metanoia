@@ -65,6 +65,11 @@ void noia_surface_set_requested_size(NoiaCoordinator* coordinator,
                                      NoiaSurfaceId sid,
                                      NoiaSize size);
 
+void noia_surface_set_requested_position(NoiaCoordinator* coordinator,
+                                         NoiaSurfaceId sid,
+                                         NoiaSurfaceId reference_sid,
+                                         NoiaPosition pos);
+
 //------------------------------------------------------------------------------
 
 void noia_surface_set_as_cursor(NoiaSurfaceId sid);

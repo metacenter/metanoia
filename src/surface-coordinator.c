@@ -262,8 +262,10 @@ void noia_surface_set_offset(NoiaCoordinator* coordinator,
                              NoiaPosition offset)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+    noia_coordinator_lock_surfaces(coordinator);
     surface->offset.x = (offset.x > 0) ? offset.x : 0;
     surface->offset.y = (offset.y > 0) ? offset.y : 0;
+    noia_coordinator_unlock_surfaces(coordinator);
 }
 
 //------------------------------------------------------------------------------
@@ -273,7 +275,23 @@ void noia_surface_set_requested_size(NoiaCoordinator* coordinator,
                                      NoiaSize size)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+    noia_coordinator_lock_surfaces(coordinator);
     surface->requested_size = size;
+    noia_coordinator_unlock_surfaces(coordinator);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_surface_set_requested_position(NoiaCoordinator* coordinator,
+                                         NoiaSurfaceId sid,
+                                         NoiaSurfaceId reference_sid,
+                                         NoiaPosition pos)
+{
+    NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+    noia_coordinator_lock_surfaces(coordinator);
+    surface->parent_sid = reference_sid;
+    surface->requested_position = pos;
+    noia_coordinator_unlock_surfaces(coordinator);
 }
 
 //------------------------------------------------------------------------------

@@ -25,7 +25,7 @@ void noia_wayland_surface_unbind(struct wl_resource* resource)
 void noia_wayland_surface_frame_unbind(struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
-    LOG_WAYL3("Wayland: unbind surface frame (sid: %u)", sid);
+    LOG_WAYL3("Wayland > unbind surface frame (sid: %u)", sid);
     noia_wayland_cache_remove_surface_resource
                                            (sid, NOIA_RESOURCE_FRAME, resource);
 }
@@ -36,7 +36,9 @@ void noia_wayland_surface_frame_unbind(struct wl_resource* resource)
 void noia_wayland_surface_destroy(struct wl_client* client     NOIA_UNUSED,
                                   struct wl_resource* resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland: surface destroy");
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    LOG_WAYL2("Wayland > destroy surface (sid: %u)", sid);
+    wl_resource_destroy(resource);
 }
 
 //------------------------------------------------------------------------------

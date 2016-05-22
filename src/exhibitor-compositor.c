@@ -80,16 +80,24 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
 
     // Create and configure workspace
     NoiaFrame* workspace = noia_frame_new();
-    NoiaFrameType type = NOIA_FRAME_TYPE_WORKSPACE
-                       | noia_config()->default_frame_type;
-
-    noia_frame_configure(workspace, self->coordinator, type, 0,
+    NoiaFrame* selection = workspace;
+    noia_frame_configure(workspace, self->coordinator,
+                         NOIA_FRAME_TYPE_WORKSPACE, scInvalidSurfaceId,
                          noia_frame_get_area(display), title);
     noia_frame_settle(workspace, display, self->coordinator);
 
+    // Create subframe depending on configuration
+    if (noia_config()->default_frame_type != NOIA_FRAME_TYPE_NONE) {
+        selection = noia_frame_new();
+        noia_frame_configure(selection, self->coordinator,
+                             noia_config()->default_frame_type, 0,
+                             noia_frame_get_area(display), NULL);
+        noia_frame_settle(selection, workspace, self->coordinator);
+    }
+
     /// @todo Focusing new workspace should be configurable
-    noia_compositor_set_selection(self, workspace);
-    noia_frame_pop_recursively(self->root, workspace);
+    noia_compositor_set_selection(self, selection);
+    noia_frame_pop_recursively(self->root, selection);
     return workspace;
 }
 
@@ -205,21 +213,38 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     NoiaSurfaceData* surface = noia_surface_get(self->coordinator, sid);
     NOIA_ENSURE(surface, return false);
 
-    NoiaFrame* target = noia_frame_buildable(self->selection);
+    // Popus are glued to workspace, normal windows close to current selection
+    NoiaFrame* target = NULL;
+    if (surface->parent_sid == scInvalidSurfaceId) {
+        target = noia_frame_buildable(self->selection);
+    } else {
+        target = noia_frame_find_top(self->selection);
+    }
+
+    // Prepare new frame parameters
+    NoiaPosition reference_position = {0, 0};
+    NoiaFrame* reference_frame = noia_frame_find_with_sid(self->root,
+                                                          surface->parent_sid);
+    if (reference_frame) {
+        reference_position = noia_frame_get_area(reference_frame).pos;
+    }
+
+    NoiaArea area = {{reference_position.x + surface->requested_position.x,
+                      reference_position.y + surface->requested_position.y},
+                     surface->requested_size};
 
     NoiaFrameType type =
       (noia_frame_has_type(target, NOIA_FRAME_TYPE_DIRECTED)
       ? NOIA_FRAME_TYPE_NONE : NOIA_FRAME_TYPE_FLOATING) | NOIA_FRAME_TYPE_LEAF;
 
+    // Create and glue new frame
     NoiaFrame* frame = noia_frame_new();
-    NoiaArea area = {{0,0}, surface->requested_size};
     noia_frame_configure(frame, self->coordinator, type, sid, area, NULL);
-
     noia_frame_settle(frame, target, self->coordinator);
     /// @todo This should be configurable
-    noia_compositor_set_selection(self, frame);
-
-    noia_compositor_log_frame(self);
+    if (surface->parent_sid == scInvalidSurfaceId) {
+        noia_compositor_set_selection(self, frame);
+    }
 
     return true;
 }

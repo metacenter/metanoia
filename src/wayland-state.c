@@ -177,6 +177,16 @@ void noia_wayland_state_surface_set_requested_size(NoiaItemId sid,
 
 //------------------------------------------------------------------------------
 
+void noia_wayland_state_surface_set_requested_position(NoiaItemId sid,
+                                                       NoiaItemId reference_sid,
+                                                       NoiaPosition pos)
+{
+    noia_surface_set_requested_position(sState.coordinator, sid,
+                                        reference_sid, pos);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_wayland_state_subscribe_frame(NoiaSurfaceId sid,
                                         struct wl_resource* rc)
 {

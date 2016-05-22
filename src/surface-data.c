@@ -14,6 +14,7 @@ void noia_surface_data_clean(NoiaSurfaceData* self)
 {
     NOIA_ENSURE(self, return);
     memset(self, 0, sizeof(NoiaSurfaceData));
+    self->parent_sid = scInvalidSurfaceId;
     self->buffer.image = EGL_NO_IMAGE_KHR;
     self->pending_buffer.image = EGL_NO_IMAGE_KHR;
 }

@@ -48,6 +48,12 @@ typedef struct {
     /// Size requested by client.
     NoiaSize requested_size;
 
+    /// Position requested by client.
+    NoiaPosition requested_position;
+
+    /// Id of parent surface
+    NoiaSurfaceId parent_sid;
+
     /// Data required for draw.
     NoiaDrawBuffer buffer;
 

@@ -6,6 +6,7 @@
 #include "wayland-protocol-xdg-surface.h"
 #include "wayland-protocol-xdg-popup.h"
 #include "wayland-cache.h"
+#include "wayland-state.h"
 
 #include "utils-log.h"
 
@@ -24,6 +25,7 @@ void noia_wayland_xdg_shell_unbind(struct wl_resource* resource)
 void noia_wayland_xdg_destroy(struct wl_client* client NOIA_UNUSED,
                               struct wl_resource* resource)
 {
+    LOG_NYIMP("Wayland > destroy XDG shell");
     wl_resource_destroy(resource);
 }
 
@@ -34,7 +36,7 @@ void noia_wayland_xdg_use_unstable_version
                                        struct wl_resource* resource NOIA_UNUSED,
                                        int32_t version)
 {
-    LOG_NYIMP("Wayland: use unstable version (version: %d)", version);
+    LOG_NYIMP("Wayland > use unstable version (version: %d)", version);
 }
 
 //------------------------------------------------------------------------------
@@ -74,6 +76,9 @@ void noia_wayland_xdg_get_xdg_popup
     LOG_WAYL2("Wayland > get XDG popup (id: %d, serial: %d, "
               "x: %d, y: %d, popup sid: %u, parent sid: %u)",
               id, serial, x, y, popup_sid, parent_sid);
+
+    noia_wayland_state_surface_set_requested_position
+                                  (popup_sid, parent_sid, (NoiaPosition) {x,y});
 
     uint32_t version = wl_resource_get_version(resource);
     noia_wayland_xdg_popup_bind(client, (void*) popup_sid, version, id);
