@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import build
-import buildfile
 import sys
 
 ################################################################################
@@ -27,9 +26,15 @@ def generate_version_file():
                            '#endif\n'.format(version=version)
                 vf.write(contents)
     else:
-        prinf("Failed running git command!");
+        print("Failed running git command!");
 
     return result.returncode
+
+################################################################################
+
+def generate_build_system_deps():
+    for t in buildfile.generated_files:
+        t.generate()
 
 ################################################################################
 
@@ -72,14 +77,44 @@ def run_cppcheck():
 if __name__ == '__main__':
     result = 0
     command = sys.argv[1] if len(sys.argv) > 1 else ''
+    def print_command():
+        print(' >>> {command}'.format(command=command))
+
     if command == 'version':
         result = generate_version_file()
+
     elif command == 'memcheck':
+        print_command()
         result = run_memcheck()
+
     elif command == 'cppcheck':
+        print_command()
         result = run_cppcheck()
+
+    elif command == 'generate':
+        print_command()
+        import buildfile
+        generate_build_system_deps()
+
+    elif command == 'ninja':
+        print_command()
+        import buildfile
+        result = build.NinjaWriter().write(buildfile.p)
+
+    elif command == 'make':
+        print_command()
+        import buildfile
+        result = build.MakeWriter().write(buildfile.p)
+
+    elif command == 'install':
+        print_command()
+        import buildfile
+        ins = build.Installer(buildfile.c)
+        ins(buildfile.metanoia, build.InstallConfigExec())
+
     else:
-        result = buildfile.run(command)
+        print('Unknown command "{command}"'.format(command=command))
+        result = 1
 
     exit(result)
 

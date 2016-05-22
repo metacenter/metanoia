@@ -510,6 +510,10 @@ class GeneratedTarget(Target):
             deps.sort()
         return deps
 
+    def generate(self):
+        print("  GEN  {output}".format(output=self.get_output()))
+        return Run.command(self.get_command()).returncode
+
     def _add_to_project(self, project):
         project._add_generated(self);
 

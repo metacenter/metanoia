@@ -9,6 +9,7 @@ from build import CheckTarget      as Chk
 from build import PhonyTarget      as Pny
 
 #-------------------------------------------------------------------------------
+# CONFIGURATION
 
 c = build.ConfigClangDebug()
 c.add_cflags(['-Wpedantic', '-std=gnu11'])
@@ -305,32 +306,11 @@ p.add(Chk(output='check-frame',
                   target_exhibitor_frame, target_exhibitor_frame_internal]))
 
 #-------------------------------------------------------------------------------
+# MAIN TARGETS
 
 p.add(target_version_info, include_in_default=True)
 p.add(metanoia,            include_in_default=True)
 p.add(metanoiactl_gtk,     include_in_default=True)
-
-#-------------------------------------------------------------------------------
-
-def run(command):
-    print(' >>> {command}'.format(command=command))
-
-    if command == 'build.ninja' or command == 'ninja':
-        result = build.NinjaWriter().write(p)
-
-    elif command == 'Makefile' or command == 'make':
-        result = build.MakeWriter().write(p)
-
-    elif command == 'install':
-        ins = build.Installer(c)
-        ins(metanoia, build.InstallConfigExec())
-        result = 0
-
-    else:
-        print('Unknown command "{command}"'.format(command=command))
-        result = 1
-
-    return result
 
 #-------------------------------------------------------------------------------
 
