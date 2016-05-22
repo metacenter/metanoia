@@ -255,7 +255,7 @@ NoiaResult noia_frame_jump(NoiaFrame* self,
     NOIA_ENSURE(target, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
     NoiaResult result = NOIA_RESULT_SUCCESS;
-    /// @todo: to be implemented.
+    /// @todo To be implemented.
     return result;
 }
 

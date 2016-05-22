@@ -9,7 +9,7 @@
 
 //------------------------------------------------------------------------------
 
-/// @todo: Handle destruction of subsurface resource.
+/// @todo Handle destruction of subsurface resource.
 void noia_wayland_subsurface_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind subsurface");
@@ -20,7 +20,7 @@ void noia_wayland_subsurface_unbind(struct wl_resource* resource NOIA_UNUSED)
 void noia_wayland_subsurface_destroy(struct wl_client* client     NOIA_UNUSED,
                                      struct wl_resource* resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland: subsurface destroy");
+    LOG_NYIMP("Wayland > subsurface destroy");
 }
 
 //------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ void noia_wayland_subsurface_set_position
                                        struct wl_resource* resource NOIA_UNUSED,
                                        int32_t x, int32_t y)
 {
-    LOG_NYIMP("Wayland: subsurface set position (x: %d, y: %d)", x, y);
+    LOG_NYIMP("Wayland > subsurface set position (x: %d, y: %d)", x, y);
 }
 
 //------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ void noia_wayland_subsurface_place_above
                                struct wl_resource* resource         NOIA_UNUSED,
                                struct wl_resource* sibling_resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland: subsurface place above");
+    LOG_NYIMP("Wayland > subsurface place above");
 }
 
 //------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ void noia_wayland_subsurface_place_below
                                struct wl_resource* resource         NOIA_UNUSED,
                                struct wl_resource* sibling_resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland: subsurface place below");
+    LOG_NYIMP("Wayland > subsurface place below");
 }
 
 //------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ void noia_wayland_subsurface_place_below
 void noia_wayland_subsurface_set_sync(struct wl_client* client     NOIA_UNUSED,
                                       struct wl_resource* resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland: subsurface set sync");
+    LOG_NYIMP("Wayland > subsurface set sync");
 }
 
 //------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ void noia_wayland_subsurface_set_sync(struct wl_client* client     NOIA_UNUSED,
 void noia_wayland_subsurface_set_desync(struct wl_client* client     NOIA_UNUSED,
                                         struct wl_resource* resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland: subsurface set desync");
+    LOG_NYIMP("Wayland > subsurface set desync");
 }
 
 //------------------------------------------------------------------------------

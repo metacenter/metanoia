@@ -38,7 +38,12 @@ NoiaResult noia_output_initialize(NoiaOutput* self,
 
 NoiaResult noia_output_initialize_rendering(NoiaOutput* self)
 {
-    return self->renderer->initialize(self->renderer);
+    NoiaResult result = NOIA_RESULT_ERROR;
+    self->renderer = self->initialize(self, self->area.size);
+    if (self->renderer) {
+        result = self->renderer->initialize(self->renderer);
+    }
+    return result;
 }
 
 //------------------------------------------------------------------------------

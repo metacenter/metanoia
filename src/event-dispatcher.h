@@ -13,7 +13,7 @@ typedef struct NoiaEventDispatcherPriv NoiaEventDispatcher;
 typedef void (*NoiaEventHandler) (NoiaEventData*, struct epoll_event*);
 typedef void (*NoiaEventExitHandler) (NoiaEventData*);
 
-/// @todo Mode NoiaEventData to separate file and change name.
+/// @todo Move NoiaEventData to separate file and change name.
 struct NoiaEventData {
     int fd;
     NoiaEventHandler handler;

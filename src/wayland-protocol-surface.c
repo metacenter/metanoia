@@ -74,7 +74,7 @@ void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: damage surface.
+/// @todo Wayland protocol: damage surface.
 void noia_wayland_surface_damage(struct wl_client* client NOIA_UNUSED,
                                  struct wl_resource* resource,
                                  int32_t x, int32_t y,
@@ -109,7 +109,7 @@ void noia_wayland_surface_frame(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-/// #todo: Wayland protocol: set surface opaque region.
+/// @todo Wayland protocol: set surface opaque region.
 void noia_wayland_surface_set_opaque_region
                                           (struct wl_client* client NOIA_UNUSED,
                                            struct wl_resource* resource,
@@ -120,7 +120,7 @@ void noia_wayland_surface_set_opaque_region
     if (region_resource) {
         rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
     } else {
-        /// @todo Clear opaque region.
+        /// @todo Clean opaque region.
     }
 
     LOG_NYIMP("Wayland > set opaque region (sid: %d, rid: %d)", sid, rid);
@@ -138,7 +138,7 @@ void noia_wayland_surface_set_input_region(struct wl_client* client NOIA_UNUSED,
     if (region_resource) {
         rid = (NoiaItemId) wl_resource_get_user_data(region_resource);
     } else {
-        /// @todo Clear input region.
+        /// @todo Clean input region.
     }
 
     LOG_WAYL2("Wayland > set input region (sid: %d, rid: %d)", sid, rid);
@@ -166,7 +166,7 @@ void noia_wayland_surface_commit(struct wl_client* client NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: set surface buffer transform.
+/// @todo Wayland protocol: set surface buffer transform.
 void noia_wayland_surface_set_buffer_transform
                                       (struct wl_client* client     NOIA_UNUSED,
                                        struct wl_resource* resource NOIA_UNUSED,
@@ -177,7 +177,7 @@ void noia_wayland_surface_set_buffer_transform
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: set surface buffer scale.
+/// @todo Wayland protocol: set surface buffer scale.
 void noia_wayland_surface_set_buffer_scale
                                       (struct wl_client* client     NOIA_UNUSED,
                                        struct wl_resource* resource NOIA_UNUSED,
@@ -188,7 +188,7 @@ void noia_wayland_surface_set_buffer_scale
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: surface buffer damage.
+/// @todo Wayland protocol: surface buffer damage.
 void noia_wayland_surface_damage_buffer
                                       (struct wl_client* client     NOIA_UNUSED,
                                        struct wl_resource* resource NOIA_UNUSED,

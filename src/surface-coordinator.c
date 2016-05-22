@@ -187,7 +187,6 @@ void noia_surface_commit(NoiaCoordinator* coordinator, NoiaSurfaceId sid)
 
     // If surface was just created - inform others
     if (is_first_time_commited) {
-        /// @todo Size should not be set here.
         if ((surface->requested_size.width  == 0)
         or  (surface->requested_size.height == 0)) {
             surface->requested_size.width  = surface->buffer.width;

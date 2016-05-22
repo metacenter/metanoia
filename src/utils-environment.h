@@ -7,9 +7,6 @@
 
 #include "global-constants.h"
 
-/// @file
-/// @todo Use NoiaResult instead of int.
-
 #define __USE_GNU
 #define _GNU_SOURCE
 #include <pthread.h>

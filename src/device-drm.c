@@ -589,7 +589,7 @@ int noia_drm_update_devices(NoiaList* outputs)
 
     NOIA_BLOCK {
         // Find and open DRM device
-        /// @todo: try all devices, there may be more than one connected
+        /// @todo Try all devices, there may be more than one connected.
         unsigned int i;
         for (i = 0; scModuleName[i]; ++i) {
             fd = drmOpen(scModuleName[i], NULL);

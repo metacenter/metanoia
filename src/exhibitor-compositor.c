@@ -473,7 +473,7 @@ void noia_compositor_configure(NoiaCompositor* self,
 
     // Change frame type
     if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
-        /// @todo: Create new frame at trunk and resettle selection.
+        /// @todo Create new frame at trunk and resettle selection.
         noia_frame_change_type(frame->trunk, self->coordinator, type);
     } else {
         noia_frame_change_type(frame, self->coordinator, type);

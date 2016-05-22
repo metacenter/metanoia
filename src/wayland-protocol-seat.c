@@ -13,6 +13,7 @@
 
 //------------------------------------------------------------------------------
 
+/// @todo Handle destruction of seat.
 void noia_wayland_seat_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind seat");
@@ -20,6 +21,7 @@ void noia_wayland_seat_unbind(struct wl_resource* resource NOIA_UNUSED)
 
 //------------------------------------------------------------------------------
 
+/// Wayland protocol: seat get pointer.
 void noia_wayland_seat_get_pointer(struct wl_client* client,
                                    struct wl_resource* resource,
                                    uint32_t id)
@@ -30,6 +32,7 @@ void noia_wayland_seat_get_pointer(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
+/// Wayland protocol: seat get keyboard.
 void noia_wayland_seat_get_keyboard(struct wl_client* client,
                                     struct wl_resource* resource,
                                     uint32_t id)
@@ -40,7 +43,7 @@ void noia_wayland_seat_get_keyboard(struct wl_client* client,
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: seat get touch.
+/// @todo Wayland protocol: seat get touch.
 void noia_wayland_seat_get_touch(struct wl_client* client     NOIA_UNUSED,
                                  struct wl_resource* resource NOIA_UNUSED,
                                  uint32_t id)
@@ -50,7 +53,7 @@ void noia_wayland_seat_get_touch(struct wl_client* client     NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: seat release.
+/// @todo Wayland protocol: seat release.
 void noia_wayland_seat_release(struct wl_client* client     NOIA_UNUSED,
                                struct wl_resource* resource NOIA_UNUSED)
 {

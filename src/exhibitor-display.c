@@ -76,14 +76,10 @@ NoiaResult noia_display_setup(NoiaDisplay* self)
     LOG_INFO1("Threads: starting display loop '%s'", name);
     LOG_INFO1("Initializing output '%s'", self->output->unique_name);
 
-    NOIA_BLOCK {
-        // Initialize output
-        /// @todo Squash this to one function call.
-        self->output->renderer =
-                self->output->initialize(self->output, self->output->area.size);
-        result = noia_output_initialize_rendering(self->output);
-        NOIA_ASSERT_RESULT(result);
+    // Initialize output
+    result = noia_output_initialize_rendering(self->output);
 
+    if (result == NOIA_RESULT_SUCCESS) {
         // Read in background image
         NoiaBuffer buff = noia_image_read(noia_config()->background_image_path);
         if (noia_buffer_is_valid(&buff)) {
@@ -95,8 +91,6 @@ NoiaResult noia_display_setup(NoiaDisplay* self)
             noia_surface_commit(self->coordinator, self->background_sid);
             noia_buffer_release(&buff);
         }
-
-        result = NOIA_RESULT_SUCCESS;
     }
 
     return result;

@@ -9,15 +9,15 @@
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: data source unbind.
+/// @todo Handle destruction of data source.
 void noia_wayland_data_source_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
-    LOG_NYIMP("Wayland > data source destroy");
+    LOG_NYIMP("Wayland: data source destroy");
 }
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: data source offer.
+/// @todo Wayland protocol: data source offer.
 void noia_wayland_data_source_offer(struct wl_client* client     NOIA_UNUSED,
                                     struct wl_resource* resource NOIA_UNUSED,
                                     const char* type)
@@ -27,17 +27,17 @@ void noia_wayland_data_source_offer(struct wl_client* client     NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: data source destroy.
+/// Wayland protocol: data source destroy.
 void noia_wayland_data_source_destroy(struct wl_client* client NOIA_UNUSED,
                                       struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland > data source destroy");
+    LOG_WAYL2("Wayland > data source destroy");
     wl_resource_destroy(resource);
 }
 
 //------------------------------------------------------------------------------
 
-/// @todo: Wayland protocol: data source set actions.
+/// @todo Wayland protocol: data source set actions.
 void noia_wayland_data_source_set_actions
                                       (struct wl_client* client     NOIA_UNUSED,
                                        struct wl_resource* resource NOIA_UNUSED,

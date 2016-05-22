@@ -5,9 +5,6 @@
 #ifndef NOIA_TESTS_SUIT_H
 #define NOIA_TESTS_SUIT_H
 
-/// @file
-/// @todo Add NOIA prefixes.
-
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>

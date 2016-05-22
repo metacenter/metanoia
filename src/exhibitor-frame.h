@@ -105,7 +105,6 @@ NoiaResult noia_frame_resettle(NoiaFrame* self,
 
 /// Ramify given frame by creating new subframe and transfer configuration.
 /// @return newly created frame.
-/// @todo Add unit tests.
 NoiaFrame* noia_frame_ramify(NoiaFrame* self,
                              NoiaFrameType type,
                              NoiaCoordinator* coordinator);
@@ -117,7 +116,6 @@ NoiaResult noia_frame_jump(NoiaFrame* self,
                            NoiaCoordinator* coordinator);
 
 /// Insert frame `self` in frame `target`.
-/// @todo Add unit tests.
 NoiaResult noia_frame_jumpin(NoiaFrame* self,
                              NoiaFramePosition position,
                              NoiaFrame* target,
