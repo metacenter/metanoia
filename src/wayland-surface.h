@@ -46,8 +46,5 @@ void noia_wayland_surface_remove_resource
                                    NoiaWaylandSurfaceResourceType resource_type,
                                    struct wl_resource* resource);
 
-/// Remove all resources.
-void noia_wayland_surface_remove_frame_resources(NoiaWaylandSurface* self);
-
 #endif // NOIA_WAYLAND_SURFACE_H
 

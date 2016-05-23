@@ -213,6 +213,8 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     NoiaSurfaceData* surface = noia_surface_get(self->coordinator, sid);
     NOIA_ENSURE(surface, return false);
 
+    LOG_INFO2("Manage surface %u", sid);
+
     // Popus are glued to workspace, normal windows close to current selection
     NoiaFrame* target = NULL;
     if (surface->parent_sid == scInvalidSurfaceId) {
@@ -254,6 +256,8 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 void noia_compositor_unmanage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 {
     NOIA_ENSURE(self, return);
+
+    LOG_INFO2("Unmanage surface %u", sid);
 
     NoiaFrame* frame = noia_frame_find_with_sid(self->root, sid);
     if (frame == self->selection) {

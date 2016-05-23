@@ -486,17 +486,18 @@ void noia_wayland_state_screen_refresh(NoiaSurfaceId sid)
                noia_wayland_surface_get_resource(surface, NOIA_RESOURCE_BUFFER);
         if (buffer_rc) {
             wl_resource_queue_event(buffer_rc, WL_BUFFER_RELEASE);
+            noia_wayland_surface_add_resource
+                                          (surface, NOIA_RESOURCE_BUFFER, NULL);
+        }
+
+        // Notify frame
+        FOR_EACH(frcs, link) {
+            struct wl_resource* frame_rc = (struct wl_resource*) link->data;
+            LOG_WAYL3("Wayland < frame (sid: %u)", sid);
+            wl_callback_send_done(frame_rc,
+                                 (uint32_t) noia_time_get_monotonic_milliseconds());
         }
     }
-
-    // Notify frame
-    FOR_EACH(frcs, link) {
-        struct wl_resource* frame_rc = (struct wl_resource*) link->data;
-        LOG_WAYL3("Wayland < frame (sid: %u)", sid);
-        wl_callback_send_done(frame_rc,
-                             (uint32_t) noia_time_get_monotonic_milliseconds());
-    }
-    noia_wayland_surface_remove_frame_resources(surface);
 
     pthread_mutex_unlock(&sStateMutex);
 }

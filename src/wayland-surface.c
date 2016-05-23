@@ -35,7 +35,6 @@ void noia_wayland_surface_free(NoiaWaylandSurface* self)
     if (len > 2) {
         LOG_WARN1("Wayland: %d surface frame resources not released!", len);
     }
-    noia_wayland_surface_remove_frame_resources(self);
     noia_list_free(self->frame_resources);
 
     memset(self, 0, sizeof(NoiaWaylandSurface));
@@ -99,16 +98,6 @@ void noia_wayland_surface_remove_resource
         noia_list_remove(self->frame_resources, resource,
                      (NoiaCompareFunc) noia_wayland_surfsace_compare_resources);
         self->resources[resource_type] = noia_list_first(self->frame_resources);
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void noia_wayland_surface_remove_frame_resources(NoiaWaylandSurface* self)
-{
-    NOIA_ENSURE(self, return);
-    while (noia_list_len(self->frame_resources) > 0) {
-        wl_resource_destroy(noia_list_first(self->frame_resources));
     }
 }
 
