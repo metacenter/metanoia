@@ -3,8 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-region.h"
-#include "wayland-cache.h"
+#include "wayland-facade.h"
+
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
@@ -42,8 +44,7 @@ void noia_wayland_region_add(struct wl_client* client NOIA_UNUSED,
     LOG_WAYL2("Wayland > region add (rid: %d, x: %d, y: %d, w: %d, h: %d)",
               rid, x, y, width, height);
 
-    NoiaWaylandRegion* region = noia_wayland_cache_find_region(rid);
-    noia_wayland_region_inflate(region, x, y, width, height);
+    noia_wayland_facade_inflate_region(rid, x, y, width, height);
 }
 
 //------------------------------------------------------------------------------

@@ -3,8 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-xdg-surface.h"
-#include "wayland-cache.h"
-#include "wayland-state.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
 #include "global-macros.h"
@@ -17,7 +16,7 @@ void noia_wayland_xdg_surface_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_WAYL2("Wayland: unbind XDG shell surface (sid: %u)", sid);
-    noia_wayland_cache_remove_surface_resource
+    noia_wayland_facade_remove_surface_resource
                                (sid, NOIA_RESOURCE_XDG_SHELL_SURFACE, resource);
 }
 
@@ -133,7 +132,7 @@ void noia_wayland_xdg_surface_set_window_geometry
                sid, x, y, width, height);
 
     NoiaSize size = {width, height};
-    noia_wayland_state_surface_set_requested_size(sid, size);
+    noia_wayland_facade_set_requested_size(sid, size);
 }
 
 //------------------------------------------------------------------------------
@@ -224,7 +223,7 @@ void noia_wayland_xdg_surface_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scXdgSurfaceImplementation, data,
                                    noia_wayland_xdg_surface_unbind);
 
-    noia_wayland_state_add_shell_surface
+    noia_wayland_facade_add_shell_surface
                            (sid, NOIA_RESOURCE_XDG_SHELL_SURFACE, rc);
 }
 

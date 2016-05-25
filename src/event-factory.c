@@ -9,7 +9,7 @@
 #include "backend-offscreen.h"
 #include "output-collector.h"
 #include "exhibitor-module.h"
-#include "wayland.h"
+#include "wayland-module.h"
 #include "utils-environment.h"
 
 #include <malloc.h>

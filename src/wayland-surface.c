@@ -10,8 +10,16 @@
 
 //------------------------------------------------------------------------------
 
-int noia_wayland_surfsace_compare_resources(struct wl_resource* rc1,
-                                            struct wl_resource* rc2)
+struct NoiaWaylandSurfaceStruct {
+    NoiaItem base;
+    NoiaList* frame_resources;
+    struct wl_resource* resources[NOIA_NUM_SURFACE_RESOURCE_TYPES];
+};
+
+//------------------------------------------------------------------------------
+
+int noia_wayland_surface_compare_resources(struct wl_resource* rc1,
+                                           struct wl_resource* rc2)
 {
     return rc1 != rc2;
 }
@@ -96,7 +104,7 @@ void noia_wayland_surface_remove_resource
 
     if (resource_type == NOIA_RESOURCE_FRAME) {
         noia_list_remove(self->frame_resources, resource,
-                     (NoiaCompareFunc) noia_wayland_surfsace_compare_resources);
+                      (NoiaCompareFunc) noia_wayland_surface_compare_resources);
         self->resources[resource_type] = noia_list_first(self->frame_resources);
     }
 }

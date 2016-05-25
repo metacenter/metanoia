@@ -5,10 +5,10 @@
 #include "wayland-protocol-compositor.h"
 #include "wayland-protocol-surface.h"
 #include "wayland-protocol-region.h"
-#include "wayland-cache.h"
-#include "wayland-state.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@
 void noia_wayland_compositor_unbind(struct wl_resource* resource)
 {
     LOG_WAYL2("Wayland: unbind compositor");
-    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
+    noia_wayland_facade_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ void noia_wayland_create_surface(struct wl_client* client,
                                  struct wl_resource* resource,
                                  uint32_t id)
 {
-    NoiaSurfaceId new_sid = noia_wayland_state_create_surface();
+    NoiaSurfaceId new_sid = noia_wayland_facade_create_surface();
     int32_t version = wl_resource_get_version(resource);
     noia_wayland_surface_bind(client, (void*) new_sid, version, id);
 }
@@ -39,7 +39,7 @@ void noia_wayland_create_region(struct wl_client* client,
                                 struct wl_resource* resource,
                                 uint32_t id)
 {
-    NoiaItemId new_rid = noia_wayland_cache_create_region();
+    NoiaItemId new_rid = noia_wayland_facade_create_region();
     int32_t version = wl_resource_get_version(resource);
     noia_wayland_region_bind(client, (void*) new_rid, version, id);
 }
@@ -68,7 +68,7 @@ void noia_wayland_compositor_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scCompositorImplementation,
                                    data, noia_wayland_compositor_unbind);
 
-    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
+    noia_wayland_facade_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 }
 
 //------------------------------------------------------------------------------

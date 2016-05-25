@@ -3,8 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-keyboard.h"
-#include "wayland-state.h"
-#include "wayland-cache.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
 #include "global-macros.h"
@@ -15,7 +14,8 @@
 void noia_wayland_keyboard_unbind(struct wl_resource* resource)
 {
     LOG_WAYL3("Wayland: unbind keyboard");
-    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_KEYBOARD,resource);
+    noia_wayland_facade_remove_general_resource(NOIA_RESOURCE_KEYBOARD,
+                                                resource);
 }
 
 //------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ void noia_wayland_keyboard_bind(struct wl_client* client,
                                    data, noia_wayland_keyboard_unbind);
 
     // Store resource
-    noia_wayland_state_add_keyboard_resource(rc);
+    noia_wayland_facade_add_keyboard_resource(rc);
 
     // Send keymap to client
     NoiaKeymap* keymap = noia_gears()->keymap;

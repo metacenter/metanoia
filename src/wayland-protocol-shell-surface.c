@@ -3,10 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-shell-surface.h"
-#include "wayland-cache.h"
-#include "wayland-state.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ void noia_wayland_shell_surface_unbind(struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_WAYL2("Wayland: unbind shell surface (sid: %u)", sid);
-    noia_wayland_cache_remove_surface_resource
+    noia_wayland_facade_remove_surface_resource
                                    (sid, NOIA_RESOURCE_SHELL_SURFACE, resource);
 }
 
@@ -177,7 +177,7 @@ void noia_wayland_shell_surface_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scShellSurfaceImplementation, data,
                                    noia_wayland_shell_surface_unbind);
 
-    noia_wayland_state_add_shell_surface(sid, NOIA_RESOURCE_SHELL_SURFACE, rc);
+    noia_wayland_facade_add_shell_surface(sid, NOIA_RESOURCE_SHELL_SURFACE, rc);
 }
 
 //------------------------------------------------------------------------------

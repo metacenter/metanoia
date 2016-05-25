@@ -4,9 +4,10 @@
 
 #include "wayland-protocol-subcompositor.h"
 #include "wayland-protocol-subsurface.h"
-#include "wayland-cache.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
@@ -14,7 +15,7 @@
 void noia_wayland_subcompositor_unbind(struct wl_resource* resource)
 {
     LOG_WAYL3("Wayland: unbind subcompositor");
-    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
+    noia_wayland_facade_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -66,7 +67,7 @@ void noia_wayland_subcompositor_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scSubcompositorImplementation,
                                    data, noia_wayland_subcompositor_unbind);
 
-    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
+    noia_wayland_facade_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 }
 
 //------------------------------------------------------------------------------

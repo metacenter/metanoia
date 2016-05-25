@@ -3,11 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-surface.h"
-#include "wayland-cache.h"
-#include "wayland-state.h"
+#include "wayland-facade.h"
 
-#include "surface-coordinator.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 
@@ -16,7 +15,7 @@ void noia_wayland_surface_unbind(struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_WAYL2("Wayland: unbind surface (sid: %u)", sid);
-    noia_wayland_state_remove_surface(sid, resource);
+    noia_wayland_facade_remove_surface(sid, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -26,7 +25,7 @@ void noia_wayland_surface_frame_unbind(struct wl_resource* resource)
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
     LOG_WAYL3("Wayland > unbind surface frame (sid: %u)", sid);
-    noia_wayland_cache_remove_surface_resource
+    noia_wayland_facade_remove_surface_resource
                                            (sid, NOIA_RESOURCE_FRAME, resource);
 }
 
@@ -68,8 +67,8 @@ void noia_wayland_surface_attach(struct wl_client* client NOIA_UNUSED,
         LOG_WARN3("Wayland: wrong shared memory buffer!");
     }
 
-    noia_wayland_state_surface_attach(sid, resource, buffer_resource,
-                                      width, height, stride, data);
+    noia_wayland_facade_surface_attach(sid, resource, buffer_resource,
+                                       width, height, stride, data);
 }
 
 //------------------------------------------------------------------------------
@@ -104,7 +103,7 @@ void noia_wayland_surface_frame(struct wl_client* client,
     wl_resource_set_implementation(rc, NULL, (void*) sid,
                                    noia_wayland_surface_frame_unbind);
 
-    noia_wayland_state_subscribe_frame(sid, rc);
+    noia_wayland_facade_add_surface_resource(sid, NOIA_RESOURCE_FRAME, rc);
 }
 
 //------------------------------------------------------------------------------
@@ -143,11 +142,7 @@ void noia_wayland_surface_set_input_region(struct wl_client* client NOIA_UNUSED,
 
     LOG_WAYL2("Wayland > set input region (sid: %d, rid: %d)", sid, rid);
 
-    NoiaWaylandRegion* region = noia_wayland_cache_find_region(rid);
-    if (region) {
-        noia_wayland_state_surface_set_offset(sid, region->pos);
-        noia_wayland_state_surface_set_requested_size(sid, region->size);
-    }
+    noia_wayland_facade_set_input_region(sid, rid);
 }
 
 //------------------------------------------------------------------------------
@@ -161,7 +156,7 @@ void noia_wayland_surface_commit(struct wl_client* client NOIA_UNUSED,
 
     LOG_WAYL3("Wayland > commit (sid: %d)", sid);
 
-    noia_wayland_state_surface_commit(sid);
+    noia_wayland_facade_commit(sid);
 }
 
 //------------------------------------------------------------------------------
@@ -235,7 +230,7 @@ void noia_wayland_surface_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scSurfaceImplementation,
                                    data, noia_wayland_surface_unbind);
 
-    noia_wayland_state_add_surface(sid, rc);
+    noia_wayland_facade_add_surface(sid, rc);
 }
 
 //------------------------------------------------------------------------------

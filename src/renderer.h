@@ -6,7 +6,6 @@
 #define NOIA_RENDERER_H
 
 #include "utils-pool.h"
-#include "global-constants.h"
 #include "surface-coordinator.h"
 
 /// This type defines general interface for drawing on screen.

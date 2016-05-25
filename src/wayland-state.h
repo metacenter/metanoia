@@ -5,75 +5,27 @@
 #ifndef NOIA_WAYLAND_STATE_H
 #define NOIA_WAYLAND_STATE_H
 
-#include "utils-store.h"
-#include "output.h"
-#include "wayland-surface.h"
+#include "utils-keyboard-state.h"
 
-#include <wayland-server.h>
+/// Structure containing current Wayland state.
+/// @see NoiaWaylandContext NoiaWaylandContext
+typedef struct {
+    NoiaKeyboardState* keyboard_state;
+    NoiaSurfaceId keyboard_focused_sid;
+    NoiaSurfaceId pointer_focused_sid;
+} NoiaWaylandState;
 
-NoiaResult noia_wayland_state_initialize(struct wl_display* display,
-                                         NoiaCoordinator* coordinator);
+/// Construct State.
+NoiaWaylandState* noia_wayland_state_new(void);
 
-void noia_wayland_state_finalize(void);
+/// Initialize State.
+void noia_wayland_state_initialize(NoiaWaylandState* self);
 
-NoiaSurfaceId noia_wayland_state_create_surface();
+/// Finalize State.
+void noia_wayland_state_finalize(NoiaWaylandState* self);
 
-void noia_wayland_state_add_surface(NoiaItemId sid, struct wl_resource* rc);
-
-void noia_wayland_state_add_shell_surface(NoiaSurfaceId sid,
-                                          NoiaWaylandSurfaceResourceType type,
-                                          struct wl_resource* rc);
-
-void noia_wayland_state_remove_surface(NoiaItemId sid, struct wl_resource* rc);
-
-void noia_wayland_state_surface_attach(NoiaSurfaceId sid,
-                                       struct wl_resource* rc,
-                                       struct wl_resource* brc,
-                                       int width,
-                                       int height,
-                                       int stride,
-                                       uint8_t* buffer);
-
-void noia_wayland_state_surface_commit(NoiaItemId sid);
-
-void noia_wayland_state_surface_set_offset(NoiaItemId sid, NoiaPosition pos);
-
-void noia_wayland_state_surface_set_requested_size(NoiaItemId sid,
-                                                   NoiaSize size);
-
-void noia_wayland_state_surface_set_requested_position(NoiaItemId sid,
-                                                       NoiaItemId reference_sid,
-                                                       NoiaPosition pos);
-
-void noia_wayland_state_subscribe_frame(NoiaItemId sid, struct wl_resource* rc);
-
-void noia_wayland_state_add_keyboard_resource(struct wl_resource* rc);
-
-void noia_wayland_state_keyboard_focus_update(NoiaItemId sid);
-
-void noia_wayland_state_key(uint32_t time, uint32_t key, uint32_t state);
-
-void noia_wayland_state_pointer_focus_update(NoiaSurfaceId new_sid,
-                                             NoiaPosition pos);
-
-void noia_wayland_state_pointer_motion(NoiaSurfaceId sid, NoiaPosition pos);
-
-void noia_wayland_state_pointer_button(uint32_t time,
-                                       uint32_t button,
-                                       uint32_t state);
-
-void noia_wayland_state_set_cursor(int serial,
-                                   int hotspot_x,
-                                   int hotspot_y,
-                                   NoiaSurfaceId sid);
-
-void noia_wayland_state_screen_refresh(NoiaSurfaceId sid);
-
-void noia_wayland_state_advertise_output(NoiaOutput* output);
-
-void noia_wayland_state_destroy_output(NoiaOutput* output);
-
-void noia_wayland_state_surface_reconfigured(NoiaSurfaceId sid);
+/// Free State.
+void noia_wayland_state_free(NoiaWaylandState* self);
 
 #endif // NOIA_WAYLAND_STATE_H
 

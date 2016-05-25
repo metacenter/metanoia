@@ -5,10 +5,10 @@
 #include "wayland-protocol-xdg-shell.h"
 #include "wayland-protocol-xdg-surface.h"
 #include "wayland-protocol-xdg-popup.h"
-#include "wayland-cache.h"
-#include "wayland-state.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include "xdg-shell-server-protocol.h"
 
@@ -17,7 +17,7 @@
 void noia_wayland_xdg_shell_unbind(struct wl_resource* resource)
 {
     LOG_WAYL3("Wayland: unbind XDG shell");
-    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
+    noia_wayland_facade_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ void noia_wayland_xdg_get_xdg_popup
               "x: %d, y: %d, popup sid: %u, parent sid: %u)",
               id, serial, x, y, popup_sid, parent_sid);
 
-    noia_wayland_state_surface_set_requested_position
+    noia_wayland_facade_set_requested_position
                                   (popup_sid, parent_sid, (NoiaPosition) {x,y});
 
     uint32_t version = wl_resource_get_version(resource);
@@ -117,7 +117,7 @@ void noia_wayland_xdg_shell_bind(struct wl_client* client,
     rc = wl_resource_create(client, &xdg_shell_interface, version, id);
     NOIA_ENSURE(rc, wl_client_post_no_memory(client); return);
 
-    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
+    noia_wayland_facade_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 
     wl_resource_set_implementation(rc, &scXdgShellImplementation,
                                    data, noia_wayland_xdg_shell_unbind);

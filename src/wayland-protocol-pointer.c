@@ -3,8 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-keyboard.h"
-#include "wayland-state.h"
-#include "wayland-cache.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
 #include "global-macros.h"
@@ -14,7 +13,7 @@
 void noia_wayland_pointer_unbind(struct wl_resource* resource)
 {
     LOG_WAYL3("Wayland: unbind pointer");
-    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_POINTER, resource);
+    noia_wayland_facade_remove_general_resource(NOIA_RESOURCE_POINTER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -37,7 +36,7 @@ void noia_wayland_pointer_set_cursor(struct wl_client* client     NOIA_UNUSED,
               "(serial: %d, hotspot_x: %d, hotspot_y: %d, sid: %d)",
               serial, hotspot_x, hotspot_y, sid);
 
-    noia_wayland_state_set_cursor(serial, hotspot_x, hotspot_y, sid);
+    noia_wayland_facade_set_cursor(serial, hotspot_x, hotspot_y, sid);
 }
 
 //------------------------------------------------------------------------------
@@ -72,7 +71,7 @@ void noia_wayland_pointer_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scPointerImplementation,
                                    data, noia_wayland_pointer_unbind);
 
-    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_POINTER, rc);
+    noia_wayland_facade_add_general_resource(NOIA_RESOURCE_POINTER, rc);
 }
 
 //------------------------------------------------------------------------------

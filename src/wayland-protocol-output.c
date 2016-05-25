@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-output.h"
-#include "wayland-cache.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
 #include "output.h"
@@ -15,7 +15,7 @@
 void noia_wayland_output_unbind(struct wl_resource* resource)
 {
     LOG_WAYL2("Wayland: unbind output");
-    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
+    noia_wayland_facade_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ void noia_wayland_output_bind(struct wl_client* client,
         wl_output_send_done(rc);
     }
 
-    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
+    noia_wayland_facade_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 }
 
 //------------------------------------------------------------------------------

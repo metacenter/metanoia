@@ -5,9 +5,9 @@
 #include "wayland-protocol-device-manager.h"
 #include "wayland-protocol-data-source.h"
 #include "wayland-protocol-data-device.h"
-#include "wayland-cache.h"
 
 #include "utils-log.h"
+#include "global-macros.h"
 
 //------------------------------------------------------------------------------
 

@@ -5,8 +5,7 @@
 #include "wayland-protocol-seat.h"
 #include "wayland-protocol-pointer.h"
 #include "wayland-protocol-keyboard.h"
-#include "wayland-cache.h"
-#include "wayland-state.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
 #include "config.h"

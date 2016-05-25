@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-screenshooter.h"
-#include "wayland-cache.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
 #include "output.h"
@@ -16,7 +16,7 @@
 void noia_wayland_screenshooter_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_WAYL2("Wayland: unbind screenshooter");
-    noia_wayland_cache_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
+    noia_wayland_facade_remove_general_resource(NOIA_RESOURCE_OTHER, resource);
 }
 
 //------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ void noia_wayland_screenshooter_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scScreenshooterImplementation,
                                    data, noia_wayland_screenshooter_unbind);
 
-    noia_wayland_cache_add_general_resource(NOIA_RESOURCE_OTHER, rc);
+    noia_wayland_facade_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 }
 
 //------------------------------------------------------------------------------

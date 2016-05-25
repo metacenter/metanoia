@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-protocol-xdg-popup.h"
-#include "wayland-state.h"
+#include "wayland-facade.h"
 
 #include "utils-log.h"
 #include "global-macros.h"
@@ -51,7 +51,7 @@ void noia_wayland_xdg_popup_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scXdgPopupImplementation, data,
                                    noia_wayland_xdg_popup_unbind);
 
-    noia_wayland_state_add_shell_surface
+    noia_wayland_facade_add_shell_surface
                            (sid, NOIA_RESOURCE_XDG_SHELL_POPUP, rc);
 }
 
