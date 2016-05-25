@@ -110,22 +110,22 @@ void noia_renderer_mmap_draw_bg_image(NoiaRendererMMap* mine,
                                       NoiaBGTransform transform NOIA_UNUSED,
                                       NoiaColor color)
 {
+    // Draw background color
+    int current_buffer = mine->front ^ 1;
+    uint8_t* D = mine->buffer[current_buffer].data;
+    int W = mine->size.width;
+    int H = mine->size.height;
+    int S = mine->buffer[current_buffer].stride;
+
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            *((NoiaColor*) &D[y*S + 4*x]) = color;
+        }
+    }
+
+    // Draw background image
     NoiaSurfaceData* surface = noia_surface_get(coordinator, background_sid);
     if (surface) {
-        // Draw background color
-        int current_buffer = mine->front ^ 1;
-        uint8_t* D = mine->buffer[current_buffer].data;
-        int W = mine->size.width;
-        int H = mine->size.height;
-        int S = mine->buffer[current_buffer].stride;
-
-        for (int y = 0; y < H; ++y) {
-            for (int x = 0; x < W; ++x) {
-                *((NoiaColor*) &D[y*S + 4*x]) = color;
-            }
-        }
-
-        // Draw background image
         NoiaSurfaceContext context;
         context.sid = background_sid;
         context.pos.x = (W - surface->buffer.width) / 2;
