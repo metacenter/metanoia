@@ -5,6 +5,13 @@
 #include "global-types.h"
 #include "tests-suit.h"
 
+#define NOIA_ASSERT_IS_INSIDE(POINT, AREA) \
+    NOIA_ASSERT(noia_position_is_inside(POINT, AREA), \
+                "Casted position should be inside area " \
+                "(area is {{%d, %d}, {%d, %d}}, while point is {%d, %d})", \
+                AREA.pos.x, AREA.pos.y, AREA.size.width, AREA.size.height, \
+                POINT.x, POINT.y);
+
 //------------------------------------------------------------------------------
 
 /// Check if `noia_position_is_inside` works correctly.
@@ -77,6 +84,28 @@ NoiaTestResult should_correctly_cast_point_into_area(void)
 
 //------------------------------------------------------------------------------
 
+NoiaTestResult should_casted_be_inside_area(void)
+{
+    NoiaArea area = {{10, 10}, {10, 10}};
+
+    NoiaPosition positions[] = {
+            {30, 30},
+            {20, 20},
+            {15, 15},
+            {10, 10},
+            { 9,  9},
+        };
+
+    for (unsigned i = 0; i < NOIA_SIZEOF_ARRAY(positions); ++i) {
+        NoiaPosition casted = noia_position_cast(positions[i], area);
+        NOIA_ASSERT_IS_INSIDE(casted, area);
+    }
+
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 int main(int argc, char** argv)
 {
     NOIA_INIT_TESTS;
@@ -84,6 +113,7 @@ int main(int argc, char** argv)
     NoiaTest test[] = {
             NOIA_TEST(should_correctly_check_if_point_is_inside_area),
             NOIA_TEST(should_correctly_cast_point_into_area),
+            NOIA_TEST(should_casted_be_inside_area),
         };
 
     return noia_test_run("Globals", test, NOIA_NUM_TESTS(test));

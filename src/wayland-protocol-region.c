@@ -41,7 +41,7 @@ void noia_wayland_region_add(struct wl_client* client NOIA_UNUSED,
 {
     NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(resource);
 
-    LOG_WAYL2("Wayland > region add (rid: %d, x: %d, y: %d, w: %d, h: %d)",
+    LOG_WAYL3("Wayland > region add (rid: %d, x: %d, y: %d, w: %d, h: %d)",
               rid, x, y, width, height);
 
     noia_wayland_facade_inflate_region(rid, x, y, width, height);
@@ -78,7 +78,7 @@ void noia_wayland_region_bind(struct wl_client* client,
                               uint32_t version,
                               uint32_t id)
 {
-    LOG_WAYL2("Binding Wayland region (version: %u, id: %u)", version, id);
+    LOG_WAYL3("Binding Wayland region (version: %u, id: %u)", version, id);
 
     struct wl_resource* rc;
     rc = wl_resource_create(client, &wl_region_interface, version, id);

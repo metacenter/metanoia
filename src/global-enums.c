@@ -6,59 +6,52 @@
 
 //------------------------------------------------------------------------------
 
-bool noia_argmand_is_directed(NoiaArgmand argmand)
+NoiaDirection noia_direction_reverse(NoiaDirection direction)
 {
-    switch (argmand) {
-    case NOIA_ARGMAND_N:
-    case NOIA_ARGMAND_E:
-    case NOIA_ARGMAND_S:
-    case NOIA_ARGMAND_W:
-    case NOIA_ARGMAND_BACK:
-    case NOIA_ARGMAND_FORWARD:
-    case NOIA_ARGMAND_BEGIN:
-    case NOIA_ARGMAND_END:
-    case NOIA_ARGMAND_TRUNK:
-        return true;
-    default:
-        return false;
+    switch (direction) {
+    case NOIA_DIRECTION_N:       return NOIA_DIRECTION_S;
+    case NOIA_DIRECTION_S:       return NOIA_DIRECTION_N;
+    case NOIA_DIRECTION_E:       return NOIA_DIRECTION_W;
+    case NOIA_DIRECTION_W:       return NOIA_DIRECTION_E;
+    case NOIA_DIRECTION_BACK:    return NOIA_DIRECTION_FORWARD;
+    case NOIA_DIRECTION_FORWARD: return NOIA_DIRECTION_BACK;
+    case NOIA_DIRECTION_BEGIN:   return NOIA_DIRECTION_END;
+    case NOIA_DIRECTION_END:     return NOIA_DIRECTION_BEGIN;
+    case NOIA_DIRECTION_TRUNK:   return NOIA_DIRECTION_TRUNK;
+    default:                     return NOIA_DIRECTION_NONE;
     }
 }
 
 //------------------------------------------------------------------------------
 
-bool noia_argmand_is_actionable(NoiaArgmand argmand)
+NoiaFrameType noia_direction_translate_to_frame_type(NoiaDirection direction)
 {
-    switch (argmand) {
-    case NOIA_ARGMAND_FOCUS:
-    case NOIA_ARGMAND_SWAP:
-    case NOIA_ARGMAND_MOVE:
-    case NOIA_ARGMAND_JUMP:
-    case NOIA_ARGMAND_RESIZE:
-    case NOIA_ARGMAND_CONF:
-    case NOIA_ARGMAND_ANCHOR:
-        return true;
+    NoiaFrameType type = NOIA_FRAME_TYPE_NONE;
+
+    switch (direction) {
+    case NOIA_DIRECTION_BEGIN:
+    case NOIA_DIRECTION_END:
+        type = NOIA_FRAME_TYPE_STACKED;
+        break;
+
+    case NOIA_DIRECTION_N:
+    case NOIA_DIRECTION_S:
+        type = NOIA_FRAME_TYPE_VERTICAL;
+        break;
+
+    case NOIA_DIRECTION_E:
+    case NOIA_DIRECTION_W:
+        type = NOIA_FRAME_TYPE_HORIZONTAL;
+        break;
+
     default:
-        return false;
+        break;
     }
+
+    return type;
 }
 
 //------------------------------------------------------------------------------
-
-NoiaArgmand noia_argmand_reverse_directed(NoiaArgmand argmand)
-{
-    switch (argmand) {
-    case NOIA_ARGMAND_N:       return NOIA_ARGMAND_S;
-    case NOIA_ARGMAND_S:       return NOIA_ARGMAND_N;
-    case NOIA_ARGMAND_E:       return NOIA_ARGMAND_W;
-    case NOIA_ARGMAND_W:       return NOIA_ARGMAND_E;
-    case NOIA_ARGMAND_BACK:    return NOIA_ARGMAND_FORWARD;
-    case NOIA_ARGMAND_FORWARD: return NOIA_ARGMAND_BACK;
-    case NOIA_ARGMAND_BEGIN:   return NOIA_ARGMAND_END;
-    case NOIA_ARGMAND_END:     return NOIA_ARGMAND_BEGIN;
-    case NOIA_ARGMAND_TRUNK:   return NOIA_ARGMAND_TRUNK;
-    default:                   return NOIA_ARGMAND_NONE;
-    }
-}
 
 //------------------------------------------------------------------------------
 

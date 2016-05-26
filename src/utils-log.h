@@ -20,7 +20,7 @@
 ///  - 5 - not important, but worth logging
 
 #define LEVEL_ERROR "ERROR"
-#define LEVEL_NYIMP "NYIMP"
+#define LEVEL_NYIMP NULL
 #define LEVEL_DEBUG "DEBUG"
 #define LEVEL_CONFG "CONFG"
 #define LEVEL_STATS "STATS"

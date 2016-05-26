@@ -12,7 +12,7 @@ NoiaInputContext* noia_input_context_create(void)
     NoiaInputContext* self = malloc(sizeof(NoiaInputContext));
     NOIA_ENSURE(self, abort());
 
-    self->action = noia_action_create();
+    self->command = noia_command_create();
     self->code = 0;
     self->modifiers = 0x0;
     self->state = NOIA_KEY_RELEASED;
@@ -24,7 +24,7 @@ NoiaInputContext* noia_input_context_create(void)
 void noia_input_context_destroy(NoiaInputContext* self)
 {
     NOIA_ENSURE(self, return);
-    noia_action_destroy(self->action);
+    noia_command_destroy(self->command);
     free(self);
 }
 

@@ -7,7 +7,7 @@
 
 #include "input-context.h"
 
-bool noia_clean_action(NoiaInputContext* context);
+bool noia_clean_command(NoiaInputContext* context);
 
 bool noia_swallow();
 
@@ -21,9 +21,35 @@ bool noia_cicle_history_back(NoiaInputContext* context);
 
 bool noia_put_focus(NoiaInputContext* context);
 
+bool noia_focus_right(NoiaInputContext* context);
+
+bool noia_focus_down(NoiaInputContext* context);
+
+bool noia_focus_left(NoiaInputContext* context);
+
+bool noia_focus_up(NoiaInputContext* context);
+
 bool noia_put_swap(NoiaInputContext* context);
 
 bool noia_put_jump(NoiaInputContext* context);
+
+bool noia_jump_right(NoiaInputContext* context);
+
+bool noia_jump_down(NoiaInputContext* context);
+
+bool noia_jump_left(NoiaInputContext* context);
+
+bool noia_jump_up(NoiaInputContext* context);
+
+bool noia_put_dive(NoiaInputContext* context);
+
+bool noia_dive_right(NoiaInputContext* context);
+
+bool noia_dive_down(NoiaInputContext* context);
+
+bool noia_dive_left(NoiaInputContext* context);
+
+bool noia_dive_up(NoiaInputContext* context);
 
 bool noia_put_move(NoiaInputContext* context);
 
@@ -38,6 +64,8 @@ bool noia_jump_to_workspace(NoiaInputContext* context);
 bool noia_anchorize(NoiaInputContext* context);
 
 bool noia_ramify(NoiaInputContext* context);
+
+bool noia_enlarge(NoiaInputContext* context);
 
 bool noia_stackedize(NoiaInputContext* context);
 

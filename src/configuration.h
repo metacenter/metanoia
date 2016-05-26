@@ -43,13 +43,14 @@ static const NoiaBinding scBindingsCommon[] = {
 
 static const NoiaBinding scBindingsNormal[] = {
         // stack
-        {KEY_ESC, NOIA_KEY_NONE, noia_clean_action},
+        {KEY_ESC, NOIA_KEY_NONE, noia_clean_command},
         // modes
         {KEY_I, NOIA_KEY_NONE, noia_swap_mode_normal_to_insert},
         // actions
         {KEY_F, NOIA_KEY_NONE,  noia_put_focus},
         {KEY_F, NOIA_KEY_SHIFT, noia_put_swap},
         {KEY_J, NOIA_KEY_NONE,  noia_put_jump},
+        {KEY_D, NOIA_KEY_NONE,  noia_put_dive},
         {KEY_M, NOIA_KEY_NONE,  noia_put_move},
         {KEY_R, NOIA_KEY_NONE,  noia_put_resize},
         {KEY_A, NOIA_KEY_NONE,  noia_anchorize},
@@ -57,6 +58,7 @@ static const NoiaBinding scBindingsNormal[] = {
         {KEY_V, NOIA_KEY_NONE,  noia_verticalize},
         {KEY_H, NOIA_KEY_NONE,  noia_horizontalize},
         {KEY_B, NOIA_KEY_NONE,  noia_ramify},
+        {KEY_L, NOIA_KEY_NONE,  noia_enlarge},
         {KEY_P, NOIA_KEY_NONE,  noia_select_trunk},
         // directions
         {KEY_RIGHT,    NOIA_KEY_NONE, noia_right},
@@ -95,6 +97,20 @@ static const NoiaBinding scBindingsInsert[] = {
         // changing focus
         {KEY_TAB, NOIA_KEY_META,                noia_cicle_history_forward},
         {KEY_TAB, NOIA_KEY_META|NOIA_KEY_SHIFT, noia_cicle_history_back},
+        // focus
+        {KEY_RIGHT, NOIA_KEY_META, noia_focus_right},
+        {KEY_DOWN,  NOIA_KEY_META, noia_focus_down},
+        {KEY_LEFT,  NOIA_KEY_META, noia_focus_left},
+        {KEY_UP,    NOIA_KEY_META, noia_focus_up},
+        // jumping and diving
+        {KEY_RIGHT, NOIA_KEY_META|NOIA_KEY_SHIFT, noia_jump_right},
+        {KEY_DOWN,  NOIA_KEY_META|NOIA_KEY_SHIFT, noia_jump_down},
+        {KEY_LEFT,  NOIA_KEY_META|NOIA_KEY_SHIFT, noia_jump_left},
+        {KEY_UP,    NOIA_KEY_META|NOIA_KEY_SHIFT, noia_jump_up},
+        {KEY_RIGHT, NOIA_KEY_META|NOIA_KEY_ALT,   noia_dive_right},
+        {KEY_DOWN,  NOIA_KEY_META|NOIA_KEY_ALT,   noia_dive_down},
+        {KEY_LEFT,  NOIA_KEY_META|NOIA_KEY_ALT,   noia_dive_left},
+        {KEY_UP,    NOIA_KEY_META|NOIA_KEY_ALT,   noia_dive_up},
         // workspaces
         {KEY_0,         NOIA_KEY_META,                noia_focus_workspace},
         {KEY_1,         NOIA_KEY_META,                noia_focus_workspace},

@@ -40,55 +40,48 @@ int noia_get_number_from_key(int code)
 
 //------------------------------------------------------------------------------
 
-void noia_execute(NoiaAction* action)
+void noia_execute(NoiaCommand* command)
 {
-    NoiaObject* copy = (NoiaObject*) noia_action_copy(action);
+    NoiaObject* copy = (NoiaObject*) noia_command_copy(command);
     noia_object_ref(copy);
     noia_event_signal_emit(SIGNAL_ACTION, copy);
     noia_object_unref(copy);
-    noia_action_clean(action);
+    noia_command_clean(command);
 }
 
 //------------------------------------------------------------------------------
 
-static inline void noia_action(NoiaAction* action, NoiaArgmand argmand)
+static inline void noia_put_action(NoiaCommand* command, NoiaAction action)
 {
-    NOIA_ENSURE(action, return);
-    NOIA_ENSURE(noia_argmand_is_actionable(argmand), return);
-
-    action->action = argmand;
-    if (action->direction != NOIA_ARGMAND_NONE) {
-        if (action->magnitude == 0) {
-            action->magnitude = 1;
+    command->action = action;
+    if (command->direction != NOIA_DIRECTION_NONE) {
+        if (command->magnitude == 0) {
+            command->magnitude = 1;
         }
-        noia_execute(action);
+        noia_execute(command);
     }
 }
 
 //------------------------------------------------------------------------------
 
-static inline void noia_direction(NoiaAction* action,
-                                  NoiaArgmand argmand)
+static inline void noia_put_direction(NoiaCommand* command,
+                                      NoiaDirection direction)
 {
-    NOIA_ENSURE(action, return);
-    NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
-
-    action->direction = argmand;
-    if (action->action != NOIA_ARGMAND_NONE) {
-        if (action->magnitude == 0) {
-            action->magnitude = 1;
+    command->direction = direction;
+    if (command->action != NOIA_ACTION_NONE) {
+        if (command->magnitude == 0) {
+            command->magnitude = 1;
         }
-        noia_execute(action);
+        noia_execute(command);
     }
 }
 
 //------------------------------------------------------------------------------
 // PUBLIC
 
-bool noia_clean_action(NoiaInputContext* context)
+bool noia_clean_command(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_action_clean(context->action);
+    noia_command_clean(context->command);
     return true;
 }
 
@@ -120,12 +113,10 @@ bool noia_refresh_displays()
 
 bool noia_cicle_history_forward(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    NoiaAction* action = context->action;
-    action->action = NOIA_ARGMAND_FOCUS;
-    action->direction = NOIA_ARGMAND_FORWARD;
-    action->magnitude = 1;
-    noia_execute(action);
+    context->command->action = NOIA_ACTION_FOCUS;
+    context->command->direction = NOIA_DIRECTION_FORWARD;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
     return true;
 }
 
@@ -133,12 +124,10 @@ bool noia_cicle_history_forward(NoiaInputContext* context)
 
 bool noia_cicle_history_back(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    NoiaAction* action = context->action;
-    action->action = NOIA_ARGMAND_FOCUS;
-    action->direction = NOIA_ARGMAND_BACK;
-    action->magnitude = 1;
-    noia_execute(action);
+    context->command->action = NOIA_ACTION_FOCUS;
+    context->command->direction = NOIA_DIRECTION_BACK;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
     return true;
 }
 
@@ -146,8 +135,51 @@ bool noia_cicle_history_back(NoiaInputContext* context)
 
 bool noia_put_focus(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_action(context->action, NOIA_ARGMAND_FOCUS);
+    noia_put_action(context->command, NOIA_ACTION_FOCUS);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_focus_right(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_FOCUS;
+    context->command->direction = NOIA_DIRECTION_E;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_focus_down(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_FOCUS;
+    context->command->direction = NOIA_DIRECTION_S;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_focus_left(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_FOCUS;
+    context->command->direction = NOIA_DIRECTION_W;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_focus_up(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_FOCUS;
+    context->command->direction = NOIA_DIRECTION_N;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
     return true;
 }
 
@@ -155,8 +187,7 @@ bool noia_put_focus(NoiaInputContext* context)
 
 bool noia_put_swap(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_action(context->action, NOIA_ARGMAND_SWAP);
+    noia_put_action(context->command, NOIA_ACTION_SWAP);
     return true;
 }
 
@@ -164,8 +195,103 @@ bool noia_put_swap(NoiaInputContext* context)
 
 bool noia_put_jump(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_action(context->action, NOIA_ARGMAND_JUMP);
+    noia_put_action(context->command, NOIA_ACTION_JUMP);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_jump_right(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_JUMP;
+    context->command->direction = NOIA_DIRECTION_E;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_jump_down(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_JUMP;
+    context->command->direction = NOIA_DIRECTION_S;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_jump_left(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_JUMP;
+    context->command->direction = NOIA_DIRECTION_W;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_jump_up(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_JUMP;
+    context->command->direction = NOIA_DIRECTION_N;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_put_dive(NoiaInputContext* context)
+{
+    noia_put_action(context->command, NOIA_ACTION_DIVE);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_dive_right(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_DIVE;
+    context->command->direction = NOIA_DIRECTION_E;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_dive_down(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_DIVE;
+    context->command->direction = NOIA_DIRECTION_S;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_dive_left(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_DIVE;
+    context->command->direction = NOIA_DIRECTION_W;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_dive_up(NoiaInputContext* context)
+{
+    context->command->action    = NOIA_ACTION_DIVE;
+    context->command->direction = NOIA_DIRECTION_N;
+    context->command->magnitude = 1;
+    noia_execute(context->command);
     return true;
 }
 
@@ -173,8 +299,7 @@ bool noia_put_jump(NoiaInputContext* context)
 
 bool noia_put_move(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_action(context->action, NOIA_ARGMAND_MOVE);
+    noia_put_action(context->command, NOIA_ACTION_MOVE);
     return true;
 }
 
@@ -182,8 +307,7 @@ bool noia_put_move(NoiaInputContext* context)
 
 bool noia_put_resize(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_action(context->action, NOIA_ARGMAND_RESIZE);
+    noia_put_action(context->command, NOIA_ACTION_RESIZE);
     return true;
 }
 
@@ -191,15 +315,13 @@ bool noia_put_resize(NoiaInputContext* context)
 
 bool noia_put_number(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-
     int number = noia_get_number_from_key(context->code);
-    if (context->action->magnitude == 0) {
-        context->action->magnitude = number;
+    if (context->command->magnitude == 0) {
+        context->command->magnitude = number;
     } else if (number < 0) {
-        context->action->magnitude = context->action->magnitude * number;
+        context->command->magnitude = context->command->magnitude * number;
     } else {
-        context->action->magnitude = 10 * context->action->magnitude + number;
+        context->command->magnitude = 10 * context->command->magnitude + number;
     }
     return true;
 }
@@ -208,18 +330,15 @@ bool noia_put_number(NoiaInputContext* context)
 
 bool noia_focus_workspace(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-
     char str[3];
     int number = noia_get_number_from_key(context->code);
     snprintf(str, sizeof(str), "%d", number);
 
-    NoiaAction* action = context->action;
-    noia_action_clean(action);
-    action->action = NOIA_ARGMAND_FOCUS;
-    action->direction = NOIA_ARGMAND_WORKSPACE;
-    action->str = strdup(str);
-    noia_execute(action);
+    noia_command_clean(context->command);
+    context->command->action = NOIA_ACTION_FOCUS;
+    context->command->direction = NOIA_DIRECTION_WORKSPACE;
+    context->command->str = strdup(str);
+    noia_execute(context->command);
     return true;
 }
 
@@ -227,18 +346,15 @@ bool noia_focus_workspace(NoiaInputContext* context)
 
 bool noia_jump_to_workspace(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-
     char str[3];
     int number = noia_get_number_from_key(context->code);
     snprintf(str, sizeof(str), "%d", number);
 
-    NoiaAction* action = context->action;
-    noia_action_clean(action);
-    action->action = NOIA_ARGMAND_JUMP;
-    action->direction = NOIA_ARGMAND_WORKSPACE;
-    action->str = strdup(str);
-    noia_execute(action);
+    noia_command_clean(context->command);
+    context->command->action = NOIA_ACTION_JUMP;
+    context->command->direction = NOIA_DIRECTION_WORKSPACE;
+    context->command->str = strdup(str);
+    noia_execute(context->command);
     return true;
 }
 
@@ -246,11 +362,9 @@ bool noia_jump_to_workspace(NoiaInputContext* context)
 
 bool noia_anchorize(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    NoiaAction* action = context->action;
-    noia_action_clean(action);
-    action->action = NOIA_ARGMAND_ANCHOR;
-    noia_execute(action);
+    noia_command_clean(context->command);
+    context->command->action = NOIA_ACTION_ANCHOR;
+    noia_execute(context->command);
     return true;
 }
 
@@ -258,12 +372,21 @@ bool noia_anchorize(NoiaInputContext* context)
 
 bool noia_ramify(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    NoiaAction* action = context->action;
-    noia_action_clean(action);
-    action->action = NOIA_ARGMAND_JUMP;
-    action->direction = NOIA_ARGMAND_END;
-    noia_execute(action);
+    noia_command_clean(context->command);
+    context->command->action = NOIA_ACTION_JUMP;
+    context->command->direction = NOIA_DIRECTION_END;
+    noia_execute(context->command);
+    return true;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_enlarge(NoiaInputContext* context)
+{
+    noia_command_clean(context->command);
+    context->command->action = NOIA_ACTION_JUMP;
+    context->command->direction = NOIA_DIRECTION_BEGIN;
+    noia_execute(context->command);
     return true;
 }
 
@@ -271,12 +394,10 @@ bool noia_ramify(NoiaInputContext* context)
 
 bool noia_stackedize(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    NoiaAction* action = context->action;
-    noia_action_clean(action);
-    action->action = NOIA_ARGMAND_CONF;
-    action->direction = NOIA_ARGMAND_END;
-    noia_execute(action);
+    noia_command_clean(context->command);
+    context->command->action = NOIA_ACTION_CONF;
+    context->command->direction = NOIA_DIRECTION_END;
+    noia_execute(context->command);
     return true;
 }
 
@@ -284,12 +405,10 @@ bool noia_stackedize(NoiaInputContext* context)
 
 bool noia_verticalize(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    NoiaAction* action = context->action;
-    noia_action_clean(action);
-    action->action = NOIA_ARGMAND_CONF;
-    action->direction = NOIA_ARGMAND_N;
-    noia_execute(action);
+    noia_command_clean(context->command);
+    context->command->action = NOIA_ACTION_CONF;
+    context->command->direction = NOIA_DIRECTION_N;
+    noia_execute(context->command);
     return true;
 }
 
@@ -297,12 +416,10 @@ bool noia_verticalize(NoiaInputContext* context)
 
 bool noia_horizontalize(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    NoiaAction* action = context->action;
-    noia_action_clean(action);
-    action->action = NOIA_ARGMAND_CONF;
-    action->direction = NOIA_ARGMAND_W;
-    noia_execute(action);
+    noia_command_clean(context->command);
+    context->command->action = NOIA_ACTION_CONF;
+    context->command->direction = NOIA_DIRECTION_W;
+    noia_execute(context->command);
     return true;
 }
 
@@ -310,11 +427,9 @@ bool noia_horizontalize(NoiaInputContext* context)
 
 bool noia_select_trunk(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    NoiaAction* action = context->action;
-    action->action = NOIA_ARGMAND_FOCUS;
-    action->direction = NOIA_ARGMAND_TRUNK;
-    noia_execute(action);
+    context->command->action = NOIA_ACTION_FOCUS;
+    context->command->direction = NOIA_DIRECTION_TRUNK;
+    noia_execute(context->command);
     return true;
 }
 
@@ -322,8 +437,7 @@ bool noia_select_trunk(NoiaInputContext* context)
 
 bool noia_right(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_direction(context->action, NOIA_ARGMAND_E);
+    noia_put_direction(context->command, NOIA_DIRECTION_E);
     return true;
 }
 
@@ -331,8 +445,7 @@ bool noia_right(NoiaInputContext* context)
 
 bool noia_left(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_direction(context->action, NOIA_ARGMAND_W);
+    noia_put_direction(context->command, NOIA_DIRECTION_W);
     return true;
 }
 
@@ -340,8 +453,7 @@ bool noia_left(NoiaInputContext* context)
 
 bool noia_up(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_direction(context->action, NOIA_ARGMAND_N);
+    noia_put_direction(context->command, NOIA_DIRECTION_N);
     return true;
 }
 
@@ -349,8 +461,7 @@ bool noia_up(NoiaInputContext* context)
 
 bool noia_down(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_direction(context->action, NOIA_ARGMAND_S);
+    noia_put_direction(context->command, NOIA_DIRECTION_S);
     return true;
 }
 
@@ -358,8 +469,7 @@ bool noia_down(NoiaInputContext* context)
 
 bool noia_back(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_direction(context->action, NOIA_ARGMAND_BACK);
+    noia_put_direction(context->command, NOIA_DIRECTION_BACK);
     return true;
 }
 
@@ -367,16 +477,14 @@ bool noia_back(NoiaInputContext* context)
 
 bool noia_forward(NoiaInputContext* context)
 {
-    NOIA_ENSURE(context, return true);
-    noia_direction(context->action, NOIA_ARGMAND_FORWARD);
+    noia_put_direction(context->command, NOIA_DIRECTION_FORWARD);
     return true;
 }
 
 //------------------------------------------------------------------------------
 
-bool noia_swap_mode_normal_to_insert(NoiaInputContext* context)
+bool noia_swap_mode_normal_to_insert(NoiaInputContext* context NOIA_UNUSED)
 {
-    NOIA_ENSURE(context, return true);
     LOG_INFO2("Swap mode from normal to insert");
 
     NoiaList* modes = noia_gears()->modes;
@@ -387,7 +495,7 @@ bool noia_swap_mode_normal_to_insert(NoiaInputContext* context)
 
 //------------------------------------------------------------------------------
 
-bool noia_swap_mode_insert_to_normal(NoiaInputContext* context)
+bool noia_swap_mode_insert_to_normal(NoiaInputContext* context NOIA_UNUSED)
 {
     NOIA_ENSURE(context, return true);
     LOG_INFO2("Swap mode from insert to normal");

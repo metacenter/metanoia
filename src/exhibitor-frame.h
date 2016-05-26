@@ -23,7 +23,7 @@ typedef enum {
 typedef struct {
     unsigned num;
     NoiaFrame* frame;
-    NoiaArgmand direction;
+    NoiaDirection direction;
     NoiaFramePosition position;
 } NoiaFrameIterator;
 
@@ -72,13 +72,13 @@ NoiaResult noia_frame_swap(NoiaFrame* self,
 /// Resize the frame.
 void noia_frame_resize(NoiaFrame* self,
                        NoiaCoordinator* coordinator,
-                       NoiaArgmand border,
+                       NoiaDirection border,
                        int magnitude);
 
 /// Move the frame.
 /// This takes effect only on surfaces which are FLOATING but not FIXED.
 void noia_frame_move(NoiaFrame* self,
-                     NoiaArgmand direction,
+                     NoiaDirection direction,
                      int magnitude);
 
 /// Change directed type of frame.
@@ -109,9 +109,14 @@ NoiaFrame* noia_frame_ramify(NoiaFrame* self,
                              NoiaFrameType type,
                              NoiaCoordinator* coordinator);
 
+/// If `self` has one non-leaf twig, resetle twigs twigs to self and remove
+/// the twig.
+void noia_frame_deramify(NoiaFrame* self);
+
 /// Remove frame `self` from its current trunk and insert to frame `target`.
-/// @todo Add unit tests.
+/// @todo Add more unit tests.
 NoiaResult noia_frame_jump(NoiaFrame* self,
+                           NoiaFramePosition position,
                            NoiaFrame* target,
                            NoiaCoordinator* coordinator);
 
@@ -132,12 +137,12 @@ NoiaFrame* noia_frame_find_pointed(NoiaFrame* self, NoiaPosition point);
 
 /// Find top-most frame bordering with frame `self` in given direction.
 NoiaFrame* noia_frame_find_contiguous(NoiaFrame* self,
-                                      NoiaArgmand direction,
+                                      NoiaDirection direction,
                                       unsigned distance);
 
 /// Find find bottom-most frame bordering with frame `self` in given direction.
 NoiaFrame* noia_frame_find_adjacent(NoiaFrame* self,
-                                    NoiaArgmand direction,
+                                    NoiaDirection direction,
                                     unsigned distance);
 
 //------------------------------------------------------------------------------
@@ -150,7 +155,7 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self);
 NoiaFrame* noia_frame_buildable(NoiaFrame* self);
 
 /// Return parent of the frame.
-NoiaFrame* noia_frame_get_parent(NoiaFrame* self);
+NoiaFrame* noia_frame_get_trunk(NoiaFrame* self);
 
 /// Return first subframe.
 NoiaFrame* noia_frame_get_first(NoiaFrame* self);
@@ -163,7 +168,7 @@ NoiaFrame* noia_frame_get_last(NoiaFrame* self);
 /// Initialize iterator.
 void noia_frame_start_iteration(NoiaFrameIterator* iter,
                                 NoiaFrame* frame,
-                                NoiaArgmand direction);
+                                NoiaDirection direction);
 
 /// Iterate through Frames.
 void noia_frame_iterate(NoiaFrameIterator* iter);

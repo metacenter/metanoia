@@ -10,7 +10,7 @@
 
 /// Context passed to input binding handlers.
 typedef struct {
-    NoiaAction* action;
+    NoiaCommand* command;
     int code;
     uint32_t modifiers;
     NoiaKeyState state;

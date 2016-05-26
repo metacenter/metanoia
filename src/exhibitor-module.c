@@ -15,10 +15,10 @@
 /// @see NoiaAction
 void noia_exhibitor_module_execute(void* edata, void* sdata)
 {
-    NoiaAction* action = (NoiaAction*) edata;
+    NoiaCommand* command = (NoiaCommand*) edata;
     NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
-    noia_exhibitor_execute(exhibitor, action);
-    noia_object_unref(&action->base);
+    noia_exhibitor_execute(exhibitor, command);
+    noia_object_unref(&command->base);
 }
 
 //------------------------------------------------------------------------------

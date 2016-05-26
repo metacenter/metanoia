@@ -63,23 +63,23 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos);
 /// Compositor action context.
 typedef struct {
     NoiaObject base;
-    NoiaArgmand action;
-    NoiaArgmand direction;
+    NoiaAction action;
+    NoiaDirection direction;
     char* str;
     int magnitude;
-} NoiaAction;
+} NoiaCommand;
 
-/// Create the action.
-NoiaAction* noia_action_create(void);
+/// Create the command.
+NoiaCommand* noia_command_create(void);
 
-/// Destroy the action.
-void noia_action_destroy(NoiaAction* action);
+/// Destroy the command.
+void noia_command_destroy(NoiaCommand* command);
 
-/// Clear the action.
-void noia_action_clean(NoiaAction* action);
+/// Clear the command.
+void noia_command_clean(NoiaCommand* command);
 
-/// Copy the action.
-NoiaAction* noia_action_copy(NoiaAction* action);
+/// Copy the command.
+NoiaCommand* noia_command_copy(NoiaCommand* command);
 
 //------------------------------------------------------------------------------
 

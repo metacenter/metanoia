@@ -48,7 +48,7 @@ NoiaCoordinator* noia_exhibitor_get_coordinator(NoiaExhibitor* self);
 
 
 /// Execute an action.
-void noia_exhibitor_execute(NoiaExhibitor* self, NoiaAction* action);
+void noia_exhibitor_execute(NoiaExhibitor* self, NoiaCommand* command);
 
 /// Handle output creation notification.
 void noia_exhibitor_create_new_display(NoiaExhibitor* self, NoiaOutput* output);

@@ -31,30 +31,33 @@ typedef enum {
     NOIA_MODE_NUM, ///< Guard
 } NoiaModeEnum;
 
-/// Argmand types.
-/// Argmand is a data type that can be a command or
-/// an argument (parameter) depending on context.
+/// Action type for Exhibitor.
 typedef enum {
-    NOIA_ARGMAND_NONE = 0,  ///< Dummy; do/parametrize nothing
-    NOIA_ARGMAND_NUMBER,    ///< Number; numeric value; integer
-    NOIA_ARGMAND_ANCHOR,    ///< Anchorize; de-anchorize
-    NOIA_ARGMAND_CONF,      ///< Change configuration
-    NOIA_ARGMAND_FOCUS,     ///< Change focus
-    NOIA_ARGMAND_SWAP,      ///< Swap
-    NOIA_ARGMAND_MOVE,      ///< Change position
-    NOIA_ARGMAND_JUMP,      ///< Change placement in tree structure
-    NOIA_ARGMAND_RESIZE,    ///< Change size
-    NOIA_ARGMAND_N,         ///< North; up; above
-    NOIA_ARGMAND_E,         ///< East; right
-    NOIA_ARGMAND_S,         ///< South; down; below
-    NOIA_ARGMAND_W,         ///< West; left
-    NOIA_ARGMAND_BACK,      ///< Back in time; most recently used
-    NOIA_ARGMAND_FORWARD,   ///< Forward in time; the oldest used
-    NOIA_ARGMAND_BEGIN,     ///< Begin; start; head
-    NOIA_ARGMAND_END,       ///< End; finish; tail
-    NOIA_ARGMAND_TRUNK,     ///< Trunk; make a trunk; up in frame hierarchy
-    NOIA_ARGMAND_WORKSPACE, ///< Workspace
-} NoiaArgmand;
+    NOIA_ACTION_NONE = 0,  ///< Dummy; do/parametrize nothing
+    NOIA_ACTION_ANCHOR,    ///< Anchorize; de-anchorize
+    NOIA_ACTION_CONF,      ///< Change configuration
+    NOIA_ACTION_FOCUS,     ///< Change focus
+    NOIA_ACTION_SWAP,      ///< Swap
+    NOIA_ACTION_MOVE,      ///< Change position
+    NOIA_ACTION_JUMP,      ///< Change placement by jumping over
+    NOIA_ACTION_DIVE,      ///< Change placement by diving in
+    NOIA_ACTION_RESIZE,    ///< Change size
+} NoiaAction;
+
+/// Enum representing directions on screen, in time and beetwen frames.
+typedef enum {
+    NOIA_DIRECTION_NONE = 0,  ///< Dummy; point nowhere
+    NOIA_DIRECTION_N,         ///< North; up; above
+    NOIA_DIRECTION_E,         ///< East; right
+    NOIA_DIRECTION_S,         ///< South; down; below
+    NOIA_DIRECTION_W,         ///< West; left
+    NOIA_DIRECTION_BACK,      ///< Back in time; most recently used
+    NOIA_DIRECTION_FORWARD,   ///< Forward in time; the oldest used
+    NOIA_DIRECTION_BEGIN,     ///< Begin; start; head
+    NOIA_DIRECTION_END,       ///< End; finish; tail
+    NOIA_DIRECTION_TRUNK,     ///< Trunk; up in frame hierarchy
+    NOIA_DIRECTION_WORKSPACE, ///< Workspace
+} NoiaDirection;
 
 /// Frame types.
 typedef enum {
@@ -99,18 +102,11 @@ typedef enum {
 /// @see NoiaResult NOIA_TRY
 #define NOIA_ASSERT_RESULT(RESULT) { if (RESULT != NOIA_RESULT_SUCCESS) break; }
 
-/// Check if given argmand can define direction.
-/// @see NoiaArgmand
-bool noia_argmand_is_directed(NoiaArgmand argmand);
+/// Return opposite direction.
+NoiaDirection noia_direction_reverse(NoiaDirection direction);
 
-/// Check if given argmand can define an action.
-/// @see NoiaArgmand
-bool noia_argmand_is_actionable(NoiaArgmand argmand);
-
-/// If given argmand is directed, return and argmand pointing in opposite
-/// direction.
-/// @see noia_argmand_is_directed NoiaArgmand
-NoiaArgmand noia_argmand_reverse_directed(NoiaArgmand argmand);
+/// Translate direction to corresponding frame type.
+NoiaFrameType noia_direction_translate_to_frame_type(NoiaDirection direction);
 
 #endif // NOIA_GLOBAL_ENUMS_H
 

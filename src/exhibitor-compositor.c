@@ -118,7 +118,7 @@ NoiaFrame* noia_compositor_bring_workspace(NoiaCompositor* self,
         ///       output the workspace will be created.
         NoiaFrame* current_workspace = noia_frame_find_top(self->selection);
         NOIA_ENSURE(current_workspace, break);
-        NoiaFrame* display_frame = noia_frame_get_parent(current_workspace);
+        NoiaFrame* display_frame = noia_frame_get_trunk(current_workspace);
         NOIA_ENSURE(display_frame, break);
 
         workspace = noia_compositor_create_new_workspace
@@ -300,13 +300,12 @@ void noia_compositor_pop_surface(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
-void noia_compositor_ramify(NoiaCompositor* self,
-                            NoiaFrame* frame)
+void noia_compositor_ramify(NoiaCompositor* self, NoiaFrame* frame)
 {
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(frame, return);
 
-    NoiaFrame* new_frame = noia_frame_ramify(self->selection,
+    NoiaFrame* new_frame = noia_frame_ramify(frame,
                                              noia_config()->default_frame_type,
                                              self->coordinator);
     noia_compositor_set_selection(self, new_frame);
@@ -316,18 +315,28 @@ void noia_compositor_ramify(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
-void noia_compositor_jump(NoiaCompositor* self,
-                          NoiaFrame* frame,
-                          NoiaArgmand direction,
-                          int distance)
+void noia_compositor_enlarge(NoiaCompositor* self, NoiaFrame* frame)
 {
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(frame, return);
-    NOIA_ENSURE(noia_argmand_is_directed(direction), return);
 
-    NoiaFrame* target = noia_frame_find_adjacent(frame, direction, distance);
-    if (target) {
-        noia_frame_jump(frame, target, self->coordinator);
+    NoiaFrame* new_frame = NULL;
+    NoiaFrame* trunk = noia_frame_get_trunk(frame);
+    if (noia_frame_has_type(trunk, NOIA_FRAME_TYPE_STACKED)) {
+        NoiaFrame* top = noia_frame_get_trunk(trunk);
+        if (noia_frame_has_type(top, NOIA_FRAME_TYPE_STACKED)) {
+            noia_frame_resettle(frame, top, self->coordinator);
+        } else {
+            new_frame = noia_frame_ramify(top,
+                                          NOIA_FRAME_TYPE_STACKED,
+                                          self->coordinator);
+            noia_frame_resettle(frame, new_frame, self->coordinator);
+        }
+    } else {
+        new_frame = noia_frame_ramify(trunk,
+                                      NOIA_FRAME_TYPE_STACKED,
+                                      self->coordinator);
+        noia_frame_resettle(frame, new_frame, self->coordinator);
     }
 
     noia_compositor_log_frame(self);
@@ -335,14 +344,83 @@ void noia_compositor_jump(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
+void noia_compositor_jump(NoiaCompositor* self,
+                          NoiaFrame* frame,
+                          NoiaDirection direction,
+                          int position)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(frame, return);
+
+    LOG_INFO2("Compositor: jump");
+
+    // Modify direction if needed
+    if (position < 0) {
+        direction = noia_direction_reverse(direction);
+        position = -position;
+    }
+
+    // Perform jump
+    NoiaFrame* target = noia_frame_find_adjacent(frame, direction, position);
+    if (target) {
+        NoiaFramePosition position = NOIA_FRAME_POSITION_BEFORE;
+        if ((direction == NOIA_DIRECTION_S)
+        or  (direction == NOIA_DIRECTION_W)) {
+            position = NOIA_FRAME_POSITION_AFTER;
+        }
+
+        noia_frame_jump(frame, position, target, self->coordinator);
+    }
+
+    // Log result
+    noia_compositor_log_frame(self);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_compositor_dive(NoiaCompositor* self,
+                          NoiaFrame* frame,
+                          NoiaDirection direction,
+                          int position)
+{
+    NOIA_ENSURE(self, return);
+    NOIA_ENSURE(frame, return);
+
+    LOG_INFO2("Compositor: jump");
+
+    // Modify direction if needed
+    if (position < 0) {
+        direction = noia_direction_reverse(direction);
+        position = -position;
+    }
+
+    // Perform jump
+    NoiaFrame* target = noia_frame_find_adjacent(frame, direction, position);
+    if (target) {
+        noia_frame_jump(frame,
+                        NOIA_FRAME_POSITION_ON,
+                        target,
+                        self->coordinator);
+    }
+
+    // Log result
+    noia_compositor_log_frame(self);
+}
+//------------------------------------------------------------------------------
+
 void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
 {
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(title, return);
 
+    LOG_INFO2("Compositor: jump to workspace '%s'", title);
+
     NoiaFrame* workspace = noia_compositor_bring_workspace(self, title);
     if (workspace) {
-        noia_frame_jump(self->selection, workspace, self->coordinator);
+        noia_frame_jump(self->selection,
+                        NOIA_FRAME_POSITION_ON,
+                        workspace,
+                        self->coordinator);
     } else {
         LOG_WARN1("Compositor: Workspace '%s' not found "
                   "and could not be created!", title);
@@ -352,14 +430,17 @@ void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
 //------------------------------------------------------------------------------
 
 void noia_compositor_focus(NoiaCompositor* self,
-                           NoiaArgmand argmand,
+                           NoiaFrame* frame,
+                           NoiaDirection direction,
                            int position)
 {
     NOIA_ENSURE(self, return);
-    NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
 
-    if ((argmand == NOIA_ARGMAND_BACK) or (argmand == NOIA_ARGMAND_FORWARD)) {
-        if (argmand == NOIA_ARGMAND_FORWARD) {
+    LOG_INFO2("Compositor: focus");
+
+    if ((direction == NOIA_DIRECTION_BACK)
+    or  (direction == NOIA_DIRECTION_FORWARD)) {
+        if (direction == NOIA_DIRECTION_FORWARD) {
             position = -1 * position;
         }
 
@@ -370,12 +451,12 @@ void noia_compositor_focus(NoiaCompositor* self,
         }
     } else {
         if (position < 0) {
-            argmand = noia_argmand_reverse_directed(argmand);
+            direction = noia_direction_reverse(direction);
             position = -position;
         }
 
         NoiaFrame* new_selection =
-                   noia_frame_find_adjacent(self->selection, argmand, position);
+                           noia_frame_find_adjacent(frame, direction, position);
         if (new_selection) {
             noia_compositor_set_selection(self, new_selection);
         }
@@ -387,23 +468,21 @@ void noia_compositor_focus(NoiaCompositor* self,
 //------------------------------------------------------------------------------
 
 void noia_compositor_swap(NoiaCompositor* self,
-                          NoiaArgmand argmand,
+                          NoiaFrame* frame,
+                          NoiaDirection direction,
                           int position)
 {
     NOIA_ENSURE(self, return);
-    NOIA_ENSURE(noia_argmand_is_directed(argmand), return);
+    NOIA_ENSURE(frame, return);
 
     if (position < 0) {
-        argmand = noia_argmand_reverse_directed(argmand);
+        direction = noia_direction_reverse(direction);
         position = -position;
     }
 
-    if (self->selection) {
-        NoiaFrame* frame =
-                   noia_frame_find_adjacent(self->selection, argmand, position);
-        if (frame) {
-            noia_frame_swap(self->selection, frame, self->coordinator);
-        }
+    NoiaFrame* target = noia_frame_find_adjacent(frame, direction, position);
+    if (target) {
+        noia_frame_swap(frame, target, self->coordinator);
     }
 }
 
@@ -445,33 +524,14 @@ void noia_compositor_focus_workspace(NoiaCompositor* self, char* title)
 
 void noia_compositor_configure(NoiaCompositor* self,
                                NoiaFrame* frame,
-                               NoiaArgmand direction)
+                               NoiaDirection direction)
 {
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(frame, return);
     NOIA_ENSURE(frame->trunk, return);
 
     // Translate direction to frame type
-    NoiaFrameType type = NOIA_FRAME_TYPE_NONE;
-    switch (direction) {
-    case NOIA_ARGMAND_BEGIN:
-    case NOIA_ARGMAND_END:
-        type = NOIA_FRAME_TYPE_STACKED;
-        break;
-
-    case NOIA_ARGMAND_N:
-    case NOIA_ARGMAND_S:
-        type = NOIA_FRAME_TYPE_VERTICAL;
-        break;
-
-    case NOIA_ARGMAND_E:
-    case NOIA_ARGMAND_W:
-        type = NOIA_FRAME_TYPE_HORIZONTAL;
-        break;
-
-    default:
-        break;
-    }
+    NoiaFrameType type = noia_direction_translate_to_frame_type(direction);
 
     LOG_INFO2("Compositor: Change frame type to 0x%04x", type);
 
@@ -503,52 +563,62 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
             break;
         }
 
-        noia_frame_jump(frame, workspace, self->coordinator);
+        noia_frame_jump(frame,
+                        NOIA_FRAME_POSITION_ON,
+                        workspace,
+                        self->coordinator);
     }
     noia_compositor_log_frame(self);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_compositor_execute(NoiaCompositor* self, NoiaAction* a)
+void noia_compositor_execute(NoiaCompositor* self, NoiaCommand* c)
 {
-    NOIA_ENSURE(a, return);
+    NOIA_ENSURE(c, return);
     NOIA_ENSURE(self, return);
-    NOIA_ENSURE(noia_argmand_is_actionable(a->action), return);
 
     if (self->selection) {
-        switch (a->action) {
-        case NOIA_ARGMAND_RESIZE:
+        switch (c->action) {
+        case NOIA_ACTION_RESIZE:
             noia_frame_resize(self->selection, self->coordinator,
-                              a->direction, a->magnitude);
+                              c->direction, c->magnitude);
             break;
-        case NOIA_ARGMAND_MOVE:
-            noia_frame_move(self->selection, a->direction, a->magnitude);
+        case NOIA_ACTION_MOVE:
+            noia_frame_move(self->selection, c->direction, c->magnitude);
             break;
-        case NOIA_ARGMAND_JUMP:
-            if (a->direction == NOIA_ARGMAND_WORKSPACE) {
-                noia_compositor_jump_to_workspace(self, a->str);
-            } else if (a->direction == NOIA_ARGMAND_END) {
+        case NOIA_ACTION_JUMP:
+            if (c->direction == NOIA_DIRECTION_WORKSPACE) {
+                noia_compositor_jump_to_workspace(self, c->str);
+            } else if (c->direction == NOIA_DIRECTION_END) {
                 noia_compositor_ramify(self, self->selection);
+            } else if (c->direction == NOIA_DIRECTION_BEGIN) {
+                noia_compositor_enlarge(self, self->selection);
             } else {
                 noia_compositor_jump(self, self->selection,
-                                     a->direction, a->magnitude);
+                                     c->direction, c->magnitude);
             }
             break;
-        case NOIA_ARGMAND_FOCUS:
-            if (a->direction == NOIA_ARGMAND_WORKSPACE) {
-                noia_compositor_focus_workspace(self, a->str);
+        case NOIA_ACTION_DIVE:
+            noia_compositor_dive(self, self->selection,
+                                 c->direction, c->magnitude);
+            break;
+        case NOIA_ACTION_FOCUS:
+            if (c->direction == NOIA_DIRECTION_WORKSPACE) {
+                noia_compositor_focus_workspace(self, c->str);
             } else {
-                noia_compositor_focus(self, a->direction, a->magnitude);
+                noia_compositor_focus(self, self->selection,
+                                      c->direction, c->magnitude);
             }
             break;
-        case NOIA_ARGMAND_SWAP:
-            noia_compositor_swap(self, a->direction, a->magnitude);
+        case NOIA_ACTION_SWAP:
+            noia_compositor_swap(self, self->selection,
+                                 c->direction, c->magnitude);
             break;
-        case NOIA_ARGMAND_CONF:
-            noia_compositor_configure(self, self->selection, a->direction);
+        case NOIA_ACTION_CONF:
+            noia_compositor_configure(self, self->selection, c->direction);
             break;
-        case NOIA_ARGMAND_ANCHOR:
+        case NOIA_ACTION_ANCHOR:
             noia_compositor_anchorize(self, self->selection);
             break;
         default: break;

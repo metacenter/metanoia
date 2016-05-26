@@ -140,7 +140,7 @@ void noia_wayland_surface_set_input_region(struct wl_client* client NOIA_UNUSED,
         /// @todo Clean input region.
     }
 
-    LOG_WAYL2("Wayland > set input region (sid: %d, rid: %d)", sid, rid);
+    LOG_WAYL3("Wayland > set input region (sid: %d, rid: %d)", sid, rid);
 
     noia_wayland_facade_set_input_region(sid, rid);
 }

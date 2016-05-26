@@ -32,13 +32,16 @@ static const char scLogDelimiter[] =
 "----------------+-------+-----------------+------+----"
 "--------------------------------------+\n";
 
-/// Default log file deacriptor - stdout
+/// Default log file deacriptor - stdout.
 #define NOIA_DEFAULT_LOG_FD 1
 
-/// Log file descriptor
+/// Buffer size for log line.
+#define NOIA_BUFF_SIZE 128
+
+/// Log file descriptor.
 static int sLogFD = NOIA_DEFAULT_LOG_FD;
 
-/// Logger mutex
+/// Logger mutex.
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //------------------------------------------------------------------------------
@@ -86,7 +89,7 @@ int noia_log(const char* log_level,
              ...)
 {
     size_t n;
-    char buff[128];
+    char buff[NOIA_BUFF_SIZE];
     char thread_name[16];
 
     // Get time
@@ -160,7 +163,7 @@ int noia_log_end(void)
 
 int noia_log_print(const char* format, ...)
 {
-    char buff[128];
+    char buff[NOIA_BUFF_SIZE];
 
     va_list argptr;
     va_start(argptr, format);

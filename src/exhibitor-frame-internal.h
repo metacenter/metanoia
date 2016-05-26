@@ -53,6 +53,9 @@ void noia_frame_set_size(NoiaFrame* self,
 /// Set frame position.
 void noia_frame_set_position(NoiaFrame* self, NoiaPosition position);
 
+/// Get next frame.
+NoiaFrame* noia_frame_get_next(NoiaFrame* self);
+
 /// Add child frame to ending.
 /// If `self` has twigs add `other` to them.
 /// If not, add to subframes of its trunk.
@@ -89,13 +92,13 @@ void noia_frame_reconfigure(NoiaFrame* self,
 /// Resize anchored frame.
 void noia_frame_resize_anchored(NoiaFrame* self,
                                 NoiaCoordinator* coordinator,
-                                NoiaArgmand border,
+                                NoiaDirection border,
                                 int magnitude);
 
 /// Resize floating frame.
 void noia_frame_resize_floating(NoiaFrame* self,
                                 NoiaCoordinator* coordinator,
-                                NoiaArgmand border,
+                                NoiaDirection border,
                                 int magnitude);
 
 /// Make all subsurfaces have the same size and proper layout.

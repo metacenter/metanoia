@@ -36,8 +36,8 @@ void noia_compositor_pop_surface(NoiaCompositor* self, NoiaSurfaceId sid);
 
 /// Moves, jumps, resizes, changes order, anchorizes, changes parameters
 /// of currently selected frame basing on given action.
-/// @see NoiaAction
-void noia_compositor_execute(NoiaCompositor* self, NoiaAction* action);
+/// @see NoiaCommand
+void noia_compositor_execute(NoiaCompositor* self, NoiaCommand* command);
 
 #endif // NOIA_EXHIBITOR_COMPOSITOR_H
 

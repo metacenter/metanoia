@@ -109,11 +109,11 @@ NoiaCoordinator* noia_exhibitor_get_coordinator(NoiaExhibitor* self)
 
 //------------------------------------------------------------------------------
 
-void noia_exhibitor_execute(NoiaExhibitor* self, NoiaAction* action)
+void noia_exhibitor_execute(NoiaExhibitor* self, NoiaCommand* command)
 {
     NOIA_ENSURE(self, return);
-    NOIA_ENSURE(action, return);
-    noia_compositor_execute(self->compositor, action);
+    NOIA_ENSURE(command, return);
+    noia_compositor_execute(self->compositor, command);
 }
 
 //------------------------------------------------------------------------------

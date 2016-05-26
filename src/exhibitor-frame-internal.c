@@ -56,6 +56,13 @@ int noia_frame_params_compare_sid(NoiaFrameParams* params, NoiaSurfaceId sid)
 
 //------------------------------------------------------------------------------
 
+NoiaFrame* noia_frame_get_next(NoiaFrame* self)
+{
+    return (NoiaFrame*) ((NoiaLink*) self)->next;
+}
+
+//------------------------------------------------------------------------------
+
 void noia_frame_set_surface(NoiaFrame* self,
                             NoiaCoordinator* coordinator,
                             NoiaSurfaceId sid)
@@ -205,7 +212,7 @@ void noia_frame_reconfigure(NoiaFrame* self,
 
 void noia_frame_resize_anchored(NoiaFrame* self,
                                 NoiaCoordinator* coordinator,
-                                NoiaArgmand border,
+                                NoiaDirection border,
                                 int magnitude)
 {
     NOIA_ENSURE(self, return);
@@ -214,22 +221,22 @@ void noia_frame_resize_anchored(NoiaFrame* self,
     NoiaArea area_other = {{0, 0}, {0, 0}};
     NoiaFrame* other = NULL;
 
-    if (border == NOIA_ARGMAND_N) {
+    if (border == NOIA_DIRECTION_N) {
         other                   = (NoiaFrame*) self->base.prev;
         area.pos.y             -= magnitude;
         area.size.height       += magnitude;
         area_other.size.height -= magnitude;
-    } else if (border == NOIA_ARGMAND_S) {
+    } else if (border == NOIA_DIRECTION_S) {
         other                   = (NoiaFrame*) self->base.next;
         area.size.height       += magnitude;
         area_other.pos.y       += magnitude;
         area_other.size.height -= magnitude;
-    } else if (border == NOIA_ARGMAND_W) {
+    } else if (border == NOIA_DIRECTION_W) {
         other                  = (NoiaFrame*) self->base.prev;
         area.pos.x            -= magnitude;
         area.size.width       += magnitude;
         area_other.size.width -= magnitude;
-    } else if (border == NOIA_ARGMAND_E) {
+    } else if (border == NOIA_DIRECTION_E) {
         other                  = (NoiaFrame*) self->base.next;
         area.size.width       += magnitude;
         area_other.pos.x      += magnitude;
@@ -246,7 +253,7 @@ void noia_frame_resize_anchored(NoiaFrame* self,
 
 void noia_frame_resize_floating(NoiaFrame* self,
                                 NoiaCoordinator* coordinator,
-                                NoiaArgmand border,
+                                NoiaDirection border,
                                 int magnitude)
 {
     NOIA_ENSURE(self, return);
@@ -254,14 +261,14 @@ void noia_frame_resize_floating(NoiaFrame* self,
     NoiaArea area = {{0, 0}, {0, 0}};
 
     switch (border) {
-    case NOIA_ARGMAND_N:
+    case NOIA_DIRECTION_N:
         area.pos.y -= magnitude;
-    case NOIA_ARGMAND_S:
+    case NOIA_DIRECTION_S:
         area.size.height += magnitude;
         break;
-    case NOIA_ARGMAND_W:
+    case NOIA_DIRECTION_W:
         area.pos.x -= magnitude;
-    case NOIA_ARGMAND_E:
+    case NOIA_DIRECTION_E:
         area.size.width += magnitude;
         break;
     default:

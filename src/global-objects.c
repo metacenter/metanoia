@@ -140,33 +140,33 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos)
 
 //------------------------------------------------------------------------------
 
-/// Create an action.
-NoiaAction* noia_action_create(void)
+/// Create a command.
+NoiaCommand* noia_command_create(void)
 {
-    NoiaAction* self = malloc(sizeof(NoiaAction));
-    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_action_destroy);
+    NoiaCommand* self = malloc(sizeof(NoiaCommand));
+    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_command_destroy);
     self->str = NULL;
-    noia_action_clean(self);
+    noia_command_clean(self);
     return self;
 }
 
 //------------------------------------------------------------------------------
 
-/// Free an action.
-void noia_action_destroy(NoiaAction* self)
+/// Free a command.
+void noia_command_destroy(NoiaCommand* self)
 {
     NOIA_ENSURE(self, return);
-    noia_action_clean(self);
+    noia_command_clean(self);
     free(self);
 }
 
 //------------------------------------------------------------------------------
 
-/// Clean an action.
-void noia_action_clean(NoiaAction* self)
+/// Clean a command.
+void noia_command_clean(NoiaCommand* self)
 {
-    self->action    = NOIA_ARGMAND_NONE;
-    self->direction = NOIA_ARGMAND_NONE;
+    self->action    = NOIA_ACTION_NONE;
+    self->direction = NOIA_DIRECTION_NONE;
     self->magnitude = 0;
     if (self->str) {
         free(self->str);
@@ -176,10 +176,10 @@ void noia_action_clean(NoiaAction* self)
 
 //------------------------------------------------------------------------------
 
-/// Copy an action.
-NoiaAction* noia_action_copy(NoiaAction* self)
+/// Copy a commnad.
+NoiaCommand* noia_command_copy(NoiaCommand* self)
 {
-    NoiaAction* copy = noia_action_create();
+    NoiaCommand* copy = noia_command_create();
     copy->action    = self->action;
     copy->direction = self->direction;
     copy->magnitude = self->magnitude;
