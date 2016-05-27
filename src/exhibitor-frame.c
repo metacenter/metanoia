@@ -290,14 +290,21 @@ NoiaFrame* noia_frame_ramify(NoiaFrame* self,
 void noia_frame_deramify(NoiaFrame* self)
 {
     unsigned len = noia_chain_recalculate_length(self->twigs);
+
     if (len == 1) {
         NoiaFrame* first = noia_frame_get_first(self);
         len = noia_chain_recalculate_length(first->twigs);
-        if (len > 0) {
+        if (len == 1) {
             NoiaFrame* second = noia_frame_get_first(first);
             noia_branch_remove(first, second);
             noia_branch_remove(self, first);
             noia_branch_prepend(self, second);
+            noia_frame_free(first);
+        } else if (len == 0) {
+            NoiaFrameParams* params = noia_frame_get_params(self);
+            params->type = NOIA_FRAME_TYPE_LEAF;
+            params->sid = noia_frame_get_sid(first),
+            noia_branch_remove(self, first);
             noia_frame_free(first);
         }
     }
@@ -477,8 +484,15 @@ NoiaFrame* noia_frame_find_top(NoiaFrame* self)
     NOIA_ENSURE(self, return NULL);
 
     NoiaFrame* frame = self;
-    while (frame and (not noia_frame_has_type(frame, NOIA_FRAME_TYPE_SPECIAL))){
-        frame = frame->trunk;
+    NoiaFrame* trunk = self->trunk;
+
+    if ((not trunk) and noia_frame_has_type(self, NOIA_FRAME_TYPE_SPECIAL)) {
+        frame = NULL;
+    }
+
+    while (trunk and (not noia_frame_has_type(trunk, NOIA_FRAME_TYPE_SPECIAL))){
+        frame = trunk;
+        trunk = trunk->trunk;
     }
     return frame;
 }

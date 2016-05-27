@@ -68,6 +68,14 @@ NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
 
 //------------------------------------------------------------------------------
 
+/// Search for existing workspace with given title.
+NoiaFrame* noia_compositor_find_current_workspace(NoiaCompositor* self)
+{
+    return noia_frame_find_top(self->selection)->trunk;
+}
+
+//------------------------------------------------------------------------------
+
 /// Creates new frame, places it in proper place in frame tree and initializes
 /// it as a workspace.
 NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
@@ -116,9 +124,9 @@ NoiaFrame* noia_compositor_bring_workspace(NoiaCompositor* self,
 
         /// @todo For many output setup this should be cofigurable on which
         ///       output the workspace will be created.
-        NoiaFrame* current_workspace = noia_frame_find_top(self->selection);
-        NOIA_ENSURE(current_workspace, break);
-        NoiaFrame* display_frame = noia_frame_get_trunk(current_workspace);
+        NoiaFrame* current = noia_compositor_find_current_workspace(self);
+        NOIA_ENSURE(current, break);
+        NoiaFrame* display_frame = noia_frame_get_trunk(current);
         NOIA_ENSURE(display_frame, break);
 
         workspace = noia_compositor_create_new_workspace
@@ -139,7 +147,7 @@ NoiaCompositor* noia_compositor_new(NoiaExhibitor* exhibitor)
     self->exhibitor = exhibitor;
     self->coordinator = noia_exhibitor_get_coordinator(exhibitor);
     self->root = noia_frame_new();
-    noia_frame_configure(self->root, self->coordinator, NOIA_FRAME_TYPE_STACKED,
+    noia_frame_configure(self->root, self->coordinator, NOIA_FRAME_TYPE_SPECIAL,
                          scInvalidSurfaceId, area, "METANOIA");
     return self;
 }
@@ -220,7 +228,7 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
     if (surface->parent_sid == scInvalidSurfaceId) {
         target = noia_frame_buildable(self->selection);
     } else {
-        target = noia_frame_find_top(self->selection);
+        target = noia_compositor_find_current_workspace(self);
     }
 
     // Prepare new frame parameters
@@ -347,7 +355,7 @@ void noia_compositor_enlarge(NoiaCompositor* self, NoiaFrame* frame)
 void noia_compositor_jump(NoiaCompositor* self,
                           NoiaFrame* frame,
                           NoiaDirection direction,
-                          int position)
+                          int distance)
 {
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(frame, return);
@@ -355,22 +363,32 @@ void noia_compositor_jump(NoiaCompositor* self,
     LOG_INFO2("Compositor: jump");
 
     // Modify direction if needed
-    if (position < 0) {
+    if (distance < 0) {
         direction = noia_direction_reverse(direction);
-        position = -position;
+        distance = -distance;
+    }
+
+    // Calculate position
+    NoiaFramePosition position = NOIA_FRAME_POSITION_ON;
+    if ((direction == NOIA_DIRECTION_N)
+    or  (direction == NOIA_DIRECTION_W)) {
+        position = NOIA_FRAME_POSITION_BEFORE;
+    } else {
+        position = NOIA_FRAME_POSITION_AFTER;
+    }
+
+    // Find target
+    NoiaFrame* target = noia_frame_find_adjacent(frame, direction, distance);
+    if (not target) {
+        NoiaFrameType type = noia_direction_translate_to_frame_type(direction);
+        target = noia_frame_find_top(frame);
+        noia_frame_ramify(target, type, self->coordinator);
     }
 
     // Perform jump
-    NoiaFrame* target = noia_frame_find_adjacent(frame, direction, position);
-    if (target) {
-        NoiaFramePosition position = NOIA_FRAME_POSITION_BEFORE;
-        if ((direction == NOIA_DIRECTION_S)
-        or  (direction == NOIA_DIRECTION_W)) {
-            position = NOIA_FRAME_POSITION_AFTER;
-        }
-
-        noia_frame_jump(frame, position, target, self->coordinator);
-    }
+    NoiaFrame* source = noia_frame_get_trunk(frame);
+    noia_frame_jump(frame, position, target, self->coordinator);
+    noia_frame_deramify(source);
 
     // Log result
     noia_compositor_log_frame(self);
@@ -397,10 +415,12 @@ void noia_compositor_dive(NoiaCompositor* self,
     // Perform jump
     NoiaFrame* target = noia_frame_find_adjacent(frame, direction, position);
     if (target) {
+        NoiaFrame* source = noia_frame_get_trunk(frame);
         noia_frame_jump(frame,
                         NOIA_FRAME_POSITION_ON,
                         target,
                         self->coordinator);
+        noia_frame_deramify(source);
     }
 
     // Log result
@@ -558,7 +578,7 @@ void noia_compositor_anchorize(NoiaCompositor* self, NoiaFrame* frame)
             break;
         }
 
-        NoiaFrame* workspace = noia_frame_find_top(self->selection);
+        NoiaFrame* workspace = noia_compositor_find_current_workspace(self);
         if (not workspace) {
             break;
         }

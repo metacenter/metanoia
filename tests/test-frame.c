@@ -116,19 +116,31 @@ bool noia_test_streq(const char * s1, const char * s2)
     NoiaFrame* a1 = noia_frame_new(); \
     NoiaFrame* a2 = noia_frame_new(); \
     NoiaFrame* a3 = noia_frame_new(); \
+    NoiaFrame* f = noia_frame_new(); \
     NoiaFrame* b  = noia_frame_new(); \
     NoiaFrame* c  = noia_frame_new(); \
+    NoiaFrame* d1 = noia_frame_new(); \
+    NoiaFrame* d2 = noia_frame_new(); \
+    NoiaFrame* d3 = noia_frame_new(); \
     noia_test_frame_config(r,  co, NOIA_FRAME_TYPE_VERTICAL, INV); \
-    noia_test_frame_config(a1, co, NOIA_FRAME_TYPE_LEAF,     INV); \
+    noia_test_frame_config(a1, co, NOIA_FRAME_TYPE_STACKED,  INV); \
     noia_test_frame_config(a2, co, NOIA_FRAME_TYPE_VERTICAL, INV); \
     noia_test_frame_config(a3, co, NOIA_FRAME_TYPE_LEAF,     INV); \
+    noia_test_frame_config(f,  co, NOIA_FRAME_TYPE_LEAF,  INV); \
     noia_test_frame_config(b,  co, NOIA_FRAME_TYPE_STACKED,  INV); \
-    noia_test_frame_config(c,  co, NOIA_FRAME_TYPE_LEAF,     INV); \
+    noia_test_frame_config(c,  co, NOIA_FRAME_TYPE_STACKED,  INV); \
+    noia_test_frame_config(d1, co, NOIA_FRAME_TYPE_LEAF,     INV); \
+    noia_test_frame_config(d2, co, NOIA_FRAME_TYPE_LEAF,     INV); \
+    noia_test_frame_config(d3, co, NOIA_FRAME_TYPE_LEAF,     INV); \
     noia_frame_append(r,  a1); \
     noia_frame_append(r,  a2); \
     noia_frame_append(r,  a3); \
-    noia_frame_append(a2, b ); \
-    noia_frame_append(b,  c );
+    noia_frame_append(a1, f); \
+    noia_frame_append(a2, b); \
+    noia_frame_append(b,  c); \
+    noia_frame_append(c,  d1); \
+    noia_frame_append(c,  d2); \
+    noia_frame_append(c,  d3);
 
 /// Frame set for testing search.
 ///
@@ -1095,10 +1107,38 @@ NoiaTestResult should_deramify(void)
     noia_frame_deramify(a2);
 
     NOIA_ASSERT_CHAIN_LEN(r->twigs,  3u)
+    NOIA_ASSERT_CHAIN_LEN(a1->twigs, 1u)
     NOIA_ASSERT_CHAIN_LEN(a2->twigs, 1u)
     NOIA_ASSERT_TRUNK(a2, r);
     //NOIA_ASSERT_TRUNK(b,  NULL); <- invalid read
     NOIA_ASSERT_TRUNK(c,  a2);
+
+    noia_frame_free(r);
+    noia_coordinator_mock_free(co);
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Should deramify frame with single leaf twig.
+NoiaTestResult should_deramify_with_one_leaf(void)
+{
+    NoiaCoordinator* co = noia_coordinator_mock_new();
+    NOIA_MAKE_FRAMES_FOR_DERAMIFYING;
+
+    noia_frame_deramify(a1);
+
+    NOIA_ASSERT_CHAIN_LEN(r->twigs,  3u)
+    NOIA_ASSERT_CHAIN_LEN(a1->twigs, 0u)
+    NOIA_ASSERT_CHAIN_LEN(a2->twigs, 1u)
+    NOIA_ASSERT_TRUNK(a2, r);
+    NOIA_ASSERT_TRUNK(a1, r);
+    //NOIA_ASSERT_TRUNK(f,  a1); <- invalid read
+    NOIA_ASSERT_TRUNK(b,  a2);
+    NOIA_ASSERT_TRUNK(c,  b);
+    NOIA_ASSERT_TRUNK(d1, c);
+    NOIA_ASSERT_TRUNK(d2, c);
+    NOIA_ASSERT_TRUNK(d3, c);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -1116,10 +1156,16 @@ NoiaTestResult should_not_deramify_not_single(void)
     noia_frame_deramify(r);
 
     NOIA_ASSERT_CHAIN_LEN(r->twigs,  3u)
+    NOIA_ASSERT_CHAIN_LEN(a1->twigs, 1u)
     NOIA_ASSERT_CHAIN_LEN(a2->twigs, 1u)
     NOIA_ASSERT_TRUNK(a2, r);
-    NOIA_ASSERT_TRUNK(b, a2);
-    NOIA_ASSERT_TRUNK(c, b);
+    NOIA_ASSERT_TRUNK(b,  a2);
+    NOIA_ASSERT_TRUNK(f,  a1);
+    NOIA_ASSERT_TRUNK(b,  a2);
+    NOIA_ASSERT_TRUNK(c,  b);
+    NOIA_ASSERT_TRUNK(d1, c);
+    NOIA_ASSERT_TRUNK(d2, c);
+    NOIA_ASSERT_TRUNK(d3, c);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -1128,8 +1174,8 @@ NoiaTestResult should_not_deramify_not_single(void)
 
 //------------------------------------------------------------------------------
 
-/// Should not deramify frame with single leaf twig.
-NoiaTestResult should_not_deramify_with_leaf(void)
+/// Should not deramify frame with many leaf twigs.
+NoiaTestResult should_not_deramify_single_with_many_leafs(void)
 {
     NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_FOR_DERAMIFYING;
@@ -1137,10 +1183,16 @@ NoiaTestResult should_not_deramify_with_leaf(void)
     noia_frame_deramify(b);
 
     NOIA_ASSERT_CHAIN_LEN(r->twigs,  3u)
+    NOIA_ASSERT_CHAIN_LEN(a1->twigs, 1u)
     NOIA_ASSERT_CHAIN_LEN(a2->twigs, 1u)
     NOIA_ASSERT_TRUNK(a2, r);
-    NOIA_ASSERT_TRUNK(b, a2);
-    NOIA_ASSERT_TRUNK(c, b);
+    NOIA_ASSERT_TRUNK(a1, r);
+    NOIA_ASSERT_TRUNK(f,  a1);
+    NOIA_ASSERT_TRUNK(b,  a2);
+    NOIA_ASSERT_TRUNK(c,  b);
+    NOIA_ASSERT_TRUNK(d1, c);
+    NOIA_ASSERT_TRUNK(d2, c);
+    NOIA_ASSERT_TRUNK(d3, c);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -1190,13 +1242,13 @@ NoiaTestResult should_find_top(void)
     NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_POSITIONED;
 
-    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(a), r);
-    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(b), r);
-    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(c), r);
-    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(d), r);
-    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(e), r);
-    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(f), r);
-    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(r), r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(a), abcde);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(b), abcde);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(c), abcde);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(d), abcde);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(e), abcde);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(f), f);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_find_top(r), NULL);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -2768,8 +2820,9 @@ int main(int argc, char** argv)
             NOIA_TEST(should_ramify_leaf),
             NOIA_TEST(should_ramify_nonleaf),
             NOIA_TEST(should_deramify),
+            NOIA_TEST(should_deramify_with_one_leaf),
             NOIA_TEST(should_not_deramify_not_single),
-            NOIA_TEST(should_not_deramify_with_leaf),
+            NOIA_TEST(should_not_deramify_single_with_many_leafs),
 
             // finding
             NOIA_TEST(should_find_with_sid),
