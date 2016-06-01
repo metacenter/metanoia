@@ -90,6 +90,16 @@ NoiaTestResult should_get_nth(void)
 
 //------------------------------------------------------------------------------
 
+NoiaTestResult should_clean_empty(void)
+{
+    NoiaList* l = noia_list_new(free);
+    noia_list_clean(l);
+    noia_list_free(l);
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaTestResult should_remove_from_begining(void)
 {
     char* a[] = {"3", "4"};
@@ -281,6 +291,7 @@ int main(int argc, char** argv)
             NOIA_TEST(should_append_values),
             NOIA_TEST(should_prepend_values),
             NOIA_TEST(should_get_nth),
+            NOIA_TEST(should_clean_empty),
             NOIA_TEST(should_remove_from_begining),
             NOIA_TEST(should_remove_from_end),
             NOIA_TEST(should_remove_from_inside),

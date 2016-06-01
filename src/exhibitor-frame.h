@@ -45,7 +45,9 @@ void noia_frame_configure(NoiaFrame* self,
 
 /// Append self and all children surface context to array `surfaces`.
 /// @see noia_display_redraw_all
-void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces);
+void noia_frame_to_array(NoiaFrame* self,
+                         NoiaPool* surfaces,
+                         NoiaCoordinator* coordinator);
 
 //------------------------------------------------------------------------------
 

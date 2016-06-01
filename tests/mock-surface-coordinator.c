@@ -76,3 +76,15 @@ NoiaSize noia_surface_get_desired_size(NoiaCoordinator* mock,
 
 //------------------------------------------------------------------------------
 
+void noia_surface_to_array(NoiaCoordinator* coordinator NOIA_UNUSED,
+                           NoiaSurfaceId sid,
+                           NoiaPosition parent_pos,
+                           NoiaPool* surfaces)
+{
+    NoiaSurfaceContext* context = noia_pool_add(surfaces);
+    context->sid = sid;
+    context->pos = parent_pos;
+}
+
+//------------------------------------------------------------------------------
+

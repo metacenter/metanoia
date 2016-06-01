@@ -51,8 +51,7 @@ void noia_wayland_xdg_popup_bind(struct wl_client* client,
     wl_resource_set_implementation(rc, &scXdgPopupImplementation, data,
                                    noia_wayland_xdg_popup_unbind);
 
-    noia_wayland_facade_add_shell_surface
-                           (sid, NOIA_RESOURCE_XDG_SHELL_POPUP, rc);
+    noia_wayland_facade_add_general_resource(NOIA_RESOURCE_OTHER, rc);
 }
 
 //------------------------------------------------------------------------------

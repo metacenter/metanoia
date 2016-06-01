@@ -32,14 +32,24 @@ void noia_wayland_subcompositor_destroy
 
 /// Wayland protocol: Handle request subsurface object.
 void noia_wayland_subcompositor_get_subsurface
-                              (struct wl_client* client             NOIA_UNUSED,
-                               struct wl_resource* resource,
-                               uint32_t id,
-                               struct wl_resource* surface_resource NOIA_UNUSED,
-                               struct wl_resource* parent_resource  NOIA_UNUSED)
+                                          (struct wl_client* client,
+                                           struct wl_resource* resource,
+                                           uint32_t id,
+                                           struct wl_resource* surface_resource,
+                                           struct wl_resource* parent_resource)
 {
     uint32_t version = wl_resource_get_version(resource);
-    noia_wayland_subsurface_bind(client, NULL, version, id);
+    NoiaSurfaceId sid =
+                    (NoiaSurfaceId) wl_resource_get_user_data(surface_resource);
+    NoiaSurfaceId parent_sid =
+                     (NoiaSurfaceId) wl_resource_get_user_data(parent_resource);
+
+    LOG_WAYL3("Wayland > get subsurface "
+              "(sid: %u, parent sid: %u)",
+              sid, parent_sid);
+
+    noia_wayland_subsurface_bind(client, (void*) sid, version, id);
+    noia_wayland_facade_add_subsurface(sid, parent_sid, 0, 0);
 }
 
 //------------------------------------------------------------------------------

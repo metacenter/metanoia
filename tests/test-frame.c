@@ -636,13 +636,13 @@ NoiaTestResult should_insert_values(void)
 //------------------------------------------------------------------------------
 
 /// Check order and position when translating whole frame to array.
-NoiaTestResult should_translate_frame_to_array(void)
+NoiaTestResult should_translate_root_frame_to_array(void)
 {
     NoiaCoordinator* co = noia_coordinator_mock_new();
 
     NOIA_MAKE_FRAMES_SIMPLE;
 
-;    NoiaSurfaceContext a[] = {
+    NoiaSurfaceContext a[] = {
             {11, {  0,  0}},
             {12, {  0, 12}},
             {13, {  0, 24}},
@@ -663,7 +663,7 @@ NoiaTestResult should_translate_frame_to_array(void)
     NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
                                       sizeof(NoiaSurfaceContext));
 
-    noia_frame_to_array(r, pool);
+    noia_frame_to_array(r, pool, co);
     noia_frame_free(r);
 
     NOIA_ASSERT_FRAME_ARRAY(a, pool);
@@ -676,7 +676,7 @@ NoiaTestResult should_translate_frame_to_array(void)
 //------------------------------------------------------------------------------
 
 /// Check order and position when translating subframes to array.
-NoiaTestResult should_translate_subframes_to_array(void)
+NoiaTestResult should_translate_twig_frame_to_array(void)
 {
     NoiaCoordinator* co = noia_coordinator_mock_new();
 
@@ -711,9 +711,9 @@ NoiaTestResult should_translate_subframes_to_array(void)
     NoiaPool* ps = noia_pool_create(NOIA_SIZEOF_ARRAY(as),
                                     sizeof(NoiaSurfaceContext));
 
-    noia_frame_to_array(v, pv);
-    noia_frame_to_array(h, ph);
-    noia_frame_to_array(s, ps);
+    noia_frame_to_array(v, pv, co);
+    noia_frame_to_array(h, ph, co);
+    noia_frame_to_array(s, ps, co);
     noia_frame_free(r);
 
     NOIA_ASSERT_FRAME_ARRAY(av, pv);
@@ -1024,7 +1024,7 @@ NoiaTestResult should_pop_frame_recursively(void)
                                       sizeof(NoiaSurfaceContext));
 
     noia_frame_pop_recursively(r, z2);
-    noia_frame_to_array(r, pool);
+    noia_frame_to_array(r, pool, co);
     noia_frame_free(r);
 
     NOIA_ASSERT_FRAME_ARRAY(a, pool);
@@ -2622,24 +2622,22 @@ NoiaTestResult should_jumpin_before(void)
     NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
     NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
 
-    NoiaSurfaceContext a[] = {
-            {11, {0,  0}},
-            {12, {0, 10}},
-            {66, {0, 20}},
-            {13, {0, 30}},
-            {14, {0, 40}},
-            {15, {0, 50}},
-        };
+    NoiaFrame* twig = noia_frame_get_first(v);
+    NOIA_ASSERT_FRAME_POINTER(twig, v1);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v2);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, f);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v3);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v4);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v5);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, NULL);
 
-    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
-                                      sizeof(NoiaSurfaceContext));
-
-    noia_frame_to_array(v, pool);
     noia_frame_free(r);
-
-    NOIA_ASSERT_FRAME_ARRAY(a, pool);
-
-    noia_pool_destroy(pool);
     noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
@@ -2667,24 +2665,22 @@ NoiaTestResult should_jumpin_after(void)
     NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
     NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
 
-    NoiaSurfaceContext a[] = {
-            {11, {0,  0}},
-            {12, {0, 10}},
-            {13, {0, 20}},
-            {66, {0, 30}},
-            {14, {0, 40}},
-            {15, {0, 50}},
-        };
+    NoiaFrame* twig = noia_frame_get_first(v);
+    NOIA_ASSERT_FRAME_POINTER(twig, v1);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v2);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v3);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, f);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v4);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v5);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, NULL);
 
-    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
-                                      sizeof(NoiaSurfaceContext));
-
-    noia_frame_to_array(v, pool);
     noia_frame_free(r);
-
-    NOIA_ASSERT_FRAME_ARRAY(a, pool);
-
-    noia_pool_destroy(pool);
     noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
@@ -2716,24 +2712,27 @@ NoiaTestResult should_jumpin_on(void)
     NOIA_ASSERT_FRAME_PARAMETERS(v3, 13ul, NOIA_FRAME_TYPE_LEAF,
                                  0, 24, 60, 12, "v3");
 
-    NoiaSurfaceContext a[] = {
-            {11, {0,  0}},
-            {12, {0, 12}},
-            {13, {0, 24}},
-            {66, {0, 24}},
-            {14, {0, 36}},
-            {15, {0, 48}},
-        };
+    NoiaFrame* twig = noia_frame_get_first(f->trunk);
+    NOIA_ASSERT_FRAME_POINTER(twig, v3);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, f);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, NULL);
 
-    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
-                                      sizeof(NoiaSurfaceContext));
+    twig = noia_frame_get_first(v);
+    NOIA_ASSERT_FRAME_POINTER(twig, v1);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v2);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, f->trunk);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v4);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, v5);
+    twig = noia_frame_get_next(twig);
+    NOIA_ASSERT_FRAME_POINTER(twig, NULL);
 
-    noia_frame_to_array(v, pool);
     noia_frame_free(r);
-
-    NOIA_ASSERT_FRAME_ARRAY(a, pool);
-
-    noia_pool_destroy(pool);
     noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
@@ -2809,8 +2808,8 @@ int main(int argc, char** argv)
             // general operations
             NOIA_TEST(should_append_and_prepend_values),
             NOIA_TEST(should_insert_values),
-            NOIA_TEST(should_translate_frame_to_array),
-            NOIA_TEST(should_translate_subframes_to_array),
+            NOIA_TEST(should_translate_root_frame_to_array),
+            NOIA_TEST(should_translate_twig_frame_to_array),
             NOIA_TEST(should_remove_some_leaf_frames),
             NOIA_TEST(should_remove_frame_with_subframes),
             NOIA_TEST(should_resettle_one_frame),

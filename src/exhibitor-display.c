@@ -136,7 +136,8 @@ void noia_display_redraw_all(NoiaDisplay* self)
 
     // Prepare surfaces.
     noia_frame_to_array(noia_frame_get_last(self->frame),
-                        self->visible_surfaces);
+                        self->visible_surfaces,
+                        self->coordinator);
 
     // Prepare overlayer
     NoiaPointer* pointer = noia_exhibitor_get_pointer(self->exhibitor);

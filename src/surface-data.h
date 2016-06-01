@@ -6,6 +6,7 @@
 #define NOIA_SURFACE_DATA_H
 
 #include "utils-store.h"
+#include "utils-list.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -51,8 +52,15 @@ typedef struct {
     /// Position requested by client.
     NoiaPosition requested_position;
 
-    /// Id of parent surface
+    /// Position requested by client relative to parent surface.
+    /// For surfaces without parent this must be {0, 0}.
+    NoiaPosition relative_position;
+
+    /// ID of parent surface.
     NoiaSurfaceId parent_sid;
+
+    /// List of IDs of satelliting surfaces.
+    NoiaList* satellites;
 
     /// Data required for draw.
     NoiaDrawBuffer buffer;

@@ -47,11 +47,11 @@ void noia_wayland_facade_set_requested_size(NoiaSurfaceId sid, NoiaSize size)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_facade_set_requested_position(NoiaSurfaceId sid,
-                                                NoiaSurfaceId reference_sid,
-                                                NoiaPosition pos)
+void noia_wayland_facade_set_subsurface_position(NoiaSurfaceId sid,
+                                                 int x, int y)
 {
-    noia_surface_set_requested_position(C->coordinator, sid, reference_sid, pos);
+    NoiaPosition pos = {x, y};
+    noia_surface_set_relative_position(C->coordinator, sid, pos);
 }
 
 //------------------------------------------------------------------------------
@@ -137,6 +137,16 @@ void noia_wayland_facade_add_shell_surface(NoiaSurfaceId sid,
 
 //------------------------------------------------------------------------------
 
+void noia_wayland_facade_add_subsurface(NoiaSurfaceId sid,
+                                        NoiaSurfaceId parent_sid,
+                                        int x, int y)
+{
+    noia_surface_relate(C->coordinator, sid, parent_sid);
+    noia_wayland_facade_set_subsurface_position(sid, x, y);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_wayland_facade_surface_attach(NoiaSurfaceId sid,
                                         struct wl_resource* rc,
                                         struct wl_resource* brc,
@@ -163,6 +173,41 @@ void noia_wayland_facade_remove_surface(NoiaSurfaceId sid,
                        (C->cache, sid, NOIA_RESOURCE_SURFACE, rc);
     noia_wayland_cache_remove_surface(C->cache, sid);
     noia_wayland_cache_unlock(C->cache);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_facade_reorder_satellites(NoiaSurfaceId sid,
+                                            NoiaSurfaceId sibling_sid,
+                                            bool above)
+{
+    NoiaSurfaceData* surface = noia_surface_get(C->coordinator, sid);
+    NOIA_ENSURE(surface, return);
+
+    NoiaSurfaceData* parent =
+                          noia_surface_get(C->coordinator, surface->parent_sid);
+    NOIA_ENSURE(parent, return);
+
+    NoiaLink* surface_link = NULL;
+    NoiaLink* sibling_link = NULL;
+    FOR_EACH(parent->satellites, link) {
+        NoiaSurfaceId satellite_sid = (NoiaSurfaceId) link->data;
+        if (satellite_sid == sibling_sid) {
+            sibling_link = link;
+        } else if (satellite_sid == sid) {
+            surface_link = link;
+        }
+    }
+
+    NOIA_ENSURE(surface_link and sibling_link, return);
+
+    NoiaChain* satellites = &parent->satellites->base;
+    noia_chain_disjoin(satellites, surface_link);
+    if (above) {
+        noia_chain_adjoin_onto(satellites, surface_link, sibling_link);
+    } else {
+        noia_chain_prejoin_onto(satellites, surface_link, sibling_link);
+    }
 }
 
 //------------------------------------------------------------------------------

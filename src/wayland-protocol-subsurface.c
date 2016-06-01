@@ -4,6 +4,8 @@
 
 #include "wayland-protocol-subsurface.h"
 
+#include "wayland-facade.h"
+
 #include "global-macros.h"
 #include "utils-log.h"
 
@@ -17,6 +19,7 @@ void noia_wayland_subsurface_unbind(struct wl_resource* resource NOIA_UNUSED)
 
 //------------------------------------------------------------------------------
 
+/// @todo Wayland protocol: destroy subsurface.
 void noia_wayland_subsurface_destroy(struct wl_client* client     NOIA_UNUSED,
                                      struct wl_resource* resource NOIA_UNUSED)
 {
@@ -25,36 +28,54 @@ void noia_wayland_subsurface_destroy(struct wl_client* client     NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_subsurface_set_position
-                                      (struct wl_client* client     NOIA_UNUSED,
-                                       struct wl_resource* resource NOIA_UNUSED,
-                                       int32_t x, int32_t y)
+/// Wayland protocol: set subsurface position.
+void noia_wayland_subsurface_set_position(struct wl_client* client NOIA_UNUSED,
+                                          struct wl_resource* resource,
+                                          int32_t x, int32_t y)
 {
-    LOG_NYIMP("Wayland > subsurface set position (x: %d, y: %d)", x, y);
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    LOG_WAYL3("Wayland > subsurface set position "
+              "(sid: %u, x: %d, y: %d)", sid, x, y);
+    noia_wayland_facade_set_subsurface_position(sid, x, y);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_subsurface_place_above
-                              (struct wl_client* client             NOIA_UNUSED,
-                               struct wl_resource* resource         NOIA_UNUSED,
-                               struct wl_resource* sibling_resource NOIA_UNUSED)
+/// Wayland protocol: place subsurface above.
+void noia_wayland_subsurface_place_above(struct wl_client* client NOIA_UNUSED,
+                                         struct wl_resource* resource,
+                                         struct wl_resource* sibling_resource)
 {
-    LOG_NYIMP("Wayland > subsurface place above");
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    NoiaSurfaceId sibling_sid =
+                    (NoiaSurfaceId) wl_resource_get_user_data(sibling_resource);
+    LOG_WAYL3("Wayland > subsurface place above "
+              "(sid: %u, sibling sid: %u)",
+              sid, sibling_sid);
+
+    noia_wayland_facade_reorder_satellites(sid, sibling_sid, true);
 }
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_subsurface_place_below
-                              (struct wl_client* client             NOIA_UNUSED,
-                               struct wl_resource* resource         NOIA_UNUSED,
-                               struct wl_resource* sibling_resource NOIA_UNUSED)
+/// Wayland protocol: place subsurface below.
+void noia_wayland_subsurface_place_below(struct wl_client* client NOIA_UNUSED,
+                                         struct wl_resource* resource,
+                                         struct wl_resource* sibling_resource)
 {
-    LOG_NYIMP("Wayland > subsurface place below");
+    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    NoiaSurfaceId sibling_sid =
+                    (NoiaSurfaceId) wl_resource_get_user_data(sibling_resource);
+    LOG_WAYL3("Wayland > subsurface place below "
+              "(sid: %u, sibling sid: %u)",
+              sid, sibling_sid);
+
+    noia_wayland_facade_reorder_satellites(sid, sibling_sid, false);
 }
 
 //------------------------------------------------------------------------------
 
+/// @todo Wayland protocol: subsurface set sync.
 void noia_wayland_subsurface_set_sync(struct wl_client* client     NOIA_UNUSED,
                                       struct wl_resource* resource NOIA_UNUSED)
 {
@@ -63,6 +84,7 @@ void noia_wayland_subsurface_set_sync(struct wl_client* client     NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
+/// @todo Wayland protocol: subsurface set desync.
 void noia_wayland_subsurface_set_desync(struct wl_client* client     NOIA_UNUSED,
                                         struct wl_resource* resource NOIA_UNUSED)
 {
@@ -88,7 +110,10 @@ void noia_wayland_subsurface_bind(struct wl_client* client,
                                   uint32_t version,
                                   uint32_t id)
 {
-    LOG_WAYL2("Binding Wayland subsurface (version: %u, id: %u)", version, id);
+    NoiaSurfaceId sid = (NoiaSurfaceId) data;
+    LOG_WAYL2("Binding Wayland subsurface "
+              "(version: %u, id: %u, sid: %u)",
+              version, id, sid);
 
     struct wl_resource* rc;
     rc = wl_resource_create(client, &wl_subsurface_interface, version, id);

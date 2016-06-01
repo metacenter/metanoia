@@ -6,6 +6,10 @@
 #define NOIA_SURFACE_COORDINATOR_H
 
 #include "surface-data.h"
+#include "utils-pool.h"
+
+/// @file
+/// @todo Add doxygen commants.
 
 typedef struct NoiaCoordinatorStruct NoiaCoordinator;
 
@@ -65,10 +69,19 @@ void noia_surface_set_requested_size(NoiaCoordinator* coordinator,
                                      NoiaSurfaceId sid,
                                      NoiaSize size);
 
-void noia_surface_set_requested_position(NoiaCoordinator* coordinator,
-                                         NoiaSurfaceId sid,
-                                         NoiaSurfaceId reference_sid,
-                                         NoiaPosition pos);
+void noia_surface_set_relative_position(NoiaCoordinator* coordinator,
+                                        NoiaSurfaceId sid,
+                                        NoiaPosition pos);
+
+void noia_surface_relate(NoiaCoordinator* coordinator,
+                         NoiaSurfaceId sid,
+                         NoiaSurfaceId parent_sid);
+
+/// @todo Add unit tests for `noia_surface_to_array`.
+void noia_surface_to_array(NoiaCoordinator* coordinator,
+                           NoiaSurfaceId sid,
+                           NoiaPosition parent_pos,
+                           NoiaPool* surfaces);
 
 //------------------------------------------------------------------------------
 

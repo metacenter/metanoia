@@ -305,8 +305,8 @@ p.add(Chk(output='check-branch',
 p.add(Chk(output='check-frame',
           inputs=[target_test_frame, target_mock_surface_coordinator,
                   target_utils_pool, target_utils_debug,
-                  target_utils_store, target_utils_chain, target_utils_branch,
-                  target_global_enums, target_global_types,
+                  target_utils_store, target_utils_chain, target_utils_list,
+                  target_utils_branch, target_global_enums, target_global_types,
                   target_exhibitor_frame, target_exhibitor_frame_internal]))
 
 #-------------------------------------------------------------------------------

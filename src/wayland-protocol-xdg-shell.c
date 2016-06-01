@@ -59,10 +59,10 @@ void noia_wayland_xdg_get_xdg_surface(struct wl_client* client,
 
 void noia_wayland_xdg_get_xdg_popup
                               (struct wl_client* client             NOIA_UNUSED,
-                               struct wl_resource* resource         NOIA_UNUSED,
+                               struct wl_resource* resource,
                                uint32_t id,
-                               struct wl_resource* surface_resource NOIA_UNUSED,
-                               struct wl_resource* parent_resource  NOIA_UNUSED,
+                               struct wl_resource* surface_resource,
+                               struct wl_resource* parent_resource,
                                struct wl_resource* seat_resource    NOIA_UNUSED,
                                uint32_t serial,
                                int32_t x,
@@ -77,8 +77,7 @@ void noia_wayland_xdg_get_xdg_popup
               "x: %d, y: %d, popup sid: %u, parent sid: %u)",
               id, serial, x, y, popup_sid, parent_sid);
 
-    noia_wayland_facade_set_requested_position
-                                  (popup_sid, parent_sid, (NoiaPosition) {x,y});
+    noia_wayland_facade_add_subsurface(popup_sid, parent_sid, x, y);
 
     uint32_t version = wl_resource_get_version(resource);
     noia_wayland_xdg_popup_bind(client, (void*) popup_sid, version, id);

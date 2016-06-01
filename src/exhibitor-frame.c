@@ -54,18 +54,19 @@ void noia_frame_configure(NoiaFrame* self,
 
 //------------------------------------------------------------------------------
 
-void noia_frame_to_array(NoiaFrame* self, NoiaPool* surfaces)
+void noia_frame_to_array(NoiaFrame* self,
+                         NoiaPool* surfaces,
+                         NoiaCoordinator* coordinator)
 {
     NOIA_ENSURE(self, return);
 
     FOR_EACH_TWIG(self, twig) {
         NoiaFrameParams* params = noia_frame_get_params(twig);
         if (params->sid != scInvalidSurfaceId) {
-            NoiaSurfaceContext* context = noia_pool_add(surfaces);
-            context->sid = params->sid;
-            context->pos = params->area.pos;
+            noia_surface_to_array
+                         (coordinator, params->sid, params->area.pos, surfaces);
         } else {
-            noia_frame_to_array(twig, surfaces);
+            noia_frame_to_array(twig, surfaces, coordinator);
         }
     }
 }

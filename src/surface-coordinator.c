@@ -96,6 +96,7 @@ NoiaSurfaceId noia_surface_create(NoiaCoordinator* coordinator)
     noia_coordinator_lock_surfaces(coordinator);
     NoiaSurfaceId sid = noia_store_generate_new_id(coordinator->surfaces);
     noia_store_add(coordinator->surfaces, sid, data);
+    noia_list_append(data->satellites, (void*) sid);
     noia_coordinator_unlock_surfaces(coordinator);
 
     return sid;
@@ -106,7 +107,12 @@ NoiaSurfaceId noia_surface_create(NoiaCoordinator* coordinator)
 void noia_surface_destroy(NoiaCoordinator* coordinator, NoiaSurfaceId sid)
 {
     noia_event_signal_emit_int(SIGNAL_SURFACE_DESTROYED, sid);
+    NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+    NOIA_GET_AND_ASSERT_SURFACE(parent_surface, surface->parent_sid);
+
     noia_coordinator_lock_surfaces(coordinator);
+    noia_list_remove_all(parent_surface->satellites, (void*) sid,
+                         (NoiaCompareFunc) noia_surface_compare);
     noia_surface_data_free(noia_store_delete(coordinator->surfaces, sid));
     noia_coordinator_unlock_surfaces(coordinator);
 }
@@ -191,6 +197,10 @@ void noia_surface_commit(NoiaCoordinator* coordinator, NoiaSurfaceId sid)
         or  (surface->requested_size.height == 0)) {
             surface->requested_size.width  = surface->buffer.width;
             surface->requested_size.height = surface->buffer.height;
+            if (surface->parent_sid != scInvalidSurfaceId) {
+                surface->desired_size.width  = surface->buffer.width;
+                surface->desired_size.height = surface->buffer.height;
+            }
         }
 
         if (surface->buffer.data or surface->buffer.resource) {
@@ -281,16 +291,56 @@ void noia_surface_set_requested_size(NoiaCoordinator* coordinator,
 
 //------------------------------------------------------------------------------
 
-void noia_surface_set_requested_position(NoiaCoordinator* coordinator,
-                                         NoiaSurfaceId sid,
-                                         NoiaSurfaceId reference_sid,
-                                         NoiaPosition pos)
+void noia_surface_set_relative_position(NoiaCoordinator* coordinator,
+                                        NoiaSurfaceId sid,
+                                        NoiaPosition pos)
 {
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
     noia_coordinator_lock_surfaces(coordinator);
-    surface->parent_sid = reference_sid;
-    surface->requested_position = pos;
+    surface->relative_position = pos;
     noia_coordinator_unlock_surfaces(coordinator);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_surface_relate(NoiaCoordinator* coordinator,
+                         NoiaSurfaceId sid,
+                         NoiaSurfaceId parent_sid)
+{
+    NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+    NOIA_GET_AND_ASSERT_SURFACE(parent_surface, parent_sid);
+    noia_coordinator_lock_surfaces(coordinator);
+    surface->parent_sid = parent_sid;
+    surface->relative_position.x = 0;
+    surface->relative_position.y = 0;
+    noia_list_append(parent_surface->satellites, (void*) sid);
+    noia_coordinator_unlock_surfaces(coordinator);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_surface_to_array(NoiaCoordinator* coordinator,
+                           NoiaSurfaceId sid,
+                           NoiaPosition parent_pos,
+                           NoiaPool* surfaces)
+{
+    NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+
+    FOR_EACH(surface->satellites, link) {
+        NoiaSurfaceId child_sid = (NoiaSurfaceId) link->data;
+        if (child_sid == sid) {
+            NoiaSurfaceContext* context = noia_pool_add(surfaces);
+            context->sid = sid;
+            context->pos.x = parent_pos.x + surface->relative_position.x;
+            context->pos.y = parent_pos.y + surface->relative_position.y;
+        } else {
+            NoiaSurfaceData* data = noia_surface_get(coordinator, child_sid);
+            if (data) {
+                noia_surface_to_array
+                                 (coordinator, child_sid, parent_pos, surfaces);
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------

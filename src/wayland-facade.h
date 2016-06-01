@@ -37,10 +37,9 @@ void noia_wayland_facade_set_offset(NoiaSurfaceId sid, NoiaPosition pos);
 /// Set size of a given surface.
 void noia_wayland_facade_set_requested_size(NoiaSurfaceId sid, NoiaSize size);
 
-/// Set position of a given surface (used by popups).
-void noia_wayland_facade_set_requested_position(NoiaSurfaceId sid,
-                                                NoiaSurfaceId reference_sid,
-                                                NoiaPosition pos);
+/// Set position of a given surface (used by subsurfaces).
+void noia_wayland_facade_set_subsurface_position(NoiaSurfaceId sid,
+                                                 int x, int y);
 
 /// Tell coordinator to use given surface as cursor image.
 void noia_wayland_facade_set_cursor(int serial,
@@ -82,6 +81,11 @@ void noia_wayland_facade_add_shell_surface(NoiaSurfaceId sid,
                                            NoiaWaylandSurfaceResourceType type,
                                            struct wl_resource* rc);
 
+/// Tell coordinator surface defined by `sid` is subsurface of `parent_sid`.
+void noia_wayland_facade_add_subsurface(NoiaSurfaceId sid,
+                                        NoiaSurfaceId parent_sid,
+                                        int x, int y);
+
 /// Cache buffer resource and tell coordinator what surface data should be used
 /// after commit.
 void noia_wayland_facade_surface_attach(NoiaSurfaceId sid,
@@ -95,6 +99,13 @@ void noia_wayland_facade_surface_attach(NoiaSurfaceId sid,
 /// Tell coordinator to destroy given surface and remove it from cache.
 void noia_wayland_facade_remove_surface(NoiaSurfaceId sid,
                                         struct wl_resource* rc);
+
+/// Reorder satelite surfaces.
+/// If `above` is `true` surface with `sid` will be placed just above surface
+/// with sid `sibling_sid`, otherwise it will be placed just below.
+void noia_wayland_facade_reorder_satellites(NoiaSurfaceId sid,
+                                            NoiaSurfaceId sibling_sid,
+                                            bool above);
 
 //------------------------------------------------------------------------------
 

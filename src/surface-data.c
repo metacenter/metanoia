@@ -25,6 +25,7 @@ NoiaSurfaceData* noia_surface_data_new(void)
 {
     NoiaSurfaceData* self = malloc(sizeof(NoiaSurfaceData));
     noia_surface_data_clean(self);
+    self->satellites = noia_list_new(NULL);
     return self;
 }
 
@@ -38,6 +39,7 @@ void noia_surface_data_free(NoiaSurfaceData* self)
         free(self->buffer.data);
     }
 
+    noia_list_free(self->satellites);
     noia_surface_data_clean(self);
     free(self);
 }
