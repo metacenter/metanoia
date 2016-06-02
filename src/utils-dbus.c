@@ -296,7 +296,7 @@ int noia_dbus_session_take_device(uint32_t major, uint32_t minor)
     DBusError err;
     dbus_error_init(&err);
 
-    int paused, fd = 0;
+    int paused, fd = -1;
     bool ok = false;
     NoiaResult result = NOIA_RESULT_SUCCESS;
 

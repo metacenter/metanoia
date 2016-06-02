@@ -7,7 +7,11 @@
 
 #include "event-dispatcher.h"
 
-void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed);
+/// Verify device and add it to dispatcher as event source.
+void noia_evdev_add_input_device(NoiaEventDispatcher* ed,
+                                 const char* devnode,
+                                 const char* sysname,
+                                 uint32_t properties);
 
 #endif // NOIA_DEVICE_EVDEV_H
 

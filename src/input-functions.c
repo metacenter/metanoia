@@ -105,7 +105,7 @@ bool noia_quit()
 
 bool noia_refresh_displays()
 {
-    noia_event_signal_emit(SIGNAL_DISPLAYS_CHANGED, NULL);
+    noia_event_signal_emit(SIGNAL_OUTPUTS_CHANGED, NULL);
     return true;
 }
 

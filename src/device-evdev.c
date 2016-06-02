@@ -4,84 +4,65 @@
 
 #include "device-evdev.h"
 #include "device-common.h"
-#include "utils-dbus.h"
 #include "utils-log.h"
 #include "global-objects.h"
 #include "event-signals.h"
 #include "config.h"
 #include "input-bindings.h"
 
-#include <malloc.h>
-#include <libudev.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <linux/input.h>
 
-//------------------------------------------------------------------------------
-
-static const char scIdInputMouse[]       = "ID_INPUT_MOUSE";
-static const char scIdInputTouchpad[]    = "ID_INPUT_TOUCHPAD";
-static const char scIdInputTablet[]      = "ID_INPUT_TABLET";
-static const char scIdInputTouchscreen[] = "ID_INPUT_TOUCHSCREEN";
-static const char scIdInputJoystic[]     = "ID_INPUT_JOYSTICK";
-static const char scIdInputKey[]         = "ID_INPUT_KEY";
-static const char scIdInputKeyboard[]    = "ID_INPUT_KEYBOARD";
-
-static const uint32_t scIdInputMouseFlag       = 0x0001;
-static const uint32_t scIdInputTouchpadFlag    = 0x0002;
-static const uint32_t scIdInputTabletFlag      = 0x0004;
-static const uint32_t scIdInputTouchscreenFlag = 0x0008;
-static const uint32_t scIdInputJoysticFlag     = 0x0010;
-static const uint32_t scIdInputKeyFlag         = 0x0020;
-static const uint32_t scIdInputKeyboardFlag    = 0x0040;
+#define DEVICE_BUFFER_NAME_SIZE 256
 
 //------------------------------------------------------------------------------
 
-/// Handle epoll events from EventDispatcher comming from keyboard devices.
+/// Handle epoll events from EventDispatcher coming from keyboard devices.
 void noia_evdev_handle_key(struct input_event* ev, NoiaInputContext* context)
 {
-    if (ev->type == EV_KEY) {
-        NOIA_BLOCK {
-            unsigned code = ev->code;
-            NoiaKeyState value = ev->value ? NOIA_KEY_PRESSED
-                                           : NOIA_KEY_RELEASED;
+    NOIA_BLOCK {
+        if (ev->type != EV_KEY) {
+            break;
+        }
 
-            // Ignore repeated mask key
-            if (ev->value) {
-                if ((((code == KEY_LEFTCTRL) or (code == KEY_RIGHTCTRL))
-                    and (context->modifiers & NOIA_KEY_CTRL))
-                 or (((code == KEY_LEFTSHIFT) or (code == KEY_RIGHTSHIFT))
-                    and (context->modifiers & NOIA_KEY_SHIFT))
-                 or (((code == KEY_LEFTALT) or (code == KEY_RIGHTALT))
-                    and (context->modifiers & NOIA_KEY_ALT))
-                 or (((code == KEY_LEFTMETA) or (code == KEY_RIGHTMETA))
-                    and (context->modifiers & NOIA_KEY_META))) {
-                    break;
-                }
-            }
+        unsigned code = ev->code;
+        NoiaKeyState value = ev->value ? NOIA_KEY_PRESSED
+                                       : NOIA_KEY_RELEASED;
 
-            // Check for key bindings
-            bool catched = noia_input_catch_key(noia_gears()->modes,
-                                                context, code, value);
-            if (catched) {
+        // Ignore repeated mask key
+        if (ev->value) {
+            if ((((code == KEY_LEFTCTRL) or (code == KEY_RIGHTCTRL))
+                and (context->modifiers & NOIA_KEY_CTRL))
+             or (((code == KEY_LEFTSHIFT) or (code == KEY_RIGHTSHIFT))
+                and (context->modifiers & NOIA_KEY_SHIFT))
+             or (((code == KEY_LEFTALT) or (code == KEY_RIGHTALT))
+                and (context->modifiers & NOIA_KEY_ALT))
+             or (((code == KEY_LEFTMETA) or (code == KEY_RIGHTMETA))
+                and (context->modifiers & NOIA_KEY_META))) {
                 break;
             }
-
-            // If no binding found inform the rest of the world
-            unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
-            NoiaKeyObject* key = noia_key_create(time, ev->code, value);
-            noia_event_signal_emit(SIGNAL_KEYBOARD_EVENT, (NoiaObject*) key);
-            noia_object_unref((NoiaObject*) key);
         }
+
+        // Check for key bindings
+        bool catched = noia_input_catch_key(noia_gears()->modes,
+                                            context, code, value);
+        if (catched) {
+            break;
+        }
+
+        // If no binding found inform the rest of the world
+        unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
+        NoiaKeyObject* key = noia_key_create(time, ev->code, value);
+        noia_event_signal_emit(SIGNAL_KEYBOARD_EVENT, (NoiaObject*) key);
+        noia_object_unref((NoiaObject*) key);
     }
 }
 
 //------------------------------------------------------------------------------
 
-/// Handle epoll events from EventDispatcher comming from mouses.
+/// Handle epoll events from EventDispatcher coming from mouses.
 void noia_evdev_handle_mouse(struct input_event* ev)
 {
     if (ev->code == ABS_X) {
@@ -100,7 +81,7 @@ void noia_evdev_handle_mouse(struct input_event* ev)
 
 //------------------------------------------------------------------------------
 
-/// Handle epoll events from EventDispatcher comming from touch devices.
+/// Handle epoll events from EventDispatcher coming from touch devices.
 void noia_evdev_handle_touchpad(struct input_event* ev)
 {
     if (ev->code == ABS_MT_TRACKING_ID) {
@@ -134,34 +115,33 @@ void noia_evdev_handle_event(NoiaEventData* data, struct epoll_event* epev)
 
     int size = read(fd, &ev, sizeof(struct input_event));
 
-    if (size != sizeof(struct input_event)) {
+    if (size == sizeof(struct input_event)) {
+        LOG_EVNT4("Event (time: %ld.%06ld, type: %d, "
+                  "code: %d, value: %d, flag: 0x%x)",
+                  ev.time.tv_sec, ev.time.tv_usec,
+                  ev.type, ev.code, ev.value, flags);
+
+        if (flags & NOIA_PROPERTY_KEYBOARD) {
+            noia_evdev_handle_key(&ev, context);
+        } else if (flags & NOIA_PROPERTY_MOUSE) {
+            noia_evdev_handle_mouse(&ev);
+        } else if (flags & NOIA_PROPERTY_TOUCHPAD) {
+            noia_evdev_handle_touchpad(&ev);
+        }
+    } else {
         if (size != -1) {
             LOG_ERROR("Wrong data size! (%d)", size);
         }
-        return;
-    }
-
-    LOG_EVNT4("Event (time: %ld.%06ld, type: %d, "
-              "code: %d, value: %d, flag: 0x%x)",
-              ev.time.tv_sec, ev.time.tv_usec,
-              ev.type, ev.code, ev.value, flags);
-
-    if (flags & scIdInputKeyboardFlag) {
-        noia_evdev_handle_key(&ev, context);
-    } else if (flags & scIdInputMouseFlag) {
-        noia_evdev_handle_mouse(&ev);
-    } else if (flags & scIdInputTouchpadFlag) {
-        noia_evdev_handle_touchpad(&ev);
     }
 }
 
 //------------------------------------------------------------------------------
 
+/// Handle exit of event dispatcher.
 void noia_evdev_handle_exit(NoiaEventData* data)
 {
-    if ((not data) or (not data->data)) {
-        return;
-    }
+    NOIA_ENSURE(data, return);
+    NOIA_ENSURE(data->data, return);
 
     NoiaInputContext* context = (NoiaInputContext*) data->data;
     noia_input_context_destroy(context);
@@ -169,106 +149,50 @@ void noia_evdev_handle_exit(NoiaEventData* data)
 
 //------------------------------------------------------------------------------
 
-/// Find input devices using idev.
-void noia_evdev_setup_input_devices(NoiaEventDispatcher* ed)
+void noia_evdev_add_input_device(NoiaEventDispatcher* ed,
+                                 const char* devnode,
+                                 const char* sysname,
+                                 uint32_t properties)
 {
-    int fd;
-    char name[256];
-    const char* propname;
-    struct stat st;
-    struct udev* udev;
-    struct udev_enumerate* enumerate;
-    struct udev_list_entry* dev_list_entry;
-    struct udev_list_entry* prop_list_entry;
+    NOIA_BLOCK {
+        // Does the device have useful properties?
+        if (properties == 0x0) {
+            break;
+        }
 
-    LOG_INFO1("Setting up input devices");
+        // Does it exist and is of correct type?
+        struct stat st;
+        if ((not devnode)
+        or  (stat(devnode, &st) < 0)
+        or  (not S_ISCHR(st.st_mode))) {
+            break;
+        }
 
-    udev = udev_new();
-    if (!udev) {
-        LOG_ERROR("Can't create udev!");
-        return;
-    }
-
-    // Find devices
-    enumerate = udev_enumerate_new(udev);
-    udev_enumerate_add_match_subsystem(enumerate, "input");
-    udev_enumerate_scan_devices(enumerate);
-
-    // Enumerate devices
-    for (dev_list_entry = udev_enumerate_get_list_entry(enumerate);
-         dev_list_entry != NULL;
-         dev_list_entry = udev_list_entry_get_next(dev_list_entry))
-    {
-        const char* syspath = udev_list_entry_get_name(dev_list_entry);
-        struct udev_device* dev = udev_device_new_from_syspath(udev, syspath);
-        const char* sysname = udev_device_get_sysname(dev);
-        const char* devnode = udev_device_get_devnode(dev);
-
-        // Is it input device?
+        // Is it event device?
         if (strncmp("event", sysname, 5) != 0) {
-            udev_device_unref(dev);
-            continue;
+            break;
         }
 
-        if (stat(devnode, &st) < 0 || !S_ISCHR(st.st_mode)) {
-            udev_device_unref(dev);
-            continue;
-        }
-
-        // Get device properties
-        uint32_t flags = 0x0;
-        prop_list_entry = udev_device_get_properties_list_entry(dev);
-        while (prop_list_entry) {
-            propname = udev_list_entry_get_name(prop_list_entry);
-
-            if (strcmp(propname, scIdInputMouse) == 0)
-                flags |= scIdInputMouseFlag;
-            else if (strcmp(propname, scIdInputTouchpad) == 0)
-                flags |= scIdInputTouchpadFlag;
-            else if (strcmp(propname, scIdInputTablet) == 0)
-                flags |= scIdInputTabletFlag;
-            else if (strcmp(propname, scIdInputTouchscreen) == 0)
-                flags |= scIdInputTouchscreenFlag;
-            else if (strcmp(propname, scIdInputJoystic) == 0)
-                flags |= scIdInputJoysticFlag;
-            else if (strcmp(propname, scIdInputKey) == 0)
-                flags |= scIdInputKeyFlag;
-            else if (strcmp(propname, scIdInputKeyboard) == 0)
-                flags |= scIdInputKeyboardFlag;
-
-            prop_list_entry = udev_list_entry_get_next(prop_list_entry);
-        }
-
-        if (flags == 0x0) {
-            // Did not find interesting input device
-            udev_device_unref(dev);
-            continue;
-        }
-
-        // Add event source
-        fd = noia_device_open(devnode, O_RDONLY);
+        // Try open device
+        int fd = noia_device_open(devnode, O_RDONLY);
         if (fd < 0) {
-            LOG_INFO1("Failed to open device '%s'", devnode);
-            udev_device_unref(dev);
-            continue;
+            LOG_WARN1("Failed to open device '%s'", devnode);
+            break;
         }
 
-        memset(name, 0, sizeof(name));
-        ioctl(fd, EVIOCGNAME(sizeof(name)), name);
+        // Log device found
+        char name[DEVICE_BUFFER_NAME_SIZE] = {'\0'};
+        noia_device_get_name(fd, name, DEVICE_BUFFER_NAME_SIZE);
         LOG_INFO1("Found input device: '%s' (%s)", name, devnode);
 
+        // Add event source
         NoiaInputContext* context = noia_input_context_create();
         NoiaEventData* data = noia_event_data_create(fd,
                                                      noia_evdev_handle_event,
                                                      noia_evdev_handle_exit,
-                                                     flags, context);
+                                                     properties, context);
         noia_event_dispatcher_add_event_source(ed, data);
-        udev_device_unref(dev);
     }
-
-    // Free memory
-    udev_enumerate_unref(enumerate);
-    udev_unref(udev);
 }
 
 //------------------------------------------------------------------------------

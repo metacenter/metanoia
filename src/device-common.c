@@ -7,8 +7,23 @@
 #include "global-macros.h"
 
 #include <errno.h>
-#include <libudev.h>
 #include <sys/stat.h>
+#include <linux/input.h>
+
+//------------------------------------------------------------------------------
+
+const char* scActionAdd    = "add";
+const char* scActionRemove = "remove";
+
+const char* scIdInputMouse       = "ID_INPUT_MOUSE";
+const char* scIdInputTouchpad    = "ID_INPUT_TOUCHPAD";
+const char* scIdInputTablet      = "ID_INPUT_TABLET";
+const char* scIdInputTouchscreen = "ID_INPUT_TOUCHSCREEN";
+const char* scIdInputJoystic     = "ID_INPUT_JOYSTICK";
+const char* scIdInputKey         = "ID_INPUT_KEY";
+const char* scIdInputKeyboard    = "ID_INPUT_KEYBOARD";
+
+//------------------------------------------------------------------------------
 
 int noia_device_open(const char* node, int flags)
 {
@@ -20,7 +35,7 @@ int noia_device_open(const char* node, int flags)
             break;
         }
 
-        if (fd < 0 && errno != EPERM && errno != EACCES) {
+        if ((fd < 0) and (errno != EPERM) and (errno != EACCES)) {
            break;
         }
 
@@ -33,4 +48,13 @@ int noia_device_open(const char* node, int flags)
 
     return fd;
 }
+
+//------------------------------------------------------------------------------
+
+void noia_device_get_name(int fd, char* buff, size_t size)
+{
+    ioctl(fd, EVIOCGNAME(size), buff);
+}
+
+//------------------------------------------------------------------------------
 

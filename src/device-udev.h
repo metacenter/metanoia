@@ -7,7 +7,12 @@
 
 #include "event-dispatcher.h"
 
+/// Set up device monitoring.
+/// Subscribe for dev types "input" and "drm".
 void noia_udev_setup_device_monitoring(NoiaEventDispatcher* ed);
+
+/// Find input devices using udev.
+void noia_udev_setup_input_devices(NoiaEventDispatcher* ed);
 
 #endif // NOIA_DEVICE_UDEV_H
 

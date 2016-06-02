@@ -4,7 +4,6 @@
 
 #include "event-factory.h"
 #include "event-dispatcher.h"
-#include "device-evdev.h"
 #include "device-udev.h"
 #include "backend-offscreen.h"
 #include "output-collector.h"
@@ -20,7 +19,7 @@
 
 NoiaTask* factorize_setup_input_devices_task(NoiaEventDispatcher* ed)
 {
-    return noia_task_new((NoiaTaskProcessor) noia_evdev_setup_input_devices,
+    return noia_task_new((NoiaTaskProcessor) noia_udev_setup_input_devices,
                          (NoiaTaskFreeFunc) noia_task_free, NULL, NULL, ed);
 }
 
