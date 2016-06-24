@@ -8,6 +8,7 @@
 #include "wayland-state.h"
 #include "wayland-cache.h"
 #include "wayland-engine.h"
+#include "wayland-transfer.h"
 
 //------------------------------------------------------------------------------
 
@@ -23,7 +24,13 @@
 /// Send frame events to given client.
 void noia_wayland_gateway_screen_refresh(NoiaWaylandCache* cache,
                                          NoiaSurfaceId sid,
-                                         uint32_t miliseconds);
+                                         uint32_t milliseconds);
+
+//------------------------------------------------------------------------------
+
+/// Send selection (clipboard data offer).
+void noia_wayland_gateway_send_selection(NoiaWaylandState* state,
+                                         NoiaWaylandCache* cache);
 
 //------------------------------------------------------------------------------
 

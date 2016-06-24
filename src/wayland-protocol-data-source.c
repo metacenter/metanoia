@@ -4,34 +4,40 @@
 
 #include "wayland-protocol-data-source.h"
 
+#include "wayland-facade.h"
+
 #include "global-macros.h"
 #include "utils-log.h"
 
 //------------------------------------------------------------------------------
 
-/// @todo Handle destruction of data source.
-void noia_wayland_data_source_unbind(struct wl_resource* resource NOIA_UNUSED)
+/// Handle destruction of data source.
+void noia_wayland_data_source_unbind(struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: data source destroy");
+    LOG_WAYL2("Wayland: data source destroy");
+    NoiaWaylandTransfer* transfer = wl_resource_get_user_data(resource);
+    noia_wayland_facade_destroy_transfer(transfer);
 }
 
 //------------------------------------------------------------------------------
 
-/// @todo Wayland protocol: data source offer.
-void noia_wayland_data_source_offer(struct wl_client* client     NOIA_UNUSED,
-                                    struct wl_resource* resource NOIA_UNUSED,
+/// Wayland protocol: data source offer.
+void noia_wayland_data_source_offer(struct wl_client* client NOIA_UNUSED,
+                                    struct wl_resource* resource,
                                     const char* type)
 {
-    LOG_NYIMP("Wayland > data source offer (type: '%s')", type);
+    LOG_WAYL2("Wayland > data source offer (type: '%s')", type);
+    NoiaWaylandTransfer* transfer = wl_resource_get_user_data(resource);
+    noia_wayland_facade_add_mime_type(transfer, type);
 }
 
 //------------------------------------------------------------------------------
 
-/// Wayland protocol: data source destroy.
+/// @todo Wayland protocol: data source destroy.
 void noia_wayland_data_source_destroy(struct wl_client* client NOIA_UNUSED,
                                       struct wl_resource* resource)
 {
-    LOG_WAYL2("Wayland > data source destroy");
+    LOG_NYIMP("Wayland > data source destroy");
     wl_resource_destroy(resource);
 }
 
@@ -69,6 +75,8 @@ void noia_wayland_data_source_bind(struct wl_client* client,
 
     wl_resource_set_implementation(rc, &scDataSourceImplementation,
                                    data, noia_wayland_data_source_unbind);
+
+    noia_wayland_facade_create_transfer(rc);
 }
 
 //------------------------------------------------------------------------------

@@ -4,6 +4,8 @@
 
 #include "wayland-gateway.h"
 
+#include "wayland-protocol-data-offer.h"
+
 #include "xdg-shell-server-protocol.h"
 
 #include "utils-log.h"
@@ -12,7 +14,7 @@
 
 void noia_wayland_gateway_screen_refresh(NoiaWaylandCache* cache,
                                          NoiaSurfaceId sid,
-                                         uint32_t miliseconds)
+                                         uint32_t milliseconds)
 {
     LOG_WAYL4("Wayland: screen refresh (sid: %u)", sid);
 
@@ -34,9 +36,53 @@ void noia_wayland_gateway_screen_refresh(NoiaWaylandCache* cache,
         FOR_EACH(frcs, link) {
             LOG_WAYL3("Wayland < frame (sid: %u)", sid);
             struct wl_resource* frame_rc = (struct wl_resource*) link->data;
-            wl_callback_send_done(frame_rc, miliseconds);
+            wl_callback_send_done(frame_rc, milliseconds);
         }
     }
+    noia_wayland_cache_unlock(cache);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_gateway_send_selection(NoiaWaylandState* state,
+                                         NoiaWaylandCache* cache)
+{
+    noia_wayland_cache_lock(cache);
+
+    NoiaSurfaceId kfsid = state->keyboard_focused_sid;
+    NoiaWaylandRc kfrc = noia_wayland_cache_get_rc_for_sid(cache, kfsid);
+    NoiaWaylandTransfer* transfer = state->current_transfer;
+
+    if (transfer) {
+        LOG_WAYL3("Wayland < send selection (kfsid: %u)", kfsid);
+
+        NoiaList* resources =
+             noia_wayland_cache_get_resources(cache, NOIA_RESOURCE_DATA_DEVICE);
+        FOR_EACH (resources, link) {
+            struct wl_resource* data_device_rc = link->data;
+            struct wl_client* client = wl_resource_get_client(data_device_rc);
+
+            if (client == kfrc.cl) {
+                int version = wl_resource_get_version(data_device_rc);
+                struct wl_resource* data_offer_rc =
+                     noia_wayland_data_offer_bind(client, transfer, version, 0);
+
+                wl_data_device_send_data_offer(data_device_rc, data_offer_rc);
+
+                FOR_EACH (noia_wayland_transfer_get_mimetypes(transfer), link) {
+                    const char* mime = link->data;
+                    wl_data_offer_send_offer(data_offer_rc, mime);
+                }
+
+                /// @todo Use more actions.
+                uint32_t action = WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY;
+                wl_data_offer_send_action(data_offer_rc, action);
+
+                wl_data_device_send_selection(data_device_rc, data_offer_rc);
+            }
+        }
+    }
+
     noia_wayland_cache_unlock(cache);
 }
 
@@ -81,9 +127,13 @@ void noia_wayland_gateway_keyboard_focus_update(NoiaWaylandState* state,
 
         // Update current client
         state->keyboard_focused_sid = new_sid;
-    }
+        noia_wayland_cache_unlock(cache);
 
-    noia_wayland_cache_unlock(cache);
+        // Send selection (clipboard data offer)
+        noia_wayland_gateway_send_selection(state, cache);
+    } else {
+        noia_wayland_cache_lock(cache);
+    }
 
     // Inform surfaces their states changed
     noia_wayland_gateway_surface_reconfigured
@@ -265,7 +315,7 @@ void noia_wayland_gateway_surface_reconfigured(NoiaWaylandState* state,
     }
 
     if (surface and data) {
-        LOG_INFO2("Wayland < surface reconfiguration "
+        LOG_WAYL3("Wayland < surface reconfiguration "
                   "(sid: %d, width: %d, height: %d)",
                    sid, data->desired_size.width, data->desired_size.height);
 

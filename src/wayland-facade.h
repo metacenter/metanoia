@@ -6,6 +6,7 @@
 #define NOIA_WAYLAND_FACADE_H
 
 #include "wayland-context.h"
+#include "wayland-transfer.h"
 
 //------------------------------------------------------------------------------
 
@@ -100,7 +101,7 @@ void noia_wayland_facade_surface_attach(NoiaSurfaceId sid,
 void noia_wayland_facade_remove_surface(NoiaSurfaceId sid,
                                         struct wl_resource* rc);
 
-/// Reorder satelite surfaces.
+/// Reorder satellite surfaces.
 /// If `above` is `true` surface with `sid` will be placed just above surface
 /// with sid `sibling_sid`, otherwise it will be placed just below.
 void noia_wayland_facade_reorder_satellites(NoiaSurfaceId sid,
@@ -122,8 +123,28 @@ void noia_wayland_facade_set_input_region(NoiaSurfaceId sid, NoiaItemId rid);
 
 //------------------------------------------------------------------------------
 
-/// Add givent keyboard resource to cache and send enter event if it is focused.
+/// Add given keyboard resource to cache and send enter event if it is focused.
 void noia_wayland_facade_add_keyboard_resource(struct wl_resource* rc);
+
+//------------------------------------------------------------------------------
+
+/// Create new data transfer for exchanging data between clients.
+void noia_wayland_facade_create_transfer(struct wl_resource* rc);
+
+/// Destroy data transfer.
+void noia_wayland_facade_destroy_transfer(NoiaWaylandTransfer* transfer);
+
+/// Add mime type to data transfer.
+void noia_wayland_facade_add_mime_type(NoiaWaylandTransfer* transfer,
+                                       const char* mime_type);
+
+/// Inform focused client about current selection.
+void noia_wayland_facade_send_selection(NoiaWaylandTransfer* transfer);
+
+/// Send current clipboard contents to requesting client.
+void noia_wayland_facade_receive_data_offer(NoiaWaylandTransfer* transfer,
+                                            const char* mime_type,
+                                            int fd);
 
 //------------------------------------------------------------------------------
 

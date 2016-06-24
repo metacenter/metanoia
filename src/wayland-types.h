@@ -17,6 +17,7 @@ typedef enum {
 typedef enum {
     NOIA_RESOURCE_KEYBOARD,
     NOIA_RESOURCE_POINTER,
+    NOIA_RESOURCE_DATA_DEVICE,
     NOIA_RESOURCE_OTHER,
     NOIA_NUM_GENERAL_RESOURCE_TYPES,
 } NoiaWaylandGeneralResourceType;

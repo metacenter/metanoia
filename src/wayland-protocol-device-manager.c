@@ -11,6 +11,7 @@
 
 //------------------------------------------------------------------------------
 
+/// @todo Handle destruction of device manager.
 void noia_wayland_device_manager_unbind
                                       (struct wl_resource* resource NOIA_UNUSED)
 {
@@ -19,23 +20,25 @@ void noia_wayland_device_manager_unbind
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_create_data_source(struct wl_client* client     NOIA_UNUSED,
+/// Wayland protocol: create data source.
+void noia_wayland_create_data_source(struct wl_client* client,
                                      struct wl_resource* resource NOIA_UNUSED,
-                                     uint32_t id                  NOIA_UNUSED)
+                                     uint32_t id)
 {
-    LOG_DEBUG("Wayland: create data source");
+    LOG_WAYL2("Wayland > create data source");
 
     noia_wayland_data_source_bind(client, NULL, 1, id);
 }
 
 //------------------------------------------------------------------------------
 
+/// Wayland protocol: get data device.
 void noia_wayland_get_data_device(struct wl_client* client,
                                   struct wl_resource* manager_resource,
                                   uint32_t id,
                                   struct wl_resource* seat_resource NOIA_UNUSED)
 {
-    LOG_DEBUG("Wayland: get data device");
+    LOG_WAYL2("Wayland > get data device");
 
     uint32_t version = wl_resource_get_version(manager_resource);
     noia_wayland_data_device_bind(client, NULL, version, id);

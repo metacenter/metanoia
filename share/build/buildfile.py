@@ -227,6 +227,7 @@ metanoia.add([target_exhibitor_frame,
 
 metanoia.add([Com(['wayland-region.c']),
               Com(['wayland-surface.c']),
+              Com(['wayland-transfer.c']),
               Com(['wayland-output.c']),
               Com(['wayland-cache.c']),
               Com(['wayland-state.c']),

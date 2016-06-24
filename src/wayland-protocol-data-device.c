@@ -4,11 +4,15 @@
 
 #include "wayland-protocol-data-device.h"
 
+#include "wayland-facade.h"
+#include "wayland-transfer.h"
+
 #include "global-macros.h"
 #include "utils-log.h"
 
 //------------------------------------------------------------------------------
 
+/// @todo Handle destruction of data device.
 void noia_wayland_data_device_unbind(struct wl_resource* resource NOIA_UNUSED)
 {
     LOG_NYIMP("Wayland: unbind data device");
@@ -16,6 +20,7 @@ void noia_wayland_data_device_unbind(struct wl_resource* resource NOIA_UNUSED)
 
 //------------------------------------------------------------------------------
 
+/// @todo Wayland protocol: data device: start drag.
 void noia_wayland_data_device_start_drag
                                (struct wl_client* client            NOIA_UNUSED,
                                 struct wl_resource* resource        NOIA_UNUSED,
@@ -24,30 +29,35 @@ void noia_wayland_data_device_start_drag
                                 struct wl_resource* icon_resource   NOIA_UNUSED,
                                 uint32_t serial)
 {
-    LOG_NYIMP("Wayland: data device start drag (serial: %d)", serial);
+    LOG_NYIMP("Wayland > data device start drag (serial: %d)", serial);
 }
 
 //------------------------------------------------------------------------------
 
+/// @todo Wayland protocol: data device: set selection.
 void noia_wayland_data_device_set_selection
                                       (struct wl_client* client     NOIA_UNUSED,
                                        struct wl_resource* resource NOIA_UNUSED,
                                        struct wl_resource* source_resource,
                                        uint32_t serial)
 {
-    if (not source_resource) {
-        return;
+    LOG_NYIMP("Wayland > data device set selection (serial: %d)", serial);
+    if (source_resource) {
+        NoiaWaylandTransfer* transfer =
+                                     wl_resource_get_user_data(source_resource);
+        noia_wayland_facade_send_selection(transfer);
+    } else {
+        LOG_WARN2("Wayland > got null source resource");
     }
-
-    LOG_NYIMP("Wayland: data device set selection (serial: %d)", serial);
 }
 
 //------------------------------------------------------------------------------
 
+/// @todo Wayland protocol: release data device.
 void noia_wayland_data_device_release(struct wl_client* client NOIA_UNUSED,
                                       struct wl_resource* resource)
 {
-    LOG_NYIMP("Wayland: release device data");
+    LOG_NYIMP("Wayland > release device data");
     wl_resource_destroy(resource);
 }
 
@@ -74,6 +84,8 @@ void noia_wayland_data_device_bind(struct wl_client* client,
 
     wl_resource_set_implementation(rc, &scDataDeviceImplementation,
                                    data, noia_wayland_data_device_unbind);
+
+    noia_wayland_facade_add_general_resource(NOIA_RESOURCE_DATA_DEVICE, rc);
 }
 
 //------------------------------------------------------------------------------

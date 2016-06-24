@@ -6,6 +6,7 @@
 #define NOIA_WAYLAND_STATE_H
 
 #include "utils-keyboard-state.h"
+#include "wayland-transfer.h"
 
 /// Structure containing current Wayland state.
 /// @see NoiaWaylandContext NoiaWaylandContext
@@ -13,6 +14,7 @@ typedef struct {
     NoiaKeyboardState* keyboard_state;
     NoiaSurfaceId keyboard_focused_sid;
     NoiaSurfaceId pointer_focused_sid;
+    NoiaWaylandTransfer* current_transfer;
 } NoiaWaylandState;
 
 /// Construct State.

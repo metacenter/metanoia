@@ -3,6 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "wayland-facade.h"
+#include "wayland-gateway.h"
+#include "wayland-transfer.h"
+
+#include <unistd.h>
 
 static NoiaWaylandContext* C;
 
@@ -269,6 +273,48 @@ void noia_wayland_facade_add_keyboard_resource(struct wl_resource* rc)
     }
 
     noia_wayland_cache_unlock(C->cache);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_facade_create_transfer(struct wl_resource* rc)
+{
+    NoiaWaylandTransfer* transfer = noia_wayland_transfer_create(rc);
+    wl_resource_set_user_data(rc, (void*) transfer);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_facade_destroy_transfer(NoiaWaylandTransfer* transfer)
+{
+    noia_wayland_transfer_destroy(transfer);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_facade_add_mime_type(NoiaWaylandTransfer* transfer,
+                                       const char* mime_type)
+{
+    noia_wayland_transfer_add_offer(transfer, mime_type);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_facade_send_selection(NoiaWaylandTransfer* transfer)
+{
+    C->state->current_transfer = transfer;
+    noia_wayland_gateway_send_selection(C->state, C->cache);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_wayland_facade_receive_data_offer(NoiaWaylandTransfer* transfer,
+                                            const char* mime_type,
+                                            int fd)
+{
+    struct wl_resource* data_source_rc = noia_wayland_transfer_get_rc(transfer);
+    wl_data_source_send_send(data_source_rc, mime_type, fd);
+    close(fd);
 }
 
 //------------------------------------------------------------------------------
