@@ -7,7 +7,7 @@
 
 //------------------------------------------------------------------------------
 
-NoiaInputContext* noia_input_context_create(void)
+NoiaInputContext* noia_input_context_create(uint32_t properties)
 {
     NoiaInputContext* self = malloc(sizeof(NoiaInputContext));
     NOIA_ENSURE(self, abort());
@@ -16,6 +16,7 @@ NoiaInputContext* noia_input_context_create(void)
     self->code = 0;
     self->modifiers = 0x0;
     self->state = NOIA_KEY_RELEASED;
+    self->properties = properties;
     return self;
 }
 

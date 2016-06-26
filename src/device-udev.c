@@ -60,9 +60,8 @@ void noia_udev_handle_device(NoiaEventData* data, struct epoll_event* epev)
 {
     NOIA_ENSURE(epev, return);
     NOIA_ENSURE(data, return);
-    NOIA_ENSURE(data->data, return);
 
-    NoiaMonitorBundle* bundle = (NoiaMonitorBundle*) data->data;
+    NoiaMonitorBundle* bundle = noia_event_data_get_data(data);
     struct udev_device* dev = udev_monitor_receive_device(bundle->mon);
     if (not dev) {
         LOG_ERROR("udev returned null device!");
@@ -100,9 +99,8 @@ void noia_udev_handle_device(NoiaEventData* data, struct epoll_event* epev)
 void noia_udev_handle_exit(NoiaEventData* data)
 {
     NOIA_ENSURE(data, return);
-    NOIA_ENSURE(data->data, return);
 
-    NoiaMonitorBundle* bundle = (NoiaMonitorBundle*) data->data;
+    NoiaMonitorBundle* bundle = noia_event_data_get_data(data);
     udev_monitor_unref(bundle->mon);
     free(bundle);
 }
@@ -132,9 +130,9 @@ void noia_udev_setup_device_monitoring(NoiaEventDispatcher* ed)
 
     // Prepare event handler
     NoiaEventData* data = noia_event_data_create(udev_monitor_get_fd(mon),
+                                                 bundle,
                                                  noia_udev_handle_device,
-                                                 noia_udev_handle_exit,
-                                                 0x0, bundle);
+                                                 noia_udev_handle_exit);
     noia_event_dispatcher_add_event_source(ed, data);
 
     udev_unref(udev);

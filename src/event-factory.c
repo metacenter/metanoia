@@ -80,9 +80,9 @@ NoiaEventData* factorize_signal_event_data(NoiaEventDispatcher* dispatcher)
         return NULL;
     }
 
-    return noia_event_data_create(fd,
+    return noia_event_data_create(fd, dispatcher,
                                   noia_event_dispatcher_default_signal_handler,
-                                  NULL, 0x0, dispatcher);
+                                  NULL);
 }
 
 //------------------------------------------------------------------------------

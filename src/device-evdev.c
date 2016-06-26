@@ -109,23 +109,22 @@ void noia_evdev_handle_event(NoiaEventData* data, struct epoll_event* epev)
     NOIA_ENSURE(data, return);
 
     struct input_event ev;
-    int fd = data->fd;
-    uint32_t flags = data->flags;
-    NoiaInputContext* context = (NoiaInputContext*) data->data;
+    int fd = noia_event_data_get_fd(data);
+    NoiaInputContext* context = noia_event_data_get_data(data);
 
     int size = read(fd, &ev, sizeof(struct input_event));
 
     if (size == sizeof(struct input_event)) {
         LOG_EVNT4("Event (time: %ld.%06ld, type: %d, "
-                  "code: %d, value: %d, flag: 0x%x)",
+                  "code: %d, value: %d, properties: 0x%x)",
                   ev.time.tv_sec, ev.time.tv_usec,
-                  ev.type, ev.code, ev.value, flags);
+                  ev.type, ev.code, ev.value, context->properties);
 
-        if (flags & NOIA_PROPERTY_KEYBOARD) {
+        if (context->properties & NOIA_PROPERTY_KEYBOARD) {
             noia_evdev_handle_key(&ev, context);
-        } else if (flags & NOIA_PROPERTY_MOUSE) {
+        } else if (context->properties & NOIA_PROPERTY_MOUSE) {
             noia_evdev_handle_mouse(&ev);
-        } else if (flags & NOIA_PROPERTY_TOUCHPAD) {
+        } else if (context->properties & NOIA_PROPERTY_TOUCHPAD) {
             noia_evdev_handle_touchpad(&ev);
         }
     } else {
@@ -141,9 +140,8 @@ void noia_evdev_handle_event(NoiaEventData* data, struct epoll_event* epev)
 void noia_evdev_handle_exit(NoiaEventData* data)
 {
     NOIA_ENSURE(data, return);
-    NOIA_ENSURE(data->data, return);
 
-    NoiaInputContext* context = (NoiaInputContext*) data->data;
+    NoiaInputContext* context = noia_event_data_get_data(data);
     noia_input_context_destroy(context);
 }
 
@@ -186,11 +184,10 @@ void noia_evdev_add_input_device(NoiaEventDispatcher* ed,
         LOG_INFO1("Found input device: '%s' (%s)", name, devnode);
 
         // Add event source
-        NoiaInputContext* context = noia_input_context_create();
-        NoiaEventData* data = noia_event_data_create(fd,
+        NoiaInputContext* context = noia_input_context_create(properties);
+        NoiaEventData* data = noia_event_data_create(fd, context,
                                                      noia_evdev_handle_event,
-                                                     noia_evdev_handle_exit,
-                                                     properties, context);
+                                                     noia_evdev_handle_exit);
         noia_event_dispatcher_add_event_source(ed, data);
     }
 }

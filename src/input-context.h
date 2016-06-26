@@ -14,10 +14,11 @@ typedef struct {
     int code;
     uint32_t modifiers;
     NoiaKeyState state;
+    uint32_t properties;
 } NoiaInputContext;
 
 /// Constructor of `NoiaInputContext`.
-NoiaInputContext* noia_input_context_create(void);
+NoiaInputContext* noia_input_context_create(uint32_t properties);
 
 /// Destructor of `NoiaInputContext`.
 void noia_input_context_destroy(NoiaInputContext* self);

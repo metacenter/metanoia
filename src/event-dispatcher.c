@@ -15,55 +15,20 @@
 #include <unistd.h>
 #include <sys/signalfd.h>
 
+//------------------------------------------------------------------------------
+
 struct NoiaEventDispatcherPriv {
-    int run;
+    bool run;
     int epfd;
     NoiaList* sources;
 };
 
 //------------------------------------------------------------------------------
 
-NoiaEventData* noia_event_data_create(int fd,
-                                      NoiaEventHandler handler,
-                                      NoiaEventExitHandler exit,
-                                      uint32_t flags,
-                                      void* data)
-{
-    NoiaEventData* self = malloc(sizeof(NoiaEventData));
-    if (!self) {
-        return NULL;
-    }
-
-    self->fd = fd;
-    self->handler = handler;
-    self->exit = exit;
-    self->flags = flags;
-    self->data = data;
-    return self;
-}
-
-//------------------------------------------------------------------------------
-
-void noia_event_data_destroy(NoiaEventData* event_data)
-{
-    if (!event_data) {
-        return;
-    }
-
-    memset(event_data, 0, sizeof(NoiaEventData));
-    free(event_data);
-}
-
-//------------------------------------------------------------------------------
-
 NoiaEventDispatcher* noia_event_dispatcher_new(void)
 {
     NoiaEventDispatcher* self = malloc(sizeof(NoiaEventDispatcher));
-    if (!self) {
-        return NULL;
-    }
-
-    self->run = 0;
+    self->run = false;
     self->sources = noia_list_new((NoiaFreeFunc) noia_event_data_destroy);
     return self;
 }
@@ -72,10 +37,7 @@ NoiaEventDispatcher* noia_event_dispatcher_new(void)
 
 void noia_event_dispatcher_free(NoiaEventDispatcher* self)
 {
-    if (!self) {
-        return;
-    }
-
+    NOIA_ENSURE(self, return);
     noia_list_free(self->sources);
     memset(self, 0, sizeof(NoiaEventDispatcher));
     free(self);
@@ -83,43 +45,40 @@ void noia_event_dispatcher_free(NoiaEventDispatcher* self)
 
 //------------------------------------------------------------------------------
 
-int noia_event_dispatcher_is_running(NoiaEventDispatcher* self)
+bool noia_event_dispatcher_is_running(NoiaEventDispatcher* self)
 {
-    if (!self) {
-        return 0;
-    }
-
+    NOIA_ENSURE(self, return false);
     return self->run;
 }
 
 //------------------------------------------------------------------------------
 
-int noia_event_dispatcher_initialize(NoiaEventDispatcher* self)
+NoiaResult noia_event_dispatcher_initialize(NoiaEventDispatcher* self)
 {
-    if (!self) {
-        return -1;
-    }
+    NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
-    // Create epoll
-    self->epfd = epoll_create1(0);
-    if (self->epfd == -1) {
+    NoiaResult result = NOIA_RESULT_ERROR;
+    self->epfd = epoll_create1(0x0);
+    if (self->epfd > 0) {
+        result = NOIA_RESULT_SUCCESS;
+    } else {
         LOG_ERROR("Failed to create epoll FD!");
-        return -1;
     }
 
-    return 0;
+    return result;
 }
 
 //------------------------------------------------------------------------------
 
-int noia_event_dispatcher_add_event_source(NoiaEventDispatcher* self,
-                                           NoiaEventData* data)
+NoiaResult noia_event_dispatcher_add_event_source(NoiaEventDispatcher* self,
+                                                  NoiaEventData* data)
 {
-    if (!self || !data) {
-        return -ENOMEM;
-    }
+    NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
+    NOIA_ENSURE(data, return NOIA_RESULT_INCORRECT_ARGUMENT);
 
-    LOG_INFO2("Adding event source (fd: '%d')", data->fd);
+    int fd = noia_event_data_get_fd(data);
+
+    LOG_INFO2("Adding event source (fd: '%d')", fd);
 
     noia_list_append(self->sources, data);
 
@@ -127,36 +86,33 @@ int noia_event_dispatcher_add_event_source(NoiaEventDispatcher* self,
     event.data.ptr = data;
     event.events = EPOLLIN;
 
-    return epoll_ctl(self->epfd, EPOLL_CTL_ADD, data->fd, &event);
+    NoiaResult result = NOIA_RESULT_ERROR;
+    if (epoll_ctl(self->epfd, EPOLL_CTL_ADD, fd, &event) == 0) {
+        result = NOIA_RESULT_SUCCESS;
+    }
+    return result;
 }
 
 //------------------------------------------------------------------------------
 
 void noia_event_dispatcher_start(NoiaEventDispatcher* self)
 {
-    if (!self) {
-        return;
-    }
+    NOIA_ENSURE(self, return);
 
     LOG_INFO1("Event Dispatcher: Started");
 
-    self->run = 1;
+    self->run = true;
     while (self->run) {
         LOG_EVNT4("Waiting for events...");
         struct epoll_event event;
         int r = epoll_wait(self->epfd, &event, 1, -1);
         if (r > 0) {
             NoiaEventData* data = event.data.ptr;
-            if (data) {
-                LOG_EVNT4("New event from %d", data->fd);
-                if (data->handler) {
-                    data->handler(data, &event);
-                }
-            }
+            noia_event_data_handle(data, &event);
         } else if (r < 0) {
             if (errno != EINTR) {
                 LOG_ERROR("Epoll Error! (%d, %m)", errno);
-                self->run = 0;
+                self->run = false;
             }
         } else {
             LOG_WARN1("Ut infinitum et ultra!");
@@ -165,9 +121,7 @@ void noia_event_dispatcher_start(NoiaEventDispatcher* self)
 
     FOR_EACH (self->sources, link) {
         NoiaEventData* data = link->data;
-        if (data && data->exit) {
-            data->exit(data);
-        }
+        noia_event_data_exit(data);
     }
 
     LOG_INFO1("Event Dispatcher: Stoped");
@@ -177,12 +131,9 @@ void noia_event_dispatcher_start(NoiaEventDispatcher* self)
 
 void noia_event_dispatcher_stop(NoiaEventDispatcher* self)
 {
-    if (!self) {
-        return;
-    }
-
+    NOIA_ENSURE(self, return);
     LOG_INFO1("Event Dispatcher: Stoping...");
-    self->run = 0;
+    self->run = false;
 }
 
 //------------------------------------------------------------------------------
@@ -191,22 +142,22 @@ void noia_event_dispatcher_default_signal_handler
                                          (NoiaEventData* data,
                                           struct epoll_event* event NOIA_UNUSED)
 {
-    int size;
-    struct signalfd_siginfo fdsi;
+    int fd = noia_event_data_get_fd(data);
 
-    size = read(data->fd, &fdsi, sizeof(struct signalfd_siginfo));
+    struct signalfd_siginfo fdsi;
+    ssize_t size = read(fd, &fdsi, sizeof(struct signalfd_siginfo));
     if (size != sizeof(struct signalfd_siginfo)) {
         if (size != -1) {
             LOG_ERROR("Epoll error!");
         }
-        exit(-1);
+        abort();
     }
 
     LOG_INFO1("Signal '%d' received", fdsi.ssi_signo);
 
-    if (fdsi.ssi_signo == SIGINT || fdsi.ssi_signo == SIGTERM) {
-        NoiaEventDispatcher* dispather = data->data;
-        if (dispather && noia_event_dispatcher_is_running(dispather)) {
+    if ((fdsi.ssi_signo == SIGINT) or (fdsi.ssi_signo == SIGTERM)) {
+        NoiaEventDispatcher* dispather = noia_event_data_get_data(data);
+        if (dispather and noia_event_dispatcher_is_running(dispather)) {
             noia_event_dispatcher_stop(dispather);
         } else {
             LOG_ERROR("Invalid dispatcher!");
