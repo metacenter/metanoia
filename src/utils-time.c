@@ -5,6 +5,7 @@
 #include "utils-time.h"
 
 #include <time.h>
+#include <unistd.h>
 
 //------------------------------------------------------------------------------
 
@@ -39,6 +40,13 @@ NoiaDayTime noia_time_get_local_daytime(void)
     dt.seconds = tm->tm_sec;
     dt.useconds = ts.tv_nsec / 1000;
     return dt;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_time_sleep(NoiaMilliseconds miliseconds)
+{
+    usleep(1000 * miliseconds);
 }
 
 //------------------------------------------------------------------------------

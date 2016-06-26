@@ -24,5 +24,8 @@ NoiaMilliseconds noia_time_get_realtime_milliseconds(void);
 /// Return local time.
 NoiaDayTime noia_time_get_local_daytime(void);
 
+/// Sleep for given number of milliseconds.
+void noia_time_sleep(NoiaMilliseconds miliseconds);
+
 #endif // NOIA_UTILS_TIME_H
 

@@ -5,18 +5,32 @@
 #ifndef NOIA_EVENT_TIMER_H
 #define NOIA_EVENT_TIMER_H
 
-#include <sys/signal.h>
-#include <time.h>
+#include "global-types.h"
+#include "event-data.h"
 
-typedef void (*NoiaTimerHandler) (union sigval data);
+/// Timer is used to perform delayed action using `NoiaEventDispatcher`.
+typedef struct NoiaTimerPriv NoiaTimer;
 
-timer_t noia_event_timer_run(int miliseconds,
-                             NoiaTimerHandler timer_handler,
-                             void* data);
+typedef void (*NoiaTimerHandler) (NoiaTimer*, void*);
 
-void noia_event_timer_delete(timer_t timerid);
+/// Timer constructor.
+NoiaTimer* noia_timer_create(void* data, NoiaEventHandler handler);
 
-void noia_event_timer_nanosleep(long nonoseconds);
+/// Timer destructor.
+void noia_timer_destroy(NoiaTimer* self);
+
+/// Runs/starts/arms timer to be fired after given number of milliseconds.
+void noia_timer_run(NoiaTimer* self, NoiaMilliseconds milliseconds);
+
+/// Cancels/stops/disarms timer.
+void noia_timer_cancel(NoiaTimer* self);
+
+/// Return associated user data.
+void* noia_timer_get_data(NoiaTimer* self);
+
+/// Create event data that can be used as event source for Dispatcher.
+/// @see noia_event_dispatcher_add_event_source
+NoiaEventData* noia_timer_create_event_data(NoiaTimer* self);
 
 #endif // NOIA_EVENT_TIMER_H
 

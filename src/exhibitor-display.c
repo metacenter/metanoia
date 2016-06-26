@@ -9,7 +9,6 @@
 #include "utils-time.h"
 #include "utils-image.h"
 #include "utils-environment.h"
-#include "event-timer.h"
 #include "event-signals.h"
 #include "surface-coordinator.h"
 #include "config.h"
@@ -187,7 +186,7 @@ void* noia_display_thread_loop(void* data)
             noia_coordinator_lock_surfaces(self->coordinator);
             noia_display_redraw_all(self);
             noia_coordinator_unlock_surfaces(self->coordinator);
-            noia_event_timer_nanosleep(100 * 1000000);
+            noia_time_sleep(100);
         }
     } else {
         LOG_ERROR("Initializing new renderer failed!");
