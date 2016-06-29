@@ -160,11 +160,12 @@ void noia_exhibitor_module_finalize(void* edata NOIA_UNUSED, void* sdata)
 // PUBLIC
 
 void noia_exhibitor_initialize(NoiaLoop* this_loop,
-                               NoiaCoordinator* coordinator)
+                               NoiaFactoryBundle* bundle)
 {
     NOIA_ENSURE(this_loop, return);
 
-    NoiaExhibitor* exhibitor = noia_exhibitor_new(coordinator);
+    NoiaExhibitor* exhibitor =
+                            noia_exhibitor_new(bundle->coordinator, bundle->ed);
     noia_exhibitor_setup(exhibitor);
 
     // actions

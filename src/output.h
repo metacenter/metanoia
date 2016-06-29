@@ -5,16 +5,18 @@
 #ifndef NOIA_OUTPUT_H
 #define NOIA_OUTPUT_H
 
-#include "renderer.h"
 #include "utils-object.h"
+#include "event-dispatcher.h"
+#include "renderer.h"
 
 /// This data type represents a physical output.
 typedef struct NoiaOutput NoiaOutput;
 
-typedef NoiaRenderer* (*NoiaOutputInitRendererFunc) (NoiaOutput*, NoiaSize);
-typedef NoiaResult (*NoiaOutputBeginDrawingFunc) (NoiaOutput*);
-typedef NoiaResult (*NoiaOutputEndDrawingFunc) (NoiaOutput*);
+typedef NoiaResult (*NoiaOutputInitRendererFunc) (NoiaOutput*, NoiaSize);
+typedef NoiaEventData* (*NoiaOutputGetVBlankSourceFunc) (NoiaOutput*);
+typedef NoiaResult (*NoiaOutputSchedulePageFlipFunc) (NoiaOutput*);
 typedef void (*NoiaOutputFreeFunc) (NoiaOutput*);
+typedef void (*NoiaOutputVBlankNotifyFunc) (void*);
 
 /// @todo Make NoiaOutput opaque.
 /// @todo Keep list of available modes instead of just width and height
@@ -31,33 +33,49 @@ struct NoiaOutput {
     /// A rendering interface used to drawing on screen.
     NoiaRenderer* renderer;
 
-    /// Initialize th renderer.
+    /// Initialize the renderer.
     NoiaOutputInitRendererFunc initialize;
 
-    /// Prepare output for drawing (back-end specific).
-    NoiaOutputBeginDrawingFunc begin_drawing;
+    /// Return event data for vblank.
+    NoiaOutputGetVBlankSourceFunc get_vblank_source;
 
-    /// Finalize drawing (back-end specific).
-    NoiaOutputEndDrawingFunc end_drawing;
+    /// Schedules page flip.
+    NoiaOutputSchedulePageFlipFunc schedule_page_flip;
+
+    /// VBlank event listerner
+    /// @see noia_output_notify_vblank, noia_output_register_vblank_listener
+    void* vblank_listener;
+
+    /// Notify function for vblank event.
+    /// @see noia_output_notify_vblank, noia_output_register_vblank_listener
+    NoiaOutputVBlankNotifyFunc vblank_notify;
 };
 
-/// Initialize NoiaOutput.
+/// Setup NoiaOutput.
+/// @param size - desired dimentions of output
 /// @param unique_name - a string that uniquely specifies an output
 /// @param initialize - renderer constructor (back-end specific)
-/// @param swap_buffers - buffer swapper (back-end specific)
+/// @param get_vblank_source - returns event data for vblank (back-end specific)
+/// @param schedule_page_flip - schedules page flip (back-end specific)
 /// @param free - free method (back-end specific)
-NoiaResult noia_output_initialize(NoiaOutput* self,
-                                  NoiaSize size,
-                                  char* unique_name,
-                                  NoiaOutputInitRendererFunc initialize,
-                                  NoiaOutputBeginDrawingFunc begin_drawing,
-                                  NoiaOutputEndDrawingFunc end_drawing,
-                                  NoiaOutputFreeFunc free);
+NoiaResult noia_output_setup(NoiaOutput* self,
+                             NoiaSize size,
+                             char* unique_name,
+                             NoiaOutputInitRendererFunc initialize,
+                             NoiaOutputGetVBlankSourceFunc get_vblank_source,
+                             NoiaOutputSchedulePageFlipFunc schedule_page_flip,
+                             NoiaOutputFreeFunc free);
 
 /// Initialize the renderer.
 /// This function should be called in thread in which the rendering will be
 /// performed.
 NoiaResult noia_output_initialize_rendering(NoiaOutput* self);
+
+/// Registers handler for vblank events.
+void noia_output_register_vblank_listener(NoiaOutput* self,
+                                          NoiaEventDispatcher* ed,
+                                          void* listener,
+                                          NoiaOutputVBlankNotifyFunc vbn);
 
 /// Compare two outputs.
 /// @return `0` if identical.
@@ -75,14 +93,12 @@ void noia_output_draw(NoiaOutput* self,
                       NoiaPool* surfaces,
                       NoiaLayoutContext* layout_context);
 
-/// Swap renderers buffers.
-void noia_output_swap_buffers(NoiaOutput* self);
+/// Schedule page flip.
+void noia_output_schedule_page_flip(NoiaOutput* self);
 
-/// Prepares output for drawing.
-void noia_output_begin_drawing(NoiaOutput* self);
 
-/// Finishes drawing.
-void noia_output_end_drawing(NoiaOutput* self);
+/// Notify registered listener about vblank event.
+void noia_output_notify_vblank(NoiaOutput* self);
 
 #endif // NOIA_OUTPUT_H
 

@@ -155,7 +155,7 @@ NoiaResult noia_renderer_gl_initialize(NoiaRenderer* self)
         // Compile shaders and link program
         const char* vertex_shader_source = "";
         const char* fragment_shader_source = "";
-        NoiaGLSLVersion version = noia_gl_get_shading_land_version();
+        NoiaGLSLVersion version = noia_gl_get_shading_lang_version();
         if (version == NOIA_GLSL_300) {
             vertex_shader_source = scShaderVertex300;
             fragment_shader_source = scShaderFragment300;

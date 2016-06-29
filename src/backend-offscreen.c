@@ -26,10 +26,10 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-NoiaRenderer* noia_backend_offscreen_output_mmap_initialize(NoiaOutput* output,
+NoiaResult noia_backend_offscreen_output_mmap_initialize(NoiaOutput* output,
                                                             NoiaSize size)
 {
-    NOIA_ENSURE(output, return NULL);
+    NOIA_ENSURE(output, return NOIA_RESULT_INCORRECT_ARGUMENT);
     NoiaOutputOffscreen* output_offscreen = (NoiaOutputOffscreen*) output;
     LOG_INFO1("Initializing plain offscreen output...");
 
@@ -40,9 +40,12 @@ NoiaRenderer* noia_backend_offscreen_output_mmap_initialize(NoiaOutput* output,
         noia_renderer_mmap_set_buffer(output->renderer, i, data, 4*size.width);
     }
 
+    NoiaResult result = output->renderer->initialize(output->renderer);
+
     LOG_INFO1("Initializing plain offscreen output: %s",
-              output->renderer ? "SUCCESS" : "FAILURE");
-    return output->renderer;
+              (result == NOIA_RESULT_SUCCESS) ? "SUCCESS" : "FAILURE");
+
+    return result;
 }
 
 //------------------------------------------------------------------------------
@@ -105,10 +108,10 @@ NoiaOutputOffscreen* noia_backend_offscreen_output_new(NoiaSize size, int num)
     char name[32];
     snprintf(name, sizeof(name), "OS-%d", num),
 
-    noia_output_initialize(&output_offscreen->base, size, strdup(name),
-                           noia_backend_offscreen_output_mmap_initialize,
-                           NULL, NULL,
-                           noia_backend_offscreen_output_free);
+    noia_output_setup(&output_offscreen->base, size, strdup(name),
+                      noia_backend_offscreen_output_mmap_initialize,
+                      NULL, NULL,
+                      noia_backend_offscreen_output_free);
     output_offscreen->num = num;
 
     return output_offscreen;

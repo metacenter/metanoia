@@ -20,7 +20,7 @@ void noia_gl_log_status(void)
     GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     bool framebufferComplete = (framebufferStatus == GL_FRAMEBUFFER_COMPLETE);
 
-    LOG_DEBUG("Status - GL: 0x%x, EGL: 0x%x, framebuffer: %scomplete",
+    LOG_INFO1("Status - GL: 0x%x, EGL: 0x%x, framebuffer: %scomplete",
               glGetError(), eglGetError(), framebufferComplete ? "" : "NOT ");
 }
 
@@ -101,7 +101,7 @@ char* noia_gl_read_shader_source(const char* filename)
 //------------------------------------------------------------------------------
 
 /// Get latests supported version of GL ES shading language
-NoiaGLSLVersion noia_gl_get_shading_land_version(void)
+NoiaGLSLVersion noia_gl_get_shading_lang_version(void)
 {
     NoiaGLSLVersion result = NOIA_GLSL_UNKNOWN;
     const char* version_string =
@@ -267,6 +267,7 @@ NoiaResult noia_gl_create_onscreen_egl_bundle(EGLNativeDisplayType display,
                                            scDefaultConfigAttribs,
                                            scDefaultContextAttribs);
     if (result != NOIA_RESULT_SUCCESS) {
+        LOG_ERROR("GL: Failed to initialize!");
         return result;
     }
 
@@ -371,7 +372,7 @@ NoiaResult noia_gl_release_current(NoiaEGLBundle* egl)
     EGLint r = eglMakeCurrent(egl->display, EGL_NO_SURFACE,
                               EGL_NO_SURFACE, EGL_NO_CONTEXT);
     if (r == EGL_FALSE) {
-        LOG_DEBUG("Failed to release current context! (0x%x)", eglGetError());
+        LOG_ERROR("Failed to release current context! (0x%x)", eglGetError());
         return NOIA_RESULT_ERROR;
     }
 

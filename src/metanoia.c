@@ -29,6 +29,9 @@ int main(int argc, char** argv)
     NoiaEventDispatcher* dispatcher = noia_event_dispatcher_new();
     noia_event_dispatcher_initialize(dispatcher);
 
+    // Prepare factory bundle
+    NoiaFactoryBundle bundle = {coordinator, dispatcher};
+
     // Prepare loops and events
     NoiaLoop* loop_devices = noia_loop_new("noia:devices");
     NoiaLoop* loop_displays = noia_loop_new("noia:displays");
@@ -52,7 +55,7 @@ int main(int argc, char** argv)
     task = factorize_initialize_wayland_task(loop_displays, coordinator);
     noia_loop_schedule_task(loop_displays, task);
 
-    task = factorize_initialize_exhibitor_task(loop_displays, coordinator);
+    task = factorize_initialize_exhibitor_task(loop_displays, &bundle);
     noia_loop_schedule_task(loop_displays, task);
 
     // Start threads

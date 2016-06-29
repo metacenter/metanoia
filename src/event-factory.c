@@ -52,11 +52,11 @@ NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop,
 //------------------------------------------------------------------------------
 
 NoiaTask* factorize_initialize_exhibitor_task(NoiaLoop* loop,
-                                              NoiaCoordinator* coordinator)
+                                              NoiaFactoryBundle* bundle)
 {
     return noia_task_new((NoiaTaskProcessor) noia_exhibitor_initialize,
                          (NoiaTaskFreeFunc) noia_task_free, NULL,
-                         coordinator, loop);
+                         bundle, loop);
 }
 
 //------------------------------------------------------------------------------

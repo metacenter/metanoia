@@ -7,10 +7,11 @@
 
 #include "event-loop.h"
 #include "surface-coordinator.h"
+#include "event-factory.h"
 
 /// Initialize exhibitor module and subscribe for notifications.
 void noia_exhibitor_initialize(NoiaLoop* this_loop,
-                               NoiaCoordinator* coordinator);
+                               NoiaFactoryBundle* bundle);
 
 #endif // NOIA_EXHIBITOR_MODULE_H
 

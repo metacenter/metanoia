@@ -8,6 +8,7 @@
 #include "output.h"
 #include "global-objects.h"
 #include "utils-list.h"
+#include "event-dispatcher.h"
 
 /// Hold all information about composition state: frame tree, display threads,
 /// surface history, pointer position, etc.
@@ -20,9 +21,9 @@ typedef struct NoiaCompositorStruct NoiaCompositor;
 /// `NoiaPointer` manages motion of pointer and appearance of cursor.
 typedef struct NoiaPointerStruct NoiaPointer;
 
-
 /// Exhibitor constructor.
-NoiaExhibitor* noia_exhibitor_new(NoiaCoordinator* coordinator);
+NoiaExhibitor* noia_exhibitor_new(NoiaCoordinator* coordinator,
+                                  NoiaEventDispatcher* ed);
 
 /// Exhibitor destructor.
 void noia_exhibitor_free(NoiaExhibitor* self);
@@ -45,6 +46,9 @@ NoiaPointer* noia_exhibitor_get_pointer(NoiaExhibitor* self);
 
 /// Get surface coordinator.
 NoiaCoordinator* noia_exhibitor_get_coordinator(NoiaExhibitor* self);
+
+/// Get event dispatcher.
+NoiaEventDispatcher* noia_exhibitor_get_dispatcher(NoiaExhibitor* self);
 
 
 /// Execute an action.

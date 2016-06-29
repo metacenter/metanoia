@@ -65,7 +65,7 @@ void noia_gl_print_log(GLuint object);
 
 char* noia_gl_read_shader_source(const char* filename);
 
-NoiaGLSLVersion noia_gl_get_shading_land_version(void);
+NoiaGLSLVersion noia_gl_get_shading_lang_version(void);
 
 GLuint noia_gl_create_shader(const char* source, GLenum type);
 

@@ -10,6 +10,7 @@
 #include "utils-image.h"
 #include "utils-environment.h"
 #include "event-signals.h"
+#include "event-loop.h"
 #include "surface-coordinator.h"
 #include "config.h"
 
@@ -34,23 +35,31 @@ struct NoiaDisplayStruct {
     /// Background surface ID.
     NoiaSurfaceId background_sid;
 
-    /// State of the thread.
-    bool run;
-
     /// Reference to exhibitor.
     NoiaExhibitor* exhibitor;
 
     /// Reference to coordinator.
     NoiaCoordinator* coordinator;
 
-    /// Thread object.
-    pthread_t thread;
+    /// Event dispatcher.
+    /// @see noia_output_register_vblank_listener
+    NoiaEventDispatcher* ed;
 
-    /// Time of last display redraw in monotinic clock miliseconds.
-    NoiaMilliseconds last_time;
+    /// Event loop.
+    NoiaLoop* loop;
+
+    /// Event loop task for display setup.
+    NoiaTask* setup_task;
+
+    /// Event loop task for display redraw.
+    NoiaTask* redraw_task;
+
+    /// Holds information if redraw is needed to avoid unnecessary redraws.
+    bool redraw_needed;
 };
 
 //------------------------------------------------------------------------------
+// PRIVATE
 
 /// Check validity of the display.
 bool noia_display_is_valid(NoiaDisplay* self)
@@ -60,6 +69,19 @@ bool noia_display_is_valid(NoiaDisplay* self)
     NOIA_ENSURE(self->frame, return false);
     return true;
 }
+
+//------------------------------------------------------------------------------
+
+/// Handle notification about vblank from output.
+void noia_display_handle_vblank_notification(void* data)
+{
+    NoiaDisplay* display = data;
+    NOIA_ENSURE(display, return);
+
+    noia_object_ref((NoiaObject*) display->redraw_task);
+    noia_loop_schedule_task(display->loop, display->redraw_task);
+}
+
 //------------------------------------------------------------------------------
 
 /// Setup display loop.
@@ -67,18 +89,17 @@ NoiaResult noia_display_setup(NoiaDisplay* self)
 {
     NoiaResult result = NOIA_RESULT_ERROR;
 
-    // Setup the thread
-    char name[32];
-    snprintf(name, sizeof(name), "noia@%s", self->output->unique_name);
-    noia_environment_on_enter_new_thread(self->thread, name);
-
-    LOG_INFO1("Threads: starting display loop '%s'", name);
     LOG_INFO1("Initializing output '%s'", self->output->unique_name);
 
     // Initialize output
     result = noia_output_initialize_rendering(self->output);
 
     if (result == NOIA_RESULT_SUCCESS) {
+        // Register vblank listener
+        noia_output_register_vblank_listener
+                                      (self->output, self->ed, self,
+                                       noia_display_handle_vblank_notification);
+
         // Read in background image
         NoiaBuffer buff = noia_image_read(noia_config()->background_image_path);
         if (noia_buffer_is_valid(&buff)) {
@@ -129,7 +150,7 @@ void noia_display_setup_layout_context(NoiaDisplay* self,
 void noia_display_redraw_all(NoiaDisplay* self)
 {
     // Check if there is something to do.
-    if (noia_coordinator_get_last_notify(self->coordinator) < self->last_time) {
+    if (not self->redraw_needed) {
         return;
     }
 
@@ -148,13 +169,10 @@ void noia_display_redraw_all(NoiaDisplay* self)
     noia_display_setup_layout_context(self, pointer, &layout_context);
 
     // Draw
-    noia_output_begin_drawing(self->output);
     noia_output_draw(self->output,
                      self->coordinator,
                      self->visible_surfaces,
                      &layout_context);
-    noia_output_swap_buffers(self->output);
-    noia_output_end_drawing(self->output);
 
     // Send notifications
     unsigned i;
@@ -164,36 +182,43 @@ void noia_display_redraw_all(NoiaDisplay* self)
     }
 
     // Finish
-    self->last_time = noia_time_get_monotonic_milliseconds();
     noia_pool_release(self->visible_surfaces);
+    self->redraw_needed = false;
+}
+
+//------------------------------------------------------------------------------
+// HANDLE TASKS
+
+/// Helper function for setup task.
+void noia_display_process_setup(void* edata NOIA_UNUSED, void* sdata)
+{
+    NoiaDisplay* display = sdata;
+    NOIA_ENSURE(display, return);
+    noia_display_setup(display);
 }
 
 //------------------------------------------------------------------------------
 
-/// Main loop of the display thread.
-/// @todo Extend output to provide information about v-blanks.
-void* noia_display_thread_loop(void* data)
+/// Helper function for redraw task.
+void noia_display_process_redraw(void* edata NOIA_UNUSED, void* sdata)
 {
-    NoiaDisplay* self = (NoiaDisplay*) data;
-    if (not noia_display_is_valid(self)) {
-        return NULL;
-    }
+    NoiaDisplay* display = sdata;
+    NOIA_ENSURE(display, return);
+    noia_display_redraw_all(display);
+}
 
-    if (noia_display_setup(self) == NOIA_RESULT_SUCCESS) {
-        LOG_INFO1("Initialized new renderer!");
-        self->run = true;
-        while (self->run) {
-            noia_coordinator_lock_surfaces(self->coordinator);
-            noia_display_redraw_all(self);
-            noia_coordinator_unlock_surfaces(self->coordinator);
-            noia_time_sleep(100);
-        }
-    } else {
-        LOG_ERROR("Initializing new renderer failed!");
-    }
+//------------------------------------------------------------------------------
 
-    LOG_INFO1("Threads: stopped display loop");
-    return NULL;
+/// Handle notification about needed redraw.
+void noia_display_on_notify(void* edata NOIA_UNUSED, void* sdata)
+{
+    NoiaDisplay* display = sdata;
+    NOIA_ENSURE(display, return);
+
+    if (not display->redraw_needed) {
+        display->redraw_needed = true;
+        noia_output_schedule_page_flip(display->output);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -205,14 +230,31 @@ NoiaDisplay* noia_display_new(NoiaOutput* output,
 {
     NoiaDisplay* self = malloc(sizeof(NoiaDisplay));
 
-    self->run = false;
+    // Glue thread name
+    char name[32];
+    snprintf(name, sizeof(name), "noia@%s", output->unique_name);
+
+    // Set display members
     self->output = output;
     self->frame = frame;
+    self->loop = noia_loop_new(name);
     self->exhibitor = exhibitor;
     self->coordinator = noia_exhibitor_get_coordinator(exhibitor);
+    self->ed = noia_exhibitor_get_dispatcher(exhibitor);
     self->visible_surfaces = noia_pool_create(8, sizeof(NoiaSurfaceContext));
     self->background_sid = scInvalidSurfaceId;
-    self->last_time = 0;
+    self->redraw_needed = false;
+
+    // Create tasks
+    self->setup_task =
+                noia_task_create(noia_display_process_setup, self->loop, self);
+    self->redraw_task =
+                noia_task_create(noia_display_process_redraw, self->loop, self);
+
+    // Subscribe signals
+    noia_event_signal_subscribe(SIGNAL_NOTIFY,
+               noia_task_create(noia_display_on_notify,
+                                self->loop, self));
 
     return self;
 }
@@ -222,10 +264,12 @@ NoiaDisplay* noia_display_new(NoiaOutput* output,
 void noia_display_free(NoiaDisplay* self)
 {
     NOIA_ENSURE(self, return);
-    NOIA_ENSURE(not self->run, return);
 
+    noia_loop_free(self->loop);
     noia_pool_destroy(self->visible_surfaces);
     noia_object_unref((NoiaObject*) self->output);
+    noia_object_unref((NoiaObject*) self->setup_task);
+    noia_object_unref((NoiaObject*) self->redraw_task);
 
     memset(self, 0, sizeof(NoiaDisplay));
     free(self);
@@ -237,16 +281,8 @@ NoiaResult noia_display_start(NoiaDisplay* self)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_ERROR);
 
-    NoiaResult result = NOIA_RESULT_ERROR;
-    int code = pthread_create(&self->thread, NULL,
-                              noia_display_thread_loop, self);
-    if (code == 0) {
-        result = NOIA_RESULT_SUCCESS;
-    } else {
-        LOG_ERROR("Threads: error while creating thread: '%s'", strerror(code));
-    }
-
-    return result;
+    noia_loop_schedule_task(self->loop, self->setup_task);
+    return noia_loop_run(self->loop);
 }
 
 //------------------------------------------------------------------------------
@@ -254,8 +290,8 @@ NoiaResult noia_display_start(NoiaDisplay* self)
 void noia_display_stop(NoiaDisplay* self)
 {
     NOIA_ENSURE(self, return);
-    self->run = false;
-    pthread_join(self->thread, NULL);
+    noia_loop_stop(self->loop);
+    noia_loop_join(self->loop);
 }
 
 //------------------------------------------------------------------------------

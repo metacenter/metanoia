@@ -23,15 +23,18 @@ struct NoiaExhibitorStruct {
     NoiaStrategist* strategist;
     NoiaPointer* pointer;
     NoiaCoordinator* coordinator;
+    NoiaEventDispatcher* ed;
 };
 
 //------------------------------------------------------------------------------
 
-NoiaExhibitor* noia_exhibitor_new(NoiaCoordinator* coordinator)
+NoiaExhibitor* noia_exhibitor_new(NoiaCoordinator* coordinator,
+                                  NoiaEventDispatcher* ed)
 {
     NoiaExhibitor* self = malloc(sizeof(NoiaExhibitor));
 
     self->coordinator = coordinator;
+    self->ed = ed;
     self->surface_history = noia_list_new(NULL);
     self->displays = noia_list_new((NoiaFreeFunc) noia_display_free);
     self->compositor = noia_compositor_new(self);
@@ -105,6 +108,13 @@ NoiaPointer* noia_exhibitor_get_pointer(NoiaExhibitor* self)
 NoiaCoordinator* noia_exhibitor_get_coordinator(NoiaExhibitor* self)
 {
     return self->coordinator;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaEventDispatcher* noia_exhibitor_get_dispatcher(NoiaExhibitor* self)
+{
+    return self->ed;
 }
 
 //------------------------------------------------------------------------------

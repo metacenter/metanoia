@@ -9,6 +9,11 @@
 #include "event-dispatcher.h"
 #include "surface-coordinator.h"
 
+typedef struct {
+    NoiaCoordinator* coordinator;
+    NoiaEventDispatcher* ed;
+} NoiaFactoryBundle;
+
 NoiaTask* factorize_setup_input_devices_task(NoiaEventDispatcher* ed);
 
 NoiaTask* factorize_setup_device_monitor_task(NoiaEventDispatcher* ed);
@@ -19,7 +24,7 @@ NoiaTask* factorize_initialize_wayland_task(NoiaLoop* loop,
                                             NoiaCoordinator* coordinator);
 
 NoiaTask* factorize_initialize_exhibitor_task(NoiaLoop* loop,
-                                              NoiaCoordinator* coordinator);
+                                              NoiaFactoryBundle* bundle);
 
 NoiaTask* factorize_initialize_output_collector_task(NoiaLoop* loop);
 

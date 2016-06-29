@@ -8,6 +8,8 @@
 #include "exhibitor-compositor.h"
 #include "exhibitor.h"
 
+#include "event-dispatcher.h"
+
 /// NoiaDisplay represents a thread running for drawing on one output.
 typedef struct NoiaDisplayStruct NoiaDisplay;
 

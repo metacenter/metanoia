@@ -200,6 +200,7 @@ metanoia.add([Com(['device-common.c']),
 # OUTPUT
 
 metanoia.add([Com(['output.c']),
+              Com(['output-drm.c'], pkgs={'libdrm'}),
               Com(['output-collector.c'])])
 
 #-------------------------------------------------------------------------------

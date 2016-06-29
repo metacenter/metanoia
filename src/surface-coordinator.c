@@ -75,6 +75,7 @@ void noia_coordinator_unlock_surfaces(NoiaCoordinator* self)
 void noia_coordinator_notify(NoiaCoordinator* self)
 {
     self->last_notify_time = noia_time_get_monotonic_milliseconds();
+    noia_event_signal_emit(SIGNAL_NOTIFY, NULL);
 }
 
 //------------------------------------------------------------------------------
