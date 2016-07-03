@@ -5,8 +5,10 @@
 #ifndef NOIA_OUTPUT_DRM_H
 #define NOIA_OUTPUT_DRM_H
 
-#include "output.h"
+#include "global-types.h"
 
+/// @todo Do not use this headers here.
+#include <stddef.h>
 #include <xf86drmMode.h>
 
 #define INVALID_CRTC_ID 0

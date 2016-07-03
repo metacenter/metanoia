@@ -262,12 +262,14 @@ NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output)
                         noia_renderer_mmap_copy_buffer,
                         noia_renderer_mmap_free);
 
+    NoiaSize size = noia_output_get_area(output).size;
+
     mine->front = 0;
-    mine->size = output->area.size;
+    mine->size = size;
     mine->buffer[0].data = NULL;
-    mine->buffer[0].stride = 4*output->area.size.width;
+    mine->buffer[0].stride = 4*size.width;
     mine->buffer[1].data = NULL;
-    mine->buffer[1].stride = 4*output->area.size.width;
+    mine->buffer[1].stride = 4*size.width;
     mine->output = output;
 
     return (NoiaRenderer*) mine;

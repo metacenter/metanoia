@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <wayland-server.h>
+#include <string.h>
 
 //------------------------------------------------------------------------------
 
@@ -218,7 +219,9 @@ void noia_wayland_engine_advertise_output(NoiaWaylandEngine* self,
 
     NoiaWaylandOutput* wayland_output =
                                      noia_wayland_output_create(global, output);
-    noia_store_add(self->outputs, output->unique_name, wayland_output);
+    noia_store_add(self->outputs,
+                   strdup(noia_output_get_name(output)),
+                   wayland_output);
 }
 
 //------------------------------------------------------------------------------
@@ -227,7 +230,7 @@ void noia_wayland_engine_destroy_output(NoiaWaylandEngine* self,
                                         NoiaOutput* output)
 {
     NoiaWaylandOutput* wayland_output =
-                          noia_store_delete(self->outputs, output->unique_name);
+                 noia_store_delete(self->outputs, noia_output_get_name(output));
     wl_global_destroy(wayland_output->global_output);
     noia_wayland_output_destroy(wayland_output);
 }

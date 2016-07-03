@@ -213,8 +213,10 @@ void* noia_store_find_with_id(NoiaStore* self, NoiaItemId key)
 /// Store item using string.
 /// @param key - string used to reference an item
 /// @return pointer to found item or null if nothing found
-void* noia_store_find_with_str(NoiaStore* self, char* key)
+void* noia_store_find_with_str(NoiaStore* self, const char* const_key)
 {
+    // Const cats just tu satify compiler.
+    char* key = (char*) const_key;
     noia_store_find_template(str);
 }
 
@@ -242,7 +244,7 @@ void* noia_store_delete_with_id(NoiaStore* self, NoiaItemId key)
 /// Delete an item using string.
 /// @param key - string used to reference an item
 /// @return pointer to found item or null if nothing found
-void* noia_store_delete_with_str(NoiaStore* self, char* key)
+void* noia_store_delete_with_str(NoiaStore* self, const char* key)
 {
     void* result = NULL;
     NOIA_ENSURE(self, return result);

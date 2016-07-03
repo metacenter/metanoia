@@ -45,17 +45,19 @@ void noia_wayland_output_bind(struct wl_client* client,
 
     wl_resource_set_implementation(rc, NULL, data, noia_wayland_output_unbind);
 
+    NoiaArea area = noia_output_get_area(output);
+    const char* name = noia_output_get_name(output);
+
     /// @todo Pass more realistic data to wl_output_send_geometry
     wl_output_send_geometry(rc,
-                            output->area.pos.x, output->area.pos.y,
-                            output->area.size.width, output->area.size.height,
+                            area.pos.x, area.pos.y,
+                            area.size.width, area.size.height,
                             0,
-                            output->unique_name, output->unique_name,
+                            name, name,
                             0);
 
     /// @todo Pass more realistic data to wl_output_send_mode
-    wl_output_send_mode(rc, 0, output->area.size.width,
-                               output->area.size.height, 60);
+    wl_output_send_mode(rc, 0, area.size.width, area.size.height, 60);
 
     if (version >= WL_OUTPUT_SCALE_SINCE_VERSION) {
         wl_output_send_scale(rc, 1);

@@ -29,16 +29,16 @@ NoiaResult noia_store_add_with_str(NoiaStore* self, char* key, void* data);
         char*:      noia_store_add_with_str) (store, key, data)
 
 void* noia_store_find_with_id(NoiaStore* self, NoiaItemId key);
-void* noia_store_find_with_str(NoiaStore* self, char* key);
+void* noia_store_find_with_str(NoiaStore* self, const char* key);
 #define noia_store_find(store, key) _Generic(key, \
-        NoiaItemId: noia_store_find_with_id, \
-        char*:      noia_store_find_with_str) (store, key)
+        NoiaItemId:  noia_store_find_with_id, \
+        const char*: noia_store_find_with_str) (store, key)
 
 void* noia_store_delete_with_id(NoiaStore* self, NoiaItemId key);
-void* noia_store_delete_with_str(NoiaStore* self, char* key);
+void* noia_store_delete_with_str(NoiaStore* self, const char* key);
 #define noia_store_delete(store, key) _Generic(key, \
-        NoiaItemId: noia_store_delete_with_id, \
-        char*:      noia_store_delete_with_str) (store, key)
+        NoiaItemId:  noia_store_delete_with_id, \
+        const char*: noia_store_delete_with_str) (store, key)
 
 #endif // NOIA_STORE_H
 

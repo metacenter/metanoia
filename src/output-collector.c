@@ -30,10 +30,11 @@ NoiaPosition noia_output_collector_allocate_position(void)
     NoiaPosition result = {INT_MIN, INT_MIN};
     FOR_EACH (outputs, link) {
         NoiaOutput* output = (NoiaOutput*) link->data;
-        int x = output->area.pos.x + output->area.size.width;
+        NoiaArea area = noia_output_get_area(output);
+        int x = area.pos.x + area.size.width;
         if (x > result.x) {
             result.x = x + 10;
-            result.y = output->area.pos.y;
+            result.y = area.pos.y;
         }
     }
 
@@ -79,13 +80,14 @@ void noia_output_collector_notify_outputs_found(NoiaList* found_outputs)
 {
     FOR_EACH (found_outputs, link) {
         NoiaOutput* output = (NoiaOutput*) link->data;
-        if (!output || !output->unique_name) {
+        if (not output) {
             LOG_WARN1("Invalid output found!");
             continue;
         }
 
         // Assign position to output
-        output->area.pos = noia_output_collector_allocate_position();
+        NoiaPosition pos = noia_output_collector_allocate_position();
+        noia_output_set_position(output, pos);
         noia_list_append(outputs, output);
 
         // Notify about new output
@@ -101,12 +103,12 @@ void noia_output_collector_notify_outputs_lost(NoiaList* lost_outputs)
 {
     FOR_EACH (lost_outputs, link) {
         NoiaOutput* output = (NoiaOutput*) link->data;
-        if (!output || !output->unique_name) {
+        if (not output) {
             LOG_WARN1("Invalid output found!");
             continue;
         }
 
-        LOG_INFO1("Removing output '%s'", output->unique_name);
+        LOG_INFO1("Removing output '%s'", noia_output_get_name(output));
         noia_list_remove(outputs, output, (NoiaCompareFunc)noia_output_compare);
         noia_event_signal_emit(SIGNAL_OUTPUT_LOST, (NoiaObject*) output);
     }

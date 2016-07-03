@@ -5,7 +5,6 @@
 #ifndef NOIA_DEVICE_FB_H
 #define NOIA_DEVICE_FB_H
 
-#include "output.h"
 #include "utils-list.h"
 
 /// Get info about framebuffer and create Output for use with it.

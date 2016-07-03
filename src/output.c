@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-#include "output.h"
+#include "output-internal.h"
 
 #include <string.h>
 
@@ -123,6 +123,37 @@ void noia_output_notify_vblank(NoiaOutput* self)
     NOIA_ENSURE(self->vblank_notify, return);
 
     self->vblank_notify(self->vblank_listener);
+}
+
+//------------------------------------------------------------------------------
+
+NoiaArea noia_output_get_area(NoiaOutput* self)
+{
+    return self->area;
+}
+
+//------------------------------------------------------------------------------
+
+const char* noia_output_get_name(NoiaOutput* self)
+{
+    NOIA_ENSURE(self, return NULL);
+    return self->unique_name;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_output_set_position(NoiaOutput* self, NoiaPosition position)
+{
+    NOIA_ENSURE(self, return);
+    self->area.pos = position;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_output_unref(NoiaOutput* self)
+{
+    NOIA_ENSURE(self, return);
+    noia_object_unref(&self->base);
 }
 
 //------------------------------------------------------------------------------

@@ -34,10 +34,7 @@ void noia_wayland_output_destroy(NoiaWaylandOutput* self)
         return;
     }
 
-    noia_object_unref((NoiaObject*) self->output);
-    if (self->base.str) {
-        free(self->base.str);
-    }
+    noia_output_unref(self->output);
     memset(self, 0, sizeof(NoiaWaylandOutput));
     free(self);
 }

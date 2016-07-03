@@ -5,7 +5,7 @@
 #include "backend-offscreen.h"
 #include "renderer-mmap.h"
 #include "renderer-gl.h"
-#include "output.h"
+#include "output-internal.h"
 #include "event-signals.h"
 #include "utils-log.h"
 

@@ -6,6 +6,7 @@
 #define NOIA_RENDERER_MMAP_H
 
 #include "output.h"
+#include "renderer.h"
 
 NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output);
 

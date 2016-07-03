@@ -89,7 +89,7 @@ NoiaResult noia_display_setup(NoiaDisplay* self)
 {
     NoiaResult result = NOIA_RESULT_ERROR;
 
-    LOG_INFO1("Initializing output '%s'", self->output->unique_name);
+    LOG_INFO1("Initializing output '%s'", noia_output_get_name(self->output));
 
     // Initialize output
     result = noia_output_initialize_rendering(self->output);
@@ -127,10 +127,11 @@ void noia_display_setup_layout_context(NoiaDisplay* self,
     memset(context, 0, sizeof(NoiaLayoutContext));
 
     // Setup pointer position and surface id
+    NoiaArea output_area = noia_output_get_area(self->output);
     NoiaPosition position = noia_exhibitor_pointer_get_global_position(pointer);
-    if (noia_position_is_inside(position, self->output->area)) {
-        context->pointer.pos.x = position.x - self->output->area.pos.x;
-        context->pointer.pos.y = position.y - self->output->area.pos.y;
+    if (noia_position_is_inside(position, output_area)) {
+        context->pointer.pos.x = position.x - output_area.pos.x;
+        context->pointer.pos.y = position.y - output_area.pos.y;
         context->pointer.sid = noia_exhibitor_pointer_get_sid(pointer);
     } else {
         context->pointer.pos.x = INT_MIN;
@@ -161,9 +162,8 @@ void noia_display_redraw_all(NoiaDisplay* self)
 
     // Prepare overlayer
     NoiaPointer* pointer = noia_exhibitor_get_pointer(self->exhibitor);
-    noia_exhibitor_pointer_update_hover_state(pointer,
-                                              self->output->area,
-                                              self->visible_surfaces);
+    noia_exhibitor_pointer_update_hover_state
+          (pointer, noia_output_get_area(self->output), self->visible_surfaces);
 
     NoiaLayoutContext layout_context;
     noia_display_setup_layout_context(self, pointer, &layout_context);
@@ -232,7 +232,7 @@ NoiaDisplay* noia_display_new(NoiaOutput* output,
 
     // Glue thread name
     char name[32];
-    snprintf(name, sizeof(name), "noia@%s", output->unique_name);
+    snprintf(name, sizeof(name), "noia@%s", noia_output_get_name(output));
 
     // Set display members
     self->output = output;
@@ -298,7 +298,7 @@ void noia_display_stop(NoiaDisplay* self)
 
 NoiaArea noia_display_get_area(NoiaDisplay* self)
 {
-    return self->output->area;
+    return noia_output_get_area(self->output);
 }
 
 //------------------------------------------------------------------------------
@@ -309,8 +309,7 @@ int noia_display_compare_name(NoiaDisplay* self,
     NOIA_ENSURE(name, return -1);
     NOIA_ENSURE(self, return -1);
     NOIA_ENSURE(self->output, return -1);
-    NOIA_ENSURE(self->output->unique_name, return -1);
-    return strcmp(self->output->unique_name, name);
+    return strcmp(noia_output_get_name(self->output), name);
 }
 
 //------------------------------------------------------------------------------

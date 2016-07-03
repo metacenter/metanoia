@@ -7,6 +7,7 @@
 #include "utils-log.h"
 #include "renderer-mmap.h"
 #include "renderer-gl.h"
+#include "output-internal.h"
 #include "config.h"
 
 #include <gbm.h>

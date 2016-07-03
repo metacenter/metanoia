@@ -3,8 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "device-fb.h"
+
 #include "device-common.h"
 #include "renderer-mmap.h"
+#include "output-internal.h"
 #include "event-timer.h"
 #include "utils-log.h"
 

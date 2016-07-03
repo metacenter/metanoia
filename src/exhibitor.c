@@ -135,9 +135,9 @@ void noia_exhibitor_create_new_display(NoiaExhibitor* exhibitor,
     NOIA_ENSURE(output, return);
 
     NoiaFrame* display_frame =
-                       noia_compositor_create_new_display(exhibitor->compositor,
-                                                          output->area,
-                                                          output->unique_name);
+               noia_compositor_create_new_display(exhibitor->compositor,
+                                                  noia_output_get_area(output),
+                                                  noia_output_get_name(output));
 
     noia_compositor_create_next_workspace(exhibitor->compositor, display_frame);
     NoiaDisplay* display = noia_display_new(output, display_frame, exhibitor);
@@ -154,17 +154,19 @@ void noia_exhibitor_destroy_display(NoiaExhibitor* exhibitor,
     NOIA_ENSURE(exhibitor, return);
     NOIA_ENSURE(output, return);
 
-    LOG_INFO2("Stopping rendering thread for output '%s'", output->unique_name);
+    const char* name = noia_output_get_name(output);
+
+    LOG_INFO2("Stopping rendering thread for output '%s'", name);
 
     FOR_EACH(exhibitor->displays, link) {
         NoiaDisplay* display = (NoiaDisplay*) link->data;
-        if (noia_display_compare_name(display, output->unique_name) == 0) {
+        if (noia_display_compare_name(display, name) == 0) {
             noia_display_stop(display);
             break;
         }
     }
 
-    noia_list_remove(exhibitor->displays, output->unique_name,
+    noia_list_remove(exhibitor->displays, (void*) name,
                      (NoiaCompareFunc) noia_display_compare_name);
 }
 
