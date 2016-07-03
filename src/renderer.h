@@ -5,6 +5,8 @@
 #ifndef NOIA_RENDERER_H
 #define NOIA_RENDERER_H
 
+#include "global-types.h"
+
 #include "utils-pool.h"
 #include "surface-coordinator.h"
 
@@ -13,54 +15,26 @@
 /// @see NoiaRendererMMap, NoiaRendererGL
 typedef struct NoiaRendererStruct NoiaRenderer;
 
-typedef NoiaResult (*NoiaRendererInitializeFunc) (NoiaRenderer*);
+/// Initialize the renderer.
+NoiaResult noia_renderer_initialize(NoiaRenderer* self);
 
-typedef void (*NoiaRendererFinalizeFunc) (NoiaRenderer*);
+/// Redraw hwole scene.
+void noia_renderer_draw(NoiaRenderer* self,
+                        NoiaCoordinator* coordinator,
+                        NoiaPool* surfaces,
+                        NoiaLayoutContext* layout_context);
 
-typedef void (*NoiaRendererDrawFunc) (NoiaRenderer*,
-                                      NoiaCoordinator*,
-                                      NoiaPool*,
-                                      NoiaLayoutContext*);
+/// Swap renderers buffers.
+void noia_renderer_swap_buffers(NoiaRenderer* self);
 
-typedef void (*NoiaRendererSwapBuffersFunc) (NoiaRenderer*);
+/// Copy renderers front buffer.
+void noia_renderer_copy_buffer(NoiaRenderer* self,
+                               NoiaArea area,
+                               uint8_t* data,
+                               unsigned stride);
 
-typedef void (*NoiaRendererCopyBufferFunc) (NoiaRenderer*,
-                                            NoiaArea,
-                                            uint8_t*,
-                                            unsigned);
-
-typedef void (*NoiarendererFreeFunc) (NoiaRenderer*);
-
-/// Renderer strategy interface.
-/// @todo Move 'attach' elsewhere.
-struct NoiaRendererStruct {
-    /// Initialize everything needed for drawing.
-    NoiaRendererInitializeFunc initialize;
-
-    /// Finalize all tasks, free resources.
-    NoiaRendererFinalizeFunc finalize;
-
-    /// Draw surfaces and layout using passed contexts.
-    NoiaRendererDrawFunc draw;
-
-    /// Swap buffers if renderer supports this.
-    NoiaRendererSwapBuffersFunc swap_buffers;
-
-    /// Copy current scene fragment to given memory in RGBA format, 32 bpp.
-    NoiaRendererCopyBufferFunc copy_buffer;
-
-    /// Free all allocated memory.
-    NoiaRendererFinalizeFunc free;
-};
-
-/// Initialize renderer.
-void noia_renderer_initialize(NoiaRenderer* self,
-                              NoiaRendererInitializeFunc initialize,
-                              NoiaRendererFinalizeFunc finalize,
-                              NoiaRendererDrawFunc draw,
-                              NoiaRendererSwapBuffersFunc swap_buffers,
-                              NoiaRendererCopyBufferFunc copy_buffer,
-                              NoiaRendererFinalizeFunc free);
+/// Renderer desctructor.
+void noia_renderer_destroy(NoiaRenderer* self);
 
 #endif // NOIA_RENDERER_H
 

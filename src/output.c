@@ -85,9 +85,8 @@ void noia_output_take_screenshot(NoiaOutput* self,
     NOIA_ENSURE(data, return);
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(self->renderer, return);
-    NOIA_ENSURE(self->renderer->copy_buffer, return);
 
-    self->renderer->copy_buffer(self->renderer, area, data, stride);
+    noia_renderer_copy_buffer(self->renderer, area, data, stride);
 }
 
 //------------------------------------------------------------------------------
@@ -102,9 +101,8 @@ void noia_output_draw(NoiaOutput* self,
     NOIA_ENSURE(layout_context, return);
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(self->renderer, return);
-    NOIA_ENSURE(self->renderer->draw, return);
 
-    self->renderer->draw(self->renderer, coordinator, surfaces, layout_context);
+    noia_renderer_draw(self->renderer, coordinator, surfaces, layout_context);
 }
 
 //------------------------------------------------------------------------------

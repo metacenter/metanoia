@@ -8,6 +8,7 @@
 #include "utils-object.h"
 #include "event-dispatcher.h"
 #include "renderer.h"
+#include "surface-coordinator.h"
 
 /// This data type represents a physical output.
 typedef struct NoiaOutput NoiaOutput;

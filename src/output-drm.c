@@ -166,7 +166,7 @@ NoiaResult noia_output_drm_schedule_device_page_flip(NoiaOutputDRM* output_drm)
     pthread_mutex_lock(&drm_mutex);
     NoiaResult result = NOIA_RESULT_ERROR;
 
-    output_drm->base.renderer->swap_buffers(output_drm->base.renderer);
+    noia_renderer_swap_buffers(output_drm->base.renderer);
 
     int32_t fb = noia_output_drm_swap_buffers(output_drm);
     int r = drmModePageFlip(output_drm->fd, output_drm->crtc_id, fb,
@@ -381,8 +381,8 @@ NoiaResult noia_output_drm_initialize(NoiaOutput* output,
             break;
         }
 
-        NOIA_ASSERT_RESULT(output->renderer->initialize(output->renderer));
-        output->renderer->swap_buffers(output->renderer);
+        NOIA_ASSERT_RESULT(noia_renderer_initialize(output->renderer));
+        noia_renderer_swap_buffers(output->renderer);
 
         int32_t fb = noia_output_drm_swap_buffers(output_drm);
         NOIA_ASSERT_RESULT(noia_output_drm_set_mode(output_drm, fb));
@@ -391,7 +391,7 @@ NoiaResult noia_output_drm_initialize(NoiaOutput* output,
     }
 
     if ((result != NOIA_RESULT_SUCCESS) and (output->renderer)) {
-        output->renderer->free(output->renderer);
+        noia_renderer_destroy(output->renderer);
     }
 
     return result;
@@ -422,7 +422,7 @@ NoiaResult noia_output_drm_schedule_page_flip(NoiaOutput* output)
     pthread_mutex_lock(&drm_mutex);
     NoiaResult result = NOIA_RESULT_ERROR;
 
-    output_drm->base.renderer->swap_buffers(output_drm->base.renderer);
+    noia_renderer_swap_buffers(output_drm->base.renderer);
 
     int32_t fb = noia_output_drm_swap_buffers(output_drm);
     int r = drmModePageFlip(output_drm->fd, output_drm->crtc_id, fb,

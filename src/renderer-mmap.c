@@ -4,6 +4,7 @@
 
 #include "renderer-mmap.h"
 
+#include "renderer-internal.h"
 #include "surface-coordinator.h"
 #include "utils-log.h"
 #include "global-macros.h"
@@ -253,13 +254,13 @@ NoiaRenderer* noia_renderer_mmap_create(NoiaOutput* output)
 
     memset(mine, 0, sizeof(NoiaRendererMMap));
 
-    noia_renderer_initialize(&mine->base,
-                             noia_renderer_mmap_initialize,
-                             noia_renderer_mmap_finalize,
-                             noia_renderer_mmap_draw,
-                             noia_renderer_mmap_swap_buffers,
-                             noia_renderer_mmap_copy_buffer,
-                             noia_renderer_mmap_free);
+    noia_renderer_setup(&mine->base,
+                        noia_renderer_mmap_initialize,
+                        noia_renderer_mmap_finalize,
+                        noia_renderer_mmap_draw,
+                        noia_renderer_mmap_swap_buffers,
+                        noia_renderer_mmap_copy_buffer,
+                        noia_renderer_mmap_free);
 
     mine->front = 0;
     mine->size = output->area.size;

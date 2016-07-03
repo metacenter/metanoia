@@ -40,7 +40,7 @@ NoiaResult noia_backend_offscreen_output_mmap_initialize(NoiaOutput* output,
         noia_renderer_mmap_set_buffer(output->renderer, i, data, 4*size.width);
     }
 
-    NoiaResult result = output->renderer->initialize(output->renderer);
+    NoiaResult result = noia_renderer_initialize(output->renderer);
 
     LOG_INFO1("Initializing plain offscreen output: %s",
               (result == NOIA_RESULT_SUCCESS) ? "SUCCESS" : "FAILURE");
@@ -83,7 +83,7 @@ void noia_backend_offscreen_output_free(NoiaOutput* output)
     NoiaOutputOffscreen* output_offscreen = (NoiaOutputOffscreen*) output;
 
     if (output->renderer) {
-        output->renderer->free(output->renderer);
+        noia_renderer_destroy(output->renderer);
         output->renderer = NULL;
     }
 

@@ -4,6 +4,7 @@
 
 #include "renderer-gl.h"
 
+#include "renderer-internal.h"
 #include "surface-coordinator.h"
 #include "utils-log.h"
 #include "config.h"
@@ -535,13 +536,13 @@ NoiaRenderer* noia_renderer_gl_create(NoiaEGLBundle* egl,
     NoiaRendererGL* mine = calloc(1, sizeof(NoiaRendererGL));
     NOIA_ENSURE(mine, abort());
 
-    noia_renderer_initialize(&mine->base,
-                             noia_renderer_gl_initialize,
-                             noia_renderer_gl_finalize,
-                             noia_renderer_gl_draw,
-                             noia_renderer_gl_swap_buffers,
-                             noia_renderer_gl_copy_buffer,
-                             noia_renderer_gl_free);
+    noia_renderer_setup(&mine->base,
+                        noia_renderer_gl_initialize,
+                        noia_renderer_gl_finalize,
+                        noia_renderer_gl_draw,
+                        noia_renderer_gl_swap_buffers,
+                        noia_renderer_gl_copy_buffer,
+                        noia_renderer_gl_free);
 
     mine->egl.display = egl->display;
     mine->egl.surface = egl->surface;

@@ -60,7 +60,7 @@ NoiaResult noia_devfb_output_initialize(NoiaOutput* output, NoiaSize size)
     noia_renderer_mmap_set_buffer(output->renderer, 0, buff, info.line_length);
     noia_renderer_mmap_set_buffer(output->renderer, 1, buff, info.line_length);
 
-    output->renderer->initialize(output->renderer);
+    noia_renderer_initialize(output->renderer);
 
     return NOIA_RESULT_SUCCESS;
 }
