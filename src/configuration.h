@@ -30,6 +30,10 @@ static const NoiaConfig scConfig = {
         // In future will be replaced by non-linear scale per dimension.
         .touchpad_scale = 1.0,
 
+        // Threshold value for touchpad pressure below which move events
+        // will be ignored.
+        .touchpad_presure_threshold = 0,
+
         // Scale for mouse event motion values
         // In future will be replaced by non-linear scale per dimension.
         .mouse_scale = 1.0

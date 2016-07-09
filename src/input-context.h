@@ -12,8 +12,13 @@
 typedef struct {
     NoiaCommand* command;
     int code;
-    uint32_t modifiers;
-    NoiaKeyState state;
+    union {
+        struct {
+            uint32_t modifiers;
+            NoiaKeyState state;
+        };
+        int presure;
+    };
     uint32_t properties;
 } NoiaInputContext;
 

@@ -82,21 +82,25 @@ void noia_evdev_handle_mouse(struct input_event* ev)
 //------------------------------------------------------------------------------
 
 /// Handle epoll events from EventDispatcher coming from touch devices.
-void noia_evdev_handle_touchpad(struct input_event* ev)
+void noia_evdev_handle_touchpad(struct input_event* ev,
+                                NoiaInputContext* context)
 {
-    if (ev->code == ABS_MT_TRACKING_ID) {
+    if (ev->code == ABS_PRESSURE) {
+        context->presure = ev->value;
+    } else if (ev->code == ABS_MT_TRACKING_ID) {
         noia_event_signal_emit(SIGNAL_POINTER_POSITION_RESET, NULL);
-    } else if (ev->code == ABS_MT_POSITION_X) {
-        noia_event_signal_emit_int(SIGNAL_POINTER_POSITION_X,
-                                   noia_config()->touchpad_scale * ev->value);
-    } else if (ev->code == ABS_MT_POSITION_Y) {
-        noia_event_signal_emit_int(SIGNAL_POINTER_POSITION_Y,
-                                   noia_config()->touchpad_scale * ev->value);
     } else if ((ev->code == BTN_LEFT) or (ev->code == BTN_RIGHT)) {
         unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
         NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
         noia_event_signal_emit(SIGNAL_POINTER_BUTTON, (NoiaObject*) btn);
         noia_object_unref((NoiaObject*) btn);
+    } else if (context->presure > noia_config()->touchpad_presure_threshold) {
+        int value = noia_config()->touchpad_scale * ev->value;
+        if (ev->code == ABS_MT_POSITION_X) {
+            noia_event_signal_emit_int(SIGNAL_POINTER_POSITION_X, value);
+        } else if (ev->code == ABS_MT_POSITION_Y) {
+            noia_event_signal_emit_int(SIGNAL_POINTER_POSITION_Y, value);
+        }
     }
 }
 
@@ -125,7 +129,7 @@ void noia_evdev_handle_event(NoiaEventData* data, struct epoll_event* epev)
         } else if (context->properties & NOIA_PROPERTY_MOUSE) {
             noia_evdev_handle_mouse(&ev);
         } else if (context->properties & NOIA_PROPERTY_TOUCHPAD) {
-            noia_evdev_handle_touchpad(&ev);
+            noia_evdev_handle_touchpad(&ev, context);
         }
     } else {
         if (size != -1) {

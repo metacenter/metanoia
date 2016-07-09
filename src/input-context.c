@@ -5,6 +5,8 @@
 #include "input-context.h"
 #include "global-macros.h"
 
+#include <memory.h>
+
 //------------------------------------------------------------------------------
 
 NoiaInputContext* noia_input_context_create(uint32_t properties)
@@ -12,10 +14,8 @@ NoiaInputContext* noia_input_context_create(uint32_t properties)
     NoiaInputContext* self = malloc(sizeof(NoiaInputContext));
     NOIA_ENSURE(self, abort());
 
+    memset(self, 0, sizeof(*self));
     self->command = noia_command_create();
-    self->code = 0;
-    self->modifiers = 0x0;
-    self->state = NOIA_KEY_RELEASED;
     self->properties = properties;
     return self;
 }

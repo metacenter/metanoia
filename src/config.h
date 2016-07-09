@@ -17,6 +17,7 @@ typedef struct {
     NoiaColor background_color;
     NoiaFrameType default_frame_type;
     double touchpad_scale;
+    int touchpad_presure_threshold;
     double mouse_scale;
 } NoiaConfig;
 
