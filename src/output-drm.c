@@ -158,33 +158,6 @@ void noia_output_drm_vblank_handler(NoiaEventData* data,
 }
 
 //------------------------------------------------------------------------------
-
-/// Swaps buffers and schedules page flip on device.
-NoiaResult noia_output_drm_schedule_device_page_flip(NoiaOutputDRM* output_drm)
-{
-    NOIA_ENSURE(output_drm, return NOIA_RESULT_INCORRECT_ARGUMENT);
-
-    pthread_mutex_lock(&drm_mutex);
-    NoiaResult result = NOIA_RESULT_ERROR;
-
-    noia_renderer_swap_buffers(output_drm->base.renderer);
-
-    int32_t fb = noia_output_drm_swap_buffers(output_drm);
-    int r = drmModePageFlip(output_drm->fd, output_drm->crtc_id, fb,
-                            DRM_MODE_PAGE_FLIP_EVENT, output_drm);
-    if (r) {
-        LOG_ERROR("Failed to page flip "
-                  "(id: %u, crtc_id: %u, error: '%m')",
-                  output_drm->connector_id, output_drm->crtc_id);
-    } else {
-        result = NOIA_RESULT_SUCCESS;
-    }
-
-    pthread_mutex_unlock(&drm_mutex);
-    return result;
-}
-
-//------------------------------------------------------------------------------
 // EGL
 
 /// Lock GBM surface and create new frame buffer if needed.
@@ -336,7 +309,7 @@ NoiaResult noia_output_drm_create_dumb_buffer(NoiaOutputDRM* output_drm,
 
 /// Swap dumb buffers.
 /// This function is used only for dumb buffers.
-/// @see noia_output_drm_end_drawing, noia_output_drm_swap_gbm_surfaces
+/// @see noia_output_drm_swap_gbm_surfaces
 uint32_t noia_output_drm_swap_dumb_buffers(NoiaOutputDRM* output_drm)
 {
     output_drm->front = output_drm->front ^ 1;

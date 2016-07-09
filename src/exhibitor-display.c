@@ -56,6 +56,9 @@ struct NoiaDisplayStruct {
 
     /// Holds information if redraw is needed to avoid unnecessary redraws.
     bool redraw_needed;
+
+    /// Holds informations if page flip was scheduled.
+    bool page_flip_sheduled;
 };
 
 //------------------------------------------------------------------------------
@@ -78,6 +81,7 @@ void noia_display_handle_vblank_notification(void* data)
     NoiaDisplay* display = data;
     NOIA_ENSURE(display, return);
 
+    display->page_flip_sheduled = false;
     noia_object_ref((NoiaObject*) display->redraw_task);
     noia_loop_schedule_task(display->loop, display->redraw_task);
 }
@@ -183,7 +187,11 @@ void noia_display_redraw_all(NoiaDisplay* self)
 
     // Finish
     noia_pool_release(self->visible_surfaces);
+
+    // Schedule page flip
     self->redraw_needed = false;
+    self->page_flip_sheduled = true;
+    noia_output_schedule_page_flip(self->output);
 }
 
 //------------------------------------------------------------------------------
@@ -217,7 +225,9 @@ void noia_display_on_notify(void* edata NOIA_UNUSED, void* sdata)
 
     if (not display->redraw_needed) {
         display->redraw_needed = true;
-        noia_output_schedule_page_flip(display->output);
+        if (not display->page_flip_sheduled) {
+            noia_display_redraw_all(display);
+        }
     }
 }
 
@@ -244,6 +254,7 @@ NoiaDisplay* noia_display_new(NoiaOutput* output,
     self->visible_surfaces = noia_pool_create(8, sizeof(NoiaSurfaceContext));
     self->background_sid = scInvalidSurfaceId;
     self->redraw_needed = false;
+    self->page_flip_sheduled = false;
 
     // Create tasks
     self->setup_task =
