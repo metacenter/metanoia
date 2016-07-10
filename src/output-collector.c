@@ -3,10 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 #include "output-collector.h"
+
 #include "event-signals.h"
 #include "utils-log.h"
 #include "device-drm.h"
 #include "device-fb.h"
+#include "output-drm.h"
 #include "backend-offscreen.h"
 #include "config.h"
 
@@ -47,6 +49,26 @@ NoiaPosition noia_output_collector_allocate_position(void)
 
 //------------------------------------------------------------------------------
 
+/// Create DRM output from DRM bundles.
+int noia_output_collector_update_drm_devices(NoiaList* actual_outputs)
+{
+    NoiaPool* drm_bundles = noia_pool_create(8, sizeof(NoiaDRMBundle));
+    noia_drm_update_devices(drm_bundles);
+
+    unsigned i;
+    NoiaDRMBundle* bundle;
+    NOIA_ITERATE_POOL(drm_bundles, i, bundle) {
+        NoiaOutputDRM* output_drm = noia_output_drm_create(bundle);
+        noia_list_append(actual_outputs, output_drm);
+    }
+
+    int num = noia_pool_get_size(drm_bundles);
+    noia_pool_destroy(drm_bundles);
+    return num;
+}
+
+//------------------------------------------------------------------------------
+
 /// Fetch all available (active) outputs from all possible sources.
 /// If running in simulator, fetch only simulated outputs.
 NoiaList* noia_output_collector_fetch_actual_outputs(void)
@@ -56,7 +78,7 @@ NoiaList* noia_output_collector_fetch_actual_outputs(void)
 
     if (!noia_settings()->run_in_test_mode) {
         if (noia_settings()->use_drm) {
-            num = noia_drm_update_devices(actual_outputs);
+            num = noia_output_collector_update_drm_devices(actual_outputs);
         }
         if (num < 1) {
             num = noia_devfb_setup_framebuffer(actual_outputs);

@@ -191,9 +191,11 @@ metanoia.add([Com(['renderer.c']),
 #-------------------------------------------------------------------------------
 # DEVICES
 
+target_device_drm = Com(['device-drm.c'], pkgs={'libdrm', 'gbm', 'egl'})
+
 metanoia.add([Com(['device-common.c']),
               Com(['device-fb.c']),
-              Com(['device-drm.c'],   pkgs={'libdrm', 'gbm', 'egl'}),
+              target_device_drm,
               Com(['device-evdev.c'], pkgs={'libudev'}),
               Com(['device-udev.c'],  pkgs={'libudev'})])
 
@@ -257,9 +259,13 @@ metanoia.add([Com(['metanoia.c'])])
 #-------------------------------------------------------------------------------
 # METANOIACTL
 
-metanoiactl.add([Com(['controller-arguments.c']),
+metanoiactl.add([target_utils_pool,
+                 target_utils_log, target_utils_environment,
+                 target_utils_debug, target_utils_time,
+                 target_device_drm,
+                 Com(['controller-arguments.c']),
                  Com(['controller-argparser.c']),
-                 Com(['controller-info.c']),
+                 Com(['controller-info.c'], pkgs={'libdrm'}),
                  Com(['controller-screenshot.c']),
                  Com(['metanoiactl.c'])])
 

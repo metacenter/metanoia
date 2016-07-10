@@ -12,6 +12,8 @@
 
 #include <gbm.h>
 #include <xf86drm.h>
+#include <xf86drmMode.h>
+
 #include <string.h>
 #include <pthread.h>
 #include <sys/mman.h>
@@ -429,27 +431,27 @@ void noia_output_drm_free(NoiaOutput* output)
 // PUBLIC
 
 /// DRM output constructor.
-NoiaOutputDRM* noia_output_drm_new(NoiaSize size,
-                                   char* connector_name,
-                                   int drm_fd,
-                                   uint32_t crtc_id,
-                                   uint32_t connector_id,
-                                   drmModeModeInfo mode)
+NoiaOutputDRM* noia_output_drm_create(NoiaDRMBundle* drm)
 {
     NoiaOutputDRM* output_drm = calloc(1, sizeof(NoiaOutputDRM));
     NOIA_ENSURE(output_drm, abort());
 
+    drmModeConnectorPtr connector =
+                                drmModeGetConnector(drm->fd, drm->connector_id);
+    drmModeModeInfo mode = connector->modes[0];
+    NoiaSize size = {mode.hdisplay, mode.vdisplay};
+
     noia_output_setup(&output_drm->base,
                       size,
-                      strdup(connector_name ? connector_name : ""),
+                      strdup(noia_drm_get_connector_name(connector)),
                       noia_output_drm_initialize,
                       noia_output_drm_get_redraw_event,
                       noia_output_drm_schedule_page_flip,
                       noia_output_drm_free);
 
-    output_drm->fd = drm_fd;
-    output_drm->crtc_id = crtc_id;
-    output_drm->connector_id = connector_id;
+    output_drm->fd = drm->fd;
+    output_drm->crtc_id = drm->crtc_id;
+    output_drm->connector_id = drm->connector_id;
     output_drm->mode = mode;
     output_drm->front = 0;
     output_drm->fb[0] = INVALID_FB_ID;
@@ -457,16 +459,9 @@ NoiaOutputDRM* noia_output_drm_new(NoiaSize size,
     output_drm->gbm_surface = NULL;
     output_drm->gbm_bo = NULL;
 
+    drmModeFreeConnector(connector);
+
     return output_drm;
-}
-
-//------------------------------------------------------------------------------
-
-/// Return ID of assigned CRTC.
-uint32_t noia_output_drm_get_crtc_id(NoiaOutputDRM* self)
-{
-    NOIA_ENSURE(self, return INVALID_CRTC_ID);
-    return self->crtc_id;
 }
 
 //------------------------------------------------------------------------------

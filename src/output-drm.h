@@ -7,9 +7,7 @@
 
 #include "global-types.h"
 
-/// @todo Do not use this headers here.
-#include <stddef.h>
-#include <xf86drmMode.h>
+#include "device-drm.h"
 
 #define INVALID_CRTC_ID 0
 #define INVALID_FB_ID 0
@@ -19,15 +17,7 @@
 typedef struct NoiaOutputDRMStruct NoiaOutputDRM;
 
 /// DRM output constructor.
-NoiaOutputDRM* noia_output_drm_new(NoiaSize size,
-                                   char* connector_name,
-                                   int drm_fd,
-                                   uint32_t crtc_id,
-                                   uint32_t connector_id,
-                                   drmModeModeInfo mode);
-
-/// Return ID of assigned CRTC.
-uint32_t noia_output_drm_get_crtc_id(NoiaOutputDRM* self);
+NoiaOutputDRM* noia_output_drm_create(NoiaDRMBundle* drm_bundle);
 
 #endif // NOIA_OUTPUT_DRM_H
 

@@ -6,8 +6,10 @@
 
 #include "output-drm.h"
 #include "utils-log.h"
+#include "global-macros.h"
 
 #include <xf86drm.h>
+#include <xf86drmMode.h>
 #include <unistd.h>
 #include <string.h>
 
@@ -18,78 +20,17 @@ static const char* scModuleName[] = {
         "i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "msm", NULL
     };
 
-/// Connector state dictionary
-static const char* scConnectorStateName[] = {
-        "NONE", "connected", "disconnected", "Unknown", NULL
-    };
-
 //------------------------------------------------------------------------------
 // PRIVATE
 
-/// Translate connector type to human-readable name.
-char* noia_drm_get_connector_name(uint32_t connector_type)
-{
-    static const char* scConnectorTypeName[] = {
-            "Unknown", "VGA", "DVII", "DVID", "DVIA", "Composite",
-            "SVIDEO", "LVDS", "Component", "9PinDIN", "DisplayPort",
-            "HDMIA", "HDMIB", "TV", "eDP"
-        };
-
-    if ((connector_type < 1)
-    or  (connector_type >= sizeof(scConnectorTypeName))) {
-        LOG_ERROR("Connector type '%u' out of range!", connector_type);
-        return strdup("NONE");
-    }
-    return strdup(scConnectorTypeName[connector_type]);
-}
-
-//------------------------------------------------------------------------------
-
-/// Log detailed information about devices.
-void noia_drm_log(int drm_fd, drmModeRes* resources)
-{
-    // Log CRTC info
-    for (int i = 0; i < resources->count_crtcs; ++i) {
-        drmModeCrtcPtr crtc = drmModeGetCrtc(drm_fd, resources->crtcs[i]);
-        if (crtc) {
-            LOG_INFO2("CRTC (id: %u, buffer: %u)",
-                      crtc->crtc_id, crtc->buffer_id);
-        }
-        drmModeFreeCrtc(crtc);
-    }
-
-    // Log encoder info
-    for (int i = 0; i < resources->count_encoders; ++i) {
-        drmModeEncoderPtr encoder =
-                              drmModeGetEncoder(drm_fd, resources->encoders[i]);
-        if (encoder) {
-            LOG_INFO2("Encoder (id: %u, CRTC: %u, mask: 0x%x)",
-                       encoder->encoder_id, encoder->crtc_id,
-                       encoder->possible_crtcs);
-        }
-        drmModeFreeEncoder(encoder);
-    }
-
-    // Log frame buffer info
-    for (int i = 0; i < resources->count_fbs; ++i) {
-        drmModeFBPtr fb = drmModeGetFB(drm_fd, resources->fbs[i]);
-        if (fb) {
-            LOG_INFO2("Framebuffer (id: %u, w: %u, h: %u)",
-                      fb->fb_id, fb->width, fb->height);
-        }
-        drmModeFreeFB(fb);
-    }
-}
-
-//------------------------------------------------------------------------------
-
 /// This function check if CRTC with id `crtc_id` is already in use.
-bool noia_drm_is_crtc_in_use(NoiaList* drm_outputs, uint32_t crtc_id)
+bool noia_drm_is_crtc_in_use(NoiaPool* drm_bundles, uint32_t crtc_id)
 {
     int is_in_use = false;
-    FOR_EACH (drm_outputs, link) {
-        NoiaOutputDRM* output_drm = (NoiaOutputDRM*) link->data;
-        if (noia_output_drm_get_crtc_id(output_drm) == crtc_id) {
+    unsigned i;
+    NoiaDRMBundle* bundle;
+    NOIA_ITERATE_POOL(drm_bundles, i, bundle) {
+        if (bundle->crtc_id == crtc_id) {
             is_in_use = true;
             break;
         }
@@ -101,9 +42,9 @@ bool noia_drm_is_crtc_in_use(NoiaList* drm_outputs, uint32_t crtc_id)
 
 /// This function matches CRTC to given connector.
 uint32_t noia_drm_find_crtc(int drm_fd,
-                            drmModeRes* resources,
-                            drmModeConnector* connector,
-                            NoiaList* drm_outputs)
+                            drmModeResPtr resources,
+                            drmModeConnectorPtr connector,
+                            NoiaPool* drm_bundles)
 {
     // Try to reuse old encoder
     if (connector->encoder_id) {
@@ -111,7 +52,7 @@ uint32_t noia_drm_find_crtc(int drm_fd,
                                drmModeGetEncoder(drm_fd, connector->encoder_id);
         if (encoder
         and (encoder->crtc_id != INVALID_CRTC_ID)
-        and (not noia_drm_is_crtc_in_use(drm_outputs, encoder->crtc_id))) {
+        and (not noia_drm_is_crtc_in_use(drm_bundles, encoder->crtc_id))) {
             return encoder->crtc_id;
         }
     }
@@ -130,7 +71,7 @@ uint32_t noia_drm_find_crtc(int drm_fd,
                 continue;
             }
 
-            if (noia_drm_is_crtc_in_use(drm_outputs, crtc->crtc_id)) {
+            if (noia_drm_is_crtc_in_use(drm_bundles, crtc->crtc_id)) {
                 continue;
             }
 
@@ -148,131 +89,154 @@ uint32_t noia_drm_find_crtc(int drm_fd,
 //------------------------------------------------------------------------------
 
 /// Construct Output instance for work with given connector.
-NoiaOutputDRM* noia_drm_update_connector(int drm_fd,
-                                         drmModeRes* resources,
-                                         drmModeConnector* connector,
-                                         NoiaList* drm_outputs)
+void noia_drm_update_connector(int drm_fd,
+                               drmModeResPtr resources,
+                               drmModeConnectorPtr connector,
+                               NoiaPool* drm_bundles)
 {
-    if (not connector) {
-        return NULL;
-    }
+    NOIA_ENSURE(connector, return);
 
     LOG_INFO2("Updating connector (id: %u, type: %s, state: %s)",
               connector->connector_id,
-              noia_drm_get_connector_name(connector->connector_type),
-              scConnectorStateName[connector->connection]);
+              noia_drm_get_connector_name(connector),
+              noia_drm_get_connector_state(connector));
 
     // Check if connector is connected
     if (connector->connection != DRM_MODE_CONNECTED) {
-        return NULL;
+        return;
     }
 
     // Check if there is at least one valid mode
     if (connector->count_modes == 0) {
         LOG_ERROR("No valid mode!");
-        return NULL;
+        return;
     }
 
     uint32_t crtc_id = noia_drm_find_crtc(drm_fd, resources,
-                                          connector, drm_outputs);
+                                          connector, drm_bundles);
     if (crtc_id == INVALID_CRTC_ID) {
         LOG_ERROR("CRTC not found!");
-        return NULL;
+        return;
     }
 
     LOG_INFO2("Updating connector (CRTC: %u)", crtc_id);
 
-    // Create output
-    NoiaSize size = {connector->modes[0].hdisplay,
-                     connector->modes[0].vdisplay};
-    NoiaOutputDRM* output =
-    noia_output_drm_new(size,
-                        noia_drm_get_connector_name(connector->connector_type),
-                        drm_fd,
-                        crtc_id,
-                        connector->connector_id,
-                        connector->modes[0]);
-    return output;
+    // Add info
+    NoiaDRMBundle* bundle = noia_pool_add(drm_bundles);
+    bundle->fd = drm_fd;
+    bundle->crtc_id = crtc_id;
+    bundle->connector_id = connector->connector_id;
 }
 
 //------------------------------------------------------------------------------
 // PUBLIC
 
-int noia_drm_update_devices(NoiaList* outputs)
+const char* noia_drm_get_connector_name(drmModeConnectorPtr connector)
 {
-    int ret;
-    int num = 0;
-    int fd = -1;
+    static const char* scConnectorTypeName[] = {
+            "Unknown", "VGA", "DVII", "DVID", "DVIA", "Composite",
+            "SVIDEO", "LVDS", "Component", "9PinDIN", "DisplayPort",
+            "HDMIA", "HDMIB", "TV", "eDP"
+        };
+
+    const char* result = "NONE";
+    if (connector->connector_type < sizeof(scConnectorTypeName)) {
+        result = scConnectorTypeName[connector->connector_type];
+    } else {
+        LOG_ERROR("Connector type '%u' for connector '%u' out of range!",
+                  connector->connector_type, connector->connector_id);
+    }
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+const char* noia_drm_get_connector_state(drmModeConnectorPtr connector)
+{
+    static const char* scConnectorStateName[] = {
+            "NONE", "connected", "disconnected", "Unknown"
+        };
+
+    const char* result = "NONE";
+    if ((size_t) connector->connection < sizeof(scConnectorStateName)) {
+        result = scConnectorStateName[connector->connection];
+    } else {
+        LOG_ERROR("Connector state '%u' for connector '%u' out of range!",
+                  connector->connection, connector->connector_id);
+    }
+    return result;
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_drm_device_has_dumb_buffers(int drm_fd)
+{
+    uint64_t has_dumb = false;
+    int ret = drmGetCap(drm_fd, DRM_CAP_DUMB_BUFFER, &has_dumb);
+    return (ret == 0) and has_dumb;
+}
+
+//------------------------------------------------------------------------------
+
+void noia_drm_iterate_devices(void* listener, NoiaDRMDeviceHandler callback)
+{
+    NOIA_ENSURE(callback, return);
+
+    for (unsigned i = 0; scModuleName[i]; ++i) {
+        // Try open DRM device
+        int fd = drmOpen(scModuleName[i], NULL);
+        if (fd < 0) {
+            continue;
+        }
+        callback(listener, fd, scModuleName[i]);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void noia_drm_update_devices(NoiaPool* drm_bundles)
+{
     drmModeRes* resources = NULL;
     drmModeConnector* connector = NULL;
-    NoiaList* drm_outputs = noia_list_new(NULL);
 
     LOG_INFO1("Updating DRM devices");
 
-    NOIA_BLOCK {
-        // Find and open DRM device
-        /// @todo Try all devices, there may be more than one connected.
-        unsigned int i;
-        for (i = 0; scModuleName[i]; ++i) {
-            fd = drmOpen(scModuleName[i], NULL);
-            if (fd > 0) {
-                break;
-            }
-        }
+    // Find and open DRM device
+    for (unsigned m = 0; scModuleName[m]; ++m) {
+        int fd = drmOpen(scModuleName[m], NULL);
         if (fd > 0) {
-            LOG_INFO1("Found DRM device (%s)", scModuleName[i]);
+            LOG_INFO1("Found DRM device (%s)", scModuleName[m]);
         } else {
-            LOG_ERROR("Could not open DRM device!");
-            break;
+            LOG_INFO2("Could not open DRM device (%s)", scModuleName[m]);
+            continue;
         }
 
         // Check if device supports dumb buffers
-        uint64_t has_dumb = false;
-        ret = drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &has_dumb);
-        if ((ret < 0) or (not has_dumb)) {
+        if (not noia_drm_device_has_dumb_buffers(fd)) {
             LOG_ERROR("DRM device does not support dumb buffers!");
             close(fd);
-            break;
-        }
-
-        // Try to set master
-        ret = drmSetMaster(fd);
-        if (ret == -1) {
-            LOG_WARN1("Set Master: %m");
+            continue;
         }
 
         // Get resources
         resources = drmModeGetResources(fd);
         if (not resources) {
             LOG_ERROR("drmModeGetResources failed: %m");
-            break;
+            close(fd);
+            continue;
         }
-
-        noia_drm_log(fd, resources);
 
         // Find connected connectors
-        for (int i = 0; i < resources->count_connectors; ++i) {
-            connector = drmModeGetConnector(fd, resources->connectors[i]);
-
-            NoiaOutputDRM* output =
-               noia_drm_update_connector(fd, resources, connector, drm_outputs);
-            if (output) {
-                noia_list_append(drm_outputs, output);
-            }
+        for (int c = 0; c < resources->count_connectors; ++c) {
+            connector = drmModeGetConnector(fd, resources->connectors[c]);
+            noia_drm_update_connector(fd, resources, connector, drm_bundles);
             drmModeFreeConnector(connector);
-        }
-
-        num = noia_list_len(drm_outputs);
-        FOR_EACH (drm_outputs, link) {
-            noia_list_append(outputs, link->data);
         }
 
         // Free memory
         drmModeFreeResources(resources);
+        break; ///< @todo DRM nodes.
     }
-
-    noia_list_free(drm_outputs);
-    return num;
 }
 
 //------------------------------------------------------------------------------
