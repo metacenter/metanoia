@@ -22,6 +22,7 @@ p.add_clean_commands(['doc', 'callgrind*', '*plist*', '.ninja*'])
 # APPLICATIONS
 
 metanoia        = Exe(output='metanoia')
+metanoiactl     = Exe(output='metanoiactl')
 metanoiactl_gtk = Exe(output='metanoiactl-gtk')
 
 #-------------------------------------------------------------------------------
@@ -256,6 +257,15 @@ metanoia.add([Com(['metanoia.c'])])
 #-------------------------------------------------------------------------------
 # METANOIACTL
 
+metanoiactl.add([Com(['controller-arguments.c']),
+                 Com(['controller-argparser.c']),
+                 Com(['controller-info.c']),
+                 Com(['controller-screenshot.c']),
+                 Com(['metanoiactl.c'])])
+
+#-------------------------------------------------------------------------------
+# METANOIACTL-GTK
+
 metanoiactl_gtk.add([target_utils_debug,
                      target_utils_time,
                      target_utils_log,
@@ -316,6 +326,7 @@ p.add(Chk(output='check-frame',
 
 p.add(target_version_info, include_in_default=True)
 p.add(metanoia,            include_in_default=True)
+p.add(metanoiactl,         include_in_default=True)
 p.add(metanoiactl_gtk,     include_in_default=True)
 
 #-------------------------------------------------------------------------------
