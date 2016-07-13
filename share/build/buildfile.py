@@ -260,8 +260,9 @@ metanoia.add([Com(['metanoia.c'])])
 # METANOIACTL
 
 metanoiactl.add([target_utils_pool,
-                 target_utils_log, target_utils_environment,
-                 target_utils_debug, target_utils_time,
+                 target_utils_gl,
+                 target_utils_debug,
+                 Com(['utils-log-fake.c']),
                  target_device_drm,
                  Com(['controller-arguments.c']),
                  Com(['controller-argparser.c']),

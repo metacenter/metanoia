@@ -5,26 +5,23 @@
 #include "controller-info.h"
 
 #include "global-macros.h"
+#include "utils-gl.h"
 #include "device-drm.h"
 
+#include <string.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <xf86drmMode.h>
 
 //------------------------------------------------------------------------------
 
-/// Log detailed information about devices.
-void noia_controller_print_drm_device_info(void* data NOIA_UNUSED,
-                                           int drm_fd,
-                                           const char* module)
+/// Print info about CRTCs, encoders and connectors.
+void noia_controller_print_drm_mode_info(int drm_fd)
 {
     drmModeResPtr resources = NULL;
     NOIA_BLOCK {
         resources = drmModeGetResources(drm_fd);
         NOIA_ENSURE(resources, break);
-
-        printf("DRM device:\n\tmodule name: '%s'\n\tdumb buffers: '%s'\n\n",
-               module, (noia_drm_device_has_dumb_buffers(drm_fd)?"yes":"no"));
 
         // Print CRTC info
         for (int i = 0; i < resources->count_crtcs; ++i) {
@@ -70,11 +67,13 @@ void noia_controller_print_drm_device_info(void* data NOIA_UNUSED,
                        noia_drm_get_connector_name(connector),
                        noia_drm_get_connector_state(connector),
                        connector->count_modes);
+
                 for (int j = 0; j < connector->count_modes; ++j) {
                     printf("\t\t%u x %u\n",
                            connector->modes[j].hdisplay,
                            connector->modes[j].vdisplay);
                 }
+
                 drmModeFreeConnector(connector);
             }
         }
@@ -86,6 +85,74 @@ void noia_controller_print_drm_device_info(void* data NOIA_UNUSED,
     if (resources) {
         drmModeFreeResources(resources);
     }
+}
+
+//------------------------------------------------------------------------------
+
+/// Print GL and EGL info.
+void noia_controller_print_drm_egl_info(int drm_fd)
+{
+    NoiaSize size = {10,10};
+
+    NoiaGBMBundle gbm;
+    NoiaResult result = noia_drm_create_gbm_surface(drm_fd, size, &gbm);
+    if (result != NOIA_RESULT_SUCCESS) {
+        printf("\tFailed to intialize GBM!\n");
+        return;
+    }
+
+    NoiaEGLBundle egl;
+    result = noia_gl_create_onscreen_egl_bundle(
+                                              (EGLNativeDisplayType) gbm.device,
+                                              (EGLNativeWindowType) gbm.surface,
+                                              &egl);
+    if (result != NOIA_RESULT_SUCCESS) {
+        printf("\tFailed to intialize EGL!\n");
+        return;
+    }
+
+    const char* extensions = eglQueryString(egl.display, EGL_EXTENSIONS);
+
+    printf("\tEGL version:       '%s'\n",
+           eglQueryString(egl.display, EGL_VERSION));
+    printf("\tEGL vendor:        '%s'\n",
+           eglQueryString(egl.display, EGL_VENDOR));
+    printf("\tWayland extension: %s\n",
+           strstr(extensions, "EGL_WL_bind_wayland_display") ? "yes" : "no");
+
+    noia_gl_make_current(&egl);
+    if (result != NOIA_RESULT_SUCCESS) {
+        printf("\tFailed to set GL context!\n");
+        return;
+    }
+
+    printf("\tGL vendor:         '%s'\n", glGetString(GL_VENDOR));
+    printf("\tGL renderer:       '%s'\n", glGetString(GL_RENDERER));
+    printf("\tGL version:        '%s'\n", glGetString(GL_VERSION));
+    printf("\tGLSL version:      '%s'\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+}
+
+//------------------------------------------------------------------------------
+
+/// Log detailed information about devices.
+void noia_controller_print_drm_device_info(void* data,
+                                           int drm_fd,
+                                           const char* module)
+{
+    NoiaInfoArguments* args = data;
+
+    printf("DRM device:\n\tmodule name: '%s'\n\tdumb buffers: '%s'\n\n",
+           module, (noia_drm_device_has_dumb_buffers(drm_fd) ? "yes" : "no"));
+
+    if (args->print_all or args->print_drm) {
+        noia_controller_print_drm_mode_info(drm_fd);
+    }
+
+    if (args->print_all or args->print_gl) {
+        noia_controller_print_drm_egl_info(drm_fd);
+    }
+
+    printf("\n");
     close(drm_fd);
 }
 
@@ -93,12 +160,9 @@ void noia_controller_print_drm_device_info(void* data NOIA_UNUSED,
 
 int noia_controller_perform_info(const NoiaInfoArguments* args)
 {
-    if (args->print_all or args->print_drm) {
-        noia_drm_iterate_devices(NULL, noia_controller_print_drm_device_info);
-    }
-
-    if (args->print_all or args->print_gl) {
-        /// @todo Print GL info.
+    if (args->print_all or args->print_drm or args->print_gl) {
+        noia_drm_iterate_devices((void*) args,
+                                 noia_controller_print_drm_device_info);
     }
 
     return 0;

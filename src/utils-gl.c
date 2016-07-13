@@ -170,7 +170,7 @@ GLuint noia_gl_prepare_shaders_and_program(const char* vertex_source,
         return scInvalidGLObject;
     }
 
-    LOG_INFO2("Shader program created successfuly");
+    LOG_INFO2("Shader program created successfully");
     return shader_program;
 }
 

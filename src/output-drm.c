@@ -48,7 +48,7 @@ struct NoiaOutputDRMStruct {
 /// Data type used to bind DRM frame buffer information to GBM buffer object.
 typedef struct {
     uint32_t fb;
-} NoiaGBMBundle;
+} NoiaGbmFbBundle;
 
 //------------------------------------------------------------------------------
 // PRIVATE
@@ -100,7 +100,7 @@ void noia_output_drm_destroy_gbm_bundle(struct gbm_bo* bo,
                                         void* data NOIA_UNUSED)
 {
     LOG_INFO2("Destroying GBM buffer object!");
-    NoiaGBMBundle* bundle = gbm_bo_get_user_data(bo);
+    NoiaGbmFbBundle* bundle = gbm_bo_get_user_data(bo);
     NOIA_ENSURE(bundle, return);
     free(bundle);
 }
@@ -108,10 +108,10 @@ void noia_output_drm_destroy_gbm_bundle(struct gbm_bo* bo,
 //------------------------------------------------------------------------------
 
 /// Create DRM frame buffer for use with GBM.
-/// @see NoiaGBMBundle
-NoiaGBMBundle* noia_output_drm_gbm_create(int drm_fd, struct gbm_bo* bo)
+/// @see NoiaGBMFbBundle
+NoiaGbmFbBundle* noia_output_drm_gbm_create(int drm_fd, struct gbm_bo* bo)
 {
-    NoiaGBMBundle* bundle = NULL;
+    NoiaGbmFbBundle* bundle = NULL;
     uint32_t fb = INVALID_FB_ID;
     uint32_t width  = gbm_bo_get_width(bo);
     uint32_t height = gbm_bo_get_height(bo);
@@ -176,7 +176,7 @@ uint32_t noia_output_drm_swap_gbm_surfaces(NoiaOutputDRM* output_drm)
         output_drm->gbm_bo = bo;
     }
 
-    NoiaGBMBundle* bundle = gbm_bo_get_user_data(output_drm->gbm_bo);
+    NoiaGbmFbBundle* bundle = gbm_bo_get_user_data(output_drm->gbm_bo);
     if (not bundle) {
         bundle = noia_output_drm_gbm_create(output_drm->fd, output_drm->gbm_bo);
     }
@@ -190,35 +190,26 @@ uint32_t noia_output_drm_swap_gbm_surfaces(NoiaOutputDRM* output_drm)
 NoiaRenderer* noia_output_drm_initialize_egl(NoiaOutputDRM* output_drm)
 {
     NoiaEGLBundle egl;
-    struct gbm_device* gbm_device;
+    NoiaGBMBundle gbm;
 
     LOG_INFO1("Creating GBM and initializing EGL...");
 
     /// @todo Find mode
     NoiaSize size = {output_drm->mode.hdisplay, output_drm->mode.vdisplay};
 
-    // Create GBM device and surface
-    gbm_device = gbm_create_device(output_drm->fd);
-    if (not gbm_device) {
-        LOG_ERROR("Failed to create GBM device!");
+    // Initialize GBM
+    noia_drm_create_gbm_surface(output_drm->fd, size, &gbm);
+    if (gbm.device and gbm.surface) {
+        output_drm->gbm_surface = gbm.surface;
+    } else {
         return NULL;
     }
 
-    output_drm->gbm_surface =
-                  gbm_surface_create(gbm_device,
-                                     size.width, size.height,
-                                     GBM_FORMAT_XRGB8888,
-                                     GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-    if (not output_drm->gbm_surface) {
-        LOG_ERROR("Failed to create GBM surface!");
-        return NULL;
-    }
-
-    // Initiate EGL
+    // Initialize EGL
     NoiaResult result = noia_gl_create_onscreen_egl_bundle
-                                 ((EGLNativeDisplayType) gbm_device,
-                                  (EGLNativeWindowType) output_drm->gbm_surface,
-                                   &egl);
+                                             ((EGLNativeDisplayType) gbm.device,
+                                              (EGLNativeWindowType) gbm.surface,
+                                              &egl);
     if (result != NOIA_RESULT_SUCCESS) {
         return NULL;
     }

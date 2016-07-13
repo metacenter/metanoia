@@ -8,6 +8,7 @@
 #include "utils-log.h"
 #include "global-macros.h"
 
+#include <gbm.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 #include <unistd.h>
@@ -174,6 +175,41 @@ bool noia_drm_device_has_dumb_buffers(int drm_fd)
     uint64_t has_dumb = false;
     int ret = drmGetCap(drm_fd, DRM_CAP_DUMB_BUFFER, &has_dumb);
     return (ret == 0) and has_dumb;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaResult noia_drm_create_gbm_surface(int fd,
+                                       NoiaSize size,
+                                       NoiaGBMBundle* gbm)
+{
+    NoiaResult result = NOIA_RESULT_ERROR;
+    gbm->device = NULL;
+    gbm->surface = NULL;
+
+    NOIA_BLOCK {
+        // Create GBM device
+        gbm->device = gbm_create_device(fd);
+        if (not gbm->device) {
+            LOG_ERROR("Failed to create GBM device!");
+            break;
+        }
+
+        // Create GBM surface
+        gbm->surface =
+                  gbm_surface_create(gbm->device,
+                                     size.width, size.height,
+                                     GBM_FORMAT_XRGB8888,
+                                     GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+        if (not gbm->surface) {
+            LOG_ERROR("Failed to create GBM surface!");
+            break;
+        }
+
+        result = NOIA_RESULT_SUCCESS;
+    }
+
+    return result;
 }
 
 //------------------------------------------------------------------------------
