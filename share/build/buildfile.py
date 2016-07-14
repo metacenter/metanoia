@@ -147,6 +147,7 @@ target_utils_chain          = Com(['utils-chain.c'])
 target_utils_list           = Com(['utils-list.c'])
 target_utils_branch         = Com(['utils-branch.c'])
 target_utils_log            = Com(['utils-log.c'])
+target_utils_log_fake       = Com(['utils-log-fake.c'])
 target_utils_environment    = Com(['utils-environment.c'])
 target_utils_dbus           = Com(['utils-dbus.c'],          pkgs={'dbus-1'})
 target_utils_gl             = Com(['utils-gl.c'],            pkgs={'gl', 'egl'})
@@ -262,7 +263,7 @@ metanoia.add([Com(['metanoia.c'])])
 metanoiactl.add([target_utils_pool,
                  target_utils_gl,
                  target_utils_debug,
-                 Com(['utils-log-fake.c']),
+                 target_utils_log_fake,
                  target_device_drm,
                  Com(['controller-arguments.c']),
                  Com(['controller-argparser.c']),
@@ -292,41 +293,41 @@ metanoiactl_gtk \
 #-------------------------------------------------------------------------------
 # TESTS
 
-target_test_globals = Tst(['test-globals.c'])
-target_test_pool    = Tst(['test-pool.c'])
-target_test_chain   = Tst(['test-chain.c'])
-target_test_list    = Tst(['test-list.c'])
-target_test_store   = Tst(['test-store.c'])
-target_test_branch  = Tst(['test-branch.c'])
-target_test_frame   = Tst(['test-frame.c'])
+check_globals = Chk(output='check-globals')
+check_pool    = Chk(output='check-pool')
+check_store   = Chk(output='check-store')
+check_chain   = Chk(output='check-chain')
+check_list    = Chk(output='check-list')
+check_branch  = Chk(output='check-branch')
+check_image   = Chk(output='check-image')
+check_frame   = Chk(output='check-frame')
 
 target_mock_surface_coordinator = Tst(['mock-surface-coordinator.c'])
 
-p.add(Chk(output='check-globals',
-          inputs=[target_test_globals, target_global_types]))
+check_globals.add([Tst(['test-globals.c']), target_global_types])
 
-p.add(Chk(output='check-pool',
-          inputs=[target_test_pool, target_utils_debug, target_utils_pool]))
+check_pool.add([Tst(['test-pool.c']), target_utils_debug, target_utils_pool])
 
-p.add(Chk(output='check-store',
-          inputs=[target_utils_debug, target_test_store, target_utils_store]))
+check_store.add([Tst(['test-store.c']), target_utils_debug, target_utils_store])
 
-p.add(Chk(output='check-chain',
-          inputs=[target_test_chain, target_utils_chain]))
+check_chain.add([Tst(['test-chain.c']), target_utils_chain])
 
-p.add(Chk(output='check-list',
-          inputs=[target_test_list, target_utils_debug,
-                  target_utils_chain, target_utils_list]))
+check_list.add([Tst(['test-list.c']),
+                target_utils_debug, target_utils_chain, target_utils_list])
 
-p.add(Chk(output='check-branch',
-          inputs=[target_test_branch, target_utils_chain, target_utils_branch]))
+check_branch.add([Tst(['test-branch.c']),
+                  target_utils_chain, target_utils_branch])
 
-p.add(Chk(output='check-frame',
-          inputs=[target_test_frame, target_mock_surface_coordinator,
-                  target_utils_pool, target_utils_debug,
-                  target_utils_store, target_utils_chain, target_utils_list,
-                  target_utils_branch, target_global_enums, target_global_types,
-                  target_exhibitor_frame, target_exhibitor_frame_internal]))
+check_image.add([Tst(['test-image.c']),
+                 target_global_types, target_utils_image,
+                 target_utils_debug, target_utils_log_fake])
+
+check_frame.add([Tst(['test-frame.c']),
+                 target_mock_surface_coordinator,
+                 target_utils_pool, target_utils_debug,
+                 target_utils_store, target_utils_chain, target_utils_list,
+                 target_utils_branch, target_global_enums, target_global_types,
+                 target_exhibitor_frame, target_exhibitor_frame_internal])
 
 #-------------------------------------------------------------------------------
 # MAIN TARGETS
@@ -335,6 +336,15 @@ p.add(target_version_info, include_in_default=True)
 p.add(metanoia,            include_in_default=True)
 p.add(metanoiactl,         include_in_default=True)
 p.add(metanoiactl_gtk,     include_in_default=True)
+
+p.add(check_globals, include_in_default=True)
+p.add(check_pool,    include_in_default=True)
+p.add(check_store,   include_in_default=True)
+p.add(check_chain,   include_in_default=True)
+p.add(check_list,    include_in_default=True)
+p.add(check_branch,  include_in_default=True)
+p.add(check_image,   include_in_default=True)
+p.add(check_frame,   include_in_default=True)
 
 #-------------------------------------------------------------------------------
 

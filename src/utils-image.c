@@ -8,26 +8,11 @@
 
 #include <errno.h>
 #include <memory.h>
+#include <string.h>
 #include <jpeglib.h>
 
 //------------------------------------------------------------------------------
-
-/// Enum defining image file format.
-typedef enum {
-    NOIA_IMAGE_UNKNOWN,
-    NOIA_IMAGE_JPEG,
-    NOIA_IMAGE_PNG,
-} NoiaImageFormat;
-
-//------------------------------------------------------------------------------
-
-/// @todo Guess file format basing on file extension.
-NoiaImageFormat noia_image_guess_format(const char* filepath NOIA_UNUSED)
-{
-    return NOIA_IMAGE_JPEG;
-}
-
-//------------------------------------------------------------------------------
+// PRIVATE
 
 /// Read in and decode JPEG file.
 NoiaBuffer noia_image_read_jpeg(FILE* file)
@@ -70,6 +55,41 @@ NoiaBuffer noia_image_read_png(FILE* file NOIA_UNUSED)
     LOG_NYIMP("PNG reading is not yet implemented!");
 
     return buffer;
+}
+
+//------------------------------------------------------------------------------
+// PUBLIC
+
+NoiaImageFormat noia_image_guess_format(const char* filepath)
+{
+    NoiaImageFormat format = NOIA_IMAGE_UNKNOWN;
+    NOIA_ENSURE(filepath, return format);
+
+    int len = strlen(filepath);
+    const char* ext4 = (len > 3) ? (filepath + len - 4) : NULL;
+    const char* ext5 = (len > 4) ? (filepath + len - 5) : NULL;
+
+    if (ext4) {
+        if (strcmp(ext4, ".png") == 0) {
+            format = NOIA_IMAGE_PNG;
+        } else if (strcmp(ext4, ".PNG") == 0) {
+            format = NOIA_IMAGE_PNG;
+        } else if (strcmp(ext4, ".jpg") == 0) {
+            format = NOIA_IMAGE_JPEG;
+        } else if (strcmp(ext4, ".JPG") == 0) {
+            format = NOIA_IMAGE_JPEG;
+        }
+    }
+
+    if (ext5 and (format == NOIA_IMAGE_UNKNOWN)) {
+        if (strcmp(ext5, ".jpeg") == 0) {
+            format = NOIA_IMAGE_JPEG;
+        } else if (strcmp(ext5, ".JPEG") == 0) {
+            format = NOIA_IMAGE_JPEG;
+        }
+    }
+
+    return format;
 }
 
 //------------------------------------------------------------------------------

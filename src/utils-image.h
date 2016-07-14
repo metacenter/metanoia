@@ -7,6 +7,16 @@
 
 #include "global-types.h"
 
+/// Enum defining image file format.
+typedef enum {
+    NOIA_IMAGE_UNKNOWN,
+    NOIA_IMAGE_JPEG,
+    NOIA_IMAGE_PNG,
+} NoiaImageFormat;
+
+/// Guess file format basing on file extension.
+NoiaImageFormat noia_image_guess_format(const char* filepath);
+
 /// Read in given image file and return drawable BGRA buffer.
 /// Currently only JPEG format is supported.
 NoiaBuffer noia_image_read(const char* filepath);
