@@ -96,18 +96,16 @@ NoiaTestResult should_correctly_delete_data_for_id(void)
 
 NoiaTestResult should_correctly_store_data_for_str(void)
 {
-    char* key1 = "key_str_1";
-    char* key2 = "key_str_2";
-    char* key3 = "key_str_3";
+    const char* key1 = "key_str_1";
+    const char* key2 = "key_str_2";
+    const char* key3 = "key_str_3";
     int value1 = 5;
     int value2 = 8;
 
     Elem e1;
-    e1.base.str = key1;
     e1.value = value1;
 
     Elem e2;
-    e2.base.str = key3;
     e2.value = value2;
 
     NoiaStore* store = noia_store_new_for_str();
@@ -137,10 +135,8 @@ NoiaTestResult should_correctly_store_data_for_str(void)
 
 NoiaTestResult should_correctly_delete_data_for_str(void)
 {
-    char* key1 = "key_str_1";
-    char* key2 = "key_str_2";
-    char* key1_copy = strdup(key1);
-    char* key2_copy = strdup(key2);
+    const char* key1 = "key_str_1";
+    const char* key2 = "key_str_2";
     int value1 = 5;
     int value2 = 8;
 
@@ -151,10 +147,8 @@ NoiaTestResult should_correctly_delete_data_for_str(void)
     e2.value = value2;
 
     NoiaStore* store = noia_store_new_for_str();
-    noia_store_add(store, key1_copy, &e1);
-    noia_store_add(store, key2_copy, &e2);
-    free(key1_copy);
-    free(key2_copy);
+    noia_store_add(store, key1, &e1);
+    noia_store_add(store, key2, &e2);
     Elem* rd = noia_store_delete(store, key2);
 
     NOIA_ASSERT(rd, "rd should be non-null")

@@ -171,7 +171,7 @@ NoiaResult noia_store_add_with_id(NoiaStore* self, NoiaItemId key, void* data)
 /// The string used as a key is duplicated.
 /// @param key - string used as a key
 /// @param data - item to be stored
-NoiaResult noia_store_add_with_str(NoiaStore* self, char* key, void* data)
+NoiaResult noia_store_add_with_str(NoiaStore* self, const char* key, void* data)
 {
     NoiaResult result = NOIA_RESULT_NOT_FOUND;
     NOIA_ENSURE(self, return NOIA_RESULT_INCORRECT_ARGUMENT);
