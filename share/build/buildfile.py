@@ -301,6 +301,7 @@ check_store   = Chk(output='check-store')
 check_chain   = Chk(output='check-chain')
 check_list    = Chk(output='check-list')
 check_branch  = Chk(output='check-branch')
+check_buffer  = Chk(output='check-buffer')
 check_image   = Chk(output='check-image')
 check_frame   = Chk(output='check-frame')
 
@@ -319,6 +320,8 @@ check_list.add([Tst(['test-list.c']),
 
 check_branch.add([Tst(['test-branch.c']),
                   target_utils_chain, target_utils_branch])
+
+check_buffer.add([Tst(['test-buffer.c']), target_utils_buffer])
 
 check_image.add([Tst(['test-image.c']),
                  target_utils_buffer, target_utils_image,
@@ -345,6 +348,7 @@ p.add(check_store,   include_in_default=True)
 p.add(check_chain,   include_in_default=True)
 p.add(check_list,    include_in_default=True)
 p.add(check_branch,  include_in_default=True)
+p.add(check_buffer,  include_in_default=True)
 p.add(check_image,   include_in_default=True)
 p.add(check_frame,   include_in_default=True)
 

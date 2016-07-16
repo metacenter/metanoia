@@ -44,6 +44,7 @@ def run_memcheck():
     command = ['valgrind', '--leak-check=full', '--show-leak-kinds=all']
 
     for f in ['./checks/check-globals',
+              './checks/check-buffer',
               './checks/check-image',
               './checks/check-pool',
               './checks/check-store',
