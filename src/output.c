@@ -79,14 +79,13 @@ int noia_output_compare(NoiaOutput* first, NoiaOutput* second)
 
 void noia_output_take_screenshot(NoiaOutput* self,
                                  NoiaArea area,
-                                 uint8_t* data,
-                                 unsigned stride)
+                                 NoiaBuffer* buffer)
 {
-    NOIA_ENSURE(data, return);
+    NOIA_ENSURE(buffer, return);
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(self->renderer, return);
 
-    noia_renderer_copy_buffer(self->renderer, area, data, stride);
+    noia_renderer_copy_buffer(self->renderer, area, buffer);
 }
 
 //------------------------------------------------------------------------------

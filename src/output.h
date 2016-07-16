@@ -5,6 +5,7 @@
 #ifndef NOIA_OUTPUT_H
 #define NOIA_OUTPUT_H
 
+#include "utils-buffer.h"
 #include "event-dispatcher.h"
 #include "surface-coordinator.h"
 
@@ -31,8 +32,7 @@ int noia_output_compare(NoiaOutput* first, NoiaOutput* second);
 /// Take screenshot.
 void noia_output_take_screenshot(NoiaOutput* self,
                                  NoiaArea area,
-                                 uint8_t* data,
-                                 unsigned stride);
+                                 NoiaBuffer* buffer);
 
 /// Draw passed surfaces and over layer.
 void noia_output_draw(NoiaOutput* self,

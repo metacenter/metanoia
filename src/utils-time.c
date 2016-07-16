@@ -44,6 +44,18 @@ NoiaDayTime noia_time_get_local_daytime(void)
 
 //------------------------------------------------------------------------------
 
+void noia_time_snprintf(char* str, unsigned size, const char* format)
+{
+    struct tm* tm;
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    tm = localtime(&ts.tv_sec);
+
+    strftime(str, size, format, tm);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_time_sleep(NoiaMilliseconds miliseconds)
 {
     usleep(1000 * miliseconds);

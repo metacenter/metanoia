@@ -491,25 +491,31 @@ void noia_renderer_gl_swap_buffers(NoiaRenderer* self)
 /// Copy specified fragment of front buffer to given destination.
 /// @param x, y, w, h - describe size and position of copied fragment
 /// @param dest_data - is destination of copied data
+/// @todo Read pixels in buffers format.
 void noia_renderer_gl_copy_buffer(NoiaRenderer* self,
                                   NoiaArea area,
-                                  uint8_t* dest_data,
-                                  unsigned stride)
+                                  NoiaBuffer* buffer)
 {
     NOIA_ENSURE_RENDERER_GL(self, return);
 
-    if (((int) stride) != (4*area.size.width)) {
+    if (((int) buffer->stride) != (4*area.size.width)) {
         LOG_ERROR("Target buffer is malformed! {stride='%u', width='%u'}",
-                  stride, area.size.width);
+                  buffer->stride, area.size.width);
         return;
     }
 
     pthread_mutex_lock(&mutexRendererGL);
 
     if (noia_gl_make_current(&mine->egl) == NOIA_RESULT_SUCCESS) {
-        glReadBuffer(GL_FRONT);
+        NoiaBuffer* dest = noia_buffer_create(buffer->width, buffer->height,
+                                              buffer->stride, NOIA_FORMAT_BGRA);
+
+        glReadBuffer(GL_BACK);
         glReadPixels(area.pos.x, area.pos.y, area.size.width, area.size.height,
-                     GL_BGRA, GL_UNSIGNED_BYTE, dest_data);
+                     GL_BGRA, GL_UNSIGNED_BYTE, dest->data);
+
+        noia_buffer_export(dest, buffer, NOIA_TRANSFORMATION_VERTICAL);
+        noia_buffer_destroy(dest);
     }
 
     noia_gl_release_current(&mine->egl);

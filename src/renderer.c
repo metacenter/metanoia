@@ -62,14 +62,13 @@ void noia_renderer_swap_buffers(NoiaRenderer* self)
 
 void noia_renderer_copy_buffer(NoiaRenderer* self,
                                NoiaArea area,
-                               uint8_t* data,
-                               unsigned stride)
+                               NoiaBuffer* buffer)
 {
-    NOIA_ENSURE(data, return);
+    NOIA_ENSURE(buffer, return);
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(self->copy_buffer, return);
 
-    self->copy_buffer(self, area, data, stride);
+    self->copy_buffer(self, area, buffer);
 }
 
 //------------------------------------------------------------------------------

@@ -23,5 +23,8 @@ NoiaImageFormat noia_image_guess_format(const char* filepath);
 /// Currently only JPEG format is supported.
 NoiaBuffer noia_image_read(const char* filepath);
 
+/// Write buffer to image file.
+NoiaResult noia_image_write(const char* filepath, NoiaBuffer buffer);
+
 #endif // NOIA_UTILS_IMAGE_H
 

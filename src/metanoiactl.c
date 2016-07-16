@@ -9,20 +9,23 @@
 
 int main(int argc, char** argv)
 {
+    int result = 999;
     NoiaControllerArguments args;
     NoiaControllerCommand command = noia_controller_argparse(argc, argv, &args);
     switch (command) {
     case NOIA_COMMAND_INFO:
-        noia_controller_perform_info(&args.info);
+        result = noia_controller_perform_info(&args.info);
         noia_controller_free_info_arguments(&args.info);
         break;
 
     case NOIA_COMMAND_SCREENSHOT:
-        noia_controller_perform_screenshot(&args.screenshot);
+        result = noia_controller_perform_screenshot(&args.screenshot);
         noia_controller_free_screenshot_arguments(&args.screenshot);
         break;
 
     default:
         break;
     }
+
+    return result;
 }

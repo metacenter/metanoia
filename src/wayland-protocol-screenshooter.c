@@ -22,6 +22,7 @@ void noia_wayland_screenshooter_unbind(struct wl_resource* resource NOIA_UNUSED)
 //------------------------------------------------------------------------------
 
 /// Wayland protocol: Take a screenshot.
+/// @todo Implement support for screenshot format.
 void noia_wayland_screenshooter_shoot(struct wl_client* client NOIA_UNUSED,
                                       struct wl_resource* resource,
                                       struct wl_resource* output_resource,
@@ -36,8 +37,13 @@ void noia_wayland_screenshooter_shoot(struct wl_client* client NOIA_UNUSED,
         int stride = wl_shm_buffer_get_stride(shm_buffer);
         uint8_t* data = wl_shm_buffer_get_data(shm_buffer);
 
+        NoiaBuffer buffer;
+        noia_buffer_setup(&buffer, width, height, stride,
+                          NOIA_FORMAT_UNKNOWN, data);
         NoiaArea area = {.pos={0, 0}, .size={width, height}};
-        noia_output_take_screenshot(output, area, data, stride);
+
+        noia_output_take_screenshot(output, area, &buffer);
+        noia_buffer_reformat(&buffer, NOIA_FORMAT_RGBA);
     } else {
         LOG_ERROR("Wrong shared memory buffer!");
         wl_resource_post_no_memory(resource);

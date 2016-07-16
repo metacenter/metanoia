@@ -154,7 +154,7 @@ target_utils_dbus           = Com(['utils-dbus.c'],          pkgs={'dbus-1'})
 target_utils_gl             = Com(['utils-gl.c'],            pkgs={'gl', 'egl'})
 target_utils_keymap         = Com(['utils-keymap.c'],        pkgs={'xkbcommon'})
 target_utils_keyboard_state = Com(['utils-keyboard-state.c'],pkgs={'xkbcommon'})
-target_utils_image          = Com(['utils-image.c'],         libs={'jpeg'})
+target_utils_image          = Com(['utils-image.c'],       libs={'jpeg', 'png'})
 target_utils_time           = Com(['utils-time.c'])
 
 metanoia.add([target_utils_debug,
@@ -232,6 +232,8 @@ metanoia.add([target_exhibitor_frame,
 #-------------------------------------------------------------------------------
 # WAYLAND FRONTEND
 
+target_screenshooter = Com([target_screenshooter_code])
+
 metanoia.add([Com(['wayland-region.c']),
               Com(['wayland-surface.c']),
               Com(['wayland-transfer.c']),
@@ -245,7 +247,7 @@ metanoia.add([Com(['wayland-region.c']),
               Com(['wayland-facade.c']),
               Com(['wayland-module.c'], pkgs={'wayland-server'}),
               Com([target_xdg_shell_code]),
-              Com([target_screenshooter_code])])
+              target_screenshooter])
 
 metanoia.add(Com.from_matching('wayland-protocol-*.c', c))
 
@@ -262,15 +264,24 @@ metanoia.add([Com(['metanoia.c'])])
 #-------------------------------------------------------------------------------
 # METANOIACTL
 
-metanoiactl.add([target_utils_pool,
-                 target_utils_gl,
-                 target_utils_debug,
-                 target_utils_log_fake,
-                 target_device_drm,
+target_controller_output = Com(['controller-output.c'])
+
+metanoiactl.add([# logging
+                 target_utils_log_fake, target_utils_debug,
+                 # info
+                 target_utils_pool, target_utils_gl, target_device_drm,
+                 # screenshot
+                 target_utils_buffer, target_utils_image,
+                 target_utils_chain, target_utils_list,
+                 target_utils_environment, target_utils_time,
+                 target_screenshooter, target_controller_output,
+                 # controller
                  Com(['controller-arguments.c']),
                  Com(['controller-argparser.c']),
                  Com(['controller-info.c'], pkgs={'libdrm'}),
-                 Com(['controller-screenshot.c']),
+                 Com(['controller-screenshot.c'],
+                      pkgs={'wayland-client'},
+                      deps={target_screenshooter_client}),
                  Com(['metanoiactl.c'])])
 
 #-------------------------------------------------------------------------------
@@ -283,7 +294,7 @@ metanoiactl_gtk.add([target_utils_debug,
                      target_screenshooter_code])
 metanoiactl_gtk \
     .add([Com(['controller-defs.c'],        pkgs={'glib-2.0'}),
-          Com(['controller-output.c'],      pkgs={'glib-2.0'}),
+          target_controller_output,
           Com([target_gtk_resources],       pkgs={'glib-2.0'}),
           Com(['controller-gtk-display.c'], pkgs={'gtk+-3.0'}),
           Com(['controller-gtk-win.c'],     pkgs={'gtk+-3.0'}),
@@ -340,7 +351,7 @@ check_frame.add([Tst(['test-frame.c']),
 p.add(target_version_info, include_in_default=True)
 p.add(metanoia,            include_in_default=True)
 p.add(metanoiactl,         include_in_default=True)
-p.add(metanoiactl_gtk,     include_in_default=True)
+p.add(metanoiactl_gtk,     include_in_default=False)
 
 p.add(check_globals, include_in_default=True)
 p.add(check_pool,    include_in_default=True)

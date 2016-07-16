@@ -24,6 +24,13 @@ NoiaMilliseconds noia_time_get_realtime_milliseconds(void);
 /// Return local time.
 NoiaDayTime noia_time_get_local_daytime(void);
 
+/// Prepare string containinge data and time.
+/// @param str - string to be printed to
+/// @param size - size of `str`
+/// @param format - format string
+/// @see strftime
+void noia_time_snprintf(char* str, unsigned size, const char* format);
+
 /// Sleep for given number of milliseconds.
 void noia_time_sleep(NoiaMilliseconds miliseconds);
 

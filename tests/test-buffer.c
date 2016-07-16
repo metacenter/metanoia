@@ -43,7 +43,7 @@ NoiaTestResult should_transform_identically(void)
     noia_buffer_setup(&expected, 3, 2, 16, NOIA_FORMAT_BGRA, expected_data);
 
     NoiaBuffer actual =
-                 noia_buffer_transform(&original, NOIA_TRANSFORMATION_IDENTITY);
+               noia_buffer_copy(&original, NOIA_TRANSFORMATION_IDENTITY);
 
     NOIA_ASSERT_BUFFERS_EQUAL(actual, expected);
 
@@ -72,7 +72,7 @@ NoiaTestResult should_transform_horizontally(void)
     noia_buffer_setup(&expected, 3, 2, 16, NOIA_FORMAT_BGRA, expected_data);
 
     NoiaBuffer actual =
-               noia_buffer_transform(&original, NOIA_TRANSFORMATION_HORIZONTAL);
+               noia_buffer_copy(&original, NOIA_TRANSFORMATION_HORIZONTAL);
 
     // We don't care about padding, so make it the same
     *((int32_t*) &actual.data[12]) = 0;
@@ -105,7 +105,7 @@ NoiaTestResult should_transform_vertically(void)
     noia_buffer_setup(&expected, 3, 2, 16, NOIA_FORMAT_BGRA, expected_data);
 
     NoiaBuffer actual =
-                 noia_buffer_transform(&original, NOIA_TRANSFORMATION_VERTICAL);
+               noia_buffer_copy(&original, NOIA_TRANSFORMATION_VERTICAL);
 
     NOIA_ASSERT_BUFFERS_EQUAL(actual, expected);
 
@@ -133,7 +133,7 @@ NoiaTestResult should_transform_horizontally_and_vertically(void)
     NoiaBuffer expected;
     noia_buffer_setup(&expected, 3, 2, 16, NOIA_FORMAT_BGRA, expected_data);
 
-    NoiaBuffer actual = noia_buffer_transform(&original,
+    NoiaBuffer actual = noia_buffer_copy(&original,
                  NOIA_TRANSFORMATION_VERTICAL | NOIA_TRANSFORMATION_HORIZONTAL);
 
     // We don't care about padding, so make it the same

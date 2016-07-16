@@ -6,7 +6,7 @@
 #define NOIA_RENDERER_H
 
 #include "global-types.h"
-
+#include "utils-buffer.h"
 #include "utils-pool.h"
 #include "surface-coordinator.h"
 
@@ -30,8 +30,7 @@ void noia_renderer_swap_buffers(NoiaRenderer* self);
 /// Copy renderers front buffer.
 void noia_renderer_copy_buffer(NoiaRenderer* self,
                                NoiaArea area,
-                               uint8_t* data,
-                               unsigned stride);
+                               NoiaBuffer* buffer);
 
 /// Renderer desctructor.
 void noia_renderer_destroy(NoiaRenderer* self);

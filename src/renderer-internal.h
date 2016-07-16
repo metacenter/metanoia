@@ -20,8 +20,7 @@ typedef void (*NoiaRendererSwapBuffersFunc) (NoiaRenderer*);
 
 typedef void (*NoiaRendererCopyBufferFunc) (NoiaRenderer*,
                                             NoiaArea,
-                                            uint8_t*,
-                                            unsigned);
+                                            NoiaBuffer* buffer);
 
 /// Renderer strategy interface.
 /// @todo Move 'attach' elsewhere.

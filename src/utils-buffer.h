@@ -31,6 +31,15 @@ typedef struct {
     uint8_t* data;
 } NoiaBuffer;
 
+/// Buffer constructor.
+NoiaBuffer* noia_buffer_create(int width,
+                               int height,
+                               int stride,
+                               NoiaBufferFormat format);
+
+/// Buffer destructor.
+void noia_buffer_destroy(NoiaBuffer* self);
+
 /// Setup buffer.
 void noia_buffer_setup(NoiaBuffer* self,
                        int width,
@@ -51,10 +60,16 @@ void noia_buffer_release(NoiaBuffer* self);
 /// Change format of buffer in place.
 void noia_buffer_reformat(NoiaBuffer* self, NoiaBufferFormat format);
 
-/// Perform spatial transformation on buffer.
-/// Returned buffer must be released.
-NoiaBuffer noia_buffer_transform(const NoiaBuffer* self,
-                                 NoiaBufferTransformation transformation);
+/// Copy buffers memory to `target` applying spatial transformation.
+/// Does nothing if `target` has different dimensions.
+void noia_buffer_export(const NoiaBuffer* self,
+                        NoiaBuffer* target,
+                        NoiaBufferTransformation transformation);
+
+/// Create new Buffer applying spatial transformation.
+/// Allocates new memory, so returned buffer must be released.
+NoiaBuffer noia_buffer_copy(const NoiaBuffer* self,
+                            NoiaBufferTransformation transformation);
 
 #endif // NOIA_UTILS_BUFFER_H
 
