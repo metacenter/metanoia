@@ -82,14 +82,6 @@ typedef struct {
     uint8_t a;
 } NoiaColor;
 
-/// Container for all data required to draw an image.
-typedef struct {
-    int width;
-    int height;
-    int stride;
-    uint8_t* data;
-} NoiaBuffer;
-
 /// Data needed by Renderer to draw surface
 typedef struct {
     NoiaSurfaceId sid;
@@ -118,15 +110,6 @@ void noia_area_invalidate(NoiaArea* area);
 /// @return `true` if areas are equal or
 ///         `false` if not or at least one area is invalid.
 bool noia_area_is_equal(NoiaArea area1, NoiaArea area2);
-
-/// Check if buffer is valid.
-bool noia_buffer_is_valid(NoiaBuffer* buffer);
-
-/// Clear the buffer.
-void noia_buffer_clean(NoiaBuffer* buffer);
-
-/// Frees the buffers allocated memory.
-void noia_buffer_release(NoiaBuffer* buffer);
 
 #endif // NOIA_GLOBAL_TYPES_H
 

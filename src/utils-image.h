@@ -5,7 +5,9 @@
 #ifndef NOIA_UTILS_IMAGE_H
 #define NOIA_UTILS_IMAGE_H
 
-#include "global-types.h"
+#include "utils-buffer.h"
+
+#include "global-enums.h"
 
 /// Enum defining image file format.
 typedef enum {

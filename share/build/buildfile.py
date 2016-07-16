@@ -146,6 +146,7 @@ target_utils_store          = Com(['utils-store.c'])
 target_utils_chain          = Com(['utils-chain.c'])
 target_utils_list           = Com(['utils-list.c'])
 target_utils_branch         = Com(['utils-branch.c'])
+target_utils_buffer         = Com(['utils-buffer.c'])
 target_utils_log            = Com(['utils-log.c'])
 target_utils_log_fake       = Com(['utils-log-fake.c'])
 target_utils_environment    = Com(['utils-environment.c'])
@@ -163,6 +164,7 @@ metanoia.add([target_utils_debug,
               target_utils_chain,
               target_utils_list,
               target_utils_branch,
+              target_utils_buffer,
               target_utils_log,
               target_utils_environment,
               target_utils_dbus,
@@ -319,7 +321,7 @@ check_branch.add([Tst(['test-branch.c']),
                   target_utils_chain, target_utils_branch])
 
 check_image.add([Tst(['test-image.c']),
-                 target_global_types, target_utils_image,
+                 target_utils_buffer, target_utils_image,
                  target_utils_debug, target_utils_log_fake])
 
 check_frame.add([Tst(['test-frame.c']),

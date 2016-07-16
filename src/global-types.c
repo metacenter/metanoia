@@ -72,27 +72,3 @@ bool noia_area_is_equal(NoiaArea area1, NoiaArea area2)
 
 //------------------------------------------------------------------------------
 
-bool noia_buffer_is_valid(NoiaBuffer* buffer)
-{
-    return buffer->data != NULL;
-}
-
-//------------------------------------------------------------------------------
-
-void noia_buffer_clean(NoiaBuffer* buffer)
-{
-    memset(buffer, 0, sizeof(NoiaBuffer));
-}
-
-//------------------------------------------------------------------------------
-
-void noia_buffer_release(NoiaBuffer* buffer)
-{
-    if (buffer->data) {
-        free(buffer->data);
-    }
-    noia_buffer_clean(buffer);
-}
-
-//------------------------------------------------------------------------------
-
