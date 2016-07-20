@@ -381,3 +381,13 @@ NoiaResult noia_gl_release_current(NoiaEGLBundle* egl)
 
 //------------------------------------------------------------------------------
 
+/// Destroy context and terminate display
+void noia_gl_terminate(NoiaEGLBundle* egl)
+{
+    noia_gl_release_current(egl);
+    eglDestroyContext(egl->display, egl->context);
+    eglTerminate(egl->display);
+}
+
+//------------------------------------------------------------------------------
+

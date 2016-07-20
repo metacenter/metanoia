@@ -98,5 +98,7 @@ NoiaResult noia_gl_make_current(NoiaEGLBundle* egl);
 
 NoiaResult noia_gl_release_current(NoiaEGLBundle* egl);
 
+void noia_gl_terminate(NoiaEGLBundle* egl);
+
 #endif // NOIA_UTILS_GL_H
 

@@ -92,44 +92,54 @@ void noia_controller_print_drm_mode_info(int drm_fd)
 /// Print GL and EGL info.
 void noia_controller_print_drm_egl_info(int drm_fd)
 {
-    NoiaSize size = {10,10};
+    NoiaGBMBundle gbm = { NULL, NULL };
+    NoiaEGLBundle egl = { NULL, NULL, NULL, NULL };
 
-    NoiaGBMBundle gbm;
-    NoiaResult result = noia_drm_create_gbm_surface(drm_fd, size, &gbm);
-    if (result != NOIA_RESULT_SUCCESS) {
-        printf("\tFailed to intialize GBM!\n");
-        return;
-    }
+    NOIA_BLOCK {
+        NoiaSize size = {10,10};
+        NoiaResult result = noia_drm_create_gbm_surface(drm_fd, size, &gbm);
+        if (result != NOIA_RESULT_SUCCESS) {
+            printf("\tFailed to intialize GBM!\n");
+            return;
+        }
 
-    NoiaEGLBundle egl;
-    result = noia_gl_create_onscreen_egl_bundle(
+        result = noia_gl_create_onscreen_egl_bundle(
                                               (EGLNativeDisplayType) gbm.device,
                                               (EGLNativeWindowType) gbm.surface,
                                               &egl);
-    if (result != NOIA_RESULT_SUCCESS) {
-        printf("\tFailed to intialize EGL!\n");
-        return;
+        if (result != NOIA_RESULT_SUCCESS) {
+            printf("\tFailed to intialize EGL!\n");
+            break;
+        }
+
+        const char* extensions = eglQueryString(egl.display, EGL_EXTENSIONS);
+
+        printf("\tEGL version:       '%s'\n",
+              eglQueryString(egl.display, EGL_VERSION));
+        printf("\tEGL vendor:        '%s'\n",
+              eglQueryString(egl.display, EGL_VENDOR));
+        printf("\tWayland extension: %s\n",
+              strstr(extensions, "EGL_WL_bind_wayland_display") ? "yes" : "no");
+
+        noia_gl_make_current(&egl);
+        if (result != NOIA_RESULT_SUCCESS) {
+            printf("\tFailed to set GL context!\n");
+            break;
+        }
+
+        printf("\tGL vendor:         '%s'\n", glGetString(GL_VENDOR));
+        printf("\tGL renderer:       '%s'\n", glGetString(GL_RENDERER));
+        printf("\tGL version:        '%s'\n", glGetString(GL_VERSION));
+        printf("\tGLSL version:      '%s'\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
     }
 
-    const char* extensions = eglQueryString(egl.display, EGL_EXTENSIONS);
-
-    printf("\tEGL version:       '%s'\n",
-           eglQueryString(egl.display, EGL_VERSION));
-    printf("\tEGL vendor:        '%s'\n",
-           eglQueryString(egl.display, EGL_VENDOR));
-    printf("\tWayland extension: %s\n",
-           strstr(extensions, "EGL_WL_bind_wayland_display") ? "yes" : "no");
-
-    noia_gl_make_current(&egl);
-    if (result != NOIA_RESULT_SUCCESS) {
-        printf("\tFailed to set GL context!\n");
-        return;
+    if (egl.display) {
+        noia_gl_terminate(&egl);
     }
 
-    printf("\tGL vendor:         '%s'\n", glGetString(GL_VENDOR));
-    printf("\tGL renderer:       '%s'\n", glGetString(GL_RENDERER));
-    printf("\tGL version:        '%s'\n", glGetString(GL_VERSION));
-    printf("\tGLSL version:      '%s'\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    if (gbm.device) {
+        noia_drm_release_gbm_surface(&gbm);
+    }
 }
 
 //------------------------------------------------------------------------------

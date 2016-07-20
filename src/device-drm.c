@@ -214,6 +214,19 @@ NoiaResult noia_drm_create_gbm_surface(int fd,
 
 //------------------------------------------------------------------------------
 
+void noia_drm_release_gbm_surface(NoiaGBMBundle* gbm)
+{
+    NOIA_ENSURE(gbm, return);
+    if (gbm->surface) {
+        gbm_surface_destroy(gbm->surface);
+    }
+    if (gbm->device) {
+        gbm_device_destroy(gbm->device);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void noia_drm_iterate_devices(void* listener, NoiaDRMDeviceHandler callback)
 {
     NOIA_ENSURE(callback, return);

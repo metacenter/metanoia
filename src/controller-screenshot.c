@@ -337,35 +337,44 @@ NoiaBuffer noia_screenshooter_take_screenshot(NoiaScreenshooter* screenshooter)
 
 int noia_controller_perform_screenshot(const NoiaScreenshotArguments* args)
 {
+    int result = 999;
+    NoiaBuffer buffer;
+    char* output = NULL;
+
+    noia_buffer_clean(&buffer);
     noia_environment_setup(NULL);
 
-    // Take screenshot
-    noia_screenshooter_initialize(&shooter);
-    NoiaBuffer buffer = noia_screenshooter_take_screenshot(&shooter);
-    if (not noia_buffer_is_valid(&buffer)) {
-        printf("Could not take screenshot!\n");
-        return 1;
-    }
+    NOIA_BLOCK {
+        // Take screenshot
+        noia_screenshooter_initialize(&shooter);
+        buffer = noia_screenshooter_take_screenshot(&shooter);
+        if (not noia_buffer_is_valid(&buffer)) {
+            printf("Could not take screenshot!\n");
+            result = 1;
+            break;
+        }
 
-    // Get output file name
-    char* output = NULL;
-    if (args->output == NULL) {
-        output = noia_controller_make_screenshot_file_name(&buffer);
-    } else {
-        output = strdup(args->output);
-    }
+        // Get output file name
+        if (args->output == NULL) {
+            output = noia_controller_make_screenshot_file_name(&buffer);
+        } else {
+            output = strdup(args->output);
+        }
 
-    // Write image
-    NoiaResult result = noia_image_write(output, buffer);
-    if (result != NOIA_RESULT_SUCCESS) {
-        printf("Could not save file!\n");
-        return 2;
-    }
+        // Write image
+        NoiaResult result = noia_image_write(output, buffer);
+        if (result != NOIA_RESULT_SUCCESS) {
+            printf("Could not save file!\n");
+            return 2;
+        }
 
-    printf("Screenshot saved in '%s'\n", output);
+        printf("Screenshot saved in '%s'\n", output);
+    }
 
     // Free memory
-    free(output);
+    if (output) {
+        free(output);
+    }
     noia_buffer_release(&buffer);
     noia_screenshooter_release(&shooter);
     /// @todo Remove temporary directories.

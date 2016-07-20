@@ -45,10 +45,13 @@ const char* noia_drm_get_connector_state(drmModeConnectorPtr);
 /// Check if given device has support for dumb buffers.
 bool noia_drm_device_has_dumb_buffers(int drm_fd);
 
-/// Create GBM surface.
+/// Create GBM device and surface.
 NoiaResult noia_drm_create_gbm_surface(int fd,
                                        NoiaSize size,
                                        NoiaGBMBundle* gbm);
+
+/// Release GBM device and surface.
+void noia_drm_release_gbm_surface(NoiaGBMBundle* gbm);
 
 /// Iterate over devices.
 /// @param listener - user data
