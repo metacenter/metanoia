@@ -20,10 +20,10 @@ void noia_wayland_gateway_screen_refresh(NoiaWaylandCache* cache,
 
     noia_wayland_cache_lock(cache);
     NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(cache, sid);
-    const NoiaList* frcs = noia_wayland_surface_get_frame_resources(surface);
+    NoiaList* frcs = noia_wayland_surface_get_frame_resources(surface);
 
+    // Release buffer if needed
     if (noia_list_len(frcs) > 0) {
-        // Release buffer if needed
         struct wl_resource* buffer_rc =
                noia_wayland_surface_get_resource(surface, NOIA_RESOURCE_BUFFER);
         if (buffer_rc) {
@@ -31,15 +31,17 @@ void noia_wayland_gateway_screen_refresh(NoiaWaylandCache* cache,
             noia_wayland_surface_remove_resource
                                      (surface, NOIA_RESOURCE_BUFFER, buffer_rc);
         }
-
-        // Notify frame
-        FOR_EACH(frcs, link) {
-            LOG_WAYL3("Wayland < frame (sid: %u)", sid);
-            struct wl_resource* frame_rc = (struct wl_resource*) link->data;
-            wl_callback_send_done(frame_rc, milliseconds);
-        }
     }
+
     noia_wayland_cache_unlock(cache);
+
+    // Notify frame
+    while (noia_list_len(frcs) > 0) {
+        LOG_WAYL3("Wayland < frame (sid: %u)", sid);
+        struct wl_resource* rc = noia_list_pop(frcs);
+        wl_callback_send_done(rc, milliseconds);
+        wl_resource_destroy(rc);
+    }
 }
 
 //------------------------------------------------------------------------------

@@ -26,8 +26,7 @@ struct wl_resource* noia_wayland_surface_get_resource
 
 /// Get list of frame resources.
 /// @note Qt applications use two frames.
-const NoiaList* noia_wayland_surface_get_frame_resources
-                                                     (NoiaWaylandSurface* self);
+NoiaList* noia_wayland_surface_get_frame_resources(NoiaWaylandSurface* self);
 
 /// Add resource of given type.
 void noia_wayland_surface_add_resource

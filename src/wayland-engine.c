@@ -52,7 +52,7 @@ void* noia_wayland_engine_run(void* data)
 
 int noia_wayland_engine_event_loop_feeder(void* data)
 {
-    LOG_WAYL4("--- Wayland loop feeder ---");
+    LOG_WAYL5("--- Wayland loop feeder ---");
     NoiaWaylandEngine* engine = (NoiaWaylandEngine*) data;
     wl_event_source_timer_update(engine->src, 60);
     return 0;

@@ -133,6 +133,9 @@ NoiaWaylandSurface* noia_wayland_cache_find_surface(NoiaWaylandCache* self,
     if (sid != scInvalidSurfaceId) {
         result = noia_store_find(self->surfaces, sid);
     }
+    if (result == NULL) {
+        LOG_ERROR("Wayland: Could not find surface (id: '%u')", sid);
+    }
     return result;
 }
 
@@ -156,6 +159,9 @@ NoiaWaylandRegion* noia_wayland_cache_find_region(NoiaWaylandCache* self,
     if (rid != scInvalidItemId) {
         result = noia_store_find(self->regions, rid);
     }
+    if (result == NULL) {
+        LOG_ERROR("Wayland: Could not find region (id: '%u')", rid);
+    }
     return result;
 }
 
@@ -167,7 +173,7 @@ void noia_wayland_cache_add_surface_resource
                                    NoiaWaylandSurfaceResourceType resource_type,
                                    struct wl_resource* resource)
 {
-    NoiaWaylandSurface* surface = noia_store_find(self->surfaces, sid);
+    NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(self, sid);
     noia_wayland_surface_add_resource(surface, resource_type, resource);
 }
 
@@ -191,8 +197,13 @@ void noia_wayland_cache_remove_surface_resource
                                    struct wl_resource* resource)
 {
     NOIA_ENSURE(resource_type < NOIA_NUM_SURFACE_RESOURCE_TYPES, return);
-    NoiaWaylandSurface* surface = noia_store_find(self->surfaces, sid);
-    noia_wayland_surface_remove_resource(surface, resource_type, resource);
+    NoiaWaylandSurface* surface = noia_wayland_cache_find_surface(self, sid);
+    if (surface) {
+        noia_wayland_surface_remove_resource(surface, resource_type, resource);
+    } else {
+        // This is not error. Some clients remove surface before XDG surface.
+        LOG_WARN1("Wayland: surface not found (sid: %u)", sid);
+    }
 }
 
 //------------------------------------------------------------------------------

@@ -17,6 +17,7 @@ NoiaWaylandState* noia_wayland_state_new()
     self->keyboard_state = noia_keyboard_state_new();
     self->keyboard_focused_sid = scInvalidItemId;
     self->pointer_focused_sid = scInvalidItemId;
+    self->current_transfer = NULL;
 
     return self;
 }

@@ -127,7 +127,7 @@ void noia_wayland_xdg_surface_set_window_geometry
 {
     NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
 
-    LOG_WAYL2("Wayland > XDG surface set window geometry "
+    LOG_WAYL3("Wayland > XDG surface set window geometry "
               "(sid: %u, x: %d, y: %d, w: %d, h: %d)",
                sid, x, y, width, height);
 

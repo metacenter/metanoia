@@ -71,8 +71,9 @@ void noia_event_data_handle(NoiaEventData* self, struct epoll_event* epev)
 void noia_event_data_exit(NoiaEventData* self)
 {
     NOIA_ENSURE(self, return);
-    NOIA_ENSURE(self->exit, return);
-    self->exit(self);
+    if (self->exit) {
+        self->exit(self);
+    }
 }
 
 //------------------------------------------------------------------------------

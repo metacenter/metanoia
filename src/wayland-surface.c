@@ -63,8 +63,7 @@ struct wl_resource* noia_wayland_surface_get_resource
 
 //------------------------------------------------------------------------------
 
-const NoiaList* noia_wayland_surface_get_frame_resources
-                                                      (NoiaWaylandSurface* self)
+NoiaList* noia_wayland_surface_get_frame_resources(NoiaWaylandSurface* self)
 {
     NOIA_ENSURE(self, return NULL);
     return self->frame_resources;

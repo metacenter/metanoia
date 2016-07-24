@@ -292,6 +292,7 @@ NoiaResult noia_display_start(NoiaDisplay* self)
 {
     NOIA_ENSURE(self, return NOIA_RESULT_ERROR);
 
+    noia_object_ref((NoiaObject*) self->setup_task);
     noia_loop_schedule_task(self->loop, self->setup_task);
     return noia_loop_run(self->loop);
 }

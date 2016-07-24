@@ -109,11 +109,16 @@ void noia_surface_destroy(NoiaCoordinator* coordinator, NoiaSurfaceId sid)
 {
     noia_event_signal_emit_int(SIGNAL_SURFACE_DESTROYED, sid);
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
-    NOIA_GET_AND_ASSERT_SURFACE(parent_surface, surface->parent_sid);
+    NoiaSurfaceData* parent_surface = NULL;
+    if (surface->parent_sid != scInvalidSurfaceId) {
+        parent_surface = noia_surface_get(coordinator, surface->parent_sid);
+    }
 
     noia_coordinator_lock_surfaces(coordinator);
-    noia_list_remove_all(parent_surface->satellites, (void*) sid,
-                         (NoiaCompareFunc) noia_surface_compare);
+    if (parent_surface) {
+        noia_list_remove_all(parent_surface->satellites, (void*) sid,
+                             (NoiaCompareFunc) noia_surface_compare);
+    }
     noia_surface_data_free(noia_store_delete(coordinator->surfaces, sid));
     noia_coordinator_unlock_surfaces(coordinator);
 }
