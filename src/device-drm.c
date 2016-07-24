@@ -179,6 +179,15 @@ bool noia_drm_device_has_dumb_buffers(int drm_fd)
 
 //------------------------------------------------------------------------------
 
+bool noia_drm_device_has_prime(int drm_fd)
+{
+    uint64_t has_prime = false;
+    int ret = drmGetCap(drm_fd, DRM_CAP_PRIME, &has_prime);
+    return (ret == 0) and has_prime;
+}
+
+//------------------------------------------------------------------------------
+
 NoiaResult noia_drm_create_gbm_surface(int fd,
                                        NoiaSize size,
                                        NoiaGBMBundle* gbm)

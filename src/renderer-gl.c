@@ -83,7 +83,6 @@ static const char* scShaderFragment300 =
 "void main(void)"
 "{"
 "    color = texture2D(texture, v_texcoords);"
-"    gl_FragColor = vec4(color.b, color.g, color.r, color.a);"
 "}";
 
 //------------------------------------------------------------------------------

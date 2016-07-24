@@ -151,8 +151,12 @@ void noia_controller_print_drm_device_info(void* data,
 {
     NoiaInfoArguments* args = data;
 
-    printf("DRM device:\n\tmodule name: '%s'\n\tdumb buffers: '%s'\n\n",
-           module, (noia_drm_device_has_dumb_buffers(drm_fd) ? "yes" : "no"));
+    printf("DRM device:\n"
+           "\tmodule name:  '%s'\n"
+           "\tdumb buffers: '%s'\n"
+           "\tprime         '%s'\n\n", module,
+           (noia_drm_device_has_dumb_buffers(drm_fd) ? "yes" : "no"),
+           (noia_drm_device_has_prime(drm_fd) ? "yes" : "no"));
 
     if (args->print_all or args->print_drm) {
         noia_controller_print_drm_mode_info(drm_fd);

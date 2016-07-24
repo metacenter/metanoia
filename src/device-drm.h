@@ -45,6 +45,9 @@ const char* noia_drm_get_connector_state(drmModeConnectorPtr);
 /// Check if given device has support for dumb buffers.
 bool noia_drm_device_has_dumb_buffers(int drm_fd);
 
+/// Check if given device has support for prime.
+bool noia_drm_device_has_prime(int drm_fd);
+
 /// Create GBM device and surface.
 NoiaResult noia_drm_create_gbm_surface(int fd,
                                        NoiaSize size,
