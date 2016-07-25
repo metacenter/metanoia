@@ -72,6 +72,11 @@ void noia_wayland_gateway_pointer_button(NoiaWaylandState* state,
                                          uint32_t button,
                                          uint32_t button_state);
 
+/// Send pointer wheel event to scrolled surface.
+void noia_wayland_gateway_pointer_wheel(NoiaWaylandState* state,
+                                        NoiaWaylandCache* cache,
+                                        int value);
+
 //------------------------------------------------------------------------------
 
 /// Send reconfiguration event (size or state change) to given surface.

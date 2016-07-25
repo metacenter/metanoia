@@ -98,6 +98,16 @@ void noia_wayland_module_on_pointer_button(void* edata, void* sdata)
 
 //------------------------------------------------------------------------------
 
+void noia_wayland_module_on_pointer_wheel(void* edata, void* sdata)
+{
+    LOG_WAYL4("Wayland: handling pointer wheel");
+    NoiaWaylandContext* ctx = (NoiaWaylandContext*) sdata;
+    unsigned value = noia_uint_unref_get((NoiaIntObject*) edata);
+    noia_wayland_gateway_pointer_wheel(ctx->state, ctx->cache, value);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_wayland_module_on_surface_reconfigured(void* edata, void* sdata)
 {
     NoiaWaylandContext* ctx = (NoiaWaylandContext*) sdata;
@@ -177,6 +187,10 @@ void noia_wayland_initialize(NoiaLoop* this_loop, NoiaCoordinator* coordinator)
 
     noia_event_signal_subscribe(SIGNAL_POINTER_BUTTON,
                noia_task_create(noia_wayland_module_on_pointer_button,
+                                this_loop, ctx));
+
+    noia_event_signal_subscribe(SIGNAL_POINTER_WHEEL,
+               noia_task_create(noia_wayland_module_on_pointer_wheel,
                                 this_loop, ctx));
 
     noia_event_signal_subscribe(SIGNAL_SURFACE_RECONFIGURED,

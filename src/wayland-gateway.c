@@ -244,8 +244,8 @@ void noia_wayland_gateway_pointer_focus_update(NoiaWaylandState* state,
 
 //------------------------------------------------------------------------------
 
-// TODO is sid needed?
-// TODO can pos be int32_t?
+// For each pointer resource matching currently focussed surface send
+// appropriate motion events.
 void noia_wayland_gateway_pointer_motion(NoiaWaylandCache* cache,
                                          NoiaSurfaceId sid,
                                          NoiaPosition pos,
@@ -273,6 +273,8 @@ void noia_wayland_gateway_pointer_motion(NoiaWaylandCache* cache,
 
 //------------------------------------------------------------------------------
 
+// For each pointer resource matching currently focussed surface send
+// appropriate button events.
 void noia_wayland_gateway_pointer_button(NoiaWaylandState* state,
                                          NoiaWaylandCache* cache,
                                          NoiaWaylandEngine* engine,
@@ -293,6 +295,40 @@ void noia_wayland_gateway_pointer_button(NoiaWaylandState* state,
             if (info.cl == wl_resource_get_client(rc)) {
                 int serial = noia_wayland_engine_next_serial(engine);
                 wl_pointer_send_button(rc, serial, time, button, button_state);
+            }
+        }
+    }
+
+    noia_wayland_cache_unlock(cache);
+}
+
+//------------------------------------------------------------------------------
+
+// For each pointer resource matching currently focussed surface send
+// appropriate axis events.
+void noia_wayland_gateway_pointer_wheel(NoiaWaylandState* state,
+                                        NoiaWaylandCache* cache,
+                                        int value)
+{
+    noia_wayland_cache_lock(cache);
+
+    NoiaWaylandRc info =
+           noia_wayland_cache_get_rc_for_sid(cache, state->pointer_focused_sid);
+    NoiaList* resources =
+                 noia_wayland_cache_get_resources(cache, NOIA_RESOURCE_POINTER);
+
+    wl_fixed_t fvalue = wl_fixed_from_double(10.0 * value);
+    uint32_t axis = WL_POINTER_AXIS_VERTICAL_SCROLL;
+    uint32_t source = WL_POINTER_AXIS_SOURCE_WHEEL;
+
+    if (info.cl) {
+        FOR_EACH (resources, link) {
+            struct wl_resource* rc = link->data;
+            if (info.cl == wl_resource_get_client(rc)) {
+                wl_pointer_send_axis_source(rc, source);
+                wl_pointer_send_axis_discrete(rc, axis, value);
+                wl_pointer_send_axis(rc, 0, axis, fvalue);
+                wl_pointer_send_axis_stop(rc, 0, axis);
             }
         }
     }

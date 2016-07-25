@@ -272,6 +272,8 @@ void noia_exhibitor_pointer_on_position_reset(NoiaPointer* self)
 
 //------------------------------------------------------------------------------
 
+/// Pointer moved in X axis: update position taking into account output
+/// boundaries.
 void noia_exhibitor_pointer_on_position_x(NoiaPointer* self,
                                           NoiaExhibitor* exhibitor,
                                           int value)
@@ -291,6 +293,8 @@ void noia_exhibitor_pointer_on_position_x(NoiaPointer* self,
 
 //------------------------------------------------------------------------------
 
+/// Pointer moved in Y axis: update position taking into account output
+/// boundaries.
 void noia_exhibitor_pointer_on_position_y(NoiaPointer* self,
                                           NoiaExhibitor* exhibitor,
                                           int value)
@@ -310,6 +314,9 @@ void noia_exhibitor_pointer_on_position_y(NoiaPointer* self,
 
 //------------------------------------------------------------------------------
 
+/// User pressed mouse button: if currently focused surface is not the same
+/// pointer hovers - pop clicked surface Do not update `self->kfsid` - if pop
+/// succeeds we will be notified.
 void noia_exhibitor_pointer_on_button(NoiaPointer* self,
                                       NoiaExhibitor* exhibitor)
 {
@@ -320,7 +327,6 @@ void noia_exhibitor_pointer_on_button(NoiaPointer* self,
     if (self->kfsid != self->pfsid) {
         NoiaCompositor* compositor = noia_exhibitor_get_compositor(exhibitor);
         noia_compositor_pop_surface(compositor, self->pfsid);
-        // Do not update `self->kfsid` - if pop succeeds we will be notified
     }
 
     pthread_mutex_unlock(&self->mutex);

@@ -71,11 +71,15 @@ void noia_evdev_handle_mouse(struct input_event* ev)
     } else if (ev->code == ABS_Y) {
         noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y,
                                    noia_config()->mouse_scale * ev->value);
-    } else if ((ev->code == BTN_LEFT) or (ev->code == BTN_RIGHT)) {
+    } else if ((ev->code == BTN_LEFT)
+           or  (ev->code == BTN_MIDDLE)
+           or  (ev->code == BTN_RIGHT)) {
         unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
         NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
         noia_event_signal_emit(SIGNAL_POINTER_BUTTON, (NoiaObject*) btn);
         noia_object_unref((NoiaObject*) btn);
+    } else if (ev->code == REL_WHEEL) {
+        noia_event_signal_emit_int(SIGNAL_POINTER_WHEEL, -1*ev->value);
     }
 }
 
@@ -89,7 +93,9 @@ void noia_evdev_handle_touchpad(struct input_event* ev,
         context->presure = ev->value;
     } else if (ev->code == ABS_MT_TRACKING_ID) {
         noia_event_signal_emit(SIGNAL_POINTER_POSITION_RESET, NULL);
-    } else if ((ev->code == BTN_LEFT) or (ev->code == BTN_RIGHT)) {
+    } else if ((ev->code == BTN_LEFT)
+           or  (ev->code == BTN_MIDDLE)
+           or  (ev->code == BTN_RIGHT)) {
         unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
         NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
         noia_event_signal_emit(SIGNAL_POINTER_BUTTON, (NoiaObject*) btn);
