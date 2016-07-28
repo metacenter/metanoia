@@ -24,6 +24,7 @@
 #define LEVEL_DEBUG "DEBUG"
 #define LEVEL_CONFG "CONFG"
 #define LEVEL_STATS "STATS"
+#define LEVEL_MUTEX "MUTEX"
 #define LEVEL_WARN1 "WARN1"
 #define LEVEL_INFO1 "INFO1"
 #define LEVEL_WAYL1 "WAYL1"
@@ -48,6 +49,7 @@
 #define LOG_NYIMP(...) NOIA_LOG(NYIMP, __VA_ARGS__)
 #define LOG_DEBUG(...) NOIA_LOG(DEBUG, __VA_ARGS__)
 #define LOG_CONFG(...) NOIA_LOG(CONFG, __VA_ARGS__)
+#define LOG_MUTEX(...) NOIA_LOG(MUTEX, __VA_ARGS__)
 #define LOG_WARN1(...) NOIA_LOG(WARN1, __VA_ARGS__)
 #define LOG_INFO1(...) NOIA_LOG(INFO1, __VA_ARGS__)
 #define LOG_WAYL1(...) NOIA_LOG(WAYL1, __VA_ARGS__)

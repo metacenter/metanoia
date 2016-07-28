@@ -134,7 +134,7 @@ void noia_wayland_gateway_keyboard_focus_update(NoiaWaylandState* state,
         // Send selection (clipboard data offer)
         noia_wayland_gateway_send_selection(state, cache);
     } else {
-        noia_wayland_cache_lock(cache);
+        noia_wayland_cache_unlock(cache);
     }
 
     // Inform surfaces their states changed

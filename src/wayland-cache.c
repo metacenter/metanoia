@@ -92,6 +92,7 @@ void noia_wayland_cache_free(NoiaWaylandCache* self)
 
 void noia_wayland_cache_lock(NoiaWaylandCache* self)
 {
+    LOG_MUTEX("Locking Wayland cache mutex");
     pthread_mutex_lock(&self->mutex);
 }
 
@@ -100,6 +101,7 @@ void noia_wayland_cache_lock(NoiaWaylandCache* self)
 void noia_wayland_cache_unlock(NoiaWaylandCache* self)
 {
     pthread_mutex_unlock(&self->mutex);
+    LOG_MUTEX("Unlocked Wayland cache mutex");
 }
 
 //------------------------------------------------------------------------------

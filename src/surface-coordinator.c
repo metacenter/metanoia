@@ -60,6 +60,7 @@ void noia_coordinator_free(NoiaCoordinator* self)
 
 void noia_coordinator_lock_surfaces(NoiaCoordinator* self)
 {
+    LOG_MUTEX("Locking surface coordinator mutex");
     pthread_mutex_lock(&self->surface_mutex);
 }
 
@@ -68,6 +69,7 @@ void noia_coordinator_lock_surfaces(NoiaCoordinator* self)
 void noia_coordinator_unlock_surfaces(NoiaCoordinator* self)
 {
     pthread_mutex_unlock(&self->surface_mutex);
+    LOG_MUTEX("Unlocked surface coordinator mutex");
 }
 
 //------------------------------------------------------------------------------
