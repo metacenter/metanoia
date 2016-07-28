@@ -261,12 +261,9 @@ NoiaResult noia_frame_resettle(NoiaFrame* self,
                                NoiaFrame* target,
                                NoiaCoordinator* coordinator)
 {
-    NoiaFrame* source = self->trunk;
     NoiaResult result = noia_frame_remove_self(self, coordinator);
     if (result == NOIA_RESULT_SUCCESS) {
-        noia_frame_append(target, self);
-        noia_frame_relax(source, coordinator);
-        noia_frame_relax(target, coordinator);
+        noia_frame_settle(self, target, coordinator);
     }
     return result;
 }

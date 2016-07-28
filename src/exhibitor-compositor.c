@@ -408,6 +408,7 @@ void noia_compositor_dive(NoiaCompositor* self,
     // Log result
     noia_compositor_log_frame(self);
 }
+
 //------------------------------------------------------------------------------
 
 void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
@@ -427,6 +428,9 @@ void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
         LOG_WARN1("Compositor: Workspace '%s' not found "
                   "and could not be created!", title);
     }
+
+    // Log result
+    noia_compositor_log_frame(self);
 }
 
 //------------------------------------------------------------------------------

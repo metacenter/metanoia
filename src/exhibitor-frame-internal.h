@@ -102,6 +102,7 @@ void noia_frame_resize_floating(NoiaFrame* self,
                                 int magnitude);
 
 /// Make all subsurfaces have the same size and proper layout.
+/// Relaxing works only on directed frames.
 void noia_frame_relax(NoiaFrame* self, NoiaCoordinator* coordinator);
 
 /// Move the frame with all twigs.

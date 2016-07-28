@@ -2701,7 +2701,7 @@ NoiaTestResult should_jumpin_on(void)
 
     NOIA_ASSERT_FRAME_POINTER(v3->trunk, f->trunk);
     NOIA_ASSERT_TRUNK(v3->trunk, v);
-    NOIA_ASSERT_TRUNK(v,  r);
+    NOIA_ASSERT_TRUNK(v, r);
 
     NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
     NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);

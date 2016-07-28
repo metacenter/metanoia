@@ -74,8 +74,10 @@ typedef enum {
                                | NOIA_FRAME_TYPE_VERTICAL
                                | NOIA_FRAME_TYPE_STACKED,
 
+    // Workspace has to be directed to let relaxing work
     NOIA_FRAME_TYPE_WORKSPACE  = NOIA_FRAME_TYPE_SPECIAL
-                               | NOIA_FRAME_TYPE_FIXED,
+                               | NOIA_FRAME_TYPE_FIXED
+                               | NOIA_FRAME_TYPE_STACKED,
 
     NOIA_FRAME_TYPE_DISPLAY    = NOIA_FRAME_TYPE_SPECIAL
                                | NOIA_FRAME_TYPE_FLOATING
