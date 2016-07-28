@@ -12,6 +12,9 @@
 #include <malloc.h>
 #include <memory.h>
 
+/// @file
+/// @todo Add unit tests for Compositor.
+
 //------------------------------------------------------------------------------
 // PRIVATE
 
@@ -50,6 +53,32 @@ void noia_compositor_set_selection(NoiaCompositor* self, NoiaFrame* frame)
 
 //------------------------------------------------------------------------------
 
+/// Find most recently focused frame inside given frame.
+/// This function is used to find most recently used frame when focusing to
+/// workspace or when currently focussed frame jumps from workspace.
+/// @return Most recently focused frame, or `reference` frame if nothing found.
+NoiaFrame* noia_compositor_find_most_recent(NoiaCompositor* self,
+                                            NoiaFrame* reference)
+{
+    /// Searching for new selection is done by iterating through surface history
+    /// and checking if surface with given ID is somewhere in workspace three.
+    /// Not the most efficient...
+    /// Any ideas for improvement?
+    NoiaFrame* result = NULL;
+    NoiaList* history = noia_exhibitor_get_surface_history(self->exhibitor);
+    FOR_EACH(history, link) {
+        NoiaSurfaceId sid = (NoiaSurfaceId) link->data;
+        result = noia_frame_find_with_sid(reference, sid);
+        if (result) {
+            break;
+        }
+    }
+
+    return result ? result : reference;
+}
+
+//------------------------------------------------------------------------------
+
 /// Search for existing workspace with given title.
 NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
                                           const char* title)
@@ -80,11 +109,15 @@ NoiaFrame* noia_compositor_find_current_workspace(NoiaCompositor* self)
 /// it as a workspace.
 NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
                                                 NoiaFrame* display,
-                                                const char* title)
+                                                const char* title,
+                                                bool focus)
 {
     NOIA_ENSURE(self, return NULL);
     NOIA_ENSURE(title, return NULL);
     NOIA_ENSURE(strlen(title) > 0, return NULL);
+
+    LOG_INFO2("Compositor: create new workspace {title: '%s', focus: %s}",
+              title, (focus ? "yes" : "no"));
 
     // Create and configure workspace
     NoiaFrame* workspace = noia_frame_new();
@@ -103,9 +136,14 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
         noia_frame_settle(selection, workspace, self->coordinator);
     }
 
-    /// @todo Focusing new workspace should be configurable
-    noia_compositor_set_selection(self, selection);
-    noia_frame_pop_recursively(self->root, selection);
+    // Focus if requested or make sure current selection stays focused
+    if (focus) {
+        noia_compositor_set_selection(self, selection);
+        noia_frame_pop_recursively(self->root, selection);
+    } else {
+        noia_frame_pop_recursively(self->root, self->selection);
+    }
+
     return workspace;
 }
 
@@ -113,7 +151,8 @@ NoiaFrame* noia_compositor_create_new_workspace(NoiaCompositor* self,
 
 /// Search for existing workspace or create new with given title.
 NoiaFrame* noia_compositor_bring_workspace(NoiaCompositor* self,
-                                           const char* title)
+                                           const char* title,
+                                           bool focus)
 {
     NoiaFrame* workspace = NULL;
     NOIA_BLOCK {
@@ -130,7 +169,7 @@ NoiaFrame* noia_compositor_bring_workspace(NoiaCompositor* self,
         NOIA_ENSURE(display_frame, break);
 
         workspace = noia_compositor_create_new_workspace
-                                                   (self, display_frame, title);
+                                            (self, display_frame, title, focus);
     }
     return workspace;
 }
@@ -200,7 +239,7 @@ NoiaFrame* noia_compositor_create_next_workspace(NoiaCompositor* self,
     }
 
     // Create and configure workspace
-    return noia_compositor_create_new_workspace(self, display, title);
+    return noia_compositor_create_new_workspace(self, display, title, true);
 }
 
 //------------------------------------------------------------------------------
@@ -418,7 +457,8 @@ void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
 
     LOG_INFO2("Compositor: jump to workspace '%s'", title);
 
-    NoiaFrame* workspace = noia_compositor_bring_workspace(self, title);
+    NoiaFrame* old_workspace = noia_compositor_find_current_workspace(self);
+    NoiaFrame* workspace = noia_compositor_bring_workspace(self, title, false);
     if (workspace) {
         noia_frame_jump(self->selection,
                         NOIA_FRAME_POSITION_ON,
@@ -428,6 +468,15 @@ void noia_compositor_jump_to_workspace(NoiaCompositor* self, char* title)
         LOG_WARN1("Compositor: Workspace '%s' not found "
                   "and could not be created!", title);
     }
+
+    /// @todo Last frame in display frame is considered focused.
+    ///       noia_compositor_bring_workspace adds new workspace if necessary,
+    ///       so we have to correct workspace order here.
+    ///       Framing should care information about time order.
+    ///       Then this can be removed.
+    NoiaFrame* selection = noia_compositor_find_most_recent(self,old_workspace);
+    noia_compositor_set_selection(self, selection);
+    noia_frame_pop_recursively(self->root, selection);
 
     // Log result
     noia_compositor_log_frame(self);
@@ -501,28 +550,16 @@ void noia_compositor_focus_workspace(NoiaCompositor* self, char* title)
 
     LOG_INFO1("Compositor: Change workspace to '%s'", title);
 
-    NoiaFrame* workspace = noia_compositor_bring_workspace(self, title);
-    if (not workspace) {
+    NoiaFrame* workspace = noia_compositor_bring_workspace(self, title, true);
+    if (workspace) {
+        // Last frame in display frame is considered focused
+        NoiaFrame* mrecent = noia_compositor_find_most_recent(self, workspace);
+        noia_compositor_set_selection(self, mrecent);
+        noia_frame_pop_recursively(self->root, mrecent);
+    } else {
         LOG_WARN1("Compositor: Workspace '%s' not found!", title);
-        return;
     }
 
-    /// Searching for new selection is done by iterating through surface history
-    /// and checking if surface with given ID is somewhere in workspace three.
-    /// Not the most efficient...
-    /// Any ideas for improvement?
-    NoiaFrame* frame = NULL;
-    NoiaList* history = noia_exhibitor_get_surface_history(self->exhibitor);
-    FOR_EACH(history, link) {
-        NoiaSurfaceId sid = (NoiaSurfaceId) link->data;
-        frame = noia_frame_find_with_sid(workspace, sid);
-        if (frame) {
-            break;
-        }
-    }
-
-    noia_frame_pop_recursively(self->root, workspace);
-    self->selection = (frame ? frame : workspace);
     noia_compositor_log_frame(self);
 }
 

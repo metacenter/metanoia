@@ -160,6 +160,7 @@ void noia_display_redraw_all(NoiaDisplay* self)
     }
 
     // Prepare surfaces.
+    // Last frame in display frame if considered a focused workspace.
     noia_frame_to_array(noia_frame_get_last(self->frame),
                         self->visible_surfaces,
                         self->coordinator);
