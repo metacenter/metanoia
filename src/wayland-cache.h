@@ -63,6 +63,10 @@ NoiaItemId noia_wayland_cache_create_region(NoiaWaylandCache* self);
 NoiaWaylandRegion* noia_wayland_cache_find_region(NoiaWaylandCache* self,
                                                   NoiaItemId rid);
 
+/// Remove region with given `rid`.
+void noia_wayland_cache_remove_region(NoiaWaylandCache* self,
+                                      NoiaItemId rid);
+
 //------------------------------------------------------------------------------
 
 /// Store surface resource.

@@ -121,6 +121,9 @@ void noia_wayland_facade_inflate_region(NoiaItemId rid,
 /// Tell coordinator about given surfaces size and offset basing on given region
 void noia_wayland_facade_set_input_region(NoiaSurfaceId sid, NoiaItemId rid);
 
+/// Remove region from cache.
+void noia_wayland_facade_remove_region(NoiaItemId rid);
+
 //------------------------------------------------------------------------------
 
 /// Add given keyboard resource to cache and send enter event if it is focused.

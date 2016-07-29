@@ -10,21 +10,23 @@
 
 //------------------------------------------------------------------------------
 
-/// @todo Handle destruction of region resource.
+/// Handle destruction of region resource.
 void noia_wayland_region_unbind(struct wl_resource* resource)
 {
     NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(resource);
-    LOG_NYIMP("Wayland: unbind region (rid: %d)", rid);
+    LOG_WAYL3("Wayland: unbind region (rid: %d)", rid);
+    noia_wayland_facade_remove_region(rid);
 }
 
 //------------------------------------------------------------------------------
 
-/// @todo Wayland protocol: destroy region.
+/// Wayland protocol: destroy region.
 void noia_wayland_region_destroy(struct wl_client* client     NOIA_UNUSED,
                                  struct wl_resource* resource NOIA_UNUSED)
 {
     NoiaItemId rid = (NoiaItemId) wl_resource_get_user_data(resource);
-    LOG_NYIMP("Wayland > region destroy (rid: %d)", rid);
+    LOG_WAYL3("Wayland > region destroy (rid: %d)", rid);
+    wl_resource_destroy(resource);
 }
 
 //------------------------------------------------------------------------------
@@ -58,7 +60,7 @@ void noia_wayland_region_subtract(struct wl_client* client     NOIA_UNUSED,
                                   int32_t width,
                                   int32_t height)
 {
-    LOG_WAYL2("Wayland > region subtract (x: %d, y: %d, w: %d, h: %d)",
+    LOG_WAYL3("Wayland > region subtract (x: %d, y: %d, w: %d, h: %d)",
               x, y, width, height);
 }
 

@@ -251,6 +251,15 @@ void noia_wayland_facade_set_input_region(NoiaSurfaceId sid, NoiaItemId rid)
 
 //------------------------------------------------------------------------------
 
+void noia_wayland_facade_remove_region(NoiaItemId rid)
+{
+    noia_wayland_cache_lock(C->cache);
+    noia_wayland_cache_remove_region(C->cache, rid);
+    noia_wayland_cache_unlock(C->cache);
+}
+
+//------------------------------------------------------------------------------
+
 void noia_wayland_facade_add_keyboard_resource(struct wl_resource* rc)
 {
     noia_wayland_cache_lock(C->cache);

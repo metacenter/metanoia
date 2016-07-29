@@ -13,6 +13,7 @@
 ///  - NYIMP - not yet implemented
 ///  - CONFG - changes of configuration
 ///  - STATS - statistics
+///  - MUTEX - for mutex debugging
 ///  - 1 - rare, important
 ///  - 2 - rare, not important
 ///  - 3 - frequent, important
@@ -24,7 +25,7 @@
 #define LEVEL_DEBUG "DEBUG"
 #define LEVEL_CONFG "CONFG"
 #define LEVEL_STATS "STATS"
-#define LEVEL_MUTEX "MUTEX"
+#define LEVEL_MUTEX NULL
 #define LEVEL_WARN1 "WARN1"
 #define LEVEL_INFO1 "INFO1"
 #define LEVEL_WAYL1 "WAYL1"

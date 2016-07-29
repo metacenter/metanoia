@@ -169,6 +169,17 @@ NoiaWaylandRegion* noia_wayland_cache_find_region(NoiaWaylandCache* self,
 
 //------------------------------------------------------------------------------
 
+void noia_wayland_cache_remove_region(NoiaWaylandCache* self NOIA_UNUSED,
+                                      NoiaItemId rid)
+{
+    if (rid != scInvalidItemId) {
+        LOG_WAYL3("Wayland: removing region (rid: %d)", rid);
+        noia_wayland_region_free(noia_store_delete(self->regions, rid));
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void noia_wayland_cache_add_surface_resource
                                   (NoiaWaylandCache* self,
                                    NoiaSurfaceId sid,
