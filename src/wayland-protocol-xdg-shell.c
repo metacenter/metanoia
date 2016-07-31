@@ -81,7 +81,6 @@ void noia_wayland_xdg_get_xdg_popup
 
     uint32_t version = wl_resource_get_version(resource);
     noia_wayland_xdg_popup_bind(client, (void*) popup_sid, version, id);
-
 }
 
 //------------------------------------------------------------------------------

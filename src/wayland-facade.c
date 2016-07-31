@@ -245,6 +245,8 @@ void noia_wayland_facade_set_input_region(NoiaSurfaceId sid, NoiaItemId rid)
     if (region) {
         noia_surface_set_offset(C->coordinator, sid, region->pos);
         noia_surface_set_requested_size(C->coordinator, sid, region->size);
+    } else {
+        noia_surface_reset_offset_and_requested_size(C->coordinator, sid);
     }
     noia_wayland_cache_unlock(C->cache);
 }

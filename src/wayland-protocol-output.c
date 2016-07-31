@@ -29,24 +29,26 @@ void noia_wayland_output_bind(struct wl_client* client,
     struct wl_resource* rc;
     NoiaOutput* output = (NoiaOutput*) data;
 
-    LOG_WAYL2("Binding Wayland output (version: %d, id: %d)", version, id);
-
-    if (!output) {
+    if (not output) {
         LOG_WARN1("Invalid output!");
         wl_client_post_no_memory(client);
         return;
     }
 
+    NoiaArea area = noia_output_get_area(output);
+    const char* name = noia_output_get_name(output);
+
+    LOG_WAYL2("Binding Wayland output (version: %d, id: %d, x: %d, y: %d, "
+              "width: %u, height: %u, name: '%s')", version, id,
+              area.pos.x, area.pos.y, area.size.width, area.size.height, name);
+
     rc = wl_resource_create(client, &wl_output_interface, version, id);
-    if (!rc) {
+    if (not rc) {
         wl_client_post_no_memory(client);
         return;
     }
 
     wl_resource_set_implementation(rc, NULL, data, noia_wayland_output_unbind);
-
-    NoiaArea area = noia_output_get_area(output);
-    const char* name = noia_output_get_name(output);
 
     /// @todo Pass more realistic data to wl_output_send_geometry
     wl_output_send_geometry(rc,
@@ -54,10 +56,13 @@ void noia_wayland_output_bind(struct wl_client* client,
                             area.size.width, area.size.height,
                             0,
                             name, name,
-                            0);
+                            0x0);
 
     /// @todo Pass more realistic data to wl_output_send_mode
-    wl_output_send_mode(rc, 0, area.size.width, area.size.height, 60);
+    wl_output_send_mode(rc,
+                        WL_OUTPUT_MODE_CURRENT,
+                        area.size.width, area.size.height,
+                        60);
 
     if (version >= WL_OUTPUT_SCALE_SINCE_VERSION) {
         wl_output_send_scale(rc, 1);

@@ -199,18 +199,24 @@ void noia_surface_commit(NoiaCoordinator* coordinator, NoiaSurfaceId sid)
     surface->buffer.height = surface->pending_buffer.height;
     surface->buffer.stride = surface->pending_buffer.stride;
 
-    // If surface was just created - inform others
+    // If surface was just created...
     if (is_first_time_commited) {
+        // ... size was not yet requested by surface ...
         if ((surface->requested_size.width  == 0)
         or  (surface->requested_size.height == 0)) {
+            // ... use its buffer size as requested size ...
             surface->requested_size.width  = surface->buffer.width;
             surface->requested_size.height = surface->buffer.height;
-            if (surface->parent_sid != scInvalidSurfaceId) {
-                surface->desired_size.width  = surface->buffer.width;
-                surface->desired_size.height = surface->buffer.height;
-            }
         }
 
+        // ... and if it is subsurface ...
+        if (surface->parent_sid != scInvalidSurfaceId) {
+            // ... set its desider size ...
+            surface->desired_size.width  = surface->buffer.width;
+            surface->desired_size.height = surface->buffer.height;
+        }
+
+        // ... and inform others the surface is now drawable.
         if (surface->buffer.data or surface->buffer.resource) {
             noia_surface_show(coordinator, sid, NOIA_SURFACE_SHOW_DRAWABLE);
         }
@@ -294,6 +300,20 @@ void noia_surface_set_requested_size(NoiaCoordinator* coordinator,
     NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
     noia_coordinator_lock_surfaces(coordinator);
     surface->requested_size = size;
+    noia_coordinator_unlock_surfaces(coordinator);
+}
+
+//------------------------------------------------------------------------------
+
+void noia_surface_reset_offset_and_requested_size(NoiaCoordinator* coordinator,
+                                                  NoiaSurfaceId sid)
+{
+    NOIA_GET_AND_ASSERT_SURFACE(surface, sid);
+    noia_coordinator_lock_surfaces(coordinator);
+    surface->offset.x = 0;
+    surface->offset.y = 0;
+    surface->requested_size.width  = surface->buffer.width;
+    surface->requested_size.height = surface->buffer.height;
     noia_coordinator_unlock_surfaces(coordinator);
 }
 
