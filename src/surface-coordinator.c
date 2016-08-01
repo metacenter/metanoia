@@ -74,6 +74,7 @@ void noia_coordinator_unlock_surfaces(NoiaCoordinator* self)
 
 //------------------------------------------------------------------------------
 
+/// @todo Think about more efficient way to synchronize than signaling.
 void noia_coordinator_notify(NoiaCoordinator* self)
 {
     self->last_notify_time = noia_time_get_monotonic_milliseconds();

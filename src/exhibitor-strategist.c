@@ -23,6 +23,7 @@ void noia_strategist_default_on_surface_ready(NoiaExhibitor* exhibitor,
     if (noia_compositor_manage_surface(compositor, sid)) {
         NoiaList* history = noia_exhibitor_get_surface_history(exhibitor);
         noia_list_prepend(history, (void*) sid);
+        noia_coordinator_notify(noia_exhibitor_get_coordinator(exhibitor));
     }
 }
 
