@@ -365,7 +365,10 @@ void noia_wayland_gateway_surface_reconfigured(NoiaWaylandState* state,
                                      (surface, NOIA_RESOURCE_XDG_SHELL_SURFACE);
 
         if (shell_surface_rc) {
-            /// @todo Implement resizing for Wayland shell
+            wl_shell_surface_send_configure(shell_surface_rc,
+                                            0x0,
+                                            data->desired_size.width,
+                                            data->desired_size.height);
         } else if (xdg_shell_surface_rc) {
             struct wl_array states;
             uint32_t* s;
