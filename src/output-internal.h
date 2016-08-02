@@ -26,6 +26,9 @@ struct NoiaOutput {
     /// Size and position of the output in global coordinates.
     NoiaArea area;
 
+    /// Physical size of output in millimeters.
+    NoiaSize physical_size;
+
     /// A rendering interface used to drawing on screen.
     NoiaRenderer* renderer;
 
@@ -49,6 +52,7 @@ struct NoiaOutput {
 
 /// Setup NoiaOutput.
 /// @param size - desired dimentions of output
+/// @param physical_size - physical size in millimeters
 /// @param unique_name - a string that uniquely specifies an output
 /// @param initialize - renderer constructor (back-end specific)
 /// @param get_vblank_source - returns event data for vblank (back-end specific)
@@ -56,6 +60,7 @@ struct NoiaOutput {
 /// @param free - free method (back-end specific)
 NoiaResult noia_output_setup(NoiaOutput* self,
                              NoiaSize size,
+                             NoiaSize physical_size,
                              char* unique_name,
                              NoiaOutputInitRendererFunc initialize,
                              NoiaOutputGetVBlankSourceFunc get_vblank_source,

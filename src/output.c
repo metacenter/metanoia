@@ -10,6 +10,7 @@
 
 NoiaResult noia_output_setup(NoiaOutput* self,
                              NoiaSize size,
+                             NoiaSize physical_size,
                              char* unique_name,
                              NoiaOutputInitRendererFunc initialize,
                              NoiaOutputGetVBlankSourceFunc get_vblank,
@@ -23,6 +24,7 @@ NoiaResult noia_output_setup(NoiaOutput* self,
     self->area.pos.x = 0;
     self->area.pos.y = 0;
     self->area.size = size;
+    self->physical_size = physical_size;
     self->unique_name = unique_name;
     self->renderer = NULL;
     self->initialize = initialize;
@@ -129,6 +131,13 @@ void noia_output_notify_vblank(NoiaOutput* self)
 NoiaArea noia_output_get_area(NoiaOutput* self)
 {
     return self->area;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaSize noia_output_get_physical_size(NoiaOutput* self)
+{
+    return self->physical_size;
 }
 
 //------------------------------------------------------------------------------

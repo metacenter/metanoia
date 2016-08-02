@@ -116,13 +116,17 @@ void noia_devfb_output_free(NoiaOutput* output)
 //------------------------------------------------------------------------------
 
 /// Allocate memory for framebuffer object.
-NoiaOutputFB* noia_devfb_output_new(NoiaSize size, char* id, int fd)
+NoiaOutputFB* noia_devfb_output_new(NoiaSize size,
+                                    NoiaSize physical_size,
+                                    char* id,
+                                    int fd)
 {
     NoiaOutputFB* output_fb = malloc(sizeof(NoiaOutputFB));
     memset(output_fb, 0, sizeof(NoiaOutputFB));
 
     noia_output_setup(&output_fb->base,
                       size,
+                      physical_size,
                       strdup(id),
                       noia_devfb_output_initialize,
                       noia_devfb_output_get_redraw_event,
@@ -160,7 +164,9 @@ int noia_devfb_setup_framebuffer(NoiaList* outputs)
               fixed_info.line_length);
 
     NoiaSize size = {screen_info.xres_virtual, screen_info.yres_virtual};
-    NoiaOutputFB* output = noia_devfb_output_new(size, fixed_info.id, fd);
+    NoiaSize physical_size = {screen_info.width, screen_info.height};
+    NoiaOutputFB* output =
+                  noia_devfb_output_new(size, physical_size, fixed_info.id, fd);
     noia_list_append(outputs, output);
 
     return 1;

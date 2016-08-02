@@ -50,6 +50,9 @@ void noia_output_notify_vblank(NoiaOutput* self);
 /// Get size and position of the output in global coordinates.
 NoiaArea noia_output_get_area(NoiaOutput* self);
 
+/// Get physical size in millimeters.
+NoiaSize noia_output_get_physical_size(NoiaOutput* self);
+
 /// Get unique name of the output.
 const char* noia_output_get_name(NoiaOutput* self);
 

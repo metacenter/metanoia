@@ -36,6 +36,7 @@ void noia_wayland_output_bind(struct wl_client* client,
     }
 
     NoiaArea area = noia_output_get_area(output);
+    NoiaSize physical_size = noia_output_get_physical_size(output);
     const char* name = noia_output_get_name(output);
 
     LOG_WAYL2("Binding Wayland output (version: %d, id: %d, x: %d, y: %d, "
@@ -53,7 +54,7 @@ void noia_wayland_output_bind(struct wl_client* client,
     /// @todo Pass more realistic data to wl_output_send_geometry
     wl_output_send_geometry(rc,
                             area.pos.x, area.pos.y,
-                            area.size.width, area.size.height,
+                            physical_size.width, physical_size.height,
                             0,
                             name, name,
                             0x0);

@@ -431,9 +431,11 @@ NoiaOutputDRM* noia_output_drm_create(NoiaDRMBundle* drm)
                                 drmModeGetConnector(drm->fd, drm->connector_id);
     drmModeModeInfo mode = connector->modes[0];
     NoiaSize size = {mode.hdisplay, mode.vdisplay};
+    NoiaSize physical_size = {connector->mmWidth, connector->mmHeight};
 
     noia_output_setup(&output_drm->base,
                       size,
+                      physical_size,
                       strdup(noia_drm_get_connector_name(connector)),
                       noia_output_drm_initialize,
                       noia_output_drm_get_redraw_event,

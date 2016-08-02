@@ -106,9 +106,10 @@ NoiaOutputOffscreen* noia_backend_offscreen_output_new(NoiaSize size, int num)
     memset(output_offscreen, 0, sizeof(NoiaOutputOffscreen));
 
     char name[32];
-    snprintf(name, sizeof(name), "OS-%d", num),
+    snprintf(name, sizeof(name), "OS-%d", num);
+    NoiaSize phsize = {0, 0};
 
-    noia_output_setup(&output_offscreen->base, size, strdup(name),
+    noia_output_setup(&output_offscreen->base, size, phsize, strdup(name),
                       noia_backend_offscreen_output_mmap_initialize,
                       NULL, NULL,
                       noia_backend_offscreen_output_free);
