@@ -105,10 +105,16 @@ void noia_wayland_shell_surface_set_popup
                                 int32_t y,
                                 uint32_t flags)
 {
-    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
-    LOG_NYIMP("Wayland > set popup "
-              "(sid: %u, serial: %u, x: %d, y: %d, flags: 0x%x)",
-              sid, serial, x, y, flags);
+    NoiaSurfaceId popup_sid =
+                     (NoiaSurfaceId) wl_resource_get_user_data(resource);
+    NoiaSurfaceId parent_sid =
+                     (NoiaSurfaceId) wl_resource_get_user_data(parent_resource);
+
+    LOG_NYIMP("Wayland > set popup (popup_sid: %u, parent_sid: %u, "
+              "serial: %u, x: %d, y: %d, flags: 0x%x)",
+              popup_sid, parent_sid, serial, x, y, flags);
+
+    noia_wayland_facade_add_subsurface(popup_sid, parent_sid, x, y);
 }
 
 //------------------------------------------------------------------------------

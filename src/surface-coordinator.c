@@ -342,6 +342,7 @@ void noia_surface_relate(NoiaCoordinator* coordinator,
     surface->parent_sid = parent_sid;
     surface->relative_position.x = 0;
     surface->relative_position.y = 0;
+    surface->show_flags &= (~NOIA_SURFACE_SHOW_IN_SHELL);
     noia_list_append(parent_surface->satellites, (void*) sid);
     noia_coordinator_unlock_surfaces(coordinator);
 }
