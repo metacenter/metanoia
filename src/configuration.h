@@ -41,15 +41,16 @@ static const NoiaConfig scConfig = {
 
 static const NoiaBinding scBindingsCommon[] = {
         // general
-        {KEY_ESC,  NOIA_KEY_CTRL|NOIA_KEY_ALT, noia_quit},
-        {KEY_F1,   NOIA_KEY_CTRL|NOIA_KEY_ALT, noia_refresh_displays},
+        {KEY_ESC,  NOIA_KEY_CTRL|NOIA_KEY_META, noia_quit},
+        {KEY_F1,   NOIA_KEY_CTRL|NOIA_KEY_META, noia_refresh_displays},
     };
 
 static const NoiaBinding scBindingsNormal[] = {
         // stack
         {KEY_ESC, NOIA_KEY_NONE, noia_clean_command},
         // modes
-        {KEY_I, NOIA_KEY_NONE, noia_swap_mode_normal_to_insert},
+        {KEY_I,     NOIA_KEY_NONE, noia_swap_mode_normal_to_insert},
+        {KEY_SPACE, NOIA_KEY_NONE, noia_swap_mode_normal_to_insert},
         // actions
         {KEY_F, NOIA_KEY_NONE,  noia_put_focus},
         {KEY_F, NOIA_KEY_SHIFT, noia_put_swap},
@@ -97,7 +98,7 @@ static const NoiaBinding scBindingsNormal[] = {
 
 static const NoiaBinding scBindingsInsert[] = {
         // modes
-        {KEY_ESC, NOIA_KEY_NONE, noia_swap_mode_insert_to_normal},
+        {KEY_ESC, NOIA_KEY_META, noia_swap_mode_insert_to_normal},
         // changing focus
         {KEY_TAB, NOIA_KEY_META,                noia_cicle_history_forward},
         {KEY_TAB, NOIA_KEY_META|NOIA_KEY_SHIFT, noia_cicle_history_back},
