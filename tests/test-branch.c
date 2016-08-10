@@ -7,11 +7,21 @@
 
 #include <malloc.h>
 
+//------------------------------------------------------------------------------
+
+/// Assume `data` is string and compare with data inside `branch`.
+int noia_test_compare_str_in_branch(NoiaBranch* branch, void* data)
+{
+    return strcmp(branch->data, data);
+}
+
+//------------------------------------------------------------------------------
+
 #define NOIA_MAKE_BRANCHES \
-    NoiaBranch* b = noia_branch_new();\
-    NoiaBranch* b1 = noia_branch_new();\
-    NoiaBranch* b2 = noia_branch_new();\
-    NoiaBranch* b3 = noia_branch_new();\
+    NoiaBranch* b   = noia_branch_new();\
+    NoiaBranch* b1  = noia_branch_new();\
+    NoiaBranch* b2  = noia_branch_new();\
+    NoiaBranch* b3  = noia_branch_new();\
     NoiaBranch* b11 = noia_branch_new();\
     NoiaBranch* b12 = noia_branch_new();\
     NoiaBranch* b13 = noia_branch_new();\
@@ -51,20 +61,22 @@
 
 //------------------------------------------------------------------------------
 
+/// Check if new branches are appended correctly.
+/// @see noia_branch_append
 NoiaTestResult should_append_values(void)
 {
-    char* a[] = {"1", "2", "3"};
-    char* a1[] = {"11", "12", "13"};
-    char* a2[] = {"21", "22", "23"};
-    char* a3[] = {"31", "32", "33"};
+    char* s[] =  { "1",  "2",  "3"};
+    char* s1[] = {"11", "12", "13"};
+    char* s2[] = {"21", "22", "23"};
+    char* s3[] = {"31", "32", "33"};
 
     NOIA_MAKE_BRANCHES;
     NOIA_GLUE_BRANCHES;
 
-    NOIA_ASSERT_BRANCH(b,  NULL, a);
-    NOIA_ASSERT_BRANCH(b1, b,    a1);
-    NOIA_ASSERT_BRANCH(b2, b,    a2);
-    NOIA_ASSERT_BRANCH(b3, b,    a3);
+    NOIA_ASSERT_BRANCH(b,  NULL, s,  s);
+    NOIA_ASSERT_BRANCH(b1, b,    s1, s1);
+    NOIA_ASSERT_BRANCH(b2, b,    s2, s2);
+    NOIA_ASSERT_BRANCH(b3, b,    s3, s3);
 
     noia_branch_free(b, free);
     return NOIA_TEST_SUCCESS;
@@ -72,12 +84,19 @@ NoiaTestResult should_append_values(void)
 
 //------------------------------------------------------------------------------
 
+/// Check if new branches are prepended correctly.
+/// @see noia_branch_prepend
 NoiaTestResult should_prepend_values(void)
 {
-    char* a[] = {"1", "2", "3"};
-    char* a1[] = {"11", "12", "13"};
-    char* a2[] = {"21", "22", "23"};
-    char* a3[] = {"31", "32", "33"};
+    char* s[] =  { "1",  "2",  "3"};
+    char* s1[] = {"11", "12", "13"};
+    char* s2[] = {"21", "22", "23"};
+    char* s3[] = {"31", "32", "33"};
+
+    char* t[] =  { "3",  "2",  "1"};
+    char* t1[] = {"13", "12", "11"};
+    char* t2[] = {"23", "22", "21"};
+    char* t3[] = {"33", "32", "31"};
 
     NOIA_MAKE_BRANCHES;
 
@@ -94,10 +113,10 @@ NoiaTestResult should_prepend_values(void)
     noia_branch_prepend(b2, b21);
     noia_branch_prepend(b3, b31);
 
-    NOIA_ASSERT_BRANCH(b,  NULL, a);
-    NOIA_ASSERT_BRANCH(b1, b,    a1);
-    NOIA_ASSERT_BRANCH(b2, b,    a2);
-    NOIA_ASSERT_BRANCH(b3, b,    a3);
+    NOIA_ASSERT_BRANCH(b,  NULL, s,  t);
+    NOIA_ASSERT_BRANCH(b1, b,    s1, t1);
+    NOIA_ASSERT_BRANCH(b2, b,    s2, t2);
+    NOIA_ASSERT_BRANCH(b3, b,    s3, t3);
 
     noia_branch_free(b, free);
     return NOIA_TEST_SUCCESS;
@@ -105,9 +124,44 @@ NoiaTestResult should_prepend_values(void)
 
 //------------------------------------------------------------------------------
 
+/// Check if branch is popped correctly.
+/// Popped branch should become first in temporal order and operation should not
+/// change spatial order.
+/// @see noia_branch_pop
+NoiaTestResult should_pop(void)
+{
+    char* s[] =  { "1",  "2",  "3"};
+    char* s1[] = {"11", "12", "13"};
+    char* s2[] = {"21", "22", "23"};
+    char* s3[] = {"31", "32", "33"};
+
+    char* t[] =  { "2",  "1",  "3"};
+    char* t1[] = {"11", "12", "13"};
+    char* t2[] = {"21", "22", "23"};
+    char* t3[] = {"31", "32", "33"};
+
+    NOIA_MAKE_BRANCHES;
+    NOIA_GLUE_BRANCHES;
+
+    noia_branch_pop(b2);
+
+    NOIA_ASSERT_BRANCH(b,  NULL, s,  t);
+    NOIA_ASSERT_BRANCH(b1, b,    s1, t1);
+    NOIA_ASSERT_BRANCH(b2, b,    s2, t2);
+    NOIA_ASSERT_BRANCH(b3, b,    s3, t3);
+
+    noia_branch_free(b, free);
+    return NOIA_TEST_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+/// Check if new branches are inserted correctly.
+/// @see noia_branch_insert_after noia_branch_insert_before
 NoiaTestResult should_insert_values(void)
 {
-    char* a[] = {"1", "2", "3", "4", "5"};
+    char* s[] = {"1", "2", "3", "4", "5"};
+    char* t[] = {"2", "4", "3", "5", "1"};
 
     NoiaBranch* b  = noia_branch_new();
     NoiaBranch* b1 = noia_branch_new();
@@ -128,7 +182,7 @@ NoiaTestResult should_insert_values(void)
     noia_branch_insert_after(b4, b5);
     noia_branch_insert_before(b2, b1);
 
-    NOIA_ASSERT_BRANCH(b, NULL, a);
+    NOIA_ASSERT_BRANCH(b, NULL, s, t);
 
     noia_branch_free(b, free);
     return NOIA_TEST_SUCCESS;
@@ -136,23 +190,25 @@ NoiaTestResult should_insert_values(void)
 
 //------------------------------------------------------------------------------
 
+/// Check if new branches are removed correctly.
+/// @see noia_branch_remove
 NoiaTestResult should_remove_branch(void)
 {
-    char* a[] = {"1", "3"};
-    char* a1[] = {"11", "12", "13"};
-    char* a2[] = {"21", "22", "23"};
-    char* a3[] = {"31", "32", "33"};
+    char* s[] =  { "1",  "3"};
+    char* s1[] = {"11", "12", "13"};
+    char* s2[] = {"21", "22", "23"};
+    char* s3[] = {"31", "32", "33"};
 
     NOIA_MAKE_BRANCHES;
     NOIA_GLUE_BRANCHES;
 
-    noia_branch_remove(b, b2);
+    noia_branch_remove(b2);
 
-    NOIA_ASSERT_BRANCH(b2, NULL, a2);
+    NOIA_ASSERT_BRANCH(b2, NULL, s2, s2);
 
-    NOIA_ASSERT_BRANCH(b,  NULL, a);
-    NOIA_ASSERT_BRANCH(b1, b,    a1);
-    NOIA_ASSERT_BRANCH(b3, b,    a3);
+    NOIA_ASSERT_BRANCH(b,  NULL, s,  s);
+    NOIA_ASSERT_BRANCH(b1, b,    s1, s1);
+    NOIA_ASSERT_BRANCH(b3, b,    s3, s3);
 
     noia_branch_free(b2, free);
     noia_branch_free(b, free);
@@ -161,16 +217,18 @@ NoiaTestResult should_remove_branch(void)
 
 //------------------------------------------------------------------------------
 
+/// Check if finding branch basing on data works correctly.
+/// @see noia_branch_prepend
 NoiaTestResult should_find_branch(void)
 {
-    char* a2[] = {"21", "22", "23"};
+    char* s2[] = {"21", "22", "23"};
 
     NOIA_MAKE_BRANCHES;
     NOIA_GLUE_BRANCHES;
 
-    NoiaBranch* f = noia_branch_find(b, "2", (NoiaBranchCompare) strcmp);
+    NoiaBranch* f = noia_branch_find(b, "2", noia_test_compare_str_in_branch);
 
-    NOIA_ASSERT_BRANCH(f, b, a2);
+    NOIA_ASSERT_BRANCH(f, b, s2, s2);
 
     noia_branch_free(b, free);
     return NOIA_TEST_SUCCESS;
@@ -185,6 +243,7 @@ int main(int argc, char** argv)
     NoiaTest test[] = {
             NOIA_TEST(should_append_values),
             NOIA_TEST(should_prepend_values),
+            NOIA_TEST(should_pop),
             NOIA_TEST(should_insert_values),
             NOIA_TEST(should_remove_branch),
             NOIA_TEST(should_find_branch),

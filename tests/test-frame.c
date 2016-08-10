@@ -216,7 +216,7 @@ bool noia_test_streq(const char * s1, const char * s2)
 ///     │└─────────────────────┘│
 ///     └───────────────────────┘
 ///
-#define NOIA_MAKE_FRAMES_FOR_ITERATION \
+#define NOIA_MAKE_FRAMES_FOR_JUMPING \
     NoiaFrame* r     = noia_frame_new(); \
     NoiaFrame* a     = noia_frame_new(); \
     NoiaFrame* b     = noia_frame_new(); \
@@ -430,8 +430,8 @@ bool noia_test_streq(const char * s1, const char * s2)
                          NOIA_FRAME_TYPE_VERTICAL | NOIA_FRAME_TYPE_FLOATING, \
                          INV, (NoiaArea) {{  0,   0}, {120, 300}}, "");
 
-/// Frame set for testing relaxig.
-/// Ihah the same layout as frame set for testing resizing with horizontal
+/// Frame set for testing relaxing.
+/// The same layout as frame set for testing resizing with horizontal
 /// floating but with different frame sizes.
 #define NOIA_MAKE_FRAMES_FOR_RELAXING \
     NoiaFrame* r      = noia_frame_new(); \
@@ -541,22 +541,31 @@ bool noia_test_streq(const char * s1, const char * s2)
                 area.size.width, area.size.height, size.width, size.height); }
 
 #define NOIA_ASSERT_FRAME_PARAMETERS(FRAME, SID, TYPE, X, Y, W, H, TITLE) { \
-    NoiaFrameParams* params = noia_frame_get_params(FRAME); \
-    NOIA_ASSERT((params->sid              == SID) \
-            and (params->type             == TYPE) \
-            and (params->area.pos.x       == X) \
-            and (params->area.pos.y       == Y) \
-            and (params->area.size.width  == W) \
-            and (params->area.size.height == H) \
-            and (noia_test_streq(params->title, TITLE)), \
+    NOIA_ASSERT((FRAME->sid              == SID) \
+            and (FRAME->type             == TYPE) \
+            and (FRAME->area.pos.x       == X) \
+            and (FRAME->area.pos.y       == Y) \
+            and (FRAME->area.size.width  == W) \
+            and (FRAME->area.size.height == H) \
+            and (noia_test_streq(FRAME->title, TITLE)), \
                 "Frame should be {sid='%lu', type='0x%04x', x='%d', y='%d', " \
                 "width='%d', height='%d', title='%s'} (is {sid='%lu', " \
                 "type='0x%04x', x='%d', y='%d', width='%d', height='%d', " \
                 "title='%s'})", SID, TYPE, X, Y, W, H, TITLE, \
-                params->sid, params->type, \
-                params->area.pos.x, params->area.pos.y, \
-                params->area.size.width, params->area.size.height, \
-                params->title); }
+                FRAME->sid, FRAME->type, \
+                FRAME->area.pos.x, FRAME->area.pos.y, \
+                FRAME->area.size.width, FRAME->area.size.height, \
+                FRAME->title); }
+
+#define NOIA_ASSERT_FRAME_TRUNK(FRAME, TRUNK) { \
+    NoiaFrame* trunk = noia_frame_get_trunk(FRAME); \
+    NOIA_ASSERT(trunk == (TRUNK), \
+                "Trunk of %p should be '%p', (is '%p')", \
+                (void*) FRAME, (void*) TRUNK, (void*) trunk); }
+
+#define NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(FRAME, NUM) \
+    NOIA_ASSERT_CHAIN_LEN(((FRAME)->branch.spatial_twigs), NUM); \
+    NOIA_ASSERT_CHAIN_LEN(((FRAME)->branch.temporal_twigs), NUM);
 
 //------------------------------------------------------------------------------
 
@@ -567,30 +576,30 @@ NoiaTestResult should_append_and_prepend_values(void)
     NoiaCoordinator* co = noia_coordinator_mock_new();
     NOIA_MAKE_FRAMES_SIMPLE;
 
-    NOIA_ASSERT_TRUNK(r,  NULL);
-    NOIA_ASSERT_TRUNK(h,  r);
-    NOIA_ASSERT_TRUNK(v,  r);
-    NOIA_ASSERT_TRUNK(s,  r);
-    NOIA_ASSERT_TRUNK(v1, v);
-    NOIA_ASSERT_TRUNK(v2, v);
-    NOIA_ASSERT_TRUNK(v3, v);
-    NOIA_ASSERT_TRUNK(v4, v);
-    NOIA_ASSERT_TRUNK(v5, v);
-    NOIA_ASSERT_TRUNK(h1, h);
-    NOIA_ASSERT_TRUNK(h2, h);
-    NOIA_ASSERT_TRUNK(h3, h);
-    NOIA_ASSERT_TRUNK(h4, h);
-    NOIA_ASSERT_TRUNK(h5, h);
-    NOIA_ASSERT_TRUNK(s1, s);
-    NOIA_ASSERT_TRUNK(s2, s);
-    NOIA_ASSERT_TRUNK(s3, s);
-    NOIA_ASSERT_TRUNK(s4, s);
-    NOIA_ASSERT_TRUNK(s5, s);
+    NOIA_ASSERT_FRAME_TRUNK(r,  NULL);
+    NOIA_ASSERT_FRAME_TRUNK(h,  r);
+    NOIA_ASSERT_FRAME_TRUNK(v,  r);
+    NOIA_ASSERT_FRAME_TRUNK(s,  r);
+    NOIA_ASSERT_FRAME_TRUNK(v1, v);
+    NOIA_ASSERT_FRAME_TRUNK(v2, v);
+    NOIA_ASSERT_FRAME_TRUNK(v3, v);
+    NOIA_ASSERT_FRAME_TRUNK(v4, v);
+    NOIA_ASSERT_FRAME_TRUNK(v5, v);
+    NOIA_ASSERT_FRAME_TRUNK(h1, h);
+    NOIA_ASSERT_FRAME_TRUNK(h2, h);
+    NOIA_ASSERT_FRAME_TRUNK(h3, h);
+    NOIA_ASSERT_FRAME_TRUNK(h4, h);
+    NOIA_ASSERT_FRAME_TRUNK(h5, h);
+    NOIA_ASSERT_FRAME_TRUNK(s1, s);
+    NOIA_ASSERT_FRAME_TRUNK(s2, s);
+    NOIA_ASSERT_FRAME_TRUNK(s3, s);
+    NOIA_ASSERT_FRAME_TRUNK(s4, s);
+    NOIA_ASSERT_FRAME_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 3u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 5u);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -621,12 +630,12 @@ NoiaTestResult should_insert_values(void)
     noia_frame_insert_after(f4, f5);
     noia_frame_insert_before(f2, f1);
 
-    NOIA_ASSERT_TRUNK(f1, r);
-    NOIA_ASSERT_TRUNK(f2, r);
-    NOIA_ASSERT_TRUNK(f3, r);
-    NOIA_ASSERT_TRUNK(f4, r);
-    NOIA_ASSERT_TRUNK(f5, r);
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 5u);
+    NOIA_ASSERT_FRAME_TRUNK(f1, r);
+    NOIA_ASSERT_FRAME_TRUNK(f2, r);
+    NOIA_ASSERT_FRAME_TRUNK(f3, r);
+    NOIA_ASSERT_FRAME_TRUNK(f4, r);
+    NOIA_ASSERT_FRAME_TRUNK(f5, r);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 5u);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -636,6 +645,7 @@ NoiaTestResult should_insert_values(void)
 //------------------------------------------------------------------------------
 
 /// Check order and position when translating whole frame to array.
+/// Array is created in temporal order.
 NoiaTestResult should_translate_root_frame_to_array(void)
 {
     NoiaCoordinator* co = noia_coordinator_mock_new();
@@ -643,21 +653,21 @@ NoiaTestResult should_translate_root_frame_to_array(void)
     NOIA_MAKE_FRAMES_SIMPLE;
 
     NoiaSurfaceContext a[] = {
-            {11, {  0,  0}},
-            {12, {  0, 12}},
-            {13, {  0, 24}},
-            {14, {  0, 36}},
-            {15, {  0, 48}},
-            {21, { 60,  0}},
-            {22, { 72,  0}},
-            {23, { 84,  0}},
-            {24, { 96,  0}},
-            {25, {108,  0}},
+            {35, {120,  0}},
             {31, {120,  0}},
+            {34, {120,  0}},
             {32, {120,  0}},
             {33, {120,  0}},
-            {34, {120,  0}},
-            {35, {120,  0}},
+            {15, {  0, 48}},
+            {11, {  0,  0}},
+            {14, {  0, 36}},
+            {12, {  0, 12}},
+            {13, {  0, 24}},
+            {25, {108,  0}},
+            {21, { 60,  0}},
+            {24, { 96,  0}},
+            {22, { 72,  0}},
+            {23, { 84,  0}},
         };
 
     NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
@@ -683,25 +693,25 @@ NoiaTestResult should_translate_twig_frame_to_array(void)
     NOIA_MAKE_FRAMES_SIMPLE;
 
     NoiaSurfaceContext av[] = {
+            {15, {0, 48}},
             {11, {0,  0}},
+            {14, {0, 36}},
             {12, {0, 12}},
             {13, {0, 24}},
-            {14, {0, 36}},
-            {15, {0, 48}},
         };
     NoiaSurfaceContext ah[] = {
+            {25, {108, 0}},
             {21, { 60, 0}},
+            {24, { 96, 0}},
             {22, { 72, 0}},
             {23, { 84, 0}},
-            {24, { 96, 0}},
-            {25, {108, 0}},
         };
     NoiaSurfaceContext as[] = {
+            {35, {120, 0}},
             {31, {120, 0}},
+            {34, {120, 0}},
             {32, {120, 0}},
             {33, {120, 0}},
-            {34, {120, 0}},
-            {35, {120, 0}},
         };
 
     NoiaPool* pv = noia_pool_create(NOIA_SIZEOF_ARRAY(ah),
@@ -747,30 +757,30 @@ NoiaTestResult should_remove_some_leaf_frames(void)
     noia_frame_remove_self(s4, co);
     noia_frame_remove_self(s2, co);
 
-    NOIA_ASSERT_TRUNK(r,  NULL);
-    NOIA_ASSERT_TRUNK(h,  r);
-    NOIA_ASSERT_TRUNK(v,  r);
-    NOIA_ASSERT_TRUNK(s,  r);
-    NOIA_ASSERT_TRUNK(v1, NULL);
-    NOIA_ASSERT_TRUNK(v2, NULL);
-    NOIA_ASSERT_TRUNK(v3, NULL);
-    NOIA_ASSERT_TRUNK(v4, v);
-    NOIA_ASSERT_TRUNK(v5, v);
-    NOIA_ASSERT_TRUNK(h1, h);
-    NOIA_ASSERT_TRUNK(h2, h);
-    NOIA_ASSERT_TRUNK(h3, NULL);
-    NOIA_ASSERT_TRUNK(h4, NULL);
-    NOIA_ASSERT_TRUNK(h5, NULL);
-    NOIA_ASSERT_TRUNK(s1, s);
-    NOIA_ASSERT_TRUNK(s2, NULL);
-    NOIA_ASSERT_TRUNK(s3, NULL);
-    NOIA_ASSERT_TRUNK(s4, NULL);
-    NOIA_ASSERT_TRUNK(s5, s);
+    NOIA_ASSERT_FRAME_TRUNK(r,  NULL);
+    NOIA_ASSERT_FRAME_TRUNK(h,  r);
+    NOIA_ASSERT_FRAME_TRUNK(v,  r);
+    NOIA_ASSERT_FRAME_TRUNK(s,  r);
+    NOIA_ASSERT_FRAME_TRUNK(v1, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(v2, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(v3, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(v4, v);
+    NOIA_ASSERT_FRAME_TRUNK(v5, v);
+    NOIA_ASSERT_FRAME_TRUNK(h1, h);
+    NOIA_ASSERT_FRAME_TRUNK(h2, h);
+    NOIA_ASSERT_FRAME_TRUNK(h3, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(h4, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(h5, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(s1, s);
+    NOIA_ASSERT_FRAME_TRUNK(s2, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(s3, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(s4, NULL);
+    NOIA_ASSERT_FRAME_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 2u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 2u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 2u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 3u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 2u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 2u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 2u);
 
     noia_frame_free(v1);
     noia_frame_free(v2);
@@ -798,30 +808,30 @@ NoiaTestResult should_remove_frame_with_subframes(void)
 
     noia_frame_remove_self(h, co);
 
-    NOIA_ASSERT_TRUNK(r,  NULL);
-    NOIA_ASSERT_TRUNK(h,  NULL);
-    NOIA_ASSERT_TRUNK(v,  r);
-    NOIA_ASSERT_TRUNK(s,  r);
-    NOIA_ASSERT_TRUNK(v1, v);
-    NOIA_ASSERT_TRUNK(v2, v);
-    NOIA_ASSERT_TRUNK(v3, v);
-    NOIA_ASSERT_TRUNK(v4, v);
-    NOIA_ASSERT_TRUNK(v5, v);
-    NOIA_ASSERT_TRUNK(h1, h);
-    NOIA_ASSERT_TRUNK(h2, h);
-    NOIA_ASSERT_TRUNK(h3, h);
-    NOIA_ASSERT_TRUNK(h4, h);
-    NOIA_ASSERT_TRUNK(h5, h);
-    NOIA_ASSERT_TRUNK(s1, s);
-    NOIA_ASSERT_TRUNK(s2, s);
-    NOIA_ASSERT_TRUNK(s3, s);
-    NOIA_ASSERT_TRUNK(s4, s);
-    NOIA_ASSERT_TRUNK(s5, s);
+    NOIA_ASSERT_FRAME_TRUNK(r,  NULL);
+    NOIA_ASSERT_FRAME_TRUNK(h,  NULL);
+    NOIA_ASSERT_FRAME_TRUNK(v,  r);
+    NOIA_ASSERT_FRAME_TRUNK(s,  r);
+    NOIA_ASSERT_FRAME_TRUNK(v1, v);
+    NOIA_ASSERT_FRAME_TRUNK(v2, v);
+    NOIA_ASSERT_FRAME_TRUNK(v3, v);
+    NOIA_ASSERT_FRAME_TRUNK(v4, v);
+    NOIA_ASSERT_FRAME_TRUNK(v5, v);
+    NOIA_ASSERT_FRAME_TRUNK(h1, h);
+    NOIA_ASSERT_FRAME_TRUNK(h2, h);
+    NOIA_ASSERT_FRAME_TRUNK(h3, h);
+    NOIA_ASSERT_FRAME_TRUNK(h4, h);
+    NOIA_ASSERT_FRAME_TRUNK(h5, h);
+    NOIA_ASSERT_FRAME_TRUNK(s1, s);
+    NOIA_ASSERT_FRAME_TRUNK(s2, s);
+    NOIA_ASSERT_FRAME_TRUNK(s3, s);
+    NOIA_ASSERT_FRAME_TRUNK(s4, s);
+    NOIA_ASSERT_FRAME_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 2u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 2u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 5u);
 
     noia_frame_free(h);
     noia_frame_free(r);
@@ -841,30 +851,30 @@ NoiaTestResult should_resettle_one_frame(void)
 
     noia_frame_resettle(h3, s, co);
 
-    NOIA_ASSERT_TRUNK(r,  NULL);
-    NOIA_ASSERT_TRUNK(h,  r);
-    NOIA_ASSERT_TRUNK(v,  r);
-    NOIA_ASSERT_TRUNK(s,  r);
-    NOIA_ASSERT_TRUNK(v1, v);
-    NOIA_ASSERT_TRUNK(v2, v);
-    NOIA_ASSERT_TRUNK(v3, v);
-    NOIA_ASSERT_TRUNK(v4, v);
-    NOIA_ASSERT_TRUNK(v5, v);
-    NOIA_ASSERT_TRUNK(h1, h);
-    NOIA_ASSERT_TRUNK(h2, h);
-    NOIA_ASSERT_TRUNK(h3, s);
-    NOIA_ASSERT_TRUNK(h4, h);
-    NOIA_ASSERT_TRUNK(h5, h);
-    NOIA_ASSERT_TRUNK(s1, s);
-    NOIA_ASSERT_TRUNK(s2, s);
-    NOIA_ASSERT_TRUNK(s3, s);
-    NOIA_ASSERT_TRUNK(s4, s);
-    NOIA_ASSERT_TRUNK(s5, s);
+    NOIA_ASSERT_FRAME_TRUNK(r,  NULL);
+    NOIA_ASSERT_FRAME_TRUNK(h,  r);
+    NOIA_ASSERT_FRAME_TRUNK(v,  r);
+    NOIA_ASSERT_FRAME_TRUNK(s,  r);
+    NOIA_ASSERT_FRAME_TRUNK(v1, v);
+    NOIA_ASSERT_FRAME_TRUNK(v2, v);
+    NOIA_ASSERT_FRAME_TRUNK(v3, v);
+    NOIA_ASSERT_FRAME_TRUNK(v4, v);
+    NOIA_ASSERT_FRAME_TRUNK(v5, v);
+    NOIA_ASSERT_FRAME_TRUNK(h1, h);
+    NOIA_ASSERT_FRAME_TRUNK(h2, h);
+    NOIA_ASSERT_FRAME_TRUNK(h3, s);
+    NOIA_ASSERT_FRAME_TRUNK(h4, h);
+    NOIA_ASSERT_FRAME_TRUNK(h5, h);
+    NOIA_ASSERT_FRAME_TRUNK(s1, s);
+    NOIA_ASSERT_FRAME_TRUNK(s2, s);
+    NOIA_ASSERT_FRAME_TRUNK(s3, s);
+    NOIA_ASSERT_FRAME_TRUNK(s4, s);
+    NOIA_ASSERT_FRAME_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 4u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 6u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 3u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 4u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 6u);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -882,30 +892,30 @@ NoiaTestResult should_resettle_frame_with_subframes(void)
 
     noia_frame_resettle(h, s, co);
 
-    NOIA_ASSERT_TRUNK(r,  NULL);
-    NOIA_ASSERT_TRUNK(h,  s);
-    NOIA_ASSERT_TRUNK(v,  r);
-    NOIA_ASSERT_TRUNK(s,  r);
-    NOIA_ASSERT_TRUNK(v1, v);
-    NOIA_ASSERT_TRUNK(v2, v);
-    NOIA_ASSERT_TRUNK(v3, v);
-    NOIA_ASSERT_TRUNK(v4, v);
-    NOIA_ASSERT_TRUNK(v5, v);
-    NOIA_ASSERT_TRUNK(h1, h);
-    NOIA_ASSERT_TRUNK(h2, h);
-    NOIA_ASSERT_TRUNK(h3, h);
-    NOIA_ASSERT_TRUNK(h4, h);
-    NOIA_ASSERT_TRUNK(h5, h);
-    NOIA_ASSERT_TRUNK(s1, s);
-    NOIA_ASSERT_TRUNK(s2, s);
-    NOIA_ASSERT_TRUNK(s3, s);
-    NOIA_ASSERT_TRUNK(s4, s);
-    NOIA_ASSERT_TRUNK(s5, s);
+    NOIA_ASSERT_FRAME_TRUNK(r,  NULL);
+    NOIA_ASSERT_FRAME_TRUNK(h,  s);
+    NOIA_ASSERT_FRAME_TRUNK(v,  r);
+    NOIA_ASSERT_FRAME_TRUNK(s,  r);
+    NOIA_ASSERT_FRAME_TRUNK(v1, v);
+    NOIA_ASSERT_FRAME_TRUNK(v2, v);
+    NOIA_ASSERT_FRAME_TRUNK(v3, v);
+    NOIA_ASSERT_FRAME_TRUNK(v4, v);
+    NOIA_ASSERT_FRAME_TRUNK(v5, v);
+    NOIA_ASSERT_FRAME_TRUNK(h1, h);
+    NOIA_ASSERT_FRAME_TRUNK(h2, h);
+    NOIA_ASSERT_FRAME_TRUNK(h3, h);
+    NOIA_ASSERT_FRAME_TRUNK(h4, h);
+    NOIA_ASSERT_FRAME_TRUNK(h5, h);
+    NOIA_ASSERT_FRAME_TRUNK(s1, s);
+    NOIA_ASSERT_FRAME_TRUNK(s2, s);
+    NOIA_ASSERT_FRAME_TRUNK(s3, s);
+    NOIA_ASSERT_FRAME_TRUNK(s4, s);
+    NOIA_ASSERT_FRAME_TRUNK(s5, s);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 2u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 6u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 2u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 6u);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -939,8 +949,8 @@ NoiaTestResult should_swap_frames(void)
 
     noia_frame_swap(b, f, co);
 
-    NOIA_ASSERT_TRUNK(b, abc);
-    NOIA_ASSERT_TRUNK(f, r);
+    NOIA_ASSERT_FRAME_TRUNK(b, abc);
+    NOIA_ASSERT_FRAME_TRUNK(f, r);
 
     NOIA_ASSERT(noia_frame_get_sid(b) == 6,
                 "SID of frame B should be 6 (is '%lu')",
@@ -1009,27 +1019,45 @@ NoiaTestResult should_pop_frame_recursively(void)
     noia_frame_prepend(z, z2);
     noia_frame_prepend(z, z3);
 
-    NoiaSurfaceContext a[] = {
+    NoiaSurfaceContext a1[] = {
+            {23, {0, 0}},
+            {33, {0, 0}},
+            {32, {0, 0}},
+            {31, {0, 0}},
+            {21, {0, 0}},
+            {13, {0, 0}},
+            {12, {0, 0}},
+            {11, {0, 0}},
+        };
+
+    NoiaSurfaceContext a2[] = {
             {13, {0, 0}},
             {12, {0, 0}},
             {11, {0, 0}},
             {23, {0, 0}},
+            {21, {0, 0}},
             {33, {0, 0}},
             {31, {0, 0}},
             {32, {0, 0}},
-            {21, {0, 0}},
         };
 
-    NoiaPool* pool = noia_pool_create(NOIA_SIZEOF_ARRAY(a),
+    NoiaPool* pool1 = noia_pool_create(NOIA_SIZEOF_ARRAY(a1),
                                       sizeof(NoiaSurfaceContext));
 
+    NoiaPool* pool2 = noia_pool_create(NOIA_SIZEOF_ARRAY(a2),
+                                      sizeof(NoiaSurfaceContext));
+
+
+    noia_frame_to_array(r, pool1, co);
     noia_frame_pop_recursively(r, z2);
-    noia_frame_to_array(r, pool, co);
+    noia_frame_to_array(r, pool2, co);
     noia_frame_free(r);
 
-    NOIA_ASSERT_FRAME_ARRAY(a, pool);
+    NOIA_ASSERT_FRAME_ARRAY(a1, pool1);
+    NOIA_ASSERT_FRAME_ARRAY(a2, pool2);
 
-    noia_pool_destroy(pool);
+    noia_pool_destroy(pool1);
+    noia_pool_destroy(pool2);
     noia_coordinator_mock_free(co);
     return NOIA_TEST_SUCCESS;
 }
@@ -1045,15 +1073,15 @@ NoiaTestResult should_ramify_leaf(void)
     NoiaFrameType type = NOIA_FRAME_TYPE_HORIZONTAL;
     NoiaFrame* d = noia_frame_ramify(v3, type, co);
 
-    NOIA_ASSERT_FRAME_POINTER(v3->trunk, d);
-    NOIA_ASSERT_FRAME_POINTER(d->trunk, v);
-    NOIA_ASSERT_FRAME_POINTER(v->trunk, r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_get_trunk(v3), d);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_get_trunk(d), v);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_get_trunk(v), r);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(d->twigs, 1u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 3u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(d, 1u);
 
     NOIA_ASSERT_FRAME_PARAMETERS(d, scInvalidSurfaceId, type,
                                  0, 24, 60, 12, NULL);
@@ -1076,14 +1104,14 @@ NoiaTestResult should_ramify_nonleaf(void)
     NoiaFrameType type = NOIA_FRAME_TYPE_HORIZONTAL;
     NoiaFrame* d = noia_frame_ramify(v, type, co);
 
-    NOIA_ASSERT_FRAME_POINTER(v->trunk, d);
-    NOIA_ASSERT_FRAME_POINTER(d->trunk, r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_get_trunk(v), d);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_get_trunk(d), r);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(d->twigs, 1u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 3u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(d, 1u);
 
     NOIA_ASSERT_FRAME_PARAMETERS(d, scInvalidSurfaceId, type,
                                  0, 0, 60, 60, NULL);
@@ -1106,12 +1134,12 @@ NoiaTestResult should_deramify(void)
 
     noia_frame_deramify(a2);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs,  3u)
-    NOIA_ASSERT_CHAIN_LEN(a1->twigs, 1u)
-    NOIA_ASSERT_CHAIN_LEN(a2->twigs, 1u)
-    NOIA_ASSERT_TRUNK(a2, r);
-    //NOIA_ASSERT_TRUNK(b,  NULL); <- invalid read
-    NOIA_ASSERT_TRUNK(c,  a2);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r,  3u)
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(a1, 1u)
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(a2, 1u)
+    NOIA_ASSERT_FRAME_TRUNK(a2, r);
+    //NOIA_ASSERT_FRAME_TRUNK(b,  NULL); <- invalid read
+    NOIA_ASSERT_FRAME_TRUNK(c,  a2);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -1128,17 +1156,17 @@ NoiaTestResult should_deramify_with_one_leaf(void)
 
     noia_frame_deramify(a1);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs,  3u)
-    NOIA_ASSERT_CHAIN_LEN(a1->twigs, 0u)
-    NOIA_ASSERT_CHAIN_LEN(a2->twigs, 1u)
-    NOIA_ASSERT_TRUNK(a2, r);
-    NOIA_ASSERT_TRUNK(a1, r);
-    //NOIA_ASSERT_TRUNK(f,  a1); <- invalid read
-    NOIA_ASSERT_TRUNK(b,  a2);
-    NOIA_ASSERT_TRUNK(c,  b);
-    NOIA_ASSERT_TRUNK(d1, c);
-    NOIA_ASSERT_TRUNK(d2, c);
-    NOIA_ASSERT_TRUNK(d3, c);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r,  3u)
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(a1, 0u)
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(a2, 1u)
+    NOIA_ASSERT_FRAME_TRUNK(a2, r);
+    NOIA_ASSERT_FRAME_TRUNK(a1, r);
+    //NOIA_ASSERT_FRAME_TRUNK(f,  a1); <- invalid read
+    NOIA_ASSERT_FRAME_TRUNK(b,  a2);
+    NOIA_ASSERT_FRAME_TRUNK(c,  b);
+    NOIA_ASSERT_FRAME_TRUNK(d1, c);
+    NOIA_ASSERT_FRAME_TRUNK(d2, c);
+    NOIA_ASSERT_FRAME_TRUNK(d3, c);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -1155,17 +1183,17 @@ NoiaTestResult should_not_deramify_not_single(void)
 
     noia_frame_deramify(r);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs,  3u)
-    NOIA_ASSERT_CHAIN_LEN(a1->twigs, 1u)
-    NOIA_ASSERT_CHAIN_LEN(a2->twigs, 1u)
-    NOIA_ASSERT_TRUNK(a2, r);
-    NOIA_ASSERT_TRUNK(b,  a2);
-    NOIA_ASSERT_TRUNK(f,  a1);
-    NOIA_ASSERT_TRUNK(b,  a2);
-    NOIA_ASSERT_TRUNK(c,  b);
-    NOIA_ASSERT_TRUNK(d1, c);
-    NOIA_ASSERT_TRUNK(d2, c);
-    NOIA_ASSERT_TRUNK(d3, c);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r,  3u)
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(a1, 1u)
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(a2, 1u)
+    NOIA_ASSERT_FRAME_TRUNK(a2, r);
+    NOIA_ASSERT_FRAME_TRUNK(b,  a2);
+    NOIA_ASSERT_FRAME_TRUNK(f,  a1);
+    NOIA_ASSERT_FRAME_TRUNK(b,  a2);
+    NOIA_ASSERT_FRAME_TRUNK(c,  b);
+    NOIA_ASSERT_FRAME_TRUNK(d1, c);
+    NOIA_ASSERT_FRAME_TRUNK(d2, c);
+    NOIA_ASSERT_FRAME_TRUNK(d3, c);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -1182,17 +1210,17 @@ NoiaTestResult should_not_deramify_single_with_many_leafs(void)
 
     noia_frame_deramify(b);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs,  3u)
-    NOIA_ASSERT_CHAIN_LEN(a1->twigs, 1u)
-    NOIA_ASSERT_CHAIN_LEN(a2->twigs, 1u)
-    NOIA_ASSERT_TRUNK(a2, r);
-    NOIA_ASSERT_TRUNK(a1, r);
-    NOIA_ASSERT_TRUNK(f,  a1);
-    NOIA_ASSERT_TRUNK(b,  a2);
-    NOIA_ASSERT_TRUNK(c,  b);
-    NOIA_ASSERT_TRUNK(d1, c);
-    NOIA_ASSERT_TRUNK(d2, c);
-    NOIA_ASSERT_TRUNK(d3, c);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r,  3u)
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(a1, 1u)
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(a2, 1u)
+    NOIA_ASSERT_FRAME_TRUNK(a2, r);
+    NOIA_ASSERT_FRAME_TRUNK(a1, r);
+    NOIA_ASSERT_FRAME_TRUNK(f,  a1);
+    NOIA_ASSERT_FRAME_TRUNK(b,  a2);
+    NOIA_ASSERT_FRAME_TRUNK(c,  b);
+    NOIA_ASSERT_FRAME_TRUNK(d1, c);
+    NOIA_ASSERT_FRAME_TRUNK(d2, c);
+    NOIA_ASSERT_FRAME_TRUNK(d3, c);
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -1273,27 +1301,31 @@ NoiaTestResult should_find_top(void)
 ///
 NoiaTestResult should_find_contiguous_on_the_same_level_one_further(void)
 {
+    NoiaArea area = {{0,0},{0,0}};
     NoiaCoordinator* co = noia_coordinator_mock_new();
     NoiaFrame* p = NULL;
     NoiaFrame* r = noia_frame_new();
     NoiaFrame* a = noia_frame_new();
     NoiaFrame* b = noia_frame_new();
-    noia_test_frame_config(r, co,
-                           NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_VERTICAL,
-                           scInvalidSurfaceId);
-    noia_test_frame_config(a, co, NOIA_FRAME_TYPE_LEAF, 1);
-    noia_test_frame_config(b, co, NOIA_FRAME_TYPE_LEAF, 2);
+    noia_frame_configure(r, co,
+                         NOIA_FRAME_TYPE_SPECIAL | NOIA_FRAME_TYPE_VERTICAL,
+                         scInvalidSurfaceId, area, "R");
+    noia_frame_configure(a, co, NOIA_FRAME_TYPE_LEAF, 1, area, "A");
+    noia_frame_configure(b, co, NOIA_FRAME_TYPE_LEAF, 2, area, "B");
     noia_frame_append(r, a);
     noia_frame_append(r, b);
 
     p = noia_frame_find_contiguous(a, NOIA_DIRECTION_S, 0);
-    NOIA_ASSERT(p == a, "0*South from A should be A");
+    NOIA_ASSERT(p == a, "0*South from A should be A (is '%s')",
+                noia_frame_get_title(p));
 
     p = noia_frame_find_contiguous(a, NOIA_DIRECTION_S, 1);
-    NOIA_ASSERT(p == b, "1*South from A should be B");
+    NOIA_ASSERT(p == b, "1*South from A should be B (is '%s')",
+                noia_frame_get_title(p));
 
     p = noia_frame_find_contiguous(b, NOIA_DIRECTION_N, 1);
-    NOIA_ASSERT(p == a, "1*North from B should be A");
+    NOIA_ASSERT(p == a, "1*North from B should be A (is '%s')",
+                noia_frame_get_title(p));
 
     p = noia_frame_find_contiguous(b, NOIA_DIRECTION_S, 1);
     NOIA_ASSERT(p == NULL, "1*South from B should be NULL");
@@ -1410,7 +1442,7 @@ NoiaTestResult should_find_contiguous_on_the_second_level(void)
     NOIA_ASSERT(p == d, "2*West from A should be D");
 
     p = noia_frame_find_contiguous(c, NOIA_DIRECTION_TRUNK, 1);
-    NOIA_ASSERT(p == c->trunk, "1*Trunk from C should be BC");
+    NOIA_ASSERT(p == noia_frame_get_trunk(c), "1*Trunk from C should be BC");
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -1751,199 +1783,6 @@ NoiaTestResult should_find_adjacent_frames(void)
 
     p = noia_frame_find_adjacent(ab, NOIA_DIRECTION_N, 1);
     NOIA_ASSERT(p == NULL, "1*North from AB should be NULL");
-
-    noia_frame_free(r);
-    noia_coordinator_mock_free(co);
-    return NOIA_TEST_SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
-/// Iterate through frames east.
-///
-///
-///     ┌───────────────────────┐
-///     │┌───────┬─────────────┐│
-///     ││       │┌─────┬─────┐││
-///     ││   A   ││ BCD │  E  │││
-///     ││       │└─────┴─────┘││
-///     │└───────┴─────────────┘│
-///     ├───────────────────────┤
-///     │┌─────────────────────┐│
-///     ││          F          ││
-///     │├─────────────────────┤│
-///     ││         GHI         ││
-///     │└─────────────────────┘│
-///     └───────────────────────┘
-///
-NoiaTestResult should_correctly_iterate_east(void)
-{
-    NoiaCoordinator* co = noia_coordinator_mock_new();
-    NOIA_MAKE_FRAMES_FOR_ITERATION;
-
-    NoiaFrameIterator iter;
-
-    noia_frame_start_iteration(&iter, a, NOIA_DIRECTION_E);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_AFTER);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_BEFORE);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_AFTER);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_AFTER);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
-
-    noia_frame_free(r);
-    noia_coordinator_mock_free(co);
-    return NOIA_TEST_SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
-/// Iterate through frames west.
-///
-///
-///     ┌───────────────────────┐
-///     │┌───────┬─────────────┐│
-///     ││       │┌─────┬─────┐││
-///     ││   A   ││ BCD │  E  │││
-///     ││       │└─────┴─────┘││
-///     │└───────┴─────────────┘│
-///     ├───────────────────────┤
-///     │┌─────────────────────┐│
-///     ││          F          ││
-///     │├─────────────────────┤│
-///     ││         GHI         ││
-///     │└─────────────────────┘│
-///     └───────────────────────┘
-///
-NoiaTestResult should_correctly_iterate_west(void)
-{
-    NoiaCoordinator* co = noia_coordinator_mock_new();
-    NOIA_MAKE_FRAMES_FOR_ITERATION;
-
-    NoiaFrameIterator iter;
-
-    noia_frame_start_iteration(&iter, e, NOIA_DIRECTION_W);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_BEFORE);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, bcd, NOIA_FRAME_POSITION_BEFORE);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_AFTER);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, a, NOIA_FRAME_POSITION_BEFORE);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
-
-    noia_frame_free(r);
-    noia_coordinator_mock_free(co);
-    return NOIA_TEST_SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
-/// Iterate through frames south.
-///
-///
-///     ┌───────────────────────┐
-///     │┌───────┬─────────────┐│
-///     ││       │┌─────┬─────┐││
-///     ││   A   ││ BCD │  E  │││
-///     ││       │└─────┴─────┘││
-///     │└───────┴─────────────┘│
-///     ├───────────────────────┤
-///     │┌─────────────────────┐│
-///     ││          F          ││
-///     │├─────────────────────┤│
-///     ││         GHI         ││
-///     │└─────────────────────┘│
-///     └───────────────────────┘
-///
-NoiaTestResult should_correctly_iterate_south(void)
-{
-    NoiaCoordinator* co = noia_coordinator_mock_new();
-    NOIA_MAKE_FRAMES_FOR_ITERATION;
-
-    NoiaFrameIterator iter;
-
-    noia_frame_start_iteration(&iter, e, NOIA_DIRECTION_S);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, e, NOIA_FRAME_POSITION_AFTER);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_BEFORE);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_AFTER);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, ghi, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, ghi, NOIA_FRAME_POSITION_AFTER);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);
-
-    noia_frame_free(r);
-    noia_coordinator_mock_free(co);
-    return NOIA_TEST_SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
-/// Iterate through frames north.
-///
-///
-///     ┌───────────────────────┐
-///     │┌───────┬─────────────┐│
-///     ││       │┌─────┬─────┐││
-///     ││   A   ││ BCD │  E  │││
-///     ││       │└─────┴─────┘││
-///     │└───────┴─────────────┘│
-///     ├───────────────────────┤
-///     │┌─────────────────────┐│
-///     ││          F          ││
-///     │├─────────────────────┤│
-///     ││         GHI         ││
-///     │└─────────────────────┘│
-///     └───────────────────────┘
-///
-NoiaTestResult should_correctly_iterate_north(void)
-{
-    NoiaCoordinator* co = noia_coordinator_mock_new();
-    NOIA_MAKE_FRAMES_FOR_ITERATION;
-
-    NoiaFrameIterator iter;
-
-    noia_frame_start_iteration(&iter, h, NOIA_DIRECTION_N);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, ghi, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, ghi, NOIA_FRAME_POSITION_BEFORE);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, f, NOIA_FRAME_POSITION_BEFORE);
-    noia_frame_iterate(&iter);
-
-    /*NOIA_ASSERT_FRAME_ITERATOR(iter, abcde, NOIA_FRAME_POSITION_AFTER);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, abcde, NOIA_FRAME_POSITION_ON);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_ITERATOR(iter, abcde, NOIA_FRAME_POSITION_BEFORE);
-    noia_frame_iterate(&iter);
-    NOIA_ASSERT_FRAME_POINTER(iter.frame, NULL);*/
 
     noia_frame_free(r);
     noia_coordinator_mock_free(co);
@@ -2612,15 +2451,15 @@ NoiaTestResult should_jumpin_before(void)
     noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 66, area, "test");
     noia_frame_jumpin(f, NOIA_FRAME_POSITION_BEFORE, v3, co);
 
-    NOIA_ASSERT_TRUNK(f,  v);
-    NOIA_ASSERT_TRUNK(v3, v);
-    NOIA_ASSERT_TRUNK(v2, v);
-    NOIA_ASSERT_TRUNK(v,  r);
+    NOIA_ASSERT_FRAME_TRUNK(f,  v);
+    NOIA_ASSERT_FRAME_TRUNK(v3, v);
+    NOIA_ASSERT_FRAME_TRUNK(v2, v);
+    NOIA_ASSERT_FRAME_TRUNK(v,  r);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 6u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 3u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 6u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 5u);
 
     NoiaFrame* twig = noia_frame_get_first(v);
     NOIA_ASSERT_FRAME_POINTER(twig, v1);
@@ -2655,15 +2494,15 @@ NoiaTestResult should_jumpin_after(void)
     noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 66, area, "test");
     noia_frame_jumpin(f, NOIA_FRAME_POSITION_AFTER, v3, co);
 
-    NOIA_ASSERT_TRUNK(f,  v);
-    NOIA_ASSERT_TRUNK(v3, v);
-    NOIA_ASSERT_TRUNK(v4, v);
-    NOIA_ASSERT_TRUNK(v,  r);
+    NOIA_ASSERT_FRAME_TRUNK(f,  v);
+    NOIA_ASSERT_FRAME_TRUNK(v3, v);
+    NOIA_ASSERT_FRAME_TRUNK(v4, v);
+    NOIA_ASSERT_FRAME_TRUNK(v,  r);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 6u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 3u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 6u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 5u);
 
     NoiaFrame* twig = noia_frame_get_first(v);
     NOIA_ASSERT_FRAME_POINTER(twig, v1);
@@ -2699,20 +2538,20 @@ NoiaTestResult should_jumpin_on(void)
     noia_frame_configure(f, co, NOIA_FRAME_TYPE_LEAF, 66, area, "test");
     noia_frame_jumpin(f, NOIA_FRAME_POSITION_ON, v3, co);
 
-    NOIA_ASSERT_FRAME_POINTER(v3->trunk, f->trunk);
-    NOIA_ASSERT_TRUNK(v3->trunk, v);
-    NOIA_ASSERT_TRUNK(v, r);
+    NOIA_ASSERT_FRAME_POINTER(noia_frame_get_trunk(v3),noia_frame_get_trunk(f));
+    NOIA_ASSERT_FRAME_TRUNK(noia_frame_get_trunk(v3), v);
+    NOIA_ASSERT_FRAME_TRUNK(v, r);
 
-    NOIA_ASSERT_CHAIN_LEN(r->twigs, 3u);
-    NOIA_ASSERT_CHAIN_LEN(v->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(h->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(s->twigs, 5u);
-    NOIA_ASSERT_CHAIN_LEN(f->trunk->twigs, 2u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(r, 3u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(v, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(h, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(s, 5u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(noia_frame_get_trunk(f), 2u);
 
     NOIA_ASSERT_FRAME_PARAMETERS(v3, 13ul, NOIA_FRAME_TYPE_LEAF,
                                  0, 24, 60, 12, "v3");
 
-    NoiaFrame* twig = noia_frame_get_first(f->trunk);
+    NoiaFrame* twig = noia_frame_get_first(noia_frame_get_trunk(f));
     NOIA_ASSERT_FRAME_POINTER(twig, v3);
     twig = noia_frame_get_next(twig);
     NOIA_ASSERT_FRAME_POINTER(twig, f);
@@ -2724,7 +2563,7 @@ NoiaTestResult should_jumpin_on(void)
     twig = noia_frame_get_next(twig);
     NOIA_ASSERT_FRAME_POINTER(twig, v2);
     twig = noia_frame_get_next(twig);
-    NOIA_ASSERT_FRAME_POINTER(twig, f->trunk);
+    NOIA_ASSERT_FRAME_POINTER(twig, noia_frame_get_trunk(f));
     twig = noia_frame_get_next(twig);
     NOIA_ASSERT_FRAME_POINTER(twig, v4);
     twig = noia_frame_get_next(twig);
@@ -2739,14 +2578,15 @@ NoiaTestResult should_jumpin_on(void)
 
 //------------------------------------------------------------------------------
 
+/// Check if new frame if correctly inserted after given frame.
 NoiaTestResult should_jump_after_on_the_same_level(void)
 {
     NoiaCoordinator* co = noia_coordinator_mock_new();
-    NOIA_MAKE_FRAMES_FOR_ITERATION;
+    NOIA_MAKE_FRAMES_FOR_JUMPING;
 
     noia_frame_jump(f, NOIA_FRAME_POSITION_AFTER, ghi, co);
 
-    NOIA_ASSERT_CHAIN_LEN(fghi->twigs, 2u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(fghi, 2u);
     NoiaFrame* twig = noia_frame_get_first(fghi);
     NOIA_ASSERT_FRAME_POINTER(twig, ghi);
     twig = noia_frame_get_next(twig);
@@ -2761,14 +2601,15 @@ NoiaTestResult should_jump_after_on_the_same_level(void)
 
 //------------------------------------------------------------------------------
 
+/// Check if new frame if correctly inserted before given frame.
 NoiaTestResult should_jump_before_on_the_same_level(void)
 {
     NoiaCoordinator* co = noia_coordinator_mock_new();
-    NOIA_MAKE_FRAMES_FOR_ITERATION;
+    NOIA_MAKE_FRAMES_FOR_JUMPING;
 
     noia_frame_jump(fghi, NOIA_FRAME_POSITION_BEFORE, abcde, co);
 
-    NOIA_ASSERT_CHAIN_LEN(fghi->twigs, 2u);
+    NOIA_ASSERT_FRAME_NUMBER_OF_SUBFRAMES(fghi, 2u);
     NoiaFrame* twig = noia_frame_get_first(r);
     NOIA_ASSERT_FRAME_POINTER(twig, fghi);
     twig = noia_frame_get_next(twig);
@@ -2840,13 +2681,7 @@ int main(int argc, char** argv)
             NOIA_TEST(should_find_flat_pointed_outside),
             NOIA_TEST(should_find_frame_over_another),
             NOIA_TEST(should_find_frame_in_empty_space),
-
-            // iterating
             NOIA_TEST(should_find_adjacent_frames),
-            NOIA_TEST(should_correctly_iterate_east),
-            NOIA_TEST(should_correctly_iterate_west),
-            NOIA_TEST(should_correctly_iterate_south),
-            NOIA_TEST(should_correctly_iterate_north),
 
             // resizing
             NOIA_TEST(check_setup_for_resizing_with_horizontal_floating),

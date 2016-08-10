@@ -330,7 +330,7 @@ check_list.add([Tst(['test-list.c']),
                 target_utils_debug, target_utils_chain, target_utils_list])
 
 check_branch.add([Tst(['test-branch.c']),
-                  target_utils_chain, target_utils_branch])
+                  target_utils_debug, target_utils_chain, target_utils_branch])
 
 check_buffer.add([Tst(['test-buffer.c']), target_utils_buffer])
 

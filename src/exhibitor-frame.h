@@ -5,12 +5,11 @@
 #ifndef NOIA_EXHIBITOR_FRAME_H
 #define NOIA_EXHIBITOR_FRAME_H
 
-#include "utils-branch.h"
 #include "utils-pool.h"
 #include "surface-coordinator.h"
 
 /// Structure representing frame containing surfaces and other frames.
-typedef NoiaBranch NoiaFrame;
+typedef struct NoiaFrame NoiaFrame;
 
 /// Enum type defining relative position to a frame.
 typedef enum {
@@ -19,13 +18,19 @@ typedef enum {
     NOIA_FRAME_POSITION_AFTER,
 } NoiaFramePosition;
 
-/// `NoiaFrame` iterator.
-typedef struct {
-    unsigned num;
-    NoiaFrame* frame;
-    NoiaDirection direction;
-    NoiaFramePosition position;
-} NoiaFrameIterator;
+//------------------------------------------------------------------------------
+
+/// Iterate over all twigs of a branch in time order
+/// (from most recently used to most formerly used).
+#define NOIA_FOR_EACH_SUBFRAME(FRAME,SUBFRAME) \
+    for (NoiaFrame* SUBFRAME = noia_frame_get_recent(FRAME); \
+    SUBFRAME; SUBFRAME = noia_frame_get_later(SUBFRAME))
+
+/// Iterate over all twigs of a branch in reverse time order
+/// (from most formerly used to most recently used).
+#define NOIA_FOR_EACH_SUBFRAME_REVERSE(FRAME,SUBFRAME) \
+    for (NoiaFrame* SUBFRAME = noia_frame_get_former(FRAME); \
+    SUBFRAME; SUBFRAME = noia_frame_get_earlier(SUBFRAME))
 
 //------------------------------------------------------------------------------
 
@@ -111,8 +116,8 @@ NoiaFrame* noia_frame_ramify(NoiaFrame* self,
                              NoiaFrameType type,
                              NoiaCoordinator* coordinator);
 
-/// If `self` has one non-leaf twig, resetle twigs twigs to self and remove
-/// the twig.
+/// If `self` has one non-leaf twig, resetle twigs to self and remove the
+/// twig or if it has one empty twig, remove it.
 void noia_frame_deramify(NoiaFrame* self);
 
 /// Remove frame `self` from its current trunk and insert to frame `target`.
@@ -159,21 +164,33 @@ NoiaFrame* noia_frame_buildable(NoiaFrame* self);
 /// Return parent of the frame.
 NoiaFrame* noia_frame_get_trunk(NoiaFrame* self);
 
-/// Return first subframe.
+//------------------------------------------------------------------------------
+
+/// Get first child in spatial terms.
 NoiaFrame* noia_frame_get_first(NoiaFrame* self);
 
-/// Return last (most recently used) subframe.
+/// Get last child in spatial terms.
 NoiaFrame* noia_frame_get_last(NoiaFrame* self);
+
+/// Get first child in temporal terms (most recently used).
+NoiaFrame* noia_frame_get_recent(NoiaFrame* self);
+
+/// Get last child in temporal terms (most formerly used).
+NoiaFrame* noia_frame_get_former(NoiaFrame* self);
 
 //------------------------------------------------------------------------------
 
-/// Initialize iterator.
-void noia_frame_start_iteration(NoiaFrameIterator* iter,
-                                NoiaFrame* frame,
-                                NoiaDirection direction);
+/// Get next frame from twigs of `self`'s trunk.
+NoiaFrame* noia_frame_get_next(NoiaFrame* self);
 
-/// Iterate through Frames.
-void noia_frame_iterate(NoiaFrameIterator* iter);
+/// Get previous frame from twigs of `self`'s trunk.
+NoiaFrame* noia_frame_get_previous(NoiaFrame* self);
+
+/// Get later frame (next in terms in temporal order).
+NoiaFrame* noia_frame_get_later(NoiaFrame* self);
+
+/// Get earlier frame (previous in terms in temporal order).
+NoiaFrame* noia_frame_get_earlier(NoiaFrame* self);
 
 //------------------------------------------------------------------------------
 

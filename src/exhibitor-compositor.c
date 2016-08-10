@@ -37,7 +37,7 @@ void noia_compositor_set_selection(NoiaCompositor* self, NoiaFrame* frame)
     if (not frame) {
         if (self->selection
         and noia_frame_has_type(self->selection, NOIA_FRAME_TYPE_LEAF)) {
-            self->selection = self->selection->trunk;
+            self->selection = noia_frame_get_trunk(self->selection);
         }
     } else if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
         sid = noia_frame_get_sid(frame);
@@ -84,8 +84,8 @@ NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
                                           const char* title)
 {
     NoiaFrame* result = NULL;
-    FOR_EACH_TWIG(self->root, output_frame) {
-        FOR_EACH_TWIG(output_frame, workspace) {
+    NOIA_FOR_EACH_SUBFRAME (self->root, output_frame) {
+        NOIA_FOR_EACH_SUBFRAME (output_frame, workspace) {
             if (strcmp(title, noia_frame_get_title(workspace)) == 0) {
                 result = workspace;
                 break;
@@ -100,7 +100,7 @@ NoiaFrame* noia_compositor_find_workspace(NoiaCompositor* self,
 /// Search for existing workspace with given title.
 NoiaFrame* noia_compositor_find_current_workspace(NoiaCompositor* self)
 {
-    return noia_frame_find_top(self->selection)->trunk;
+    return noia_frame_get_trunk(noia_frame_find_top(self->selection));
 }
 
 //------------------------------------------------------------------------------
@@ -569,9 +569,10 @@ void noia_compositor_configure(NoiaCompositor* self,
                                NoiaFrame* frame,
                                NoiaDirection direction)
 {
+    NoiaFrame* trunk = noia_frame_get_trunk(frame);
     NOIA_ENSURE(self, return);
     NOIA_ENSURE(frame, return);
-    NOIA_ENSURE(frame->trunk, return);
+    NOIA_ENSURE(trunk, return);
 
     // Translate direction to frame type
     NoiaFrameType type = noia_direction_translate_to_frame_type(direction);
@@ -581,7 +582,7 @@ void noia_compositor_configure(NoiaCompositor* self,
     // Change frame type
     if (noia_frame_has_type(frame, NOIA_FRAME_TYPE_LEAF)) {
         /// @todo Create new frame at trunk and resettle selection.
-        noia_frame_change_type(frame->trunk, self->coordinator, type);
+        noia_frame_change_type(trunk, self->coordinator, type);
     } else {
         noia_frame_change_type(frame, self->coordinator, type);
     }

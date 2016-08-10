@@ -5,11 +5,15 @@
 #ifndef NOIA_EXHIBITOR_FRAME_INTERNAL_H
 #define NOIA_EXHIBITOR_FRAME_INTERNAL_H
 
+#include "utils-branch.h"
 #include "exhibitor-frame.h"
 #include "surface-coordinator.h"
 
 /// Parameters describing state of surface hold by frame.
-typedef struct {
+struct NoiaFrame {
+    /// Branch.
+    NoiaBranch branch;
+
     /// Type of the frame.
     NoiaFrameType type;
 
@@ -21,40 +25,35 @@ typedef struct {
 
     /// Title if frame; ID of workspace.
     char* title;
-} NoiaFrameParams;
+};
 
-/// Get the parameters - convenience function.
-static inline NoiaFrameParams* noia_frame_get_params(NoiaFrame* self)
-{
-    return self->base.data;
-}
+//------------------------------------------------------------------------------
 
-/// Parameters destructor.
-void noia_frame_params_free(NoiaFrameParams* params);
+/// Compare `sid` inside `frame` with given sid.
+int noia_frame_compare_sid(NoiaFrame* frame, NoiaSurfaceId sid);
 
-/// Compare frame parameters.
-/// @return True if parameters are equivalent, else false.
-bool noia_frame_parameters_are_equivalent(NoiaFrameParams* p1,
-                                          NoiaFrameParams* p2);
+//------------------------------------------------------------------------------
 
-/// Compare function - check if given params have give surface ID.
-int noia_frame_params_compare_sid(NoiaFrameParams* params, NoiaSurfaceId sid);
-
-/// Set surface ID.
+/// Set surface ID and inform surface if necessary.
 void noia_frame_set_surface(NoiaFrame* self,
                             NoiaCoordinator* coordinator,
                             NoiaSurfaceId sid);
 
-/// Set frame size.
+/// Set frame size and inform surface if necessary.
 void noia_frame_set_size(NoiaFrame* self,
                          NoiaCoordinator* coordinator,
                          NoiaSize size);
 
-/// Set frame position.
+/// Set frame position and inform surface if necessary.
 void noia_frame_set_position(NoiaFrame* self, NoiaPosition position);
 
-/// Get next frame.
-NoiaFrame* noia_frame_get_next(NoiaFrame* self);
+//------------------------------------------------------------------------------
+
+/// @see noia_frame_resize
+NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame,
+                                           NoiaFrameType type);
+
+//------------------------------------------------------------------------------
 
 /// Add child frame to ending.
 /// If `self` has twigs add `other` to them.
@@ -71,18 +70,16 @@ NoiaFrame* noia_frame_prepend(NoiaFrame* self, NoiaFrame* other);
 /// Insert `other` to twigs of `self`'s trunk just before `self`.
 static inline void noia_frame_insert_before(NoiaFrame* self, NoiaFrame* other)
 {
-    noia_branch_insert_before(self, other);
+    noia_branch_insert_before(&self->branch, &other->branch);
 }
 
 /// Insert `other` to twigs of `self`'s trunk just after `self`.
 static inline void noia_frame_insert_after(NoiaFrame* self, NoiaFrame* other)
 {
-    noia_branch_insert_after(self, other);
+    noia_branch_insert_after(&self->branch, &other->branch);
 }
 
-/// @see noia_frame_resize
-NoiaFrame* noia_frame_find_trunk_with_type(NoiaFrame* frame,
-                                           NoiaFrameType type);
+//------------------------------------------------------------------------------
 
 /// Resize the surface frame is holding.
 void noia_frame_reconfigure(NoiaFrame* self,
@@ -108,12 +105,16 @@ void noia_frame_relax(NoiaFrame* self, NoiaCoordinator* coordinator);
 /// Move the frame with all twigs.
 void noia_frame_move_with_contents(NoiaFrame* self, NoiaPosition vector);
 
+//------------------------------------------------------------------------------
+
 /// Helper function for log printing.
 /// @see noia_frame_log
 void noia_frame_log_internal(NoiaFrame* self,
                              NoiaPrintFunc print,
                              NoiaFrame* selection,
                              unsigned level);
+
+//------------------------------------------------------------------------------
 
 #endif // NOIA_EXHIBITOR_FRAME_INTERNAL_H
 

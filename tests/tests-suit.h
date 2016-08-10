@@ -77,6 +77,24 @@
                     "Chain data should be '%s' (is '%s')", \
                     array_data, chain_data); }}
 
+#define NOIA_ASSERT_TWIG_CHAIN(CHAIN, ARRAY) { \
+    int i = 0; unsigned len = NOIA_SIZEOF_ARRAY(ARRAY); int j = len - 1; \
+    char* chain_data = NULL; char* array_data = NULL; \
+    NOIA_ASSERT(len == noia_chain_len(CHAIN), \
+                "Stored chain length should be %u (is %u)", \
+                len, noia_chain_len(CHAIN)); \
+    NOIA_ASSERT_CHAIN_LEN(CHAIN, len); \
+    for (NoiaLink* link = CHAIN->first; link; link = link->next, ++i) { \
+        chain_data = ((NoiaBranch*)link->data)->data; array_data = ARRAY[i]; \
+        NOIA_ASSERT(strcmp(chain_data, array_data) == 0, \
+                    "Chain data should be '%s' (is '%s')", \
+                    array_data, chain_data); } \
+    for (NoiaLink* link = CHAIN->last; link; link = link->prev, --j) { \
+        chain_data = ((NoiaBranch*)link->data)->data; array_data = ARRAY[j]; \
+        NOIA_ASSERT(strcmp(chain_data, array_data) == 0, \
+                    "Chain data should be '%s' (is '%s')", \
+                    array_data, chain_data); }}
+
 #define NOIA_ASSERT_LIST(LIST, ARRAY) { \
     int i = 0; unsigned len = NOIA_SIZEOF_ARRAY(ARRAY); \
     char* list_data = NULL; char* array_data = NULL; \
@@ -101,15 +119,16 @@
                     "List data should be '%s' (is '%s')", \
                     array_data, list_data); }}
 
-#define NOIA_ASSERT_TRUNK(BRANCH, TRUNK) \
+#define NOIA_ASSERT_BRANCH_TRUNK(BRANCH, TRUNK) \
     NOIA_ASSERT(BRANCH->trunk == TRUNK, \
                 "Trunk of %p should be '%p', (is '%p')", \
-                (void*) BRANCH, (void*) TRUNK, (void*) BRANCH->trunk); \
+                (void*) BRANCH, (void*) TRUNK, (void*) BRANCH->trunk);
 
-#define NOIA_ASSERT_BRANCH(BRANCH, TRUNK, ARRAY) \
+#define NOIA_ASSERT_BRANCH(BRANCH, TRUNK, SPATIAL_ARRAY, TEMPORAL_ARRAY) \
     NOIA_ASSERT(BRANCH != NULL, "Branch should not be NULL"); \
-    NOIA_ASSERT_TRUNK(BRANCH, TRUNK); \
-    NOIA_ASSERT_CHAIN(BRANCH->twigs, ARRAY);
+    NOIA_ASSERT_BRANCH_TRUNK(BRANCH, TRUNK); \
+    NOIA_ASSERT_TWIG_CHAIN(BRANCH->temporal_twigs, TEMPORAL_ARRAY); \
+    NOIA_ASSERT_TWIG_CHAIN(BRANCH->spatial_twigs, SPATIAL_ARRAY);
 
 #define NOIA_TEST(test) {#test,test}
 #define NOIA_SIZEOF_ARRAY(a) (sizeof(a)/sizeof(*a))
