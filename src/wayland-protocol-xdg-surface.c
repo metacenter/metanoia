@@ -31,13 +31,26 @@ void noia_wayland_xdg_surface_destroy(struct wl_client* client NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_xdg_surface_set_parent
-                               (struct wl_client* client            NOIA_UNUSED,
-                                struct wl_resource* resource,
-                                struct wl_resource* parent_resource NOIA_UNUSED)
+void noia_wayland_xdg_surface_set_parent(struct wl_client* client NOIA_UNUSED,
+                                         struct wl_resource* surface_resource,
+                                         struct wl_resource* parent_resource)
 {
-    NoiaSurfaceId sid = (NoiaSurfaceId) wl_resource_get_user_data(resource);
-    LOG_NYIMP("Wayland > XDG surface set parent (sid: %u)", sid);
+    NoiaSurfaceId popup_sid =
+                    (NoiaSurfaceId) wl_resource_get_user_data(surface_resource);
+    NoiaSurfaceId parent_sid = scInvalidSurfaceId;
+    if (parent_resource) {
+        parent_sid = (NoiaSurfaceId) wl_resource_get_user_data(parent_resource);
+    }
+
+    LOG_NYIMP("Wayland > XDG surface set parent "
+              "(popup sid: %u, parent sid: %p)", popup_sid, parent_sid);
+
+    if (parent_sid != scInvalidSurfaceId) {
+        /// @todo When setting parent for XDG surface the same machanism as for
+        ///       popus is used. This should be replaced with more inteligent
+        ///       behavior.
+        noia_wayland_facade_add_subsurface(popup_sid, parent_sid, 0, 0);
+    }
 }
 
 //------------------------------------------------------------------------------

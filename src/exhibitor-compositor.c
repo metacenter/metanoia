@@ -161,7 +161,7 @@ NoiaFrame* noia_compositor_bring_workspace(NoiaCompositor* self,
             break;
         }
 
-        /// @todo For many output setup this should be cofigurable on which
+        /// @todo For many output setup this should be configurable on which
         ///       output the workspace will be created.
         NoiaFrame* current = noia_compositor_find_current_workspace(self);
         NOIA_ENSURE(current, break);
@@ -172,6 +172,35 @@ NoiaFrame* noia_compositor_bring_workspace(NoiaCompositor* self,
                                             (self, display_frame, title, focus);
     }
     return workspace;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrame* noia_compositor_choose_surface_target(NoiaCompositor* self,
+                                                 NoiaSurfaceData* surface)
+{
+    NoiaFrame* target = NULL;
+    if (surface->parent_sid != scInvalidSurfaceId) {
+        target = noia_compositor_find_current_workspace(self);
+    } else {
+        target = noia_frame_buildable(self->selection);
+    }
+    return target;
+}
+
+//------------------------------------------------------------------------------
+
+NoiaFrameType noia_compositor_choose_surface_type
+                                              (NoiaCompositor* self NOIA_UNUSED,
+                                               NoiaSurfaceData* surface,
+                                               NoiaFrame* target)
+{
+    NoiaFrameType type = NOIA_FRAME_TYPE_NONE;
+    if ((surface->parent_sid != scInvalidSurfaceId)
+     or (not noia_frame_has_type(target, NOIA_FRAME_TYPE_DIRECTED))) {
+        type = NOIA_FRAME_TYPE_FLOATING;
+    }
+    return type;
 }
 
 //------------------------------------------------------------------------------
@@ -262,11 +291,12 @@ bool noia_compositor_manage_surface(NoiaCompositor* self, NoiaSurfaceId sid)
 
     LOG_INFO2("Manage surface %u", sid);
 
-    NoiaFrame* target = noia_frame_buildable(self->selection);
+    // Choose frame target and type
+    NoiaFrame* target = noia_compositor_choose_surface_target(self, surface);
+    NoiaFrameType type = NOIA_FRAME_TYPE_LEAF
+                   | noia_compositor_choose_surface_type(self, surface, target);
+
     NoiaArea area = {surface->requested_position, surface->requested_size};
-    NoiaFrameType type =
-      (noia_frame_has_type(target, NOIA_FRAME_TYPE_DIRECTED)
-      ? NOIA_FRAME_TYPE_NONE : NOIA_FRAME_TYPE_FLOATING) | NOIA_FRAME_TYPE_LEAF;
 
     // Create and glue new frame
     NoiaFrame* frame = noia_frame_new();

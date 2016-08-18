@@ -29,10 +29,10 @@ void noia_strategist_default_on_surface_ready(NoiaExhibitor* exhibitor,
 
 //------------------------------------------------------------------------------
 
-void noia_strategist_default_on_surface_destroyed
-                                          (NoiaExhibitor* exhibitor NOIA_UNUSED,
-                                           NoiaSurfaceId sid        NOIA_UNUSED)
+void noia_strategist_default_on_surface_destroyed(NoiaExhibitor* exhibitor,
+                                                  NoiaSurfaceId sid NOIA_UNUSED)
 {
+    noia_coordinator_notify(noia_exhibitor_get_coordinator(exhibitor));
 }
 
 //------------------------------------------------------------------------------
