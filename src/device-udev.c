@@ -5,9 +5,11 @@
 #include "device-udev.h"
 #include "device-common.h"
 #include "device-evdev.h"
+#include "device-libinput.h"
 #include "utils-log.h"
 #include "event-signals.h"
 #include "global-macros.h"
+#include "config.h"
 
 #include <string.h>
 #include <libudev.h>
@@ -167,7 +169,13 @@ void noia_udev_setup_input_devices(NoiaEventDispatcher* ed)
         const char* sysname = udev_device_get_sysname(dev);
         uint32_t properties = noia_udev_get_input_properties(dev);
 
-        noia_evdev_add_input_device(ed, devnode, sysname, properties);
+        /// @todo Choosing input device driver should be configurable
+        ///       per device.
+        if (noia_config()->use_libinput) {
+            noia_libinput_add_input_device(ed, devnode, sysname, properties);
+        } else {
+            noia_evdev_add_input_device(ed, devnode, sysname, properties);
+        }
 
         udev_device_unref(dev);
     }

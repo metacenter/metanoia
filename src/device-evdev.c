@@ -4,59 +4,27 @@
 
 #include "device-evdev.h"
 #include "device-common.h"
+#include "device-input-common.h"
 #include "utils-log.h"
-#include "global-objects.h"
-#include "event-signals.h"
 #include "config.h"
-#include "input-bindings.h"
 
-#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <linux/input.h>
 
 #define DEVICE_BUFFER_NAME_SIZE 256
 
+#define EVENT_TO_TIME(EV) 1000*(EV)->time.tv_sec + (EV)->time.tv_usec/1000;
+
 //------------------------------------------------------------------------------
 
 /// Handle epoll events from EventDispatcher coming from keyboard devices.
 void noia_evdev_handle_key(struct input_event* ev, NoiaInputContext* context)
 {
-    NOIA_BLOCK {
-        if (ev->type != EV_KEY) {
-            break;
-        }
-
-        unsigned code = ev->code;
-        NoiaKeyState value = ev->value ? NOIA_KEY_PRESSED
-                                       : NOIA_KEY_RELEASED;
-
-        // Ignore repeated mask key
-        if (ev->value) {
-            if ((((code == KEY_LEFTCTRL) or (code == KEY_RIGHTCTRL))
-                and (context->modifiers & NOIA_KEY_CTRL))
-             or (((code == KEY_LEFTSHIFT) or (code == KEY_RIGHTSHIFT))
-                and (context->modifiers & NOIA_KEY_SHIFT))
-             or (((code == KEY_LEFTALT) or (code == KEY_RIGHTALT))
-                and (context->modifiers & NOIA_KEY_ALT))
-             or (((code == KEY_LEFTMETA) or (code == KEY_RIGHTMETA))
-                and (context->modifiers & NOIA_KEY_META))) {
-                break;
-            }
-        }
-
-        // Check for key bindings
-        bool catched = noia_input_catch_key(noia_gears()->modes,
-                                            context, code, value);
-        if (catched) {
-            break;
-        }
-
-        // If no binding found inform the rest of the world
-        unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
-        NoiaKeyObject* key = noia_key_create(time, ev->code, value);
-        noia_event_signal_emit(SIGNAL_KEYBOARD_EVENT, (NoiaObject*) key);
-        noia_object_unref((NoiaObject*) key);
+    if (ev->type == EV_KEY) {
+        unsigned time = EVENT_TO_TIME(ev);
+        NoiaKeyState value = ev->value ? NOIA_KEY_PRESSED : NOIA_KEY_RELEASED;
+        noia_input_handle_key(time, ev->code, value, context);
     }
 }
 
@@ -65,21 +33,42 @@ void noia_evdev_handle_key(struct input_event* ev, NoiaInputContext* context)
 /// Handle epoll events from EventDispatcher coming from mouses.
 void noia_evdev_handle_mouse(struct input_event* ev)
 {
-    if (ev->code == ABS_X) {
-        noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_X,
-                                   noia_config()->mouse_scale * ev->value);
-    } else if (ev->code == ABS_Y) {
-        noia_event_signal_emit_int(SIGNAL_POINTER_MOTION_Y,
-                                   noia_config()->mouse_scale * ev->value);
-    } else if ((ev->code == BTN_LEFT)
-           or  (ev->code == BTN_MIDDLE)
-           or  (ev->code == BTN_RIGHT)) {
-        unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
-        NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
-        noia_event_signal_emit(SIGNAL_POINTER_BUTTON, (NoiaObject*) btn);
-        noia_object_unref((NoiaObject*) btn);
-    } else if (ev->code == REL_WHEEL) {
-        noia_event_signal_emit_int(SIGNAL_POINTER_WHEEL, -1*ev->value);
+    switch (ev->type) {
+    case EV_SYN:
+        // ignore syncs
+        break;
+    case EV_KEY:
+        if ((ev->code == BTN_LEFT)
+        or  (ev->code == BTN_MIDDLE)
+        or  (ev->code == BTN_RIGHT)) {
+            unsigned time = EVENT_TO_TIME(ev);
+            noia_input_handle_pointer_button(time, ev->code, ev->value);
+        } else {
+            LOG_NYIMP("Unhandled mouse key event "
+                      "(type: %u, code: %u, value: %d)",
+                      ev->type, ev->code, ev->value);
+        }
+        break;
+    case EV_REL:
+        if (ev->code == ABS_X) {
+            noia_input_handle_pointer_motion(ev->value, 0);
+        } else if (ev->code == ABS_Y) {
+            noia_input_handle_pointer_motion(0, ev->value);
+        } else if (ev->code == REL_WHEEL) {
+            noia_input_handle_pointer_axis(0.0, 0.0, 0, ev->value);
+        } else {
+            LOG_NYIMP("Unhandled mouse rel event "
+                      "(type: %u, code: %u, value: %d)",
+                      ev->type, ev->code, ev->value);
+        }
+        break;
+    case EV_ABS:
+        LOG_NYIMP("Unhandled mouse abs event (type: %u, code: %u, value: %d)",
+                  ev->type, ev->code, ev->value);
+        break;
+    default:
+        LOG_NYIMP("Unhandled mouse event (type: %u, code: %u, value: %d)",
+                  ev->type, ev->code, ev->value);
     }
 }
 
@@ -89,24 +78,46 @@ void noia_evdev_handle_mouse(struct input_event* ev)
 void noia_evdev_handle_touchpad(struct input_event* ev,
                                 NoiaInputContext* context)
 {
-    if (ev->code == ABS_PRESSURE) {
-        context->presure = ev->value;
-    } else if (ev->code == ABS_MT_TRACKING_ID) {
-        noia_event_signal_emit(SIGNAL_POINTER_POSITION_RESET, NULL);
-    } else if ((ev->code == BTN_LEFT)
-           or  (ev->code == BTN_MIDDLE)
-           or  (ev->code == BTN_RIGHT)) {
-        unsigned time = 1000*ev->time.tv_sec + ev->time.tv_usec/1000;
-        NoiaButtonObject* btn = noia_button_create(time, ev->code, ev->value);
-        noia_event_signal_emit(SIGNAL_POINTER_BUTTON, (NoiaObject*) btn);
-        noia_object_unref((NoiaObject*) btn);
-    } else if (context->presure > noia_config()->touchpad_presure_threshold) {
-        int value = noia_config()->touchpad_scale * ev->value;
-        if (ev->code == ABS_MT_POSITION_X) {
-            noia_event_signal_emit_int(SIGNAL_POINTER_POSITION_X, value);
-        } else if (ev->code == ABS_MT_POSITION_Y) {
-            noia_event_signal_emit_int(SIGNAL_POINTER_POSITION_Y, value);
+    switch (ev->type) {
+    case EV_SYN:
+        // ignore syncs
+        break;
+    case EV_KEY:
+        if ((ev->code == BTN_LEFT)
+        or  (ev->code == BTN_MIDDLE)
+        or  (ev->code == BTN_RIGHT)) {
+            unsigned time = EVENT_TO_TIME(ev);
+            noia_input_handle_pointer_button(time, ev->code, ev->value);
+        } else {
+            LOG_NYIMP("Unhandled touchpad key event "
+                      "(type: %u, code: %u, value: %d)",
+                      ev->type, ev->code, ev->value);
         }
+        break;
+    case EV_REL:
+        LOG_NYIMP("Unhandled touchpad rel event "
+                  "(type: %u, code: %u, value: %d)",
+                  ev->type, ev->code, ev->value);
+        break;
+    case EV_ABS:
+        if (ev->code == ABS_PRESSURE) {
+            context->pressure = ev->value;
+        } else if (ev->code == ABS_MT_TRACKING_ID) {
+            noia_input_handle_pointer_position_reset();
+        } else if (context->pressure >
+                   noia_config()->touchpad_pressure_threshold) {
+            if (ev->code == ABS_MT_POSITION_X) {
+                noia_input_handle_pointer_position(ev->value,
+                                                   scInvalidPointerPosition);
+            } else if (ev->code == ABS_MT_POSITION_Y) {
+                noia_input_handle_pointer_position(scInvalidPointerPosition,
+                                                   ev->value);
+            }
+        }
+        break;
+    default:
+        LOG_NYIMP("Unhandled mouse event (type: %u, code: %u, value: %d)",
+                  ev->type, ev->code, ev->value);
     }
 }
 
@@ -169,15 +180,7 @@ void noia_evdev_add_input_device(NoiaEventDispatcher* ed,
         }
 
         // Does it exist and is of correct type?
-        struct stat st;
-        if ((not devnode)
-        or  (stat(devnode, &st) < 0)
-        or  (not S_ISCHR(st.st_mode))) {
-            break;
-        }
-
-        // Is it event device?
-        if (strncmp("event", sysname, 5) != 0) {
+        if (not noia_device_is_event(devnode, sysname)) {
             break;
         }
 

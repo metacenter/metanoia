@@ -98,12 +98,17 @@ void noia_wayland_module_on_pointer_button(void* edata, void* sdata)
 
 //------------------------------------------------------------------------------
 
-void noia_wayland_module_on_pointer_wheel(void* edata, void* sdata)
+void noia_wayland_module_on_pointer_axis(void* edata, void* sdata)
 {
-    LOG_WAYL4("Wayland: handling pointer wheel");
+    LOG_WAYL4("Wayland: handling pointer axis");
     NoiaWaylandContext* ctx = (NoiaWaylandContext*) sdata;
-    unsigned value = noia_uint_unref_get((NoiaIntObject*) edata);
-    noia_wayland_gateway_pointer_wheel(ctx->state, ctx->cache, value);
+    NoiaAxisObject* object = (NoiaAxisObject*) edata;
+    noia_wayland_gateway_pointer_axis(ctx->state, ctx->cache,
+                                      wl_fixed_from_double(object->axisdata.h),
+                                      wl_fixed_from_double(object->axisdata.v),
+                                      object->axisdata.hd,
+                                      object->axisdata.vd);
+    noia_object_unref((NoiaObject*) object);
 }
 
 //------------------------------------------------------------------------------
@@ -173,7 +178,7 @@ void noia_wayland_initialize(NoiaLoop* this_loop, NoiaCoordinator* coordinator)
                noia_task_create(noia_wayland_module_on_keyboard_focus_changed,
                                 this_loop, ctx));
 
-    noia_event_signal_subscribe(SIGNAL_KEYBOARD_EVENT,
+    noia_event_signal_subscribe(SIGNAL_INPUT_KEYBOARD,
                noia_task_create(noia_wayland_module_on_keyboard_event,
                                 this_loop, ctx));
 
@@ -185,12 +190,12 @@ void noia_wayland_initialize(NoiaLoop* this_loop, NoiaCoordinator* coordinator)
                noia_task_create(noia_wayland_module_on_pointer_relative_motion,
                                 this_loop, ctx));
 
-    noia_event_signal_subscribe(SIGNAL_POINTER_BUTTON,
+    noia_event_signal_subscribe(SIGNAL_INPUT_POINTER_BUTTON,
                noia_task_create(noia_wayland_module_on_pointer_button,
                                 this_loop, ctx));
 
-    noia_event_signal_subscribe(SIGNAL_POINTER_WHEEL,
-               noia_task_create(noia_wayland_module_on_pointer_wheel,
+    noia_event_signal_subscribe(SIGNAL_INPUT_POINTER_AXIS,
+               noia_task_create(noia_wayland_module_on_pointer_axis,
                                 this_loop, ctx));
 
     noia_event_signal_subscribe(SIGNAL_SURFACE_RECONFIGURED,

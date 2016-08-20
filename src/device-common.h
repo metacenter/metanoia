@@ -6,6 +6,7 @@
 #define NOIA_DEVICE_COMMON_H
 
 #include <fcntl.h> // for flag definitions
+#include <stdbool.h>
 #include <stddef.h>
 
 /// UDev action names.
@@ -39,6 +40,9 @@ int noia_device_open(const char* node, int flags);
 /// Get name of device.
 /// Name will be written to buffer `buff` o given size `size`.
 void noia_device_get_name(int fd, char* buff, size_t size);
+
+/// Check if given device is input event device.
+bool noia_device_is_event(const char* devnode, const char* sysname);
 
 #endif // NOIA_DEVICE_COMMON_H
 

@@ -17,7 +17,7 @@ typedef struct {
             uint32_t modifiers;
             NoiaKeyState state;
         };
-        int presure;
+        int pressure;
     };
     uint32_t properties;
 } NoiaInputContext;

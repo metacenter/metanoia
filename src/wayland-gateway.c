@@ -306,9 +306,12 @@ void noia_wayland_gateway_pointer_button(NoiaWaylandState* state,
 
 // For each pointer resource matching currently focussed surface send
 // appropriate axis events.
-void noia_wayland_gateway_pointer_wheel(NoiaWaylandState* state,
-                                        NoiaWaylandCache* cache,
-                                        int value)
+void noia_wayland_gateway_pointer_axis(NoiaWaylandState* state,
+                                       NoiaWaylandCache* cache,
+                                       wl_fixed_t horiz,
+                                       wl_fixed_t vert,
+                                       int32_t horiz_descrete,
+                                       int32_t vert_descrete)
 {
     noia_wayland_cache_lock(cache);
 
@@ -317,18 +320,37 @@ void noia_wayland_gateway_pointer_wheel(NoiaWaylandState* state,
     NoiaList* resources =
                  noia_wayland_cache_get_resources(cache, NOIA_RESOURCE_POINTER);
 
-    wl_fixed_t fvalue = wl_fixed_from_double(10.0 * value);
-    uint32_t axis = WL_POINTER_AXIS_VERTICAL_SCROLL;
-    uint32_t source = WL_POINTER_AXIS_SOURCE_WHEEL;
-
     if (info.cl) {
         FOR_EACH (resources, link) {
             struct wl_resource* rc = link->data;
             if (info.cl == wl_resource_get_client(rc)) {
-                wl_pointer_send_axis_source(rc, source);
-                wl_pointer_send_axis_discrete(rc, axis, value);
-                wl_pointer_send_axis(rc, 0, axis, fvalue);
-                wl_pointer_send_axis_stop(rc, 0, axis);
+                // Send horizontal events
+                uint32_t axis = WL_POINTER_AXIS_HORIZONTAL_SCROLL;
+                if (horiz_descrete != 0) {
+                    wl_fixed_t fvalue = wl_fixed_from_double(horiz_descrete);
+                    wl_pointer_send_axis_discrete(rc, axis, fvalue);
+                }
+
+                if (horiz != 0.0) {
+                    wl_fixed_t fvalue = wl_fixed_from_double(horiz);
+                    wl_pointer_send_axis(rc, 0, axis, fvalue);
+                } else {
+                    wl_pointer_send_axis_stop(rc, 0, axis);
+                }
+
+                // Send vertical events
+                axis = WL_POINTER_AXIS_VERTICAL_SCROLL;
+                if (vert_descrete != 0) {
+                    wl_fixed_t fvalue = wl_fixed_from_double(vert_descrete);
+                    wl_pointer_send_axis_discrete(rc, axis, fvalue);
+                }
+
+                if (vert != 0.0) {
+                    wl_fixed_t fvalue = wl_fixed_from_double(vert);
+                    wl_pointer_send_axis(rc, 0, axis, fvalue);
+                } else {
+                    wl_pointer_send_axis_stop(rc, 0, axis);
+                }
             }
         }
     }

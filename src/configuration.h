@@ -26,17 +26,25 @@ static const NoiaConfig scConfig = {
         // NOIA_FRAME_TYPE_VERTICAL, NOIA_FRAME_TYPE_HORIZONTAL
         .default_frame_type = NOIA_FRAME_TYPE_HORIZONTAL,
 
+        // Set to `true` if libinput should be used.
+        // Otherwise plain evdev will be used.
+        .use_libinput = true,
+
         // Scale for touchpad event position values.
         // In future will be replaced by non-linear scale per dimension.
         .touchpad_scale = 1.0,
 
         // Threshold value for touchpad pressure below which move events
         // will be ignored.
-        .touchpad_presure_threshold = 0,
+        .touchpad_pressure_threshold = 0,
 
         // Scale for mouse event motion values
         // In future will be replaced by non-linear scale per dimension.
-        .mouse_scale = 1.0
+        .mouse_scale = 1.0,
+
+        // Scale for mouse or touchpad scroll event values.
+        /// @todo Make input event config values device (driver) specific.
+        .axis_scale = 0.01,
     };
 
 static const NoiaBinding scBindingsCommon[] = {

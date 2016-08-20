@@ -35,6 +35,7 @@ Required runtime dependences:
  * libdrm
  * libgbm
  * libgl, libegl
+ * libinput
  * libjpeg
  * libudev
  * libwayland

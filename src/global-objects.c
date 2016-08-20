@@ -16,7 +16,7 @@
 void noia_int_destroy(NoiaIntObject* self)
 {
     NOIA_ENSURE(self, return);
-    memset(self, 0, sizeof(NoiaIntObject));
+    memset(self, 0, sizeof(*self));
     free(self);
 }
 
@@ -25,7 +25,7 @@ void noia_int_destroy(NoiaIntObject* self)
 /// Allocate and initialize Int Object.
 NoiaIntObject* noia_uint_create(uintptr_t value)
 {
-    NoiaIntObject* self = malloc(sizeof(NoiaIntObject));
+    NoiaIntObject* self = malloc(sizeof(*self));
     noia_object_initialize(&self->base, (NoiaFreeFunc) noia_int_destroy);
     noia_object_ref(&self->base);
     self->uint = value;
@@ -37,7 +37,7 @@ NoiaIntObject* noia_uint_create(uintptr_t value)
 /// Allocate and initialize Int Object.
 NoiaIntObject* noia_int_create(intptr_t value)
 {
-    NoiaIntObject* self = malloc(sizeof(NoiaIntObject));
+    NoiaIntObject* self = malloc(sizeof(*self));
     noia_object_initialize(&self->base, (NoiaFreeFunc) noia_int_destroy);
     noia_object_ref(&self->base);
     self->sint = value;
@@ -74,7 +74,7 @@ intptr_t noia_int_unref_get(NoiaIntObject* self)
 void noia_key_destroy(NoiaKeyObject* self)
 {
     NOIA_ENSURE(self, return);
-    memset(self, 0, sizeof(NoiaKeyObject));
+    memset(self, 0, sizeof(*self));
     free(self);
 }
 
@@ -83,7 +83,7 @@ void noia_key_destroy(NoiaKeyObject* self)
 /// Allocate and initialize Key Object.
 NoiaKeyObject* noia_key_create(unsigned time, int code, NoiaKeyState value)
 {
-    NoiaKeyObject* self = malloc(sizeof(NoiaKeyObject));
+    NoiaKeyObject* self = malloc(sizeof(*self));
     noia_object_initialize(&self->base, (NoiaFreeFunc) noia_key_destroy);
     noia_object_ref(&self->base);
     self->keydata.time = time;
@@ -98,7 +98,7 @@ NoiaKeyObject* noia_key_create(unsigned time, int code, NoiaKeyState value)
 void noia_button_destroy(NoiaButtonObject* self)
 {
     NOIA_ENSURE(self, return);
-    memset(self, 0, sizeof(NoiaButtonObject));
+    memset(self, 0, sizeof(*self));
     free(self);
 }
 
@@ -107,7 +107,7 @@ void noia_button_destroy(NoiaButtonObject* self)
 /// Allocate and initialize Button Object.
 NoiaButtonObject* noia_button_create(unsigned time, int code, bool value)
 {
-    NoiaButtonObject* self = malloc(sizeof(NoiaButtonObject));
+    NoiaButtonObject* self = malloc(sizeof(*self));
     noia_object_initialize(&self->base, (NoiaFreeFunc) noia_button_destroy);
     noia_object_ref(&self->base);
     self->buttondata.time = time;
@@ -122,7 +122,7 @@ NoiaButtonObject* noia_button_create(unsigned time, int code, bool value)
 void noia_motion_destroy(NoiaMotionObject* self)
 {
     NOIA_ENSURE(self, return);
-    memset(self, 0, sizeof(NoiaMotionObject));
+    memset(self, 0, sizeof(*self));
     free(self);
 }
 
@@ -131,10 +131,36 @@ void noia_motion_destroy(NoiaMotionObject* self)
 /// Allocate and initialize Motion Object
 NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos)
 {
-    NoiaMotionObject* self = malloc(sizeof(NoiaMotionObject));
+    NoiaMotionObject* self = malloc(sizeof(*self));
     noia_object_initialize(&self->base, (NoiaFreeFunc) noia_motion_destroy);
+    noia_object_ref(&self->base);
     self->sid = sid;
     self->pos = pos;
+    return self;
+}
+
+//------------------------------------------------------------------------------
+
+/// Free Axis Object.
+void noia_axis_destroy(NoiaAxisObject* self)
+{
+    NOIA_ENSURE(self, return);
+    memset(self, 0, sizeof(*self));
+    free(self);
+}
+
+//------------------------------------------------------------------------------
+
+/// Allocate and initialize Axis Object.
+NoiaAxisObject* noia_axis_create(double h, double v, int hd, int vd)
+{
+    NoiaAxisObject* self= malloc(sizeof(*self));
+    noia_object_initialize(&self->base, (NoiaFreeFunc) noia_axis_destroy);
+    noia_object_ref(&self->base);
+    self->axisdata.h = h;
+    self->axisdata.v = v;
+    self->axisdata.hd = hd;
+    self->axisdata.vd = vd;
     return self;
 }
 
@@ -143,7 +169,7 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos)
 /// Create a command.
 NoiaCommand* noia_command_create(void)
 {
-    NoiaCommand* self = malloc(sizeof(NoiaCommand));
+    NoiaCommand* self = malloc(sizeof(*self));
     noia_object_initialize(&self->base, (NoiaFreeFunc) noia_command_destroy);
     self->str = NULL;
     noia_command_clean(self);

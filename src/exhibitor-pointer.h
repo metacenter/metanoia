@@ -29,28 +29,18 @@ void noia_exhibitor_pointer_update_hover_state(NoiaPointer* self,
                                                NoiaArea area,
                                                NoiaPool* visible_surfaces);
 
-/// Handle motion in X-axis notification.
-void noia_exhibitor_pointer_on_motion_x(NoiaPointer* self,
-                                        NoiaExhibitor* exhibitor,
-                                        int value);
-
-/// Handle motion in Y-axis notification.
-void noia_exhibitor_pointer_on_motion_y(NoiaPointer* self,
-                                        NoiaExhibitor* exhibitor,
-                                        int value);
+/// Handle motion notification.
+void noia_exhibitor_pointer_on_motion(NoiaPointer* self,
+                                      NoiaExhibitor* exhibitor,
+                                      NoiaPosition vector);
 
 /// Handle position reset notification.
 void noia_exhibitor_pointer_on_position_reset(NoiaPointer* self);
 
-/// Handle position on X-axis notification.
-void noia_exhibitor_pointer_on_position_x(NoiaPointer* self,
-                                          NoiaExhibitor* exhibitor,
-                                          int value);
-
-/// Handle position on Y-axis notification.
-void noia_exhibitor_pointer_on_position_y(NoiaPointer* self,
-                                          NoiaExhibitor* exhibitor,
-                                          int value);
+/// Handle position notification.
+void noia_exhibitor_pointer_on_position(NoiaPointer* self,
+                                        NoiaExhibitor* exhibitor,
+                                        NoiaPosition pos);
 
 /// Handle button press or release.
 void noia_exhibitor_pointer_on_button(NoiaPointer* self,

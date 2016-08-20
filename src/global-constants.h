@@ -7,11 +7,14 @@
 
 #include "global-types.h"
 
-/// Invalid value for NoiaItemId
+/// Invalid value for NoiaItemId.
 static const NoiaItemId scInvalidItemId = 0;
 
-/// Invalid value for NoiaSurfaceId
+/// Invalid value for NoiaSurfaceId.
 static const NoiaSurfaceId scInvalidSurfaceId = 0;
+
+/// Invalid value for pointer position.
+static const int scInvalidPointerPosition = -1;
 
 #endif // NOIA_GLOBAL_CONSTANTS_H
 

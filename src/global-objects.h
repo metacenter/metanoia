@@ -60,6 +60,17 @@ NoiaMotionObject* noia_motion_create(NoiaSurfaceId sid, NoiaPosition pos);
 
 //------------------------------------------------------------------------------
 
+/// Axis event object.
+/// AxisData structure with reference counting.
+typedef struct {
+    NoiaObject base;
+    NoiaAxisData axisdata;
+} NoiaAxisObject;
+
+NoiaAxisObject* noia_axis_create(double h, double v, int hd, int vd);
+
+//------------------------------------------------------------------------------
+
 /// Compositor action context.
 typedef struct {
     NoiaObject base;

@@ -74,22 +74,13 @@ void noia_exhibitor_module_on_surface_change(void* edata,
 
 //------------------------------------------------------------------------------
 
-/// Handle motion in X-axis notification.
-void noia_exhibitor_module_on_motion_x(void* edata, void* sdata)
+/// Handle motion in notification.
+void noia_exhibitor_module_on_motion(void* edata, void* sdata)
 {
     NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
-    int value = noia_int_unref_get((NoiaIntObject*) edata);
-    noia_exhibitor_on_motion_x(exhibitor, value);
-}
-
-//------------------------------------------------------------------------------
-
-/// Handle motion in Y-axis notification.
-void noia_exhibitor_module_on_motion_y(void* edata, void* sdata)
-{
-    NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
-    int value = noia_int_unref_get((NoiaIntObject*) edata);
-    noia_exhibitor_on_motion_y(exhibitor, value);
+    NoiaMotionObject* object = (NoiaMotionObject*) edata;
+    noia_exhibitor_on_motion(exhibitor, object->pos);
+    noia_object_unref(&object->base);
 }
 
 //------------------------------------------------------------------------------
@@ -104,22 +95,13 @@ void noia_exhibitor_module_on_position_reset(void* edata NOIA_UNUSED,
 
 //------------------------------------------------------------------------------
 
-/// Handle position on X-axis notification.
-void noia_exhibitor_module_on_position_x(void* edata, void* sdata)
+/// Handle pointer position notification.
+void noia_exhibitor_module_on_position(void* edata, void* sdata)
 {
     NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
-    int value = noia_int_unref_get((NoiaIntObject*) edata);
-    noia_exhibitor_on_position_x(exhibitor, value);
-}
-
-//------------------------------------------------------------------------------
-
-/// Handle position on Y-axis notification.
-void noia_exhibitor_module_on_position_y(void* edata, void* sdata)
-{
-    NoiaExhibitor* exhibitor = (NoiaExhibitor*) sdata;
-    int value = noia_int_unref_get((NoiaIntObject*) edata);
-    noia_exhibitor_on_position_y(exhibitor, value);
+    NoiaMotionObject* object = (NoiaMotionObject*) edata;
+    noia_exhibitor_on_position(exhibitor, object->pos);
+    noia_object_unref(&object->base);
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +115,7 @@ void noia_exhibitor_module_on_button(void* edata, void* sdata)
                              object->buttondata.time,
                              object->buttondata.code,
                              object->buttondata.value);
-    noia_object_unref((NoiaObject*) object);
+    noia_object_unref(&object->base);
 }
 
 //------------------------------------------------------------------------------
@@ -196,27 +178,19 @@ void noia_exhibitor_initialize(NoiaLoop* this_loop,
                                 this_loop, exhibitor));
 
     // pointer
-    noia_event_signal_subscribe(SIGNAL_POINTER_MOTION_X,
-               noia_task_create(noia_exhibitor_module_on_motion_x,
+    noia_event_signal_subscribe(SIGNAL_INPUT_POINTER_MOTION,
+               noia_task_create(noia_exhibitor_module_on_motion,
                                 this_loop, exhibitor));
 
-    noia_event_signal_subscribe(SIGNAL_POINTER_MOTION_Y,
-               noia_task_create(noia_exhibitor_module_on_motion_y,
-                                this_loop, exhibitor));
-
-    noia_event_signal_subscribe(SIGNAL_POINTER_POSITION_RESET,
+    noia_event_signal_subscribe(SIGNAL_INPUT_POINTER_POSITION_RESET,
                noia_task_create(noia_exhibitor_module_on_position_reset,
                                 this_loop, exhibitor));
 
-    noia_event_signal_subscribe(SIGNAL_POINTER_POSITION_X,
-               noia_task_create(noia_exhibitor_module_on_position_x,
+    noia_event_signal_subscribe(SIGNAL_INPUT_POINTER_POSITION,
+               noia_task_create(noia_exhibitor_module_on_position,
                                 this_loop, exhibitor));
 
-    noia_event_signal_subscribe(SIGNAL_POINTER_POSITION_Y,
-               noia_task_create(noia_exhibitor_module_on_position_y,
-                                this_loop, exhibitor));
-
-    noia_event_signal_subscribe(SIGNAL_POINTER_BUTTON,
+    noia_event_signal_subscribe(SIGNAL_INPUT_POINTER_BUTTON,
                noia_task_create(noia_exhibitor_module_on_button,
                                 this_loop, exhibitor));
 

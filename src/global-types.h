@@ -74,6 +74,14 @@ typedef struct {
     bool value;
 } NoiaButtonData;
 
+/// Axis event data
+typedef struct {
+    double h; ///< Horizontal
+    double v; ///< Vertical
+    int hd;   ///< Horizontal descrete
+    int vd;   ///< Vertical descrete
+} NoiaAxisData;
+
 /// Container for color data.
 typedef struct {
     uint8_t b;

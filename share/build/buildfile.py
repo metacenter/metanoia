@@ -199,7 +199,9 @@ target_device_drm = Com(['device-drm.c'], pkgs={'libdrm', 'gbm', 'egl'})
 metanoia.add([Com(['device-common.c']),
               Com(['device-fb.c']),
               target_device_drm,
-              Com(['device-evdev.c'], pkgs={'libudev'}),
+              Com(['device-input-common.c']),
+              Com(['device-evdev.c']),
+              Com(['device-libinput.c'], pkgs={'libinput'}),
               Com(['device-udev.c'],  pkgs={'libudev'})])
 
 #-------------------------------------------------------------------------------

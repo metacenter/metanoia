@@ -6,9 +6,11 @@
 #include "utils-dbus.h"
 #include "global-macros.h"
 
-#include <errno.h>
-#include <sys/stat.h>
 #include <linux/input.h>
+#include <sys/stat.h>
+
+#include <errno.h>
+#include <string.h>
 
 //------------------------------------------------------------------------------
 
@@ -54,6 +56,31 @@ int noia_device_open(const char* node, int flags)
 void noia_device_get_name(int fd, char* buff, size_t size)
 {
     ioctl(fd, EVIOCGNAME(size), buff);
+}
+
+//------------------------------------------------------------------------------
+
+bool noia_device_is_event(const char* devnode, const char* sysname)
+{
+    bool result = false;
+    NOIA_BLOCK {
+        // Does it exist and is of correct type?
+        struct stat st;
+        if ((not devnode)
+        or  (stat(devnode, &st) < 0)
+        or  (not S_ISCHR(st.st_mode))) {
+            break;
+        }
+
+        // Is it event device?
+        if (strncmp("event", sysname, 5) != 0) {
+            break;
+        }
+
+        // Found event input device
+        result = true;
+    }
+    return result;
 }
 
 //------------------------------------------------------------------------------

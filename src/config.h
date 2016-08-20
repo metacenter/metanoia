@@ -16,9 +16,11 @@ typedef struct {
     NoiaBGTransform background_image_transform;
     NoiaColor background_color;
     NoiaFrameType default_frame_type;
+    bool use_libinput;
     double touchpad_scale;
-    int touchpad_presure_threshold;
+    int touchpad_pressure_threshold;
     double mouse_scale;
+    double axis_scale;
 } NoiaConfig;
 
 /// Keeps information about variable internal application configuration.
